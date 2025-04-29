@@ -165,7 +165,7 @@ export const getById = query({
 
     if (!message) return null;
 
-    const currentMember = await getMember(ctx, message.workspaceId, userId);
+    const currentMember = await getMember(ctx, message.workspaceId, userId as Id<'users'>);
 
     if (!currentMember) return null;
 
@@ -228,7 +228,7 @@ export const create = mutation({
 
     if (!userId) throw new Error('Unauthorized.');
 
-    const member = await getMember(ctx, args.workspaceId, userId);
+    const member = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
 
     if (!member) throw new Error('Unauthorized.');
 
@@ -271,7 +271,7 @@ export const update = mutation({
 
     if (!message) throw new Error('Message not found.');
 
-    const member = await getMember(ctx, message.workspaceId, userId);
+    const member = await getMember(ctx, message.workspaceId, userId as Id<'users'>);
 
     if (!member || member._id !== message.memberId) throw new Error('Unauthorized.');
 
@@ -297,12 +297,63 @@ export const remove = mutation({
 
     if (!message) throw new Error('Message not found.');
 
-    const member = await getMember(ctx, message.workspaceId, userId);
+    const member = await getMember(ctx, message.workspaceId, userId as Id<'users'>);
 
     if (!member || member._id !== message.memberId) throw new Error('Unauthorized.');
 
     await ctx.db.delete(args.id);
 
     return args.id;
+  },
+});
+
+export const getUserMessages = query({
+  args: {
+    workspaceId: v.id('workspaces'),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error('Not authenticated');
+    }
+
+    const userId = identity.subject;
+
+    // Get the current member
+    const currentMember = await ctx.db
+      .query('members')
+      .withIndex('by_workspace_id_user_id', (q) => q.eq('workspaceId', args.workspaceId).eq('userId', userId as Id<'users'>))
+      .unique();
+
+    // If no member found, return empty array
+    if (!currentMember) {
+      return [];
+    }
+
+    // Get all channels in the workspace
+    const channels = await ctx.db
+      .query('channels')
+      .filter((q) => q.eq(q.field('workspaceId'), args.workspaceId))
+      .collect();
+
+    // Get messages for each channel
+    const messagesByChannel = await Promise.all(
+      channels.map(async (channel) => {
+        const messages = await ctx.db
+          .query('messages')
+          .filter((q) => q.eq(q.field('channelId'), channel._id))
+          .filter((q) => q.eq(q.field('memberId'), currentMember._id))
+          .order('desc')
+          .collect();
+
+        return {
+          channel,
+          messages,
+        };
+      }),
+    );
+
+    // Filter out channels with no messages
+    return messagesByChannel.filter((item) => item.messages.length > 0);
   },
 });

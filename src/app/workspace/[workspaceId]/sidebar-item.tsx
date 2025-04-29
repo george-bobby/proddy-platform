@@ -1,3 +1,5 @@
+'use client';
+
 import { type VariantProps, cva } from 'class-variance-authority';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -21,21 +23,35 @@ const sidebarItemVariants = cva('flex items-center gap-1.5 justify-start font-no
 });
 
 interface SidebarItemProps {
+  label: string;
+  icon: LucideIcon;
   id: string;
-  icon: LucideIcon | IconType;
-  label: Id<'channels'> | string;
-  variant?: VariantProps<typeof sidebarItemVariants>['variant'];
+  href?: string;
+  isActive?: boolean;
+  variant?: 'default' | 'active';
 }
 
-export const SidebarItem = ({ id, icon: Icon, label, variant }: SidebarItemProps) => {
+export const SidebarItem = ({ label, icon: Icon, id, href, isActive, variant = 'default' }: SidebarItemProps) => {
   const workspaceId = useWorkspaceId();
 
-  return (
-    <Button variant="transparent" size="sm" className={cn(sidebarItemVariants({ variant }))} asChild>
-      <Link href={`/workspace/${workspaceId}/channel/${id}`}>
-        <Icon className="mr-1 size-3.5 shrink-0" />
-        <span className="truncate text-sm">{label}</span>
-      </Link>
-    </Button>
+  const content = (
+    <div
+      className={`flex w-full cursor-pointer items-center gap-x-2 rounded-md px-2 py-2 text-sm font-medium transition hover:bg-white/10 ${variant === 'active' || isActive ? 'bg-white/10 text-white' : 'text-white/70'
+        }`}
+    >
+      <Icon className="size-5" />
+      <span className="truncate">{label}</span>
+    </div>
   );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  // For channels, use the channel ID
+  if (id.startsWith('channels/')) {
+    return <Link href={`/workspace/${workspaceId}/channel/${id}`}>{content}</Link>;
+  }
+
+  return content;
 };
