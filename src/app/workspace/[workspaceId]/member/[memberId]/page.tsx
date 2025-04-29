@@ -30,7 +30,7 @@ const MemberIdPage = () => {
         onError: () => {
           toast.error('Failed to create or get conversation.');
         },
-      },
+      }
     );
   }, [workspaceId, memberId, mutate]);
 

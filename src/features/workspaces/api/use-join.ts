@@ -47,7 +47,7 @@ export const useJoin = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

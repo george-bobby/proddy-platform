@@ -49,7 +49,7 @@ export const useRemoveMember = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

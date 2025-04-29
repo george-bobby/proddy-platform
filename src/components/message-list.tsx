@@ -64,7 +64,7 @@ export const MessageList = ({
 
       return groups;
     },
-    {} as Record<string, typeof data>,
+    {} as Record<string, typeof data>
   );
 
   return (
@@ -84,7 +84,10 @@ export const MessageList = ({
             const isCompact =
               prevMessage &&
               prevMessage.user._id === message.user._id &&
-              differenceInMinutes(new Date(message._creationTime), new Date(prevMessage._creationTime)) < TIME_THRESHOLD;
+              differenceInMinutes(
+                new Date(message._creationTime),
+                new Date(prevMessage._creationTime)
+              ) < TIME_THRESHOLD;
 
             return (
               <Message
@@ -121,7 +124,7 @@ export const MessageList = ({
               ([entry]) => {
                 if (entry.isIntersecting && canLoadMore) loadMore();
               },
-              { threshold: 1.0 },
+              { threshold: 1.0 }
             );
 
             observer.observe(el);
@@ -141,7 +144,9 @@ export const MessageList = ({
         </div>
       )}
 
-      {variant === 'channel' && channelName && channelCreationTime && <ChannelHero name={channelName} creationTime={channelCreationTime} />}
+      {variant === 'channel' && channelName && channelCreationTime && (
+        <ChannelHero name={channelName} creationTime={channelCreationTime} />
+      )}
       {variant === 'conversation' && <ConversationHero name={memberName} image={memberImage} />}
     </div>
   );

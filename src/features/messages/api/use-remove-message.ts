@@ -49,7 +49,7 @@ export const useRemoveMessage = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

@@ -5,7 +5,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
@@ -49,7 +55,7 @@ export const CreateChannelModal = () => {
         onError: () => {
           toast.error('Failed to create channel.');
         },
-      },
+      }
     );
   };
 
@@ -58,7 +64,10 @@ export const CreateChannelModal = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add a channel</DialogTitle>
-          <DialogDescription>Channels are where your team communicates. They&apos;re best when organized around a topic.</DialogDescription>
+          <DialogDescription>
+            Channels are where your team communicates. They&apos;re best when organized around a
+            topic.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

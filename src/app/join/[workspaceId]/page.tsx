@@ -38,7 +38,7 @@ const JoinWorkspaceIdPage = () => {
         onError: () => {
           toast.error('Failed to join workspace.');
         },
-      },
+      }
     );
   };
 
@@ -66,7 +66,10 @@ const JoinWorkspaceIdPage = () => {
           validChars="A-Za-z0-9"
           length={6}
           classNames={{
-            container: cn('flex gap-x-2', isPending && 'opacity-50 cursor-not-allowed pointer-events-none'),
+            container: cn(
+              'flex gap-x-2',
+              isPending && 'opacity-50 cursor-not-allowed pointer-events-none'
+            ),
             character:
               'uppercase h-auto rounded-md border border-gray-300 outline-rose-500 flex items-center justify-center text-lg font-medium text-gray-500',
             characterInactive: 'bg-muted',

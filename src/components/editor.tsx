@@ -149,12 +149,18 @@ const Editor = ({
 
   return (
     <div className="flex flex-col">
-      <input type="file" accept="image/*" ref={imageElementRef} onChange={(e) => setImage(e.target.files![0])} className="hidden" />
+      <input
+        type="file"
+        accept="image/*"
+        ref={imageElementRef}
+        onChange={(e) => setImage(e.target.files![0])}
+        className="hidden"
+      />
 
       <div
         className={cn(
           'flex flex-col overflow-hidden rounded-md border border-slate-200 bg-white transition focus-within:border-slate-300 focus-within:shadow-sm',
-          disabled && 'opacity-50',
+          disabled && 'opacity-50'
         )}
       >
         <div ref={containerRef} className="h-full" />
@@ -200,7 +206,12 @@ const Editor = ({
 
           {variant === 'create' && (
             <Hint label="Image">
-              <Button disabled={disabled} size="iconSm" variant="ghost" onClick={() => imageElementRef.current?.click()}>
+              <Button
+                disabled={disabled}
+                size="iconSm"
+                variant="ghost"
+                onClick={() => imageElementRef.current?.click()}
+              >
                 <ImageIcon className="size-4" />
               </Button>
             </Hint>
@@ -244,7 +255,9 @@ const Editor = ({
               }}
               className={cn(
                 'ml-auto',
-                isEmpty ? 'bg-white text-muted-foreground hover:bg-white/80' : 'bg-[#007a5a] text-white hover:bg-[#007a5a]/80',
+                isEmpty
+                  ? 'bg-white text-muted-foreground hover:bg-white/80'
+                  : 'bg-[#007a5a] text-white hover:bg-[#007a5a]/80'
               )}
               size="iconSm"
             >
@@ -255,7 +268,12 @@ const Editor = ({
       </div>
 
       {variant === 'create' && (
-        <div className={cn('flex justify-end p-2 text-[10px] text-muted-foreground opacity-0 transition', !isEmpty && 'opacity-100')}>
+        <div
+          className={cn(
+            'flex justify-end p-2 text-[10px] text-muted-foreground opacity-0 transition',
+            !isEmpty && 'opacity-100'
+          )}
+        >
           <p>
             <strong>Shift + {isIOS ? 'Return' : 'Enter'}</strong> to add a new line.
           </p>

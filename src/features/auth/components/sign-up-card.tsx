@@ -36,16 +36,19 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
       return String(email)
         .toLowerCase()
         .match(
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         );
     };
 
     const validatePassword = (password: string) => {
-      return String(password).match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/);
+      return String(password).match(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/
+      );
     };
 
     if (!validateEmail(email)) return setError('Invalid Email.');
-    if (password !== confirmPassword) return setError("Password and Confirm Password doesn't match.");
+    if (password !== confirmPassword)
+      return setError("Password and Confirm Password doesn't match.");
     if (!validatePassword(password)) return setError('Password must be strong.');
 
     setPending(true);
@@ -83,7 +86,14 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
             required
           />
 
-          <Input disabled={pending} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" required />
+          <Input
+            disabled={pending}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            required
+          />
           <Input
             disabled={pending}
             value={password}
@@ -110,12 +120,24 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
         <Separator />
 
         <div className="flex flex-col gap-y-2.5">
-          <Button disabled={pending} onClick={() => handleOAuthSignUp('google')} variant="outline" size="lg" className="relative w-full">
+          <Button
+            disabled={pending}
+            onClick={() => handleOAuthSignUp('google')}
+            variant="outline"
+            size="lg"
+            className="relative w-full"
+          >
             <FcGoogle className="absolute left-2.5 top-3 size-5" />
             Continue with Google
           </Button>
 
-          <Button disabled={pending} onClick={() => handleOAuthSignUp('github')} variant="outline" size="lg" className="relative w-full">
+          <Button
+            disabled={pending}
+            onClick={() => handleOAuthSignUp('github')}
+            variant="outline"
+            size="lg"
+            className="relative w-full"
+          >
             <FaGithub className="absolute left-2.5 top-3 size-5" />
             Continue with GitHub
           </Button>

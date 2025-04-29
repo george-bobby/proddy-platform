@@ -33,7 +33,11 @@ export const Conversation = ({ id }: ConversationProps) => {
 
   return (
     <div className="flex h-full flex-col">
-      <Header memberName={member?.user.name} memberImage={member?.user.image} onClick={() => onOpenProfile(memberId)} />
+      <Header
+        memberName={member?.user.name}
+        memberImage={member?.user.image}
+        onClick={() => onOpenProfile(memberId)}
+      />
 
       <MessageList
         data={results}

@@ -53,7 +53,7 @@ export const Header = ({ channelName }: HeaderProps) => {
   const workspaceId = useWorkspaceId();
   const [ConfirmDialog, confirm] = useConfirm(
     'Delete this channel?',
-    'You are about to delete this channel and any of its associated messages. This action is irreversible.',
+    'You are about to delete this channel and any of its associated messages. This action is irreversible.'
   );
 
   const [value, setValue] = useState(channelName);
@@ -90,7 +90,7 @@ export const Header = ({ channelName }: HeaderProps) => {
         onError: () => {
           toast.error('Failed to update channel.');
         },
-      },
+      }
     );
   };
 
@@ -109,7 +109,7 @@ export const Header = ({ channelName }: HeaderProps) => {
         onError: () => {
           toast.error('Failed to delete channel.');
         },
-      },
+      }
     );
   };
 
@@ -139,7 +139,12 @@ export const Header = ({ channelName }: HeaderProps) => {
       <div className="flex items-center px-4">
         <Dialog>
           <DialogTrigger asChild>
-            <Button disabled={memberLoading} variant="ghost" className="w-auto overflow-hidden px-2 text-lg font-semibold text-white" size="sm">
+            <Button
+              disabled={memberLoading}
+              variant="ghost"
+              className="w-auto overflow-hidden px-2 text-lg font-semibold text-white"
+              size="sm"
+            >
               <span className="truncate"># {channelName}</span>
               <FaChevronDown className="ml-2 size-2.5" />
             </Button>
@@ -162,7 +167,9 @@ export const Header = ({ channelName }: HeaderProps) => {
                   >
                     <div className="flex w-full items-center justify-between">
                       <p className="text-sm font-semibold">Channel name</p>
-                      {member?.role === 'admin' && <p className="text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>}
+                      {member?.role === 'admin' && (
+                        <p className="text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>
+                      )}
                     </div>
                     <p className="text-sm"># {channelName}</p>
                   </button>
@@ -216,7 +223,11 @@ export const Header = ({ channelName }: HeaderProps) => {
       </div>
 
       <div className="min-w-[280px] max-w-[642px] shrink grow-[2] px-2">
-        <Button onClick={() => setSearchOpen(true)} size="sm" className="h-7 w-full justify-start bg-accent/25 px-2 hover:bg-accent/25">
+        <Button
+          onClick={() => setSearchOpen(true)}
+          size="sm"
+          className="h-7 w-full justify-start bg-accent/25 px-2 hover:bg-accent/25"
+        >
           <Search className="mr-2 size-4 text-white" />
           <span className="text-xs text-white">Search {workspace?.name ?? 'workspace'}...</span>
           <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-90">
@@ -252,7 +263,12 @@ export const Header = ({ channelName }: HeaderProps) => {
 
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-2 px-4">
         <Button variant="transparent" size="iconSm" asChild>
-          <Link href={links.sourceCode} target="_blank" rel="noreferrer noopener" title="Source Code">
+          <Link
+            href={links.sourceCode}
+            target="_blank"
+            rel="noreferrer noopener"
+            title="Source Code"
+          >
             <FaGithub className="size-5 text-white" />
           </Link>
         </Button>

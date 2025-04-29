@@ -1,6 +1,15 @@
 'use client';
 
-import { AlertTriangle, HashIcon, Home, Loader, MessageSquareText, MoreHorizontal, SendHorizonal, Mail } from 'lucide-react';
+import {
+  AlertTriangle,
+  HashIcon,
+  Home,
+  Loader,
+  MessageSquareText,
+  MoreHorizontal,
+  SendHorizonal,
+  Mail,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
@@ -77,7 +86,11 @@ export const WorkspaceSidebar = () => {
       </div>
 
       {channels && channels.length !== 0 && (
-        <WorkspaceSection label="Channels" hint="New Channel" onNew={member.role === 'admin' ? () => setOpen(true) : undefined}>
+        <WorkspaceSection
+          label="Channels"
+          hint="New Channel"
+          onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
+        >
           {channels?.map((item) => (
             <SidebarItem
               variant={channelId === item._id ? 'active' : 'default'}
@@ -91,7 +104,11 @@ export const WorkspaceSidebar = () => {
       )}
 
       {members && members.length !== 0 && (
-        <WorkspaceSection label="Members" hint="New Direct Message" onNew={member.role === 'admin' ? () => { } : undefined}>
+        <WorkspaceSection
+          label="Members"
+          hint="New Direct Message"
+          onNew={member.role === 'admin' ? () => {} : undefined}
+        >
           {members?.map((item) => (
             <UserItem
               key={item._id}

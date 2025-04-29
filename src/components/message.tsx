@@ -85,7 +85,10 @@ export const Message = ({
   threadName,
   threadTimestamp,
 }: MessageProps) => {
-  const [ConfirmDialog, confirm] = useConfirm('Delete message', 'Are you sure you want to delete this message? This cannot be undone.');
+  const [ConfirmDialog, confirm] = useConfirm(
+    'Delete message',
+    'Are you sure you want to delete this message? This cannot be undone.'
+  );
   const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
 
   const { mutate: updateMessage, isPending: isUpdatingMessage } = useUpdateMessage();
@@ -106,7 +109,7 @@ export const Message = ({
         onError: () => {
           toast.error('Failed to update message.');
         },
-      },
+      }
     );
   };
 
@@ -126,7 +129,7 @@ export const Message = ({
         onError: () => {
           toast.error('Failed to delete message.');
         },
-      },
+      }
     );
   };
 
@@ -137,7 +140,7 @@ export const Message = ({
         onError: () => {
           toast.error('Failed to toggle reaction.');
         },
-      },
+      }
     );
   };
 
@@ -155,7 +158,8 @@ export const Message = ({
           className={cn(
             'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
             isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
-            isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
+            isRemovingMessage &&
+              'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200'
           )}
         >
           <div className="flex items-start gap-2">
@@ -219,7 +223,8 @@ export const Message = ({
         className={cn(
           'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
           isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
-          isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
+          isRemovingMessage &&
+            'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200'
         )}
       >
         <div className="flex items-start gap-2">
@@ -244,14 +249,19 @@ export const Message = ({
           ) : (
             <div className="flex w-full flex-col overflow-hidden">
               <div className="text-sm">
-                <button onClick={() => onOpenProfile(memberId)} className="font-bold text-primary hover:underline">
+                <button
+                  onClick={() => onOpenProfile(memberId)}
+                  className="font-bold text-primary hover:underline"
+                >
                   {authorName}
                 </button>
 
                 <span>&nbsp;&nbsp;</span>
 
                 <Hint label={formatFullTime(new Date(createdAt))}>
-                  <button className="text-xs text-muted-foreground hover:underline">{format(new Date(createdAt), 'h:mm a')}</button>
+                  <button className="text-xs text-muted-foreground hover:underline">
+                    {format(new Date(createdAt), 'h:mm a')}
+                  </button>
                 </Hint>
               </div>
 

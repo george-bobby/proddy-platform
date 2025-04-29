@@ -15,7 +15,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useDeleteAccount } from '../api/use-delete-account';
 import { useCurrentUser } from '../api/use-current-user';
 
@@ -101,7 +107,8 @@ export const UserButton = () => {
           <DialogHeader>
             <DialogTitle>Delete Account</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your account and remove all associated data.
+              This action cannot be undone. This will permanently delete your account and remove all
+              associated data.
             </DialogDescription>
           </DialogHeader>
 
@@ -118,11 +125,7 @@ export const UserButton = () => {
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={isDeleting}
-            >
+            <Button variant="destructive" onClick={handleDeleteAccount} disabled={isDeleting}>
               {isDeleting ? (
                 <>
                   <Loader className="mr-2 size-4 animate-spin" />

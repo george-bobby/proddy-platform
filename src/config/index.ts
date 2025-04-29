@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 
 export const siteConfig: Metadata = {
   title: 'Proddy',
-  description: 'A vibrant team collaboration platform with real-time messaging, rich text editing, and emoji support.',
+  description:
+    'A vibrant team collaboration platform with real-time messaging, rich text editing, and emoji support.',
   keywords: [
     'reactjs',
     'nextjs',

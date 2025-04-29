@@ -15,13 +15,22 @@ interface WorkspaceSectionProps {
   onNew?: () => void;
 }
 
-export const WorkspaceSection = ({ children, hint, label, onNew }: PropsWithChildren<WorkspaceSectionProps>) => {
+export const WorkspaceSection = ({
+  children,
+  hint,
+  label,
+  onNew,
+}: PropsWithChildren<WorkspaceSectionProps>) => {
   const [on, toggle] = useToggle(true);
 
   return (
     <div className="mt-3 flex flex-col px-2">
       <div className="group flex items-center px-3.5">
-        <Button onClick={toggle} variant="transparent" className="size-6 shrink-0 p-0.5 text-sm text-[#F9EDFFCC]">
+        <Button
+          onClick={toggle}
+          variant="transparent"
+          className="size-6 shrink-0 p-0.5 text-sm text-[#F9EDFFCC]"
+        >
           <FaCaretDown className={cn('size-4 transition-transform', !on && '-rotate-90')} />
         </Button>
 

@@ -50,7 +50,7 @@ export const useUpdateMessage = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

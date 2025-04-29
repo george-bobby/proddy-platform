@@ -47,7 +47,7 @@ export const useRemoveWorkspace = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

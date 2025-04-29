@@ -47,7 +47,7 @@ export const useUpdateWorkspace = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

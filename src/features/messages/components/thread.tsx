@@ -90,7 +90,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
           {},
           {
             throwError: true,
-          },
+          }
         );
 
         if (!url) throw new Error('URL not found.');
@@ -132,7 +132,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
 
       return groups;
     },
-    {} as Record<string, typeof results>,
+    {} as Record<string, typeof results>
   );
 
   if (isMessageLoading || status === 'LoadingFirstPage') {
@@ -198,7 +198,10 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
               const isCompact =
                 prevMessage &&
                 prevMessage.user._id === message.user._id &&
-                differenceInMinutes(new Date(message._creationTime), new Date(prevMessage._creationTime)) < TIME_THRESHOLD;
+                differenceInMinutes(
+                  new Date(message._creationTime),
+                  new Date(prevMessage._creationTime)
+                ) < TIME_THRESHOLD;
 
               return (
                 <Message
@@ -235,7 +238,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
                 ([entry]) => {
                   if (entry.isIntersecting && canLoadMore) loadMore();
                 },
-                { threshold: 1.0 },
+                { threshold: 1.0 }
               );
 
               observer.observe(el);
@@ -273,7 +276,13 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
       </div>
 
       <div className="px-4">
-        <Editor key={editorKey} onSubmit={handleSubmit} innerRef={innerRef} disabled={isPending} placeholder="Reply..." />
+        <Editor
+          key={editorKey}
+          onSubmit={handleSubmit}
+          innerRef={innerRef}
+          disabled={isPending}
+          placeholder="Reply..."
+        />
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ export const useCreateChannel = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

@@ -16,7 +16,10 @@ export const Thumbnail = ({ url }: ThumbnailProps) => {
         </div>
       </DialogTrigger>
 
-      <DialogContent isThumbnail className="max-w-[800px] border-none bg-transparent p-0 shadow-none">
+      <DialogContent
+        isThumbnail
+        className="max-w-[800px] border-none bg-transparent p-0 shadow-none"
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={url} alt="Message image" className="size-full rounded-md object-cover" />
       </DialogContent>

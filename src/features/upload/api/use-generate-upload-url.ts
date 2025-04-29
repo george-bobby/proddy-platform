@@ -45,7 +45,7 @@ export const useGenerateUploadUrl = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

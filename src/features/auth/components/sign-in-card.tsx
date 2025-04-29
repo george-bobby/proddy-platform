@@ -55,7 +55,14 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
       <CardContent className="space-y-5 px-0 pb-0">
         <form onSubmit={handleSignIn} className="space-y-2.5">
-          <Input disabled={pending} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" required />
+          <Input
+            disabled={pending}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            required
+          />
 
           <Input
             disabled={pending}
@@ -74,12 +81,24 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
         <Separator />
 
         <div className="flex flex-col gap-y-2.5">
-          <Button disabled={pending} onClick={() => handleOAuthSignIn('google')} variant="outline" size="lg" className="relative w-full">
+          <Button
+            disabled={pending}
+            onClick={() => handleOAuthSignIn('google')}
+            variant="outline"
+            size="lg"
+            className="relative w-full"
+          >
             <FcGoogle className="absolute left-2.5 top-3 size-5" />
             Continue with Google
           </Button>
 
-          <Button disabled={pending} onClick={() => handleOAuthSignIn('github')} variant="outline" size="lg" className="relative w-full">
+          <Button
+            disabled={pending}
+            onClick={() => handleOAuthSignIn('github')}
+            variant="outline"
+            size="lg"
+            className="relative w-full"
+          >
             <FaGithub className="absolute left-2.5 top-3 size-5" />
             Continue with GitHub
           </Button>

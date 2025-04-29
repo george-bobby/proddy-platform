@@ -51,12 +51,25 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
 
   return (
     <>
-      <PreferencesModal open={preferencesOpen} setOpen={setPreferencesOpen} initialValue={workspace.name} />
-      <InviteModal open={inviteOpen} setOpen={setInviteOpen} name={workspace.name} joinCode={workspace.joinCode} />
+      <PreferencesModal
+        open={preferencesOpen}
+        setOpen={setPreferencesOpen}
+        initialValue={workspace.name}
+      />
+      <InviteModal
+        open={inviteOpen}
+        setOpen={setInviteOpen}
+        name={workspace.name}
+        joinCode={workspace.joinCode}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" className="w-full justify-start px-2 text-lg font-semibold text-white" size="sm">
+          <Button
+            variant="ghost"
+            className="w-full justify-start px-2 text-lg font-semibold text-white"
+            size="sm"
+          >
             <span className="truncate">Switch Workspace - </span>
             <span className="truncate">{workspace.name}</span>
             <RefreshCw className="ml-2 size-4" />
@@ -107,7 +120,11 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
       <div className="flex h-[49px] items-center justify-between gap-0.5 px-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="transparent" className="w-auto overflow-hidden p-1.5 text-lg font-semibold" size="sm">
+            <Button
+              variant="transparent"
+              className="w-auto overflow-hidden p-1.5 text-lg font-semibold"
+              size="sm"
+            >
               <span className="truncate">{workspace.name}</span>
               <ChevronDown className="ml-1 size-4 shrink-0" />
             </Button>
@@ -129,13 +146,19 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
               <>
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setInviteOpen(true)}>
+                <DropdownMenuItem
+                  className="cursor-pointer py-2"
+                  onClick={() => setInviteOpen(true)}
+                >
                   Invite people to {workspace.name}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem className="cursor-pointer py-2" onClick={() => setPreferencesOpen(true)}>
+                <DropdownMenuItem
+                  className="cursor-pointer py-2"
+                  onClick={() => setPreferencesOpen(true)}
+                >
                   Preferences
                 </DropdownMenuItem>
               </>

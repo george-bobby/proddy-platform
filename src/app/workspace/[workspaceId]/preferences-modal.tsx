@@ -32,7 +32,10 @@ interface PreferencesModalProps {
 export const PreferencesModal = ({ open, setOpen, initialValue }: PreferencesModalProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
-  const [ConfirmDialog, confirmDeleteWorkspace] = useConfirm('Are you sure?', "This action can't be undone.");
+  const [ConfirmDialog, confirmDeleteWorkspace] = useConfirm(
+    'Are you sure?',
+    "This action can't be undone."
+  );
 
   const [value, setValue] = useState(initialValue);
   const [editOpen, setEditOpen] = useState(false);
@@ -59,7 +62,7 @@ export const PreferencesModal = ({ open, setOpen, initialValue }: PreferencesMod
         onError: () => {
           toast.error('Failed to remove workspace.');
         },
-      },
+      }
     );
   };
 
@@ -79,7 +82,7 @@ export const PreferencesModal = ({ open, setOpen, initialValue }: PreferencesMod
         onError: () => {
           toast.error('Failed to update workspace.');
         },
-      },
+      }
     );
   };
 
@@ -107,7 +110,9 @@ export const PreferencesModal = ({ open, setOpen, initialValue }: PreferencesMod
                   <div className="flex w-full items-center justify-between">
                     <p className="text-sm font-semibold">Workspace name</p>
 
-                    <p className="cursor-pointer text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>
+                    <p className="cursor-pointer text-sm font-semibold text-[#1264A3] hover:underline">
+                      Edit
+                    </p>
                   </div>
 
                   <p className="text-sm">{value}</p>

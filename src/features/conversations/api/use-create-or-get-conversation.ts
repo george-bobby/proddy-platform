@@ -50,7 +50,7 @@ export const useCreateOrGetConversation = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

@@ -47,7 +47,7 @@ export const useCreateWorkspace = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

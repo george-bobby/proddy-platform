@@ -31,9 +31,18 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
 
-  const [LeaveDialog, confirmLeave] = useConfirm('Leave workspace', 'Are you sure you want to leave this workspace?');
-  const [UpdateDialog, confirmUpdate] = useConfirm('Change role', "Are you sure you want to change this member's role?");
-  const [RemoveDialog, confirmRemove] = useConfirm('Remove member', 'Are you sure you want to remove this member?');
+  const [LeaveDialog, confirmLeave] = useConfirm(
+    'Leave workspace',
+    'Are you sure you want to leave this workspace?'
+  );
+  const [UpdateDialog, confirmUpdate] = useConfirm(
+    'Change role',
+    "Are you sure you want to change this member's role?"
+  );
+  const [RemoveDialog, confirmRemove] = useConfirm(
+    'Remove member',
+    'Are you sure you want to remove this member?'
+  );
 
   const { data: currentMember, isLoading: isCurrentMemberLoading } = useCurrentMember({
     workspaceId,
@@ -56,7 +65,7 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
           onClose();
         },
         onError: () => toast.error('Failed to remove member.'),
-      },
+      }
     );
   };
 
@@ -74,7 +83,7 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
           onClose();
         },
         onError: () => toast.error('Failed to leave the workspace.'),
-      },
+      }
     );
   };
 
@@ -92,7 +101,7 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
           toast.success('Role changed.');
         },
         onError: () => toast.error('Failed to change role.'),
-      },
+      }
     );
   };
 
@@ -171,7 +180,10 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent className="w-full">
-                  <DropdownMenuRadioGroup value={member.role} onValueChange={(role) => onUpdate(role as 'admin' | 'member')}>
+                  <DropdownMenuRadioGroup
+                    value={member.role}
+                    onValueChange={(role) => onUpdate(role as 'admin' | 'member')}
+                  >
                     <DropdownMenuRadioItem value="admin">Admin</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="member">Member</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
@@ -204,7 +216,10 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
             <div className="flex flex-col">
               <p className="text-[13px] font-semibold text-muted-foreground">Email Address</p>
 
-              <Link href={`mailto:${member.user.email}`} className="text-sm text-[#1264a3] hover:underline">
+              <Link
+                href={`mailto:${member.user.email}`}
+                className="text-sm text-[#1264a3] hover:underline"
+              >
                 {member.user.email}
               </Link>
             </div>

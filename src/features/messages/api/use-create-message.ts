@@ -55,7 +55,7 @@ export const useCreateMessage = () => {
         options?.onSettled?.();
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

@@ -61,7 +61,7 @@ export const ChatInput = ({ placeholder }: ChatInputProps) => {
           {},
           {
             throwError: true,
-          },
+          }
         );
 
         if (!url) throw new Error('URL not found.');
@@ -92,7 +92,13 @@ export const ChatInput = ({ placeholder }: ChatInputProps) => {
 
   return (
     <div className="w-full px-5">
-      <Editor placeholder={placeholder} key={editorKey} onSubmit={handleSubmit} disabled={isPending} innerRef={innerRef} />
+      <Editor
+        placeholder={placeholder}
+        key={editorKey}
+        onSubmit={handleSubmit}
+        disabled={isPending}
+        innerRef={innerRef}
+      />
     </div>
   );
 };

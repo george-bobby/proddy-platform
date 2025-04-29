@@ -5,7 +5,13 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 import { useCreateWorkspace } from '../api/use-create-workspace';
@@ -39,7 +45,7 @@ export const CreateWorkspaceModal = () => {
           console.error('[CREATE_WORKSPACE]: ', error);
           toast.error('Failed to create workspace.');
         },
-      },
+      }
     );
   };
 

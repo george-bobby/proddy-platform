@@ -13,11 +13,15 @@ interface UseGetMessagesProps {
 
 export type GetMessagesReturnType = (typeof api.messages.get._returnType)['page'];
 
-export const useGetMessages = ({ channelId, conversationId, parentMessageId }: UseGetMessagesProps) => {
+export const useGetMessages = ({
+  channelId,
+  conversationId,
+  parentMessageId,
+}: UseGetMessagesProps) => {
   const { results, status, loadMore } = usePaginatedQuery(
     api.messages.get,
     { channelId, conversationId, parentMessageId },
-    { initialNumItems: BATCH_SIZE },
+    { initialNumItems: BATCH_SIZE }
   );
 
   return {

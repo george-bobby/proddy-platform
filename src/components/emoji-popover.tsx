@@ -9,7 +9,11 @@ interface EmojiPopoverProps {
   onEmojiSelect: (emoji: string) => void;
 }
 
-export const EmojiPopover = ({ children, hint = 'Emoji', onEmojiSelect }: PropsWithChildren<EmojiPopoverProps>) => {
+export const EmojiPopover = ({
+  children,
+  hint = 'Emoji',
+  onEmojiSelect,
+}: PropsWithChildren<EmojiPopoverProps>) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
 

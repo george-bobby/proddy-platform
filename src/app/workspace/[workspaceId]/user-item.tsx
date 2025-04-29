@@ -7,17 +7,20 @@ import { Button } from '@/components/ui/button';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
-const userItemVariants = cva('flex items-center gap-1.5 justify-start font-normal h-7 px-4 text-sm overflow-hidden', {
-  variants: {
-    variant: {
-      default: 'text-[#f9EDFFCC]',
-      active: 'text-[#481349] bg-white/90 hover:bg-white/90',
+const userItemVariants = cva(
+  'flex items-center gap-1.5 justify-start font-normal h-7 px-4 text-sm overflow-hidden',
+  {
+    variants: {
+      variant: {
+        default: 'text-[#f9EDFFCC]',
+        active: 'text-[#481349] bg-white/90 hover:bg-white/90',
+      },
     },
-  },
-  defaultVariants: {
-    variant: 'default',
-  },
-});
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
 interface UserItemProps {
   id: Id<'members'>;
