@@ -1,4 +1,4 @@
-import { MessageSquareText, Pencil, Smile, Trash } from 'lucide-react';
+import { MessageSquareText, Pencil, Smile, Trash, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -12,6 +12,7 @@ interface ToolbarProps {
   handleDelete: () => void;
   handleThread: () => void;
   handleReaction: (value: string) => void;
+  handleSummarize?: () => void;
   hideThreadButton?: boolean;
 }
 
@@ -22,6 +23,7 @@ export const Toolbar = ({
   handleDelete,
   handleThread,
   handleReaction,
+  handleSummarize,
   hideThreadButton,
 }: ToolbarProps) => {
   return (
@@ -37,6 +39,14 @@ export const Toolbar = ({
           <Hint label="Reply in thread">
             <Button onClick={handleThread} variant="ghost" size="iconSm" disabled={isPending}>
               <MessageSquareText className="size-4" />
+            </Button>
+          </Hint>
+        )}
+
+        {handleSummarize && (
+          <Hint label="Summarize conversation">
+            <Button onClick={handleSummarize} variant="ghost" size="iconSm" disabled={isPending}>
+              <Sparkles className="size-4" />
             </Button>
           </Hint>
         )}

@@ -141,6 +141,11 @@ export const Message = ({
     );
   };
 
+  const handleSummarize = () => {
+    // TODO: Implement message summarization
+    toast.info('Message summarization coming soon!');
+  };
+
   if (isCompact) {
     return (
       <>
@@ -197,6 +202,7 @@ export const Message = ({
               handleThread={() => onOpenMessage(id)}
               handleDelete={handleDelete}
               handleReaction={handleReaction}
+              handleSummarize={handleSummarize}
               hideThreadButton={hideThreadButton}
             />
           )}
@@ -274,6 +280,7 @@ export const Message = ({
             handleThread={() => onOpenMessage(id)}
             handleDelete={handleDelete}
             handleReaction={handleReaction}
+            handleSummarize={handleSummarize}
             hideThreadButton={hideThreadButton}
           />
         )}
