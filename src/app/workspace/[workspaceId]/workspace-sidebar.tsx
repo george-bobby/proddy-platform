@@ -61,7 +61,7 @@ export const WorkspaceSidebar = () => {
     <div className="flex h-full flex-col gap-y-2 bg-[#5E2C5F]">
       <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
 
-      <div className="mt-3 flex flex-col px-2">
+      <div className="mt-3 flex flex-col px-2 gap-1">
         <SidebarItem
           label="Threads"
           icon={MessageSquareText}
@@ -70,15 +70,8 @@ export const WorkspaceSidebar = () => {
           isActive={pathname.includes('/threads')}
         />
         <SidebarItem
-          label="Drafts"
-          icon={SendHorizonal}
-          id="drafts"
-          href={`/workspace/${workspaceId}/drafts`}
-          isActive={pathname.includes('/drafts')}
-        />
-        <SidebarItem
           label="Outbox"
-          icon={Mail}
+          icon={SendHorizonal}
           id="outbox"
           href={`/workspace/${workspaceId}/outbox`}
           isActive={pathname.includes('/outbox')}
@@ -107,7 +100,7 @@ export const WorkspaceSidebar = () => {
         <WorkspaceSection
           label="Members"
           hint="New Direct Message"
-          onNew={member.role === 'admin' ? () => {} : undefined}
+          onNew={member.role === 'admin' ? () => { } : undefined}
         >
           {members?.map((item) => (
             <UserItem
