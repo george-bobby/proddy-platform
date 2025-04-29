@@ -638,7 +638,22 @@ export const getMessageBodies = query({
         args.messageIds.map(async (id) => {
           try {
             const message = await ctx.db.get(id);
-            return message ? { id: message._id, body: message.body } : null;
+            if (!message) return null;
+
+            // Get member information
+            const member = await ctx.db.get(message.memberId);
+            if (!member) return null;
+
+            // Get user information for author name
+            const user = await ctx.db.get(member.userId);
+            if (!user) return null;
+
+            return {
+              id: message._id,
+              body: message.body,
+              authorName: user.name,
+              creationTime: message._creationTime,
+            };
           } catch (error) {
             console.error(`Error fetching message ${id}:`, error);
             return null;

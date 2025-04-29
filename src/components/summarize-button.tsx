@@ -3,6 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { useMessageSelection } from '@/contexts/message-selection-context';
@@ -33,14 +34,19 @@ export const SummarizeButton = () => {
         return;
       }
 
-      const messageBodies = messageContents.map(msg => msg?.body || "").filter(Boolean);
+      // Format messages with author names and timestamps
+      const formattedMessages = messageContents.map(msg => ({
+        body: msg.body,
+        authorName: msg.authorName,
+        creationTime: msg.creationTime
+      }));
 
       const response = await fetch('/api/summarize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messageBodies }),
+        body: JSON.stringify({ messages: formattedMessages }),
         credentials: 'include',
       });
 
@@ -52,7 +58,7 @@ export const SummarizeButton = () => {
       const data = await response.json();
       const summary = data.summary;
 
-      toast.info('Messages Summary!', {
+      toast.success('Messages summarized successfully!', {
         description: summary,
         duration: 10000,
       });
