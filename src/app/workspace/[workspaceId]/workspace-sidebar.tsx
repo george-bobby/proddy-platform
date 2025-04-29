@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertTriangle, HashIcon, Loader, MessageSquareText, SendHorizonal } from 'lucide-react';
+import { AlertTriangle, HashIcon, Home, Loader, MessageSquareText, MoreHorizontal, SendHorizonal } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useCreateChannelModal } from '@/features/channels/store/use-create-channel-modal';
@@ -11,6 +12,7 @@ import { useChannelId } from '@/hooks/use-channel-id';
 import { useMemberId } from '@/hooks/use-member-id';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
+import { SidebarButton } from './sidebar-button';
 import { SidebarItem } from './sidebar-item';
 import { UserItem } from './user-item';
 import { WorkspaceHeader } from './workspace-header';
@@ -20,6 +22,7 @@ export const WorkspaceSidebar = () => {
   const workspaceId = useWorkspaceId();
   const channelId = useChannelId();
   const memberId = useMemberId();
+  const pathname = usePathname();
 
   const [_open, setOpen] = useCreateChannelModal();
 
@@ -47,11 +50,11 @@ export const WorkspaceSidebar = () => {
 
   return (
     <div className="flex h-full flex-col gap-y-2 bg-[#5E2C5F]">
+
       <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
 
       <div className="mt-3 flex flex-col px-2">
         <SidebarItem label="Threads" icon={MessageSquareText} id="threads" />
-
         <SidebarItem label="Drafts & Sent" icon={SendHorizonal} id="draft" />
       </div>
 
@@ -70,7 +73,7 @@ export const WorkspaceSidebar = () => {
       )}
 
       {members && members.length !== 0 && (
-        <WorkspaceSection label="Direct Messages" hint="New Direct Message" onNew={member.role === 'admin' ? () => {} : undefined}>
+        <WorkspaceSection label="Members" hint="New Direct Message" onNew={member.role === 'admin' ? () => { } : undefined}>
           {members?.map((item) => (
             <UserItem
               key={item._id}

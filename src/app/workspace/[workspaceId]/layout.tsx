@@ -9,8 +9,6 @@ import { Profile } from '@/features/members/components/profile';
 import { Thread } from '@/features/messages/components/thread';
 import { usePanel } from '@/hooks/use-panel';
 
-import { Sidebar } from './sidebar';
-import { Toolbar } from './toolbar';
 import { WorkspaceSidebar } from './workspace-sidebar';
 
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
@@ -20,11 +18,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
 
   return (
     <div className="h-full">
-      <Toolbar />
-
-      <div className="flex h-[calc(100vh_-_40px)]">
-        <Sidebar />
-
+      <div className="flex h-full">
         <ResizablePanelGroup direction="horizontal" autoSaveId="workspace-layout">
           <ResizablePanel defaultSize={20} minSize={11} className="bg-[#5E2C5F]">
             <WorkspaceSidebar />
