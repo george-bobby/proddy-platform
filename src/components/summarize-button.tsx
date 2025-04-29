@@ -6,10 +6,17 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { useMessageSelection } from '@/contexts/message-selection-context';
+import { api } from "../../convex/_generated/api";
+import { useQuery } from "convex/react";
 
 export const SummarizeButton = () => {
   const { selectedMessages, clearSelectedMessages } = useMessageSelection();
   const [isSummarizing, setIsSummarizing] = useState(false);
+
+  // Fetch message content for each selected message
+  const messageContents = useQuery(api.messages.getMessageBodies, {
+    messageIds: selectedMessages
+  });
 
   if (selectedMessages.length === 0) {
     return null;
@@ -19,20 +26,33 @@ export const SummarizeButton = () => {
     try {
       setIsSummarizing(true);
 
-      // TODO: Replace with actual API call to your summarization endpoint
-      // Example implementation (placeholder):
-      // const response = await fetch('/api/summarize', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ messageIds: selectedMessages }),
-      // });
-      // const data = await response.json();
-      // const summary = data.summary;
+      // If we're still loading message contents, show a message
+      if (!messageContents) {
+        toast.error('Loading message content, please try again in a moment');
+        setIsSummarizing(false);
+        return;
+      }
 
-      // For now, using a placeholder summary
-      const summary = `Summary of ${selectedMessages.length} selected messages. Implement the actual summarization logic by creating an API endpoint at /api/summarize/route.ts`;
+      const messageBodies = messageContents.map(msg => msg?.body || "").filter(Boolean);
 
-      toast.success('Messages summarized successfully!', {
+      const response = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messageBodies }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to summarize messages');
+      }
+
+      const data = await response.json();
+      const summary = data.summary;
+
+      toast.info('Messages Summary!', {
         description: summary,
         duration: 10000,
       });
@@ -54,7 +74,7 @@ export const SummarizeButton = () => {
         </span>
         <Button
           onClick={handleSummarize}
-          disabled={isSummarizing}
+          disabled={isSummarizing || !messageContents}
           className="bg-[#007a5a] text-white hover:bg-[#007a5a]/80"
           aria-label="Summarize selected messages"
         >

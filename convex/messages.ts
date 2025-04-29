@@ -624,3 +624,32 @@ export const getThreadMessages = query({
     }
   },
 });
+
+export const getMessageBodies = query({
+  args: {
+    messageIds: v.array(v.id('messages')),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const userId = await getAuthUserId(ctx);
+      if (!userId) return [];
+
+      const messages = await Promise.all(
+        args.messageIds.map(async (id) => {
+          try {
+            const message = await ctx.db.get(id);
+            return message ? { id: message._id, body: message.body } : null;
+          } catch (error) {
+            console.error(`Error fetching message ${id}:`, error);
+            return null;
+          }
+        }),
+      );
+
+      return messages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
+    } catch (error) {
+      console.error('Error in getMessageBodies:', error);
+      return [];
+    }
+  },
+});
