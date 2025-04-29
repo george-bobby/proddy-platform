@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useMessageSelection } from '@/contexts/message-selection-context';
 import { useRemoveMessage } from '@/features/messages/api/use-remove-message';
 import { useUpdateMessage } from '@/features/messages/api/use-update-message';
 import { useToggleReaction } from '@/features/reactions/api/use-toggle-reaction';
@@ -85,11 +87,9 @@ export const Message = ({
   threadName,
   threadTimestamp,
 }: MessageProps) => {
-  const [ConfirmDialog, confirm] = useConfirm(
-    'Delete message',
-    'Are you sure you want to delete this message? This cannot be undone.'
-  );
+  const [ConfirmDialog, confirm] = useConfirm('Delete message', 'Are you sure you want to delete this message? This cannot be undone.');
   const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
+  const { isMessageSelected, toggleMessageSelection } = useMessageSelection();
 
   const { mutate: updateMessage, isPending: isUpdatingMessage } = useUpdateMessage();
   const { mutate: removeMessage, isPending: isRemovingMessage } = useRemoveMessage();
@@ -97,6 +97,7 @@ export const Message = ({
 
   const avatarFallback = authorName.charAt(0).toUpperCase();
   const isPending = isUpdatingMessage || isRemovingMessage || isTogglingReaction;
+  const isSelected = isMessageSelected(id);
 
   const handleUpdate = ({ body }: { body: string }) => {
     updateMessage(
@@ -109,7 +110,7 @@ export const Message = ({
         onError: () => {
           toast.error('Failed to update message.');
         },
-      }
+      },
     );
   };
 
@@ -129,7 +130,7 @@ export const Message = ({
         onError: () => {
           toast.error('Failed to delete message.');
         },
-      }
+      },
     );
   };
 
@@ -140,13 +141,8 @@ export const Message = ({
         onError: () => {
           toast.error('Failed to toggle reaction.');
         },
-      }
+      },
     );
-  };
-
-  const handleSummarize = () => {
-    // TODO: Implement message summarization
-    toast.info('Message summarization coming soon!');
   };
 
   if (isCompact) {
@@ -158,16 +154,22 @@ export const Message = ({
           className={cn(
             'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
             isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
-            isRemovingMessage &&
-              'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200'
+            isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
           )}
         >
           <div className="flex items-start gap-2">
-            <Hint label={formatFullTime(new Date(createdAt))}>
-              <button className="w-[40px] text-center text-sm leading-[22px] text-muted-foreground opacity-0 hover:underline group-hover:opacity-100">
-                {format(new Date(createdAt), 'hh:mm')}
-              </button>
-            </Hint>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => toggleMessageSelection(id)}
+                className="ml-1 opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
+              />
+              <Hint label={formatFullTime(new Date(createdAt))}>
+                <button className="w-[40px] text-center text-sm leading-[22px] text-muted-foreground opacity-0 hover:underline group-hover:opacity-100">
+                  {format(new Date(createdAt), 'hh:mm')}
+                </button>
+              </Hint>
+            </div>
 
             {isEditing ? (
               <div className="size-full">
@@ -206,7 +208,6 @@ export const Message = ({
               handleThread={() => onOpenMessage(id)}
               handleDelete={handleDelete}
               handleReaction={handleReaction}
-              handleSummarize={handleSummarize}
               hideThreadButton={hideThreadButton}
             />
           )}
@@ -223,18 +224,24 @@ export const Message = ({
         className={cn(
           'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
           isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
-          isRemovingMessage &&
-            'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200'
+          isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
         )}
       >
         <div className="flex items-start gap-2">
-          <button onClick={() => onOpenProfile(memberId)}>
-            <Avatar>
-              <AvatarImage alt={authorName} src={authorImage} />
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => toggleMessageSelection(id)}
+              className="opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
+            />
+            <button onClick={() => onOpenProfile(memberId)}>
+              <Avatar>
+                <AvatarImage alt={authorName} src={authorImage} />
 
-              <AvatarFallback>{avatarFallback}</AvatarFallback>
-            </Avatar>
-          </button>
+                <AvatarFallback>{avatarFallback}</AvatarFallback>
+              </Avatar>
+            </button>
+          </div>
 
           {isEditing ? (
             <div className="size-full">
@@ -249,19 +256,14 @@ export const Message = ({
           ) : (
             <div className="flex w-full flex-col overflow-hidden">
               <div className="text-sm">
-                <button
-                  onClick={() => onOpenProfile(memberId)}
-                  className="font-bold text-primary hover:underline"
-                >
+                <button onClick={() => onOpenProfile(memberId)} className="font-bold text-primary hover:underline">
                   {authorName}
                 </button>
 
                 <span>&nbsp;&nbsp;</span>
 
                 <Hint label={formatFullTime(new Date(createdAt))}>
-                  <button className="text-xs text-muted-foreground hover:underline">
-                    {format(new Date(createdAt), 'h:mm a')}
-                  </button>
+                  <button className="text-xs text-muted-foreground hover:underline">{format(new Date(createdAt), 'h:mm a')}</button>
                 </Hint>
               </div>
 
@@ -290,7 +292,6 @@ export const Message = ({
             handleThread={() => onOpenMessage(id)}
             handleDelete={handleDelete}
             handleReaction={handleReaction}
-            handleSummarize={handleSummarize}
             hideThreadButton={hideThreadButton}
           />
         )}
