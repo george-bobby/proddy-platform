@@ -50,7 +50,8 @@ export const SidebarItem = ({ label, icon: Icon, id, href, isActive, variant = '
 
   // For channels, use the channel ID
   if (id.startsWith('channels/')) {
-    return <Link href={`/workspace/${workspaceId}/channel/${id}`}>{content}</Link>;
+    const channelId = id.replace('channels/', '');
+    return <Link href={`/workspace/${workspaceId}/channel/${channelId}`}>{content}</Link>;
   }
 
   return content;
