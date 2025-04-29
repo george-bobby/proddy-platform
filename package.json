@@ -58,6 +58,7 @@
     "url": "https://github.com/george-bobby/proddy-platform/issues"
   },
   "dependencies": {
+    "@ai-sdk/google": "^1.2.14",
     "@auth/core": "^0.34.2",
     "@convex-dev/auth": "^0.0.65",
     "@radix-ui/react-alert-dialog": "^1.1.1",
