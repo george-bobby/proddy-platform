@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useMessageSelection } from '@/contexts/message-selection-context';
 import { useRemoveMessage } from '@/features/messages/api/use-remove-message';
 import { useUpdateMessage } from '@/features/messages/api/use-update-message';
@@ -89,7 +88,7 @@ export const Message = ({
 }: MessageProps) => {
   const [ConfirmDialog, confirm] = useConfirm('Delete message', 'Are you sure you want to delete this message? This cannot be undone.');
   const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
-  const { isMessageSelected, toggleMessageSelection } = useMessageSelection();
+  const { isMessageSelected } = useMessageSelection();
 
   const { mutate: updateMessage, isPending: isUpdatingMessage } = useUpdateMessage();
   const { mutate: removeMessage, isPending: isRemovingMessage } = useRemoveMessage();
@@ -155,15 +154,11 @@ export const Message = ({
             'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
             isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
             isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
+            isSelected && 'bg-blue-50 hover:bg-blue-50/90',
           )}
         >
           <div className="flex items-start gap-2">
             <div className="flex items-center gap-2">
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={() => toggleMessageSelection(id)}
-                className="ml-1 opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
-              />
               <Hint label={formatFullTime(new Date(createdAt))}>
                 <button className="w-[40px] text-center text-sm leading-[22px] text-muted-foreground opacity-0 hover:underline group-hover:opacity-100">
                   {format(new Date(createdAt), 'hh:mm')}
@@ -209,6 +204,7 @@ export const Message = ({
               handleDelete={handleDelete}
               handleReaction={handleReaction}
               hideThreadButton={hideThreadButton}
+              messageId={id as string}
             />
           )}
         </div>
@@ -225,15 +221,11 @@ export const Message = ({
           'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
           isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
           isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
+          isSelected && 'bg-blue-50 hover:bg-blue-50/90',
         )}
       >
         <div className="flex items-start gap-2">
           <div className="flex items-center gap-2">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={() => toggleMessageSelection(id)}
-              className="opacity-0 group-hover:opacity-100 data-[state=checked]:opacity-100"
-            />
             <button onClick={() => onOpenProfile(memberId)}>
               <Avatar>
                 <AvatarImage alt={authorName} src={authorImage} />
@@ -293,6 +285,7 @@ export const Message = ({
             handleDelete={handleDelete}
             handleReaction={handleReaction}
             hideThreadButton={hideThreadButton}
+            messageId={id as string}
           />
         )}
       </div>
