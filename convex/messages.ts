@@ -634,34 +634,58 @@ export const getMessageBodies = query({
       const userId = await getAuthUserId(ctx);
       if (!userId) return [];
 
-      const messages = await Promise.all(
-        args.messageIds.map(async (id) => {
-          try {
-            const message = await ctx.db.get(id);
-            if (!message) return null;
+      // Early return if no message IDs provided
+      if (args.messageIds.length === 0) return [];
 
-            // Get member information
-            const member = await ctx.db.get(message.memberId);
-            if (!member) return null;
+      // Fetch all messages in a single batch query
+      const messages = await ctx.db
+        .query('messages')
+        .filter((q) => q.or(...args.messageIds.map((id) => q.eq(q.field('_id'), id))))
+        .collect();
 
-            // Get user information for author name
-            const user = await ctx.db.get(member.userId);
-            if (!user) return null;
+      if (messages.length === 0) return [];
 
-            return {
-              id: message._id,
-              body: message.body,
-              authorName: user.name,
-              creationTime: message._creationTime,
-            };
-          } catch (error) {
-            console.error(`Error fetching message ${id}:`, error);
-            return null;
-          }
-        }),
-      );
+      // Extract all unique member IDs from messages
+      const memberIds = new Set(messages.map((msg) => msg.memberId));
 
-      return messages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
+      // Fetch all members in a single batch
+      const members = await ctx.db
+        .query('members')
+        .filter((q) => q.or(...Array.from(memberIds).map((id) => q.eq(q.field('_id'), id))))
+        .collect();
+
+      // Create a map of member ID to member
+      const memberMap = new Map(members.map((member) => [member._id, member]));
+
+      // Extract all unique user IDs from members
+      const userIds = new Set(members.map((member) => member.userId));
+
+      // Fetch all users in a single batch
+      const users = await ctx.db
+        .query('users')
+        .filter((q) => q.or(...Array.from(userIds).map((id) => q.eq(q.field('_id'), id))))
+        .collect();
+
+      // Create a map of user ID to user
+      const userMap = new Map(users.map((user) => [user._id, user]));
+
+      // Map messages to the required format
+      const formattedMessages = messages.map((message) => {
+        const member = memberMap.get(message.memberId);
+        if (!member) return null;
+
+        const user = userMap.get(member.userId);
+        if (!user) return null;
+
+        return {
+          id: message._id,
+          body: message.body,
+          authorName: user.name,
+          creationTime: message._creationTime,
+        };
+      });
+
+      return formattedMessages.filter((msg): msg is NonNullable<typeof msg> => msg !== null);
     } catch (error) {
       console.error('Error in getMessageBodies:', error);
       return [];
