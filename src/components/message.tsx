@@ -1,5 +1,5 @@
 import { format, isToday, isYesterday } from 'date-fns';
-import { Loader } from 'lucide-react';
+import { CalendarIcon, Loader } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 
@@ -60,6 +60,10 @@ interface MessageProps {
   threadImage?: string;
   threadName?: string;
   threadTimestamp?: number;
+  calendarEvent?: {
+    date: number;
+    time?: string;
+  };
 }
 
 const formatFullTime = (date: Date) => {
@@ -85,6 +89,7 @@ export const Message = ({
   threadImage,
   threadName,
   threadTimestamp,
+  calendarEvent,
 }: MessageProps) => {
   const [ConfirmDialog, confirm] = useConfirm('Delete message', 'Are you sure you want to delete this message? This cannot be undone.');
   const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
@@ -178,10 +183,16 @@ export const Message = ({
               </div>
             ) : (
               <div className="flex w-full flex-col">
-                <Renderer value={body} />
+                <Renderer value={body} calendarEvent={calendarEvent} />
                 <Thumbnail url={image} />
 
                 {updatedAt ? <span className="text-xs text-muted-foreground italic animate-fade-in">(edited)</span> : null}
+                {calendarEvent && (
+                  <div className="flex items-center gap-1 text-xs text-primary mt-1">
+                    <CalendarIcon className="h-3 w-3" />
+                    <span>Calendar event: {new Date(calendarEvent.date).toLocaleDateString()}{calendarEvent.time ? ` at ${calendarEvent.time}` : ''}</span>
+                  </div>
+                )}
 
                 <Reactions data={reactions} onChange={handleReaction} />
                 <ThreadBar
@@ -259,10 +270,16 @@ export const Message = ({
                 </Hint>
               </div>
 
-              <Renderer value={body} />
+              <Renderer value={body} calendarEvent={calendarEvent} />
               <Thumbnail url={image} />
 
               {updatedAt ? <span className="text-xs text-muted-foreground italic animate-fade-in">(edited)</span> : null}
+              {calendarEvent && (
+                <div className="flex items-center gap-1 text-xs text-primary mt-1">
+                  <CalendarIcon className="h-3 w-3" />
+                  <span>Calendar event: {new Date(calendarEvent.date).toLocaleDateString()}{calendarEvent.time ? ` at ${calendarEvent.time}` : ''}</span>
+                </div>
+              )}
 
               <Reactions data={reactions} onChange={handleReaction} />
               <ThreadBar

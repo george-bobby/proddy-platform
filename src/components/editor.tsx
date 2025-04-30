@@ -1,4 +1,4 @@
-import { ImageIcon, Smile, XIcon } from 'lucide-react';
+import { CalendarIcon, ImageIcon, Smile, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import Quill, { type QuillOptions } from 'quill';
 import type { Delta, Op } from 'quill/core';
@@ -10,12 +10,17 @@ import { PiTextAa } from 'react-icons/pi';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+import { CalendarPicker } from './calendar-picker';
 import { EmojiPopover } from './emoji-popover';
 import { Hint } from './hint';
 
 type EditorValue = {
   image: File | null;
   body: string;
+  calendarEvent?: {
+    date: Date;
+    time?: string;
+  };
 };
 
 interface EditorProps {
@@ -40,6 +45,9 @@ const Editor = ({
   const [text, setText] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
+  const [calendarPickerOpen, setCalendarPickerOpen] = useState(false);
+  const [lastKeyWasExclamation, setLastKeyWasExclamation] = useState(false);
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState<{date: Date, time?: string} | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageElementRef = useRef<HTMLInputElement>(null);
@@ -114,7 +122,16 @@ const Editor = ({
     setText(quill.getText());
 
     quill.on(Quill.events.TEXT_CHANGE, () => {
-      setText(quill.getText());
+      const newText = quill.getText();
+      setText(newText);
+
+      // Check if the last character is "!" to trigger calendar picker
+      if (newText.trim().endsWith('!') && !lastKeyWasExclamation) {
+        setLastKeyWasExclamation(true);
+        setCalendarPickerOpen(true);
+      } else if (!newText.trim().endsWith('!')) {
+        setLastKeyWasExclamation(false);
+      }
     });
 
     return () => {
@@ -147,8 +164,40 @@ const Editor = ({
 
   const isEmpty = !image && text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
 
+  const handleCalendarSelect = (date: Date, time?: string) => {
+    const quill = quillRef.current;
+    if (!quill) return;
+
+    // Save the calendar event for submission
+    setSelectedCalendarEvent({ date, time });
+
+    // Remove the exclamation mark that triggered the calendar
+    const currentText = quill.getText();
+    if (currentText.trim().endsWith('!')) {
+      const newText = currentText.substring(0, currentText.lastIndexOf('!')).trimEnd();
+      quill.setText(newText + ' ');
+
+      // Move cursor to the end
+      const length = quill.getText().length;
+      quill.setSelection(length, 0);
+    }
+
+    // Format the date and time for display
+    const formattedDate = date.toLocaleDateString();
+    const displayText = time ? `${formattedDate} at ${time}` : formattedDate;
+
+    // Insert the formatted date at the cursor position
+    quill.insertText(quill.getSelection()?.index || quill.getText().length, displayText + ' ');
+  };
+
   return (
     <div className="flex flex-col">
+      <CalendarPicker
+        open={calendarPickerOpen}
+        onClose={() => setCalendarPickerOpen(false)}
+        onSelect={handleCalendarSelect}
+      />
+
       <input
         type="file"
         accept="image/*"
@@ -205,16 +254,28 @@ const Editor = ({
           </EmojiPopover>
 
           {variant === 'create' && (
-            <Hint label="Image">
-              <Button
-                disabled={disabled}
-                size="iconSm"
-                variant="ghost"
-                onClick={() => imageElementRef.current?.click()}
-              >
-                <ImageIcon className="size-4" />
-              </Button>
-            </Hint>
+            <>
+              <Hint label="Image">
+                <Button
+                  disabled={disabled}
+                  size="iconSm"
+                  variant="ghost"
+                  onClick={() => imageElementRef.current?.click()}
+                >
+                  <ImageIcon className="size-4" />
+                </Button>
+              </Hint>
+              <Hint label="Calendar">
+                <Button
+                  disabled={disabled}
+                  size="iconSm"
+                  variant="ghost"
+                  onClick={() => setCalendarPickerOpen(true)}
+                >
+                  <CalendarIcon className="size-4" />
+                </Button>
+              </Hint>
+            </>
           )}
 
           {variant === 'update' && (
@@ -231,6 +292,7 @@ const Editor = ({
                   onSubmit({
                     body: JSON.stringify(quillRef.current.getContents()),
                     image,
+                    calendarEvent: selectedCalendarEvent || undefined,
                   });
                 }}
                 size="sm"
@@ -251,6 +313,7 @@ const Editor = ({
                 onSubmit({
                   body: JSON.stringify(quillRef.current.getContents()),
                   image,
+                  calendarEvent: selectedCalendarEvent || undefined,
                 });
               }}
               className={cn(
