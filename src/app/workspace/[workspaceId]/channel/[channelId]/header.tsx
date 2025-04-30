@@ -1,7 +1,7 @@
 'use client';
 
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
-import { Bell, Search, Trash } from 'lucide-react';
+import { Bell, Search, Trash, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { FaChevronDown, FaGithub } from 'react-icons/fa';
@@ -40,6 +40,7 @@ import { links } from '@/config';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
+import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
 import { UserButton } from '@/features/auth/components/user-button';
 import type { Id } from '@/../convex/_generated/dataModel';
 
@@ -59,6 +60,7 @@ export const Header = ({ channelName }: HeaderProps) => {
   const [value, setValue] = useState(channelName);
   const [editOpen, setEditOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [_, setCreateOpen] = useCreateWorkspaceModal();
 
   const { data: workspace } = useGetWorkspace({ id: workspaceId });
   const { data: channels } = useGetChannels({ workspaceId });
@@ -262,6 +264,15 @@ export const Header = ({ channelName }: HeaderProps) => {
       </div>
 
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-2 px-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-x-2 text-white"
+          onClick={() => setCreateOpen(true)}
+        >
+          <Plus className="size-4" />
+          <span className="hidden sm:inline">Create Workspace</span>
+        </Button>
         <Button variant="transparent" size="iconSm" asChild>
           <Link
             href={links.sourceCode}
