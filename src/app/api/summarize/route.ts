@@ -7,79 +7,49 @@ import { NextRequest, NextResponse } from 'next/server';
 // Load environment variables
 dotenv.config();
 
-// Define message interface for type safety
 interface MessageData {
   body: string;
   authorName: string;
   creationTime: number;
 }
 
-// Function to extract plain text from a rich text JSON format
 function extractTextFromRichText(body: string): string {
-  console.log('[extractText] Input body:', body);
-
   if (typeof body !== 'string') {
-    console.log('[extractText] Body is not a string. Returning as is.');
     return String(body);
   }
 
   const trimmedBody = body.trim();
 
-  // Only attempt parsing if it looks like a JSON object string
   if (trimmedBody.startsWith('{') && trimmedBody.endsWith('}')) {
     try {
       const parsed = JSON.parse(trimmedBody);
-      console.log('[extractText] Parsed JSON:', parsed);
 
-      // Check for lowercase 'ops' key
       if (parsed && Array.isArray(parsed.ops)) {
-        console.log("[extractText] Found 'ops' array. Processing...");
         let extractedText = '';
-        // Iterate over lowercase 'ops'
+
         for (const op of parsed.ops) {
-          // Check if the operation has an INSERT field and it's a string
           if (op && typeof op.insert === 'string') {
             extractedText += op.insert;
-            console.log(`[extractText] Added text: "${op.insert}"`);
-          } else {
-            console.log("[extractText] Skipping op, no valid 'insert' found:", op);
           }
         }
 
-        // Clean up common newline representations and trim whitespace
-        const cleanedText = extractedText
-          .replace(/\\n|\\N|\n/g, ' ') // Replace \n, \N, and actual newlines with space
-          .trim();
-
-        console.log('[extractText] Final extracted and cleaned text:', cleanedText);
-        return cleanedText; // Return the successfully extracted text
-      } else {
-        console.log("[extractText] Parsed JSON does not contain expected 'ops' array. Returning original body.");
-        return body; // Not the ops format we expected
+        return extractedText.replace(/\\n|\\N|\n/g, ' ').trim();
       }
+      return body;
     } catch (error) {
-      console.error('[extractText] JSON parsing failed:', error);
-      // If parsing fails, it wasn't valid JSON, return original string
       return body;
     }
-  } else {
-    console.log('[extractText] Body does not look like a JSON object string. Returning as is.');
-    // Does not look like a JSON object string, return original
-    return body;
   }
+  return body;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('Summarize API called');
-
-    // Check if API key is available
     if (!process.env.NEXT_PUBLIC_GEMINI_API) {
       console.error('Missing NEXT_PUBLIC_GEMINI_API');
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
-    // Parse request body
     let requestData;
     try {
       requestData = await req.json();
@@ -99,35 +69,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No messages to summarize' }, { status: 400 });
     }
 
-    // Format messages for the AI model
     const chatHistory = messages
       .map((msg: MessageData) => {
         try {
-          // Extract plain text from rich text message body
           const plainText = extractTextFromRichText(msg.body);
 
-          // Format timestamp
           let timestamp;
           try {
             const date = new Date(msg.creationTime);
             timestamp = format(date, 'MM/dd/yyyy, h:mm a');
           } catch (dateError) {
-            console.error('Date formatting error:', dateError);
             timestamp = 'Unknown time';
           }
 
           return `[${timestamp}] ${msg.authorName}: ${plainText}`;
         } catch (error) {
-          console.error('Error formatting message for AI:', error);
-          return ''; // Skip problematic messages
+          return '';
         }
       })
       .filter(Boolean)
       .join('\n');
 
-    console.log('Formatted chat history for AI:', chatHistory);
-
-    // Generate summary using Gemini API
     try {
       const { text } = await generateText({
         model: google('gemini-1.5-pro'),
@@ -152,17 +114,15 @@ If there are action items or deadlines mentioned, include them in the summary.`,
         ],
       });
 
-      console.log('Generated summary:', text);
       return NextResponse.json({ summary: text });
     } catch (aiError) {
       console.error('AI summarization error:', aiError);
 
-      // Fallback to capitalization if AI fails
-      console.log('Falling back to capitalization method');
+      // Fallback to formatting if AI fails
       const formattedMessages = messages.map((msg: MessageData) => {
         const plainText = extractTextFromRichText(msg.body);
         const formattedDate = format(new Date(msg.creationTime), "MMM d, yyyy 'at' h:mm a");
-        return `[${msg.authorName} on ${formattedDate}]: ${plainText.toUpperCase()}`;
+        return `[${msg.authorName} on ${formattedDate}]: ${plainText}`;
       });
 
       const fallbackSummary = formattedMessages.join('\n\n--------\n\n');
