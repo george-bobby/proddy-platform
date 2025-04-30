@@ -63,14 +63,14 @@ const suggestionsCache = new Map<string, { suggestions: string[]; timestamp: num
 const CACHE_SIZE = 50; // Maximum number of cached suggestion sets
 const CACHE_TTL = 1000 * 60 * 5; // 5 minutes in milliseconds
 
-// Helper function to generate a cache key from messages and channel name
-function generateCacheKey(messages: MessageData[], channelName?: string): string {
+// Helper function to generate a cache key from messages and context (channel or member)
+function generateCacheKey(messages: MessageData[], contextName?: string): string {
   const messagesKey = messages
     .slice(-5) // Only use the last 5 messages for the cache key to avoid too much specificity
     .map((msg) => `${msg.id.substring(0, 8)}:${msg.authorName.substring(0, 5)}`)
     .join('|');
 
-  return `${channelName || 'unknown'}-${messagesKey}`;
+  return `${contextName || 'unknown'}-${messagesKey}`;
 }
 
 // Helper function to maintain cache size
@@ -107,7 +107,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON in request' }, { status: 400 });
     }
 
-    const { messages, channelName } = requestData;
+    const { messages, channelName, memberName } = requestData;
+    // Use either channelName or memberName as the context
+    const contextName = channelName || memberName;
 
     // Validate messages
     if (!messages || !Array.isArray(messages)) {
@@ -139,7 +141,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check cache first
-    const cacheKey = generateCacheKey(validMessages, channelName);
+    const cacheKey = generateCacheKey(validMessages, contextName);
     const cachedResult = suggestionsCache.get(cacheKey);
 
     if (cachedResult) {
@@ -211,19 +213,22 @@ Your task is to analyze the recent conversation history and suggest 3 possible r
 Guidelines:
 - Generate exactly 3 suggestions, separated by a special marker "|||"
 - Each suggestion should be a complete, standalone message (1-2 sentences)
-- Make suggestions relevant to the conversation context and channel topic
+- Make suggestions relevant to the conversation context
+- If this is a direct message with a specific person, make suggestions appropriate for a one-on-one conversation
+- If this is a channel, tailor suggestions to the channel topic
 - Suggestions should be helpful, professional, and natural-sounding
 - Vary the tone and purpose of suggestions (e.g., question, statement, action item)
 - Keep suggestions concise (max 100 characters each)
 - Do not include any explanations or commentary, just the 3 suggestions
-- If the channel name is provided, tailor suggestions to that topic
 
 Example output format:
 Let's discuss this in our next meeting. ||| I've completed the task you assigned. ||| Could you provide more details about the requirements?`,
           },
           {
             role: 'user',
-            content: `Channel name: ${channelName || 'General'}\n\nRecent conversation:\n${chatHistory}\n\nGenerate 3 contextually relevant message suggestions:`,
+            content: memberName
+              ? `Direct message with: ${memberName}\n\nRecent conversation:\n${chatHistory}\n\nGenerate 3 contextually relevant message suggestions:`
+              : `Channel name: ${channelName || 'General'}\n\nRecent conversation:\n${chatHistory}\n\nGenerate 3 contextually relevant message suggestions:`,
           },
         ],
         temperature: 0.7, // Add some randomness

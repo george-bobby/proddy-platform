@@ -151,7 +151,7 @@ export const Message = ({
 
         <div
           className={cn(
-            'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-standard hover:shadow-md rounded-[10px]',
+            'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-standard hover:shadow-sm rounded-[10px]',
             isEditing && 'bg-secondary/20 hover:bg-secondary/20',
             isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-standard',
             isSelected && 'bg-primary/10 hover:bg-primary/10',
@@ -218,7 +218,7 @@ export const Message = ({
 
       <div
         className={cn(
-          'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-standard hover:shadow-md rounded-[10px]',
+          'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-standard hover:shadow-sm rounded-[10px]',
           isEditing && 'bg-secondary/20 hover:bg-secondary/20',
           isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-standard',
           isSelected && 'bg-primary/10 hover:bg-primary/10',

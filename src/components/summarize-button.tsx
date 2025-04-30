@@ -122,7 +122,7 @@ export const SummarizeButton = () => {
           <Button
             onClick={handleSummarize}
             disabled={isSummarizing || !messageContents}
-            className="bg-[#007a5a] text-white hover:bg-[#007a5a]/80"
+            className="bg-primary text-white hover:bg-primary/70"
             aria-label="Summarize selected messages"
           >
             <Sparkles className="mr-2 size-4" />
