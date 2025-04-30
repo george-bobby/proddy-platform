@@ -41,7 +41,7 @@ export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, m
 
       // Validate message format before sending
       const validMessages = recentMessages.filter(msg => {
-        return msg && msg.id && msg.authorName;
+        return msg && msg._id && msg.user?.name;
       });
 
       if (validMessages.length === 0) {
@@ -50,13 +50,21 @@ export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, m
         return;
       }
 
+      // Format messages to match the expected API format
+      const formattedMessages = validMessages.map(msg => ({
+        id: msg._id,
+        body: msg.body,
+        authorName: msg.user?.name || 'Unknown',
+        creationTime: msg._creationTime
+      }));
+
       const response = await fetch('/api/suggestions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: validMessages,
+          messages: formattedMessages,
           memberName
         }),
       });
@@ -83,7 +91,7 @@ export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, m
   // Track the most recent message ID to detect new messages
   useEffect(() => {
     if (recentMessages && recentMessages.length > 0) {
-      const mostRecentMessageId = recentMessages[0].id;
+      const mostRecentMessageId = recentMessages[0]._id;
 
       // If we have a new message, refresh suggestions
       if (lastMessageId !== null && lastMessageId !== mostRecentMessageId) {
