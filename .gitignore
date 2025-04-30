@@ -7,6 +7,7 @@
 .pnp.js
 .yarn/install-state.gz
 .env.local
+convex/_generated
 
 # testing
 /coverage
