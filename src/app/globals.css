@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import react-day-picker styles */
+@import 'react-day-picker/dist/style.css';
+
 @layer base {
   :root {
     /* Colors */
@@ -145,6 +148,18 @@
 
 .ql-renderer {
   @apply !p-0;
+}
+
+/* Calendar event highlight */
+.calendar-event-highlight {
+  background-color: rgba(var(--primary), 0.2);
+  color: hsl(var(--primary));
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid rgba(var(--primary), 0.3);
+  display: inline-block;
+  margin: 0 2px;
 }
 
 @layer utilities {
