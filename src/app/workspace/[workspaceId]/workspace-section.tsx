@@ -23,21 +23,21 @@ export const WorkspaceSection = ({
   const [on, toggle] = useToggle(true);
 
   return (
-    <div className="mt-2 flex flex-col px-2">
-      <div className="group flex items-center px-2">
+    <div className="mt-4 flex flex-col px-4">
+      <div className="group flex items-center px-2 mb-2">
         <Button
           onClick={toggle}
           variant="ghost"
           size="sm"
-          className="h-6 w-6 shrink-0 p-0 text-primary-foreground/80"
+          className="h-7 w-7 shrink-0 p-0 text-primary-foreground/80 rounded-[8px] transition-standard hover:bg-primary-foreground/10"
         >
-          <ChevronDown className={cn('size-4 transition-transform', !on && '-rotate-90')} />
+          <ChevronDown className={cn('size-4 transition-transform duration-200', !on && '-rotate-90')} />
         </Button>
 
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 items-center justify-start overflow-hidden px-1 text-sm font-medium text-primary-foreground/80"
+          className="h-7 items-center justify-start overflow-hidden px-2 text-sm font-semibold tracking-tight text-primary-foreground/90 transition-standard"
         >
           <span className="truncate">{label}</span>
         </Button>
@@ -48,15 +48,15 @@ export const WorkspaceSection = ({
               onClick={onNew}
               variant="ghost"
               size="sm"
-              className="ml-auto h-6 w-6 shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-opacity group-hover:opacity-100"
+              className="ml-auto h-7 w-7 shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
             >
-              <PlusIcon className="size-4" />
+              <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
             </Button>
           </Hint>
         )}
       </div>
 
-      {on && <div className="mt-1">{children}</div>}
+      {on && <div className="mt-2 space-y-1.5">{children}</div>}
     </div>
   );
 };

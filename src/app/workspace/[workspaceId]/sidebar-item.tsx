@@ -11,12 +11,12 @@ import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
 const sidebarItemVariants = cva(
-  'flex items-center gap-2 justify-start font-normal h-8 px-3 text-sm overflow-hidden rounded-md transition-all duration-200',
+  'flex items-center gap-3 justify-start font-medium h-10 px-4 text-sm overflow-hidden rounded-[10px] transition-standard',
   {
     variants: {
       variant: {
         default: 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1',
-        active: 'text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-inner',
+        active: 'text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm',
       },
     },
     defaultVariants: {
@@ -31,7 +31,6 @@ interface SidebarItemProps {
   id: string;
   href?: string;
   isActive?: boolean;
-  variant?: 'default' | 'active';
 }
 
 export const SidebarItem = ({
@@ -40,20 +39,19 @@ export const SidebarItem = ({
   id,
   href,
   isActive,
-  variant = 'default',
 }: SidebarItemProps) => {
   const workspaceId = useWorkspaceId();
 
   const content = (
     <div
       className={cn(
-        'group flex w-full cursor-pointer items-center gap-x-2 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200',
-        variant === 'active' || isActive
-          ? 'bg-primary-foreground/20 text-primary-foreground shadow-inner hover:bg-primary-foreground/30'
+        'group flex w-full cursor-pointer items-center gap-x-3 rounded-[10px] px-4 py-2.5 text-sm font-medium transition-standard',
+        isActive
+          ? 'bg-primary-foreground/20 text-primary-foreground shadow-sm hover:bg-primary-foreground/30'
           : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1'
       )}
     >
-      <Icon className="size-4 transition-transform duration-200 group-hover:scale-110" />
+      <Icon className="size-5 transition-transform duration-200 group-hover:scale-110" />
       <span className="truncate">{label}</span>
     </div>
   );

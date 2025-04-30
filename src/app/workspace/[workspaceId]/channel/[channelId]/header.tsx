@@ -137,14 +137,14 @@ export const Header = ({ channelName }: HeaderProps) => {
   }, []);
 
   return (
-    <nav className="flex h-[49px] items-center overflow-hidden border-b bg-primary text-primary-foreground shadow-md">
-      <div className="flex items-center px-4">
+    <nav className="flex h-16 items-center overflow-hidden border-b bg-primary text-primary-foreground shadow-md">
+      <div className="flex items-center px-6">
         <Dialog>
           <DialogTrigger asChild>
             <Button
               disabled={memberLoading}
               variant="ghost"
-              className="group w-auto overflow-hidden px-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+              className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
               size="sm"
             >
               <span className="truncate"># {channelName}</span>
@@ -224,11 +224,11 @@ export const Header = ({ channelName }: HeaderProps) => {
         </Dialog>
       </div>
 
-      <div className="min-w-[280px] max-w-[642px] shrink grow-[2] px-2">
+      <div className="min-w-[280px] max-w-[642px] shrink grow-[2] px-4">
         <Button
           onClick={() => setSearchOpen(true)}
           size="sm"
-          className="h-7 w-full justify-start bg-white/10 px-2 hover:bg-white/20 transition-standard border border-white/10 rounded-[10px]"
+          className="h-9 w-full justify-start bg-white/10 px-3 hover:bg-white/20 transition-standard border border-white/10 rounded-[10px]"
         >
           <Search className="mr-2 size-4 text-white" />
           <span className="text-xs text-white">Search {workspace?.name ?? 'workspace'}...</span>
@@ -263,7 +263,7 @@ export const Header = ({ channelName }: HeaderProps) => {
         </CommandDialog>
       </div>
 
-      <div className="ml-auto flex flex-1 items-center justify-end gap-x-2 px-4">
+      <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
         <Button
           variant="ghost"
           size="sm"

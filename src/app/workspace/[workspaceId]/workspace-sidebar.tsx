@@ -39,25 +39,25 @@ export const WorkspaceSidebar = () => {
   if (memberLoading || workspaceLoading || channelsLoading || membersLoading) {
     return (
       <div className="flex h-full flex-col items-center justify-center bg-tertiary">
-        <Loader className="size-5 animate-spin text-primary-foreground animate-pulse-subtle" />
+        <Loader className="size-6 animate-spin text-primary-foreground animate-pulse-subtle" />
       </div>
     );
   }
 
   if (!workspace || !member) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-tertiary">
-        <AlertTriangle className="size-5 text-primary-foreground animate-pulse-subtle" />
-        <p className="text-sm text-primary-foreground animate-fade-in">Workspace not found.</p>
+      <div className="flex h-full flex-col items-center justify-center gap-y-3 bg-tertiary">
+        <AlertTriangle className="size-6 text-primary-foreground animate-pulse-subtle" />
+        <p className="text-sm font-medium text-primary-foreground animate-fade-in">Workspace not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col gap-y-2 bg-tertiary transition-all duration-300">
+    <div className="flex h-full flex-col gap-y-2 bg-tertiary transition-standard">
       <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
 
-      <div className="mt-2 flex flex-col gap-1 px-2">
+      <div className="mt-4 flex flex-col gap-2 px-4">
         <SidebarItem
           label="Threads"
           icon={MessageSquareText}
@@ -82,7 +82,7 @@ export const WorkspaceSidebar = () => {
         >
           {channels.map((item) => (
             <SidebarItem
-              variant={channelId === item._id ? 'active' : 'default'}
+              isActive={channelId === item._id}
               key={item._id}
               id={`channels/${item._id}`}
               icon={HashIcon}
@@ -104,7 +104,7 @@ export const WorkspaceSidebar = () => {
               id={item._id}
               label={item.user.name}
               image={item.user.image}
-              variant={item._id === memberId ? 'active' : 'default'}
+              isActive={item._id === memberId}
             />
           ))}
         </WorkspaceSection>
