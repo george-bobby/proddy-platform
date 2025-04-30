@@ -3,12 +3,9 @@
 import {
   AlertTriangle,
   HashIcon,
-  Home,
   Loader,
   MessageSquareText,
-  MoreHorizontal,
   SendHorizonal,
-  Mail,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -21,7 +18,6 @@ import { useChannelId } from '@/hooks/use-channel-id';
 import { useMemberId } from '@/hooks/use-member-id';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
-import { SidebarButton } from './sidebar-button';
 import { SidebarItem } from './sidebar-item';
 import { UserItem } from './user-item';
 import { WorkspaceHeader } from './workspace-header';
@@ -42,26 +38,26 @@ export const WorkspaceSidebar = () => {
 
   if (memberLoading || workspaceLoading || channelsLoading || membersLoading) {
     return (
-      <div className="flex h-full flex-col items-center justify-center bg-[#5E2C5F]">
-        <Loader className="size-5 animate-spin text-white" />
+      <div className="flex h-full flex-col items-center justify-center bg-primary/90 dark:bg-primary/80">
+        <Loader className="size-5 animate-spin text-primary-foreground" />
       </div>
     );
   }
 
   if (!workspace || !member) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-[#5E2C5F]">
-        <AlertTriangle className="size-5 text-white" />
-        <p className="text-sm text-white">Workspace not found.</p>
+      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-primary/90 dark:bg-primary/80">
+        <AlertTriangle className="size-5 text-primary-foreground" />
+        <p className="text-sm text-primary-foreground">Workspace not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col gap-y-2 bg-[#5E2C5F]">
+    <div className="flex h-full flex-col gap-y-2 bg-primary/90 dark:bg-primary/80">
       <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
 
-      <div className="mt-3 flex flex-col px-2 gap-1">
+      <div className="mt-2 flex flex-col gap-1 px-2">
         <SidebarItem
           label="Threads"
           icon={MessageSquareText}
@@ -78,13 +74,13 @@ export const WorkspaceSidebar = () => {
         />
       </div>
 
-      {channels && channels.length !== 0 && (
+      {channels && channels.length > 0 && (
         <WorkspaceSection
           label="Channels"
           hint="New Channel"
           onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
         >
-          {channels?.map((item) => (
+          {channels.map((item) => (
             <SidebarItem
               variant={channelId === item._id ? 'active' : 'default'}
               key={item._id}
@@ -96,13 +92,13 @@ export const WorkspaceSidebar = () => {
         </WorkspaceSection>
       )}
 
-      {members && members.length !== 0 && (
+      {members && members.length > 0 && (
         <WorkspaceSection
           label="Members"
           hint="New Direct Message"
           onNew={member.role === 'admin' ? () => { } : undefined}
         >
-          {members?.map((item) => (
+          {members.map((item) => (
             <UserItem
               key={item._id}
               id={item._id}
