@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  CalendarIcon,
   HashIcon,
   Loader,
   MessageSquareText,
@@ -71,6 +72,13 @@ export const WorkspaceSidebar = () => {
           id="outbox"
           href={`/workspace/${workspaceId}/outbox`}
           isActive={pathname.includes('/outbox')}
+        />
+        <SidebarItem
+          label="Calendar"
+          icon={CalendarIcon}
+          id="calendar"
+          href={`/workspace/${workspaceId}/calendar`}
+          isActive={pathname.includes('/calendar')}
         />
       </div>
 

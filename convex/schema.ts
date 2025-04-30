@@ -35,6 +35,10 @@ const schema = defineSchema({
     parentMessageId: v.optional(v.id('messages')),
     conversationId: v.optional(v.id('conversations')),
     updatedAt: v.optional(v.number()),
+    calendarEvent: v.optional(v.object({
+      date: v.number(), // timestamp for the event date
+      time: v.optional(v.string()), // optional time string
+    })),
   })
     .index('by_workspace_id', ['workspaceId'])
     .index('by_member_id', ['memberId'])
@@ -42,6 +46,18 @@ const schema = defineSchema({
     .index('by_conversation_id', ['conversationId'])
     .index('by_parent_message_id', ['parentMessageId'])
     .index('by_channel_id_parent_message_id_conversation_id', ['channelId', 'parentMessageId', 'conversationId']),
+  calendarEvents: defineTable({
+    title: v.string(),
+    date: v.number(), // timestamp for the event date
+    time: v.optional(v.string()), // optional time string
+    messageId: v.id('messages'),
+    memberId: v.id('members'),
+    workspaceId: v.id('workspaces'),
+  })
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_date', ['date'])
+    .index('by_message_id', ['messageId'])
+    .index('by_member_id', ['memberId']),
   reactions: defineTable({
     workspaceId: v.id('workspaces'),
     messageId: v.id('messages'),

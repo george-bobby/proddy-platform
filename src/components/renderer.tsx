@@ -3,9 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 
 interface RendererProps {
   value: string;
+  calendarEvent?: {
+    date: number;
+    time?: string;
+  };
 }
 
-const Renderer = ({ value }: RendererProps) => {
+const Renderer = ({ value, calendarEvent }: RendererProps) => {
   const [isEmpty, setIsEmpty] = useState(false);
   const rendererRef = useRef<HTMLDivElement>(null);
 
@@ -31,12 +35,59 @@ const Renderer = ({ value }: RendererProps) => {
 
     setIsEmpty(isEmpty);
 
-    container.innerHTML = quill.root.innerHTML;
+    // If this message has a calendar event, remove date/time from the displayed content
+    if (calendarEvent) {
+      // First, get the text content
+      const textContent = quill.getText();
+
+      // Get the date in various formats to remove from text
+      const dateObj = new Date(calendarEvent.date);
+      const dateStr = dateObj.toLocaleDateString();
+      const timeStr = calendarEvent.time || '';
+
+      // Create different date format variations to match what might be in the text
+      const dateFormats = [
+        dateStr,
+        dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
+        dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+        `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`,
+        `${dateObj.getMonth() + 1}-${dateObj.getDate()}-${dateObj.getFullYear()}`
+      ];
+
+      // Create time variations
+      const timeVariations = timeStr ? [
+        ` at ${timeStr}`,
+        ` ${timeStr}`,
+        `, ${timeStr}`
+      ] : [''];
+
+      // Remove date/time patterns from the text content
+      let cleanedText = textContent;
+      for (const dateFormat of dateFormats) {
+        for (const timeVariation of timeVariations) {
+          const pattern = dateFormat + timeVariation;
+          cleanedText = cleanedText.replace(pattern, '');
+        }
+      }
+
+      // Clean up any double spaces left after removal
+      cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
+
+      // Set the cleaned text back to the quill instance
+      quill.setText(cleanedText);
+    }
+
+    // Get the HTML content after cleaning
+    let htmlContent = quill.root.innerHTML;
+
+    container.innerHTML = htmlContent;
 
     return () => {
       if (container) container.innerHTML = '';
     };
-  }, [value]);
+  }, [value, calendarEvent]);
 
   if (isEmpty) return null;
 
