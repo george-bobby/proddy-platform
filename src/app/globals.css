@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* Colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -30,9 +31,23 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.75rem;
+
+    /* Border Radius */
+    --radius: 0.625rem; /* 10px */
+
+    /* Animation Durations */
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   .dark {
+    /* Colors */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -59,6 +74,12 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Shadows for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -134,15 +155,15 @@
 
   /* Animation Utilities */
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-in-out;
+    animation: fadeIn var(--duration-normal) ease-in-out;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.3s ease-in-out;
+    animation: slideUp var(--duration-normal) ease-in-out;
   }
 
   .animate-slide-down {
-    animation: slideDown 0.3s ease-in-out;
+    animation: slideDown var(--duration-normal) ease-in-out;
   }
 
   .animate-pulse-subtle {
@@ -153,25 +174,58 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  /* Hover Effects */
   .hover-scale {
-    transition: transform 0.2s ease-in-out;
+    transition: transform var(--duration-normal) ease-in-out;
   }
 
   .hover-scale:hover {
     transform: scale(1.05);
   }
 
+  .hover-rotate {
+    transition: transform var(--duration-normal) ease-in-out;
+  }
+
+  .hover-rotate:hover {
+    transform: rotate(5deg);
+  }
+
+  .hover-translate-x {
+    transition: transform var(--duration-normal) ease-in-out;
+  }
+
+  .hover-translate-x:hover {
+    transform: translateX(4px);
+  }
+
+  /* Glass Effects */
   .glass-effect {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
   }
 
   .glass-card {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius);
+  }
+
+  /* Consistent Transitions */
+  .transition-standard {
+    transition: all var(--duration-normal) ease-in-out;
+  }
+
+  .transition-fast {
+    transition: all var(--duration-fast) ease-in-out;
+  }
+
+  .transition-slow {
+    transition: all var(--duration-slow) ease-in-out;
   }
 }
 
@@ -187,7 +241,7 @@
 
 @keyframes slideUp {
   from {
-    transform: translateY(20px);
+    transform: translateY(10px);
     opacity: 0;
   }
   to {
@@ -198,7 +252,7 @@
 
 @keyframes slideDown {
   from {
-    transform: translateY(-20px);
+    transform: translateY(-10px);
     opacity: 0;
   }
   to {
@@ -213,7 +267,7 @@
     opacity: 1;
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.9;
   }
 }
 
@@ -222,7 +276,7 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
   100% {
     transform: translateY(0px);

@@ -68,7 +68,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                 className="group flex items-center gap-2 overflow-hidden p-1.5 text-primary-foreground hover:bg-primary-foreground/10 transition-all duration-200"
                 size="sm"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-primary to-tertiary text-primary-foreground shadow-md transition-all duration-300 group-hover:shadow-lg">
+                <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
                   {workspace.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col items-start">
@@ -81,7 +81,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
 
             <DropdownMenuContent side="bottom" align="start" className="w-64">
               <DropdownMenuItem className="cursor-pointer capitalize">
-                <div className="relative mr-2 flex size-9 items-center justify-center overflow-hidden rounded-md bg-gradient-to-br from-primary to-tertiary text-xl font-semibold text-primary-foreground shadow-md">
+                <div className="relative mr-2 flex size-9 items-center justify-center overflow-hidden rounded-[10px] bg-primary text-xl font-semibold text-primary-foreground shadow-md">
                   {workspace.name.charAt(0).toUpperCase()}
                 </div>
 
@@ -97,7 +97,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                 className="cursor-pointer py-2 flex items-center gap-2 group"
                 onClick={() => setOpen(true)}
               >
-                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 transition-all duration-200 group-hover:bg-primary/20">
+                <div className="flex h-5 w-5 items-center justify-center rounded-[6px] bg-primary/10 transition-standard group-hover:bg-primary/20">
                   <RefreshCw className="size-3 text-primary transition-transform duration-200 group-hover:rotate-45" />
                 </div>
                 <span>Switch workspace</span>
@@ -111,7 +111,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                     className="cursor-pointer py-2 flex items-center gap-2 group"
                     onClick={() => setInviteOpen(true)}
                   >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 transition-all duration-200 group-hover:bg-primary/20">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-[6px] bg-primary/10 transition-standard group-hover:bg-primary/20">
                       <Plus className="size-3 text-primary transition-transform duration-200 group-hover:scale-125" />
                     </div>
                     <span>Invite people to {workspace.name}</span>
@@ -123,7 +123,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                     className="cursor-pointer py-2 flex items-center gap-2 group"
                     onClick={() => setPreferencesOpen(true)}
                   >
-                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 transition-all duration-200 group-hover:bg-primary/20">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-[6px] bg-primary/10 transition-standard group-hover:bg-primary/20">
                       <SquarePen className="size-3 text-primary transition-transform duration-200 group-hover:rotate-12" />
                     </div>
                     <span>Preferences</span>
@@ -145,9 +145,9 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   <button
                     key={item._id}
                     onClick={() => onWorkspaceClick(item._id)}
-                    className="flex w-full cursor-pointer items-center gap-x-3 rounded-lg border bg-card px-4 py-2.5 hover:bg-accent/10 transition-all duration-200 hover:translate-x-1"
+                    className="flex w-full cursor-pointer items-center gap-x-3 rounded-[10px] border bg-card px-4 py-2.5 hover:bg-accent/10 transition-standard hover-translate-x"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-tertiary text-primary-foreground shadow-md transition-all duration-300 hover:shadow-lg">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard hover:shadow-lg">
                       {item.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex flex-col items-start">
@@ -157,7 +157,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                       )}
                     </div>
                     {item._id === workspace._id && (
-                      <div className="ml-auto rounded-full bg-gradient-to-r from-primary/20 to-tertiary/20 px-2 py-0.5 text-xs font-medium text-primary shadow-sm animate-pulse-subtle">
+                      <div className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary shadow-sm">
                         Active
                       </div>
                     )}
@@ -170,9 +170,9 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                       setOpen(false);
                       setCreateOpen(true);
                     }}
-                    className="flex w-full cursor-pointer items-center gap-x-3 rounded-lg border border-dashed bg-card/50 px-4 py-2.5 hover:bg-accent/10 transition-all duration-200 hover:translate-x-1"
+                    className="flex w-full cursor-pointer items-center gap-x-3 rounded-[10px] border border-dashed bg-card/50 px-4 py-2.5 hover:bg-accent/10 transition-standard hover-translate-x"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary/80 to-tertiary/80 text-primary-foreground shadow-md transition-all duration-300 hover:shadow-lg">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard hover:shadow-lg">
                       <Plus className="size-4 transition-transform duration-200 hover:scale-125" />
                     </div>
                     <p className="text-sm font-semibold">Create New Workspace</p>

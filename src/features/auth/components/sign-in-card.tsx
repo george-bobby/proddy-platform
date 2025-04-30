@@ -40,7 +40,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
   };
 
   return (
-    <Card className="size-full p-8 shadow-xl border-opacity-30 backdrop-blur-sm animate-slide-up">
+    <Card className="size-full p-8 shadow-xl border-opacity-30 backdrop-blur-sm animate-slide-up rounded-[10px]">
       <CardHeader className="px-0 pt-0">
         <CardTitle>Login to continue</CardTitle>
         <CardDescription>Use your email or another service to continue.</CardDescription>
@@ -73,7 +73,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             required
           />
 
-          <Button type="submit" className="w-full transition-all duration-300 hover:shadow-lg" size="lg" disabled={pending}>
+          <Button type="submit" className="w-full transition-standard hover:shadow-lg" size="lg" disabled={pending}>
             Continue
           </Button>
         </form>
@@ -86,7 +86,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             onClick={() => handleOAuthSignIn('google')}
             variant="outline"
             size="lg"
-            className="relative w-full transition-all duration-300 hover:shadow-md group"
+            className="relative w-full transition-standard hover:shadow-md group rounded-[10px]"
           >
             <FcGoogle className="absolute left-2.5 top-3 size-5 transition-transform duration-200 group-hover:scale-110" />
             Continue with Google
@@ -97,7 +97,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             onClick={() => handleOAuthSignIn('github')}
             variant="outline"
             size="lg"
-            className="relative w-full transition-all duration-300 hover:shadow-md group"
+            className="relative w-full transition-standard hover:shadow-md group rounded-[10px]"
           >
             <FaGithub className="absolute left-2.5 top-3 size-5 transition-transform duration-200 group-hover:scale-110" />
             Continue with GitHub

@@ -1,10 +1,12 @@
+'use client';
+
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> { }
+export interface ConsistentInputProps extends React.InputHTMLAttributes<HTMLInputElement> { }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const ConsistentInput = React.forwardRef<HTMLInputElement, ConsistentInputProps>(
   ({ className, type, ...props }, ref) => {
     return (
       <input
@@ -19,6 +21,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
-Input.displayName = 'Input';
+ConsistentInput.displayName = 'ConsistentInput';
 
-export { Input };
+export { ConsistentInput };

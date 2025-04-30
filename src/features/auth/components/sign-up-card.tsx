@@ -61,7 +61,7 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
   };
 
   return (
-    <Card className="size-full p-8 shadow-xl border-opacity-30 backdrop-blur-sm animate-slide-up">
+    <Card className="size-full p-8 shadow-xl border-opacity-30 backdrop-blur-sm animate-slide-up rounded-[10px]">
       <CardHeader className="px-0 pt-0">
         <CardTitle>Sign up to continue</CardTitle>
         <CardDescription>Use your email or another service to continue.</CardDescription>
