@@ -94,8 +94,8 @@ function pruneCache() {
 export async function POST(req: NextRequest) {
   try {
     // Check for API key
-    if (!process.env.NEXT_PUBLIC_GEMINI_API) {
-      console.error('Missing NEXT_PUBLIC_GEMINI_API');
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      console.error('Missing GOOGLE_GENERATIVE_AI_API_KEY');
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
