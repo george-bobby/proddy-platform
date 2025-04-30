@@ -7,9 +7,12 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
+import { DirectMessageSuggestions } from '@/components/direct-message-suggestions';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { useGetMember } from '@/features/members/api/use-get-member';
+import { useMemberId } from '@/hooks/use-member-id';
 
 const Editor = dynamic(() => import('@/components/editor'), {
   ssr: false,
@@ -39,6 +42,8 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
   const innerRef = useRef<Quill | null>(null);
 
   const workspaceId = useWorkspaceId();
+  const memberId = useMemberId();
+  const { data: member } = useGetMember({ id: memberId });
 
   const { mutate: createMessage } = useCreateMessage();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
@@ -89,8 +94,28 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
     }
   };
 
+  const handleSuggestionSelect = (suggestion: string) => {
+    if (innerRef.current) {
+      // Insert the suggestion at the current cursor position
+      const quill = innerRef.current;
+      const range = quill.getSelection();
+      const position = range ? range.index : 0;
+
+      // Insert the suggestion text
+      quill.insertText(position, suggestion);
+
+      // Set focus back to the editor
+      quill.focus();
+    }
+  };
+
   return (
     <div className="w-full px-5">
+      <DirectMessageSuggestions
+        onSelectSuggestion={handleSuggestionSelect}
+        conversationId={conversationId}
+        memberName={member?.user?.name}
+      />
       <Editor
         placeholder={placeholder}
         key={editorKey}

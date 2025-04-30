@@ -10,6 +10,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { siteConfig } from '@/config';
 
 import './globals.css';
+import '../styles/consistent-styles.css';
 
 const inter = Inter({
   subsets: ['latin'],

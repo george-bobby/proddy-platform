@@ -1,0 +1,127 @@
+/**
+ * Consistent Styling Patterns
+ * This file contains reusable CSS classes for consistent styling across the application
+ */
+
+/* Consistent Card Styling */
+.consistent-card {
+  @apply transition-standard rounded-[10px] border bg-card text-card-foreground shadow-md hover:shadow-lg;
+}
+
+/* Consistent Button Styling */
+.consistent-button {
+  @apply transition-standard rounded-[10px] shadow-sm hover:shadow-md active:scale-[0.98];
+}
+
+.consistent-button-primary {
+  @apply consistent-button bg-primary text-primary-foreground hover:bg-primary/90;
+}
+
+.consistent-button-secondary {
+  @apply consistent-button bg-secondary text-secondary-foreground hover:bg-secondary/80;
+}
+
+.consistent-button-tertiary {
+  @apply consistent-button bg-tertiary text-tertiary-foreground hover:bg-tertiary/90;
+}
+
+.consistent-button-ghost {
+  @apply consistent-button bg-transparent hover:bg-accent/50;
+}
+
+/* Consistent Input Styling */
+.consistent-input {
+  @apply transition-standard rounded-[10px] border border-input bg-background px-3 py-2 text-sm shadow-sm hover:border-primary/30 focus:shadow-md;
+}
+
+/* Consistent Dialog/Modal Styling */
+.consistent-dialog {
+  @apply transition-standard rounded-[10px] border border-opacity-30 bg-background shadow-xl backdrop-blur-sm;
+}
+
+/* Consistent Dropdown Styling */
+.consistent-dropdown {
+  @apply transition-standard rounded-[10px] border border-opacity-30 bg-popover shadow-lg backdrop-blur-sm;
+}
+
+/* Consistent Hover Effects */
+.hover-scale {
+  @apply transition-standard hover:scale-105;
+}
+
+.hover-translate-x {
+  @apply transition-standard hover:translate-x-1;
+}
+
+.hover-rotate {
+  @apply transition-standard hover:rotate-3;
+}
+
+/* Professional Background Styles */
+.bg-primary-solid {
+  @apply bg-primary;
+}
+
+.bg-secondary-solid {
+  @apply bg-secondary;
+}
+
+.bg-tertiary-solid {
+  @apply bg-tertiary;
+}
+
+/* Subtle Gradient Backgrounds (used sparingly) */
+.gradient-primary-subtle {
+  @apply bg-gradient-to-r from-primary to-primary/90;
+}
+
+.gradient-accent-subtle {
+  @apply bg-accent/80;
+}
+
+/* Professional UI Elements */
+.glass-effect {
+  @apply rounded-[10px] border border-white/20 bg-white/10 backdrop-blur-md;
+}
+
+.professional-header {
+  @apply bg-primary text-primary-foreground shadow-md;
+}
+
+.professional-card {
+  @apply rounded-[10px] border bg-card text-card-foreground shadow-md;
+}
+
+.professional-button {
+  @apply transition-standard rounded-[10px] bg-primary text-primary-foreground shadow-sm hover:shadow-md;
+}
+
+/* Consistent Animation Classes */
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-normal) ease-in-out;
+}
+
+.animate-slide-down {
+  animation: slideDown var(--duration-normal) ease-in-out;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSlight 2s infinite;
+}
+
+/* Consistent Shadow Classes */
+.shadow-hover {
+  @apply transition-standard shadow-md hover:shadow-lg;
+}
+
+.shadow-card {
+  @apply transition-standard shadow-md hover:shadow-lg;
+}
+
+.shadow-button {
+  @apply transition-standard shadow-sm hover:shadow-md;
+}

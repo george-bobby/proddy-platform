@@ -1,8 +1,7 @@
 'use client';
 
-import { PlusIcon } from 'lucide-react';
+import { ChevronDown, PlusIcon } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
-import { FaCaretDown } from 'react-icons/fa';
 import { useToggle } from 'react-use';
 
 import { Hint } from '@/components/hint';
@@ -24,20 +23,21 @@ export const WorkspaceSection = ({
   const [on, toggle] = useToggle(true);
 
   return (
-    <div className="mt-3 flex flex-col px-2">
-      <div className="group flex items-center px-3.5">
+    <div className="mt-4 flex flex-col px-4">
+      <div className="group flex items-center px-2 mb-2">
         <Button
           onClick={toggle}
-          variant="transparent"
-          className="size-6 shrink-0 p-0.5 text-sm text-[#F9EDFFCC]"
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 shrink-0 p-0 text-primary-foreground/80 rounded-[8px] transition-standard hover:bg-primary-foreground/10"
         >
-          <FaCaretDown className={cn('size-4 transition-transform', !on && '-rotate-90')} />
+          <ChevronDown className={cn('size-4 transition-transform duration-200', !on && '-rotate-90')} />
         </Button>
 
         <Button
-          variant="transparent"
+          variant="ghost"
           size="sm"
-          className="group h-[28px] items-center justify-start overflow-hidden px-1.5 text-sm text-[#F9EDFFCC]"
+          className="h-7 items-center justify-start overflow-hidden px-2 text-sm font-semibold tracking-tight text-primary-foreground/90 transition-standard"
         >
           <span className="truncate">{label}</span>
         </Button>
@@ -46,17 +46,17 @@ export const WorkspaceSection = ({
           <Hint label={hint} side="top" align="center">
             <Button
               onClick={onNew}
-              variant="transparent"
-              size="iconSm"
-              className="ml-auto size-6 shrink-0 p-0.5 text-sm text-[#F9EDFFCC] opacity-0 transition-opacity group-hover:opacity-100"
+              variant="ghost"
+              size="sm"
+              className="ml-auto h-7 w-7 shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
             >
-              <PlusIcon className="size-5" />
+              <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
             </Button>
           </Hint>
         )}
       </div>
 
-      {on && children}
+      {on && <div className="mt-2 space-y-1.5">{children}</div>}
     </div>
   );
 };

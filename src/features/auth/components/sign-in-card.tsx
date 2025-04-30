@@ -40,7 +40,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
   };
 
   return (
-    <Card className="size-full p-8">
+    <Card className="size-full p-8 shadow-xl border-opacity-30 backdrop-blur-sm animate-slide-up rounded-[10px]">
       <CardHeader className="px-0 pt-0">
         <CardTitle>Login to continue</CardTitle>
         <CardDescription>Use your email or another service to continue.</CardDescription>
@@ -73,7 +73,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             required
           />
 
-          <Button type="submit" className="w-full" size="lg" disabled={pending}>
+          <Button type="submit" className="w-full transition-standard hover:shadow-lg" size="lg" disabled={pending}>
             Continue
           </Button>
         </form>
@@ -86,9 +86,9 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             onClick={() => handleOAuthSignIn('google')}
             variant="outline"
             size="lg"
-            className="relative w-full"
+            className="relative w-full transition-standard hover:shadow-md group rounded-[10px]"
           >
-            <FcGoogle className="absolute left-2.5 top-3 size-5" />
+            <FcGoogle className="absolute left-2.5 top-3 size-5 transition-transform duration-200 group-hover:scale-110" />
             Continue with Google
           </Button>
 
@@ -97,9 +97,9 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
             onClick={() => handleOAuthSignIn('github')}
             variant="outline"
             size="lg"
-            className="relative w-full"
+            className="relative w-full transition-standard hover:shadow-md group rounded-[10px]"
           >
-            <FaGithub className="absolute left-2.5 top-3 size-5" />
+            <FaGithub className="absolute left-2.5 top-3 size-5 transition-transform duration-200 group-hover:scale-110" />
             Continue with GitHub
           </Button>
         </div>
@@ -109,7 +109,7 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
           <button
             disabled={pending}
             onClick={() => setState('signUp')}
-            className="cursor-pointer font-medium text-sky-700 hover:underline disabled:pointer-events-none disabled:opacity-50"
+            className="cursor-pointer font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-primary/80"
           >
             Sign up
           </button>

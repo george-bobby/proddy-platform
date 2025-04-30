@@ -8,28 +8,32 @@ import type { Id } from '@/../convex/_generated/dataModel';
 import { useGetUserMessages } from '@/features/messages/api/use-get-user-messages';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
+type MessageContext = {
+  name: string;
+  type: 'channel' | 'conversation' | 'unknown';
+  id: Id<'channels'> | Id<'conversations'>;
+  memberId?: Id<'members'>;
+};
+
 interface Message {
   _id: Id<'messages'>;
   _creationTime: number;
   body: string;
   memberId: Id<'members'>;
-}
-
-interface Channel {
-  _id: Id<'channels'>;
-  name: string;
-}
-
-interface MessagesByChannel {
-  channel: Channel;
-  messages: Message[];
+  image?: Id<'_storage'>;
+  channelId?: Id<'channels'>;
+  conversationId?: Id<'conversations'>;
+  parentMessageId?: Id<'messages'>;
+  workspaceId: Id<'workspaces'>;
+  updatedAt?: number;
+  context: MessageContext;
 }
 
 export default function OutboxPage() {
   const workspaceId = useWorkspaceId();
-  const messagesByChannel = useGetUserMessages();
+  const messages = useGetUserMessages() as Message[] | undefined;
 
-  if (!messagesByChannel) {
+  if (!messages) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-white">
         <Loader className="size-12 animate-spin text-muted-foreground" />
@@ -38,7 +42,7 @@ export default function OutboxPage() {
     );
   }
 
-  if (!messagesByChannel.length) {
+  if (!messages.length) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-white">
         <Mail className="size-12 text-muted-foreground" />
@@ -48,6 +52,28 @@ export default function OutboxPage() {
     );
   }
 
+  const parseMessageBody = (body: string) => {
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed.ops && parsed.ops[0] && parsed.ops[0].insert) {
+        return parsed.ops[0].insert;
+      }
+    } catch (e) {
+      // If parsing fails, return the original body
+      return body;
+    }
+    return body;
+  };
+
+  const getMessageUrl = (message: Message) => {
+    if (message.context.type === 'channel') {
+      return `/workspace/${workspaceId}/channel/${message.context.id}`;
+    } else if (message.context.type === 'conversation' && message.context.memberId) {
+      return `/workspace/${workspaceId}/member/${message.context.memberId}`;
+    }
+    return '#';
+  };
+
   return (
     <div className="flex h-full flex-col gap-y-4 bg-white p-4">
       <div className="flex items-center gap-x-2">
@@ -55,30 +81,23 @@ export default function OutboxPage() {
         <h2 className="text-xl font-semibold">Outbox</h2>
       </div>
 
-      <div className="flex flex-col gap-y-6">
-        {messagesByChannel.map(({ channel, messages }: MessagesByChannel) => (
-          <div key={channel._id} className="flex flex-col gap-y-2">
-            <Link
-              href={`/workspace/${workspaceId}/channel/${channel._id}`}
-              className="text-sm font-medium text-muted-foreground hover:underline"
-            >
-              #{channel.name}
-            </Link>
-
-            <div className="flex flex-col gap-y-2">
-              {messages.map((message: Message) => (
-                <div
-                  key={message._id}
-                  className="flex flex-col gap-y-1 rounded-lg border bg-white p-3 shadow-sm"
-                >
-                  <p className="text-sm">{message.body}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(message._creationTime), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-              ))}
+      <div className="flex flex-col gap-y-4">
+        {messages.map((message) => (
+          <Link
+            key={message._id}
+            href={getMessageUrl(message)}
+            className="flex flex-col gap-y-1 rounded-lg border bg-white p-3 shadow-sm hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-x-2">
+              <span className="text-sm font-medium text-muted-foreground">
+                {message.context.type === 'channel' ? '#' : ''}{message.context.name}
+              </span>
             </div>
-          </div>
+            <p className="text-sm">{parseMessageBody(message.body)}</p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(message._creationTime), 'MMM d, yyyy h:mm a')}
+            </p>
+          </Link>
         ))}
       </div>
     </div>

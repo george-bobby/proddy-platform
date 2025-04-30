@@ -7,6 +7,7 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
+import { MessageSuggestions } from '@/components/message-suggestions';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
 import { useChannelId } from '@/hooks/use-channel-id';
@@ -23,6 +24,7 @@ const Editor = dynamic(() => import('@/components/editor'), {
 
 interface ChatInputProps {
   placeholder?: string;
+  channelName?: string;
 }
 
 type CreateMessageValues = {
@@ -32,7 +34,7 @@ type CreateMessageValues = {
   image?: Id<'_storage'>;
 };
 
-export const ChatInput = ({ placeholder }: ChatInputProps) => {
+export const ChatInput = ({ placeholder, channelName }: ChatInputProps) => {
   const [editorKey, setEditorKey] = useState(0);
   const [isPending, setIsPending] = useState(false);
 
@@ -61,7 +63,7 @@ export const ChatInput = ({ placeholder }: ChatInputProps) => {
           {},
           {
             throwError: true,
-          }
+          },
         );
 
         if (!url) throw new Error('URL not found.');
@@ -90,15 +92,25 @@ export const ChatInput = ({ placeholder }: ChatInputProps) => {
     }
   };
 
+  const handleSuggestionSelect = (suggestion: string) => {
+    if (innerRef.current) {
+      // Insert the suggestion at the current cursor position
+      const quill = innerRef.current;
+      const range = quill.getSelection();
+      const position = range ? range.index : 0;
+
+      // Insert the suggestion text
+      quill.insertText(position, suggestion);
+
+      // Set focus back to the editor
+      quill.focus();
+    }
+  };
+
   return (
     <div className="w-full px-5">
-      <Editor
-        placeholder={placeholder}
-        key={editorKey}
-        onSubmit={handleSubmit}
-        disabled={isPending}
-        innerRef={innerRef}
-      />
+      <MessageSuggestions onSelectSuggestion={handleSuggestionSelect} channelName={channelName} />
+      <Editor placeholder={placeholder} key={editorKey} onSubmit={handleSubmit} disabled={isPending} innerRef={innerRef} />
     </div>
   );
 };
