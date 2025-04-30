@@ -110,6 +110,7 @@ export const MessageList = ({
                 setEditingId={setEditingId}
                 isCompact={isCompact}
                 hideThreadButton={variant === 'thread'}
+                calendarEvent={message.calendarEvent}
               />
             );
           })}

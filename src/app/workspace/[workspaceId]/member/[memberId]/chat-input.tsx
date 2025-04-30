@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { DirectMessageSuggestions } from '@/components/direct-message-suggestions';
+import { useCreateCalendarEvent } from '@/features/calendar/api/use-create-calendar-event';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
@@ -33,6 +34,10 @@ type CreateMessageValues = {
   workspaceId: Id<'workspaces'>;
   body: string;
   image?: Id<'_storage'>;
+  calendarEvent?: {
+    date: number;
+    time?: string;
+  };
 };
 
 export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
@@ -47,8 +52,20 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
 
   const { mutate: createMessage } = useCreateMessage();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
+  const { mutate: createCalendarEvent } = useCreateCalendarEvent();
 
-  const handleSubmit = async ({ body, image }: { body: string; image: File | null }) => {
+  const handleSubmit = async ({
+    body,
+    image,
+    calendarEvent
+  }: {
+    body: string;
+    image: File | null;
+    calendarEvent?: {
+      date: Date;
+      time?: string;
+    };
+  }) => {
     try {
       setIsPending(true);
       innerRef.current?.enable(false);
@@ -59,6 +76,14 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
         body,
         image: undefined,
       };
+
+      // Add calendar event if present
+      if (calendarEvent) {
+        values.calendarEvent = {
+          date: calendarEvent.date.getTime(),
+          time: calendarEvent.time,
+        };
+      }
 
       if (image) {
         const url = await generateUploadUrl(
@@ -83,7 +108,18 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
         values.image = storageId;
       }
 
-      await createMessage(values, { throwError: true });
+      const messageId = await createMessage(values, { throwError: true });
+
+      // Create calendar event in the calendar events table if needed
+      if (calendarEvent && messageId) {
+        await createCalendarEvent({
+          title: JSON.parse(body).ops[0].insert.substring(0, 50),
+          date: calendarEvent.date.getTime(),
+          time: calendarEvent.time,
+          messageId,
+          workspaceId,
+        });
+      }
 
       setEditorKey((prevKey) => prevKey + 1);
     } catch (error) {
