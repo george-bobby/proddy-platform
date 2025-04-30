@@ -19,20 +19,23 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { links } from '@/config';
+import { UserStatusIndicator } from '@/features/auth/components/user-status-indicator';
+import { UserButton } from '@/features/auth/components/user-button';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { UserButton } from '@/features/auth/components/user-button';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 interface HeaderProps {
   memberName?: string;
   memberImage?: string;
+  memberId?: Id<'members'>;
+  userId?: Id<'users'>;
   onClick?: () => void;
 }
 
-export const Header = ({ memberName = 'Member', memberImage, onClick }: HeaderProps) => {
+export const Header = ({ memberName = 'Member', memberImage, userId, onClick }: HeaderProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -73,10 +76,17 @@ export const Header = ({ memberName = 'Member', memberImage, onClick }: HeaderPr
           size="sm"
           onClick={onClick}
         >
-          <Avatar className="mr-3 size-7">
-            <AvatarImage src={memberImage} />
-            <AvatarFallback>{avatarFallback}</AvatarFallback>
-          </Avatar>
+          <div className="relative mr-3">
+            <Avatar className="size-7">
+              <AvatarImage src={memberImage} />
+              <AvatarFallback>{avatarFallback}</AvatarFallback>
+            </Avatar>
+            {userId && (
+              <div className="absolute -bottom-0.5 -right-0.5">
+                <UserStatusIndicator userId={userId} />
+              </div>
+            )}
+          </div>
 
           <span className="truncate">{memberName}</span>
           <FaChevronDown className="ml-2 size-2.5 transition-transform duration-200 group-hover:rotate-180" />

@@ -36,6 +36,7 @@ export const Conversation = ({ id }: ConversationProps) => {
       <Header
         memberName={member?.user.name}
         memberImage={member?.user.image}
+        userId={member?.userId}
         onClick={() => onOpenProfile(memberId)}
       />
 

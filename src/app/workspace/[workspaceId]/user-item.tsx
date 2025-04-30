@@ -3,17 +3,19 @@ import Link from 'next/link';
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { UserStatusIndicator } from '@/features/auth/components/user-status-indicator';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
 interface UserItemProps {
   id: Id<'members'>;
+  userId?: Id<'users'>;
   label?: string;
   image?: string;
   isActive?: boolean;
 }
 
-export const UserItem = ({ id, label = 'Member', image, isActive = false }: UserItemProps) => {
+export const UserItem = ({ id, userId, label = 'Member', image, isActive = false }: UserItemProps) => {
   const workspaceId = useWorkspaceId();
   const avatarFallback = label.charAt(0).toUpperCase();
 
@@ -29,10 +31,17 @@ export const UserItem = ({ id, label = 'Member', image, isActive = false }: User
       size="sm"
       asChild>
       <Link href={`/workspace/${workspaceId}/member/${id}`}>
-        <Avatar className="mr-3 size-7 transition-transform duration-200 group-hover:scale-110">
-          <AvatarImage alt={label} src={image} />
-          <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
-        </Avatar>
+        <div className="relative mr-3">
+          <Avatar className="size-7 transition-transform duration-200 group-hover:scale-110">
+            <AvatarImage alt={label} src={image} />
+            <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+          </Avatar>
+          {userId && (
+            <div className="absolute -bottom-0.5 -right-0.5">
+              <UserStatusIndicator userId={userId} />
+            </div>
+          )}
+        </div>
         <span className="truncate text-sm">{label}</span>
       </Link>
     </Button>

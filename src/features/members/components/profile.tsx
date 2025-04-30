@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
+import { UserStatusIndicator } from '@/features/auth/components/user-status-indicator';
 import { useConfirm } from '@/hooks/use-confirm';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
@@ -168,7 +169,10 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
         </div>
 
         <div className="flex flex-col p-4">
-          <p className="text-xl font-bold">{member.user.name}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xl font-bold">{member.user.name}</p>
+            <UserStatusIndicator userId={member.userId} />
+          </div>
 
           {currentMember.role === 'admin' && currentMember._id !== memberId ? (
             <div className="mt-4 flex items-center gap-2">

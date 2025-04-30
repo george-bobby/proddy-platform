@@ -102,6 +102,7 @@ export const WorkspaceSidebar = () => {
             <UserItem
               key={item._id}
               id={item._id}
+              userId={item.userId}
               label={item.user.name}
               image={item.user.image}
               isActive={item._id === memberId}
