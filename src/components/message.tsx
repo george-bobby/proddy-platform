@@ -151,10 +151,10 @@ export const Message = ({
 
         <div
           className={cn(
-            'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
-            isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
+            'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-all duration-200 hover:shadow-md rounded-md',
+            isEditing && 'bg-secondary/20 hover:bg-secondary/20',
             isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
-            isSelected && 'bg-blue-50 hover:bg-blue-50/90',
+            isSelected && 'bg-primary/10 hover:bg-primary/10',
           )}
         >
           <div className="flex items-start gap-2">
@@ -181,7 +181,7 @@ export const Message = ({
                 <Renderer value={body} />
                 <Thumbnail url={image} />
 
-                {updatedAt ? <span className="text-xs text-muted-foreground">(edited)</span> : null}
+                {updatedAt ? <span className="text-xs text-muted-foreground italic animate-fade-in">(edited)</span> : null}
 
                 <Reactions data={reactions} onChange={handleReaction} />
                 <ThreadBar
@@ -218,10 +218,10 @@ export const Message = ({
 
       <div
         className={cn(
-          'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60',
-          isEditing && 'bg-[#f2c74433] hover:bg-[#f2c74433]',
+          'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-all duration-200 hover:shadow-md rounded-md',
+          isEditing && 'bg-secondary/20 hover:bg-secondary/20',
           isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-all duration-200',
-          isSelected && 'bg-blue-50 hover:bg-blue-50/90',
+          isSelected && 'bg-primary/10 hover:bg-primary/10',
         )}
       >
         <div className="flex items-start gap-2">
@@ -248,21 +248,21 @@ export const Message = ({
           ) : (
             <div className="flex w-full flex-col overflow-hidden">
               <div className="text-sm">
-                <button onClick={() => onOpenProfile(memberId)} className="font-bold text-primary hover:underline">
+                <button onClick={() => onOpenProfile(memberId)} className="font-bold text-primary hover:underline transition-all duration-200 hover:text-primary/80">
                   {authorName}
                 </button>
 
                 <span>&nbsp;&nbsp;</span>
 
                 <Hint label={formatFullTime(new Date(createdAt))}>
-                  <button className="text-xs text-muted-foreground hover:underline">{format(new Date(createdAt), 'h:mm a')}</button>
+                  <button className="text-xs text-muted-foreground hover:underline transition-all duration-200 hover:text-primary/50">{format(new Date(createdAt), 'h:mm a')}</button>
                 </Hint>
               </div>
 
               <Renderer value={body} />
               <Thumbnail url={image} />
 
-              {updatedAt ? <span className="text-xs text-muted-foreground">(edited)</span> : null}
+              {updatedAt ? <span className="text-xs text-muted-foreground italic animate-fade-in">(edited)</span> : null}
 
               <Reactions data={reactions} onChange={handleReaction} />
               <ThreadBar

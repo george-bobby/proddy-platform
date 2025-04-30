@@ -11,12 +11,12 @@ import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
 const sidebarItemVariants = cva(
-  'flex items-center gap-2 justify-start font-normal h-8 px-3 text-sm overflow-hidden rounded-md transition-colors',
+  'flex items-center gap-2 justify-start font-normal h-8 px-3 text-sm overflow-hidden rounded-md transition-all duration-200',
   {
     variants: {
       variant: {
-        default: 'text-primary-foreground/80 hover:bg-primary-foreground/10',
-        active: 'text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/20',
+        default: 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1',
+        active: 'text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-inner',
       },
     },
     defaultVariants: {
@@ -47,13 +47,13 @@ export const SidebarItem = ({
   const content = (
     <div
       className={cn(
-        'flex w-full cursor-pointer items-center gap-x-2 rounded-md px-2 py-1.5 text-sm font-medium transition',
+        'group flex w-full cursor-pointer items-center gap-x-2 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-200',
         variant === 'active' || isActive
-          ? 'bg-primary-foreground/20 text-primary-foreground'
-          : 'text-primary-foreground/80 hover:bg-primary-foreground/10'
+          ? 'bg-primary-foreground/20 text-primary-foreground shadow-inner hover:bg-primary-foreground/30'
+          : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1'
       )}
     >
-      <Icon className="size-4" />
+      <Icon className="size-4 transition-transform duration-200 group-hover:scale-110" />
       <span className="truncate">{label}</span>
     </div>
   );

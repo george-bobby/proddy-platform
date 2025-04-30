@@ -65,11 +65,11 @@ export const Header = ({ memberName = 'Member', memberImage, onClick }: HeaderPr
   }, []);
 
   return (
-    <nav className="flex h-[49px] items-center overflow-hidden border-b bg-[#481349]">
+    <nav className="flex h-[49px] items-center overflow-hidden border-b bg-gradient-to-r from-primary to-tertiary/90 backdrop-blur-sm shadow-md">
       <div className="flex items-center px-4">
         <Button
           variant="ghost"
-          className="w-auto overflow-hidden px-2 text-lg font-semibold text-white"
+          className="group w-auto overflow-hidden px-2 text-lg font-semibold text-white hover:bg-white/10 transition-all duration-200"
           size="sm"
           onClick={onClick}
         >
@@ -79,7 +79,7 @@ export const Header = ({ memberName = 'Member', memberImage, onClick }: HeaderPr
           </Avatar>
 
           <span className="truncate">{memberName}</span>
-          <FaChevronDown className="ml-2 size-2.5" />
+          <FaChevronDown className="ml-2 size-2.5 transition-transform duration-200 group-hover:rotate-180" />
         </Button>
       </div>
 
@@ -87,9 +87,9 @@ export const Header = ({ memberName = 'Member', memberImage, onClick }: HeaderPr
         <Button
           onClick={() => setSearchOpen(true)}
           size="sm"
-          className="h-7 w-full justify-start bg-accent/25 px-2 hover:bg-accent/25"
+          className="h-7 w-full justify-start bg-white/10 backdrop-blur-sm px-2 hover:bg-white/20 transition-all duration-200 border border-white/10"
         >
-          <Search className="mr-2 size-4 text-white" />
+          <Search className="mr-2 size-4 text-white animate-pulse-subtle" />
           <span className="text-xs text-white">Search {workspace?.name ?? 'workspace'}...</span>
           <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-90">
             <span className="text-xs">⌘</span>K

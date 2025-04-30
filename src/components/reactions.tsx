@@ -36,16 +36,16 @@ export const Reactions = ({ data, onChange }: ReactionsProps) => {
           <button
             onClick={() => onChange(reaction.value)}
             className={cn(
-              'flex h-6 items-center gap-x-1 rounded-full border border-transparent bg-slate-200/70 px-2 text-slate-800',
+              'flex h-6 items-center gap-x-1 rounded-full border border-transparent bg-slate-200/70 px-2 text-slate-800 transition-all duration-200 hover:bg-slate-200/90 hover:scale-105',
               reaction.memberIds.includes(currentMemberId) &&
-                'border-blue-500 bg-blue-100/70 text-white'
+              'border-primary bg-primary/10 text-primary hover:bg-primary/20'
             )}
           >
             {reaction.value}{' '}
             <span
               className={cn(
                 'text-xs font-semibold text-muted-foreground',
-                reaction.memberIds.includes(currentMemberId) && 'text-blue-500'
+                reaction.memberIds.includes(currentMemberId) && 'text-primary'
               )}
             >
               {reaction.count}
@@ -55,8 +55,8 @@ export const Reactions = ({ data, onChange }: ReactionsProps) => {
       ))}
 
       <EmojiPopover hint="Add a reaction" onEmojiSelect={onChange}>
-        <button className="flex h-7 items-center gap-x-1 rounded-full border border-transparent bg-slate-200/70 px-3 text-slate-800 hover:border-slate-500">
-          <MdOutlineAddReaction className="size-4" />
+        <button className="group flex h-7 items-center gap-x-1 rounded-full border border-transparent bg-slate-200/70 px-3 text-slate-800 hover:border-primary transition-all duration-200 hover:bg-slate-200/90 hover:scale-105">
+          <MdOutlineAddReaction className="size-4 transition-transform duration-200 group-hover:rotate-12" />
         </button>
       </EmojiPopover>
     </div>
