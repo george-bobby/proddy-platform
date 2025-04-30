@@ -692,3 +692,82 @@ export const getMessageBodies = query({
     }
   },
 });
+
+export const getRecentChannelMessages = query({
+  args: {
+    channelId: v.id('channels'),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const userId = await getAuthUserId(ctx);
+      if (!userId) {
+        return [];
+      }
+
+      const limit = args.limit || 10; // Default to 10 messages if not specified
+
+      // Get the most recent messages for this channel
+      const messages = await ctx.db
+        .query('messages')
+        .withIndex('by_channel_id', (q) => q.eq('channelId', args.channelId))
+        .filter((q) => q.eq(q.field('parentMessageId'), null)) // Exclude thread replies
+        .order('desc') // Most recent first
+        .take(limit);
+
+      if (messages.length === 0) return [];
+
+      // Extract all unique member IDs from messages
+      const memberIds = new Set(messages.map((msg) => msg.memberId));
+
+      // Fetch all members in a single batch
+      const members = await ctx.db
+        .query('members')
+        .filter((q) => q.or(...Array.from(memberIds).map((id) => q.eq(q.field('_id'), id))))
+        .collect();
+
+      // Create a map of member ID to member
+      const memberMap = new Map(members.map((member) => [member._id, member]));
+
+      // Extract all unique user IDs from members
+      const userIds = new Set(members.map((member) => member.userId));
+
+      // Fetch all users in a single batch
+      const users = await ctx.db
+        .query('users')
+        .filter((q) => q.or(...Array.from(userIds).map((id) => q.eq(q.field('_id'), id))))
+        .collect();
+
+      // Create a map of user ID to user
+      const userMap = new Map(users.map((user) => [user._id, user]));
+
+      // Map messages to the required format and reverse to get chronological order
+      const formattedMessages = messages
+        .map((message) => {
+          const member = memberMap.get(message.memberId);
+          if (!member) {
+            return null;
+          }
+
+          const user = userMap.get(member.userId);
+          if (!user) {
+            return null;
+          }
+
+          return {
+            id: message._id,
+            body: message.body,
+            authorName: user.name,
+            creationTime: message._creationTime,
+          };
+        })
+        .filter((msg): msg is NonNullable<typeof msg> => msg !== null)
+        .reverse(); // Reverse to get chronological order (oldest first)
+
+      return formattedMessages;
+    } catch (error) {
+      console.error('Error in getRecentChannelMessages:', error);
+      return [];
+    }
+  },
+});
