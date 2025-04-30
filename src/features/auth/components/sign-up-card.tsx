@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
 import type { SignInFlow } from '../types';
+import { useUserStatus } from '../api/use-user-status';
 
 interface SignUpCardProps {
   setState: (state: SignInFlow) => void;
@@ -17,6 +18,7 @@ interface SignUpCardProps {
 
 export const SignUpCard = ({ setState }: SignUpCardProps) => {
   const { signIn } = useAuthActions();
+  const { setActive, initializeUser } = useUserStatus();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +28,16 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
 
   const handleOAuthSignUp = (value: 'github' | 'google') => {
     setPending(true);
-    signIn(value).finally(() => setPending(false));
+    signIn(value)
+      .then(() => {
+        // Initialize user status first
+        return initializeUser();
+      })
+      .then(() => {
+        // Set user as active after successful registration
+        return setActive();
+      })
+      .finally(() => setPending(false));
   };
 
   const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,6 +65,14 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
     setPending(true);
     setError('');
     signIn('password', { name, email, password, flow: 'signUp' })
+      .then(() => {
+        // Initialize user status first
+        return initializeUser();
+      })
+      .then(() => {
+        // Set user as active after successful registration
+        return setActive();
+      })
       .catch(() => {
         setError('Something went wrong!');
       })

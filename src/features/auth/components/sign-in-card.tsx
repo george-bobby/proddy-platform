@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
 import type { SignInFlow } from '../types';
+import { useUserStatus } from '../api/use-user-status';
 
 interface SignInCardProps {
   setState: (state: SignInFlow) => void;
@@ -17,6 +18,7 @@ interface SignInCardProps {
 
 export const SignInCard = ({ setState }: SignInCardProps) => {
   const { signIn } = useAuthActions();
+  const { setActive, initializeUser } = useUserStatus();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,7 +26,16 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
   const handleOAuthSignIn = (value: 'github' | 'google') => {
     setPending(true);
-    signIn(value).finally(() => setPending(false));
+    signIn(value)
+      .then(() => {
+        // Initialize user status first
+        return initializeUser();
+      })
+      .then(() => {
+        // Set user as active after successful login
+        return setActive();
+      })
+      .finally(() => setPending(false));
   };
 
   const handleSignIn = (e: React.FormEvent<HTMLFormElement>) => {
@@ -33,6 +44,14 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
     setError('');
 
     signIn('password', { email, password, flow: 'signIn' })
+      .then(() => {
+        // Initialize user status first
+        return initializeUser();
+      })
+      .then(() => {
+        // Set user as active after successful login
+        return setActive();
+      })
       .catch(() => {
         setError('Invalid email or password!');
       })

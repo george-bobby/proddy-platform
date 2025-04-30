@@ -2,8 +2,20 @@ import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
 
+// Extend the users table with an active field and preserve existing fields
+const usersTable = defineTable({
+  // Fields from the original users table
+  name: v.optional(v.string()),
+  email: v.optional(v.string()),
+  image: v.optional(v.string()),
+  emailVerificationTime: v.optional(v.number()),
+  // Our new field to track user active status
+  active: v.optional(v.string()),
+});
+
 const schema = defineSchema({
   ...authTables,
+  users: usersTable,
   workspaces: defineTable({
     name: v.string(),
     userId: v.id('users'),

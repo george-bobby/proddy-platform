@@ -3,7 +3,7 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { Loader, LogOut, User, Settings, Trash2, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useDeleteAccount } from '../api/use-delete-account';
 import { useCurrentUser } from '../api/use-current-user';
+import { useUserStatus } from '../api/use-user-status';
 
 export const UserButton = () => {
   const router = useRouter();
@@ -32,6 +33,22 @@ export const UserButton = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteAccount = useDeleteAccount();
+  const { setActive, setInactive, initializeUser } = useUserStatus();
+
+  // Initialize user status and set user as active when component mounts
+  useEffect(() => {
+    if (data) {
+      // Initialize user status first, then set as active
+      initializeUser().then(() => setActive());
+    }
+
+    // Set user as inactive when they leave the page or close the browser
+    return () => {
+      if (data) {
+        setInactive();
+      }
+    };
+  }, [data, setActive, setInactive, initializeUser]);
 
   if (isLoading) {
     return <Loader className="size-4 animate-spin text-muted-foreground" />;
@@ -47,6 +64,8 @@ export const UserButton = () => {
   const handleDeleteAccount = async () => {
     try {
       setIsDeleting(true);
+      // Set user as inactive before deleting account
+      await setInactive();
       await deleteAccount();
       await signOut();
       router.replace('/auth');
@@ -81,6 +100,8 @@ export const UserButton = () => {
 
           <DropdownMenuItem
             onClick={async () => {
+              // Set user as inactive before signing out
+              await setInactive();
               await signOut();
               router.replace('/auth');
             }}
