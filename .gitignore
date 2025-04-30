@@ -16,9 +16,6 @@
 
 #env files
 .env.local
-.env.production
-.env.template
-.env.*
 
 # production
 /build
