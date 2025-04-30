@@ -14,9 +14,6 @@
 /.next/
 /out/
 
-#env files
-.env.local
-
 # production
 /build
 
