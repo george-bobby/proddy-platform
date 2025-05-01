@@ -92,7 +92,7 @@ const CalendarPage = () => {
     <div className="flex h-full flex-col bg-white">
       <div className="flex items-center justify-between px-6 py-3 border-t">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold">Calendar Controls</h1>
+          {/* <h1 className="text-xl font-semibold">Calendar Controls</h1> */}
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handlePreviousMonth}>

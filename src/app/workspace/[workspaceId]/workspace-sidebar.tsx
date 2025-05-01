@@ -60,6 +60,13 @@ export const WorkspaceSidebar = () => {
 
       <div className="mt-4 flex flex-col gap-2 px-4">
         <SidebarItem
+          label="Calendar"
+          icon={CalendarIcon}
+          id="calendar"
+          href={`/workspace/${workspaceId}/calendar`}
+          isActive={pathname.includes('/calendar')}
+        />
+        <SidebarItem
           label="Threads"
           icon={MessageSquareText}
           id="threads"
@@ -72,13 +79,6 @@ export const WorkspaceSidebar = () => {
           id="outbox"
           href={`/workspace/${workspaceId}/outbox`}
           isActive={pathname.includes('/outbox')}
-        />
-        <SidebarItem
-          label="Calendar"
-          icon={CalendarIcon}
-          id="calendar"
-          href={`/workspace/${workspaceId}/calendar`}
-          isActive={pathname.includes('/calendar')}
         />
       </div>
 
