@@ -1,14 +1,12 @@
 'use client';
 
-import { Bell, Plus, Search } from 'lucide-react';
-import Link from 'next/link';
+import { Bell, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -21,22 +19,19 @@ import { UserButton } from '@/features/auth/components/user-button';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
-import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
+
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
 interface WorkspaceHeaderProps {
   children: ReactNode;
-  showCreateWorkspace?: boolean;
 }
 
 export const WorkspaceHeader = ({
-  children,
-  showCreateWorkspace = true
+  children
 }: WorkspaceHeaderProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [_, setCreateOpen] = useCreateWorkspaceModal();
 
   const { data: workspace } = useGetWorkspace({ id: workspaceId });
   const { data: channels } = useGetChannels({ workspaceId });

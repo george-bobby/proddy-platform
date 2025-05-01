@@ -1,7 +1,7 @@
 'use client';
 
 import { MemberInfo } from '@/components/workspace/member-info';
-import { WorkspaceHeader } from '@/components/workspace-toolbar';
+import { WorkspaceHeader } from '../../workspace-toolbar';
 
 interface HeaderProps {
   memberName?: string;

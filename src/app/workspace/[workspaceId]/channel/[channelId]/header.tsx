@@ -1,7 +1,7 @@
 'use client';
 
 import { ChannelInfo } from '@/components/workspace/channel-info';
-import { WorkspaceHeader } from '@/components/workspace-toolbar';
+import { WorkspaceHeader } from '../../workspace-toolbar';
 
 interface HeaderProps {
   channelName: string;
