@@ -1,14 +1,15 @@
 'use client';
 
+import { FaChevronDown } from 'react-icons/fa';
 import { Loader, TriangleAlert } from 'lucide-react';
 
 import { MessageList } from '@/components/message-list';
 import { ChatInput } from '@/components/chat-input';
+import { Button } from '@/components/ui/button';
 import { useGetChannel } from '@/features/channels/api/use-get-channel';
 import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useChannelId } from '@/hooks/use-channel-id';
-
-import { Header } from './header';
+import { WorkspaceHeader } from '../../workspace-toolbar';
 
 const ChannelIdPage = () => {
   const channelId = useChannelId();
@@ -35,7 +36,16 @@ const ChannelIdPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <Header channelName={channel.name} />
+      <WorkspaceHeader>
+        <Button
+          variant="ghost"
+          className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+          size="sm"
+        >
+          <span className="truncate"># {channel.name}</span>
+          <FaChevronDown className="ml-2 size-2.5 transition-transform duration-200 group-hover:rotate-180" />
+        </Button>
+      </WorkspaceHeader>
 
       <MessageList
         channelName={channel.name}

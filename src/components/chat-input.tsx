@@ -7,8 +7,8 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
-import { DirectMessageSuggestions } from '@/components/direct-message-suggestions';
-import { MessageSuggestions } from '@/components/message-suggestions';
+import { DirectMessageSuggestions } from '@/components/member-suggestions';
+import { MessageSuggestions } from '@/components/channel-suggestions';
 import { useCreateCalendarEvent } from '@/features/calendar/api/use-create-calendar-event';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
@@ -44,10 +44,10 @@ type CreateMessageValues = {
   conversationId?: Id<'conversations'>;
 };
 
-export const ChatInput = ({ 
-  placeholder, 
-  channelId, 
-  conversationId, 
+export const ChatInput = ({
+  placeholder,
+  channelId,
+  conversationId,
   channelName,
   memberName
 }: ChatInputProps) => {
@@ -57,7 +57,7 @@ export const ChatInput = ({
   const innerRef = useRef<Quill | null>(null);
 
   const workspaceId = useWorkspaceId();
-  
+
   const { mutate: createMessage } = useCreateMessage();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
   const { mutate: createCalendarEvent } = useCreateCalendarEvent();
@@ -170,9 +170,9 @@ export const ChatInput = ({
           memberName={memberName}
         />
       ) : (
-        <MessageSuggestions 
-          onSelectSuggestion={handleSuggestionSelect} 
-          channelName={channelName} 
+        <MessageSuggestions
+          onSelectSuggestion={handleSuggestionSelect}
+          channelName={channelName}
         />
       )}
       <Editor
