@@ -10,7 +10,7 @@ import { useGetMember } from '@/features/members/api/use-get-member';
 import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useMemberId } from '@/hooks/use-member-id';
 import { usePanel } from '@/hooks/use-panel';
-import { WorkspaceHeader } from '../../workspace-toolbar';
+import { WorkspaceHeader } from '../../toolbar';
 
 interface ConversationProps {
   id: Id<'conversations'>;

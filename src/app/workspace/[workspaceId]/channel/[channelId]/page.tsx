@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useGetChannel } from '@/features/channels/api/use-get-channel';
 import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useChannelId } from '@/hooks/use-channel-id';
-import { WorkspaceHeader } from '../../workspace-toolbar';
+import { WorkspaceHeader } from '../../toolbar';
 
 const ChannelIdPage = () => {
   const channelId = useChannelId();

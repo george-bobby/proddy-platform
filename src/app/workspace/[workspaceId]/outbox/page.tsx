@@ -8,7 +8,7 @@ import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { useGetUserMessages } from '@/features/messages/api/use-get-user-messages';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { WorkspaceHeader } from '../workspace-toolbar';
+import { WorkspaceHeader } from '../toolbar';
 
 type MessageContext = {
   name: string;

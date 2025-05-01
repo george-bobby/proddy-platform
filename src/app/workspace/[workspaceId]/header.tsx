@@ -25,8 +25,8 @@ import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
 import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
 
-import { InviteModal } from './invite-modal';
-import { PreferencesModal } from './preferences-modal';
+import { InviteModal } from './invitation';
+import { PreferencesModal } from './preferences';
 
 interface WorkspaceHeaderProps {
   workspace: Doc<'workspaces'>;
@@ -93,18 +93,6 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem
-                className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
-                onClick={() => setOpen(true)}
-              >
-                <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
-                  <RefreshCw className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-45" />
-                </div>
-                <span className="font-medium">Switch workspace</span>
-              </DropdownMenuItem>
-
               {isAdmin && (
                 <>
                   <DropdownMenuSeparator />
@@ -116,7 +104,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                     <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
                       <Plus className="size-3.5 text-primary transition-transform duration-200 group-hover:scale-125" />
                     </div>
-                    <span className="font-medium">Invite people to {workspace.name}</span>
+                    <span className="font-medium">Invite to {workspace.name}</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
@@ -132,6 +120,18 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   </DropdownMenuItem>
                 </>
               )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
+                onClick={() => setOpen(true)}
+              >
+                <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
+                  <RefreshCw className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-45" />
+                </div>
+                <span className="font-medium">Switch Workspace</span>
+              </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
 

@@ -9,7 +9,7 @@ import Renderer from '@/components/renderer';
 import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { WorkspaceHeader } from '../workspace-toolbar';
+import { WorkspaceHeader } from '../toolbar';
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
