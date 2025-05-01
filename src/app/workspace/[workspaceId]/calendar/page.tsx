@@ -9,7 +9,6 @@ import Renderer from '@/components/renderer';
 import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { WorkspaceHeader } from '../toolbar';
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -90,105 +89,92 @@ const CalendarPage = () => {
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="flex h-full flex-col">
-      <WorkspaceHeader>
-        <Button
-          variant="ghost"
-          className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
-          size="sm"
-        >
-          <CalendarIcon className="mr-2 size-5" />
-          <span className="truncate">Calendar</span>
-        </Button>
-      </WorkspaceHeader>
-
-      <div className="flex h-full flex-col bg-white">
-        <div className="flex items-center justify-between px-6 py-3 border-t">
-          <div className="flex items-center gap-2">
-            {/* <h1 className="text-xl font-semibold">Calendar Controls</h1> */}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="min-w-[120px] text-center font-medium">
-              {format(currentDate, 'MMMM yyyy')}
-            </div>
-            <Button variant="outline" size="sm" onClick={handleNextMonth}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="flex h-full flex-col bg-white">
+      <div className="flex items-center justify-between px-6 py-3 border-t">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold">Calendar Controls</h1>
         </div>
-
-        <div className="flex-1 overflow-auto p-4">
-          {isLoading ? (
-            <div className="flex h-full items-center justify-center">
-              <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="h-full rounded-md border">
-              {/* Calendar header */}
-              <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">
-                {weekdays.map((day) => (
-                  <div key={day} className="bg-background p-2 text-xs font-medium text-muted-foreground">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              {/* Calendar grid */}
-              <div className="grid h-[calc(100%-2rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
-                {weeks.flat().map((dayObj, index) => (
-                  <div
-                    key={index}
-                    className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
-                      } ${dayObj.day && new Date().getDate() === dayObj.day &&
-                        new Date().getMonth() === currentDate.getMonth() &&
-                        new Date().getFullYear() === currentDate.getFullYear()
-                        ? 'bg-accent'
-                        : ''
-                      }`}
-                  >
-                    {dayObj.day && (
-                      <>
-                        <div className="absolute right-1 top-1 text-xs">{dayObj.day}</div>
-                        {dayObj.events && dayObj.events.length > 0 && (
-                          <div className="mt-4 flex max-h-[80px] flex-col gap-1 overflow-y-auto">
-                            {dayObj.events.map((event) => (
-                              <Link
-                                href={event.message?.channelId
-                                  ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
-                                  : event.message?.conversationId
-                                    ? `/workspace/${workspaceId}/member/${event.memberId}`
-                                    : '#'}
-                                key={event._id}
-                                className="rounded-sm bg-primary/10 p-1 text-[10px] leading-tight block hover:bg-primary/20 transition-colors"
-                                title={event?.message?.body ? JSON.parse(event.message.body).ops[0].insert : ''}
-                              >
-                                {event.time && <span className="font-bold">{event.time}</span>}
-                                <div className="truncate">
-                                  {event?.message?.body ? (
-                                    <Renderer
-                                      value={event.message.body}
-                                      calendarEvent={event.message.calendarEvent}
-                                    />
-                                  ) : 'Event'}
-                                </div>
-                                <div className="text-[8px] text-muted-foreground">
-                                  by {event?.user?.name || 'Unknown'}
-                                </div>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="min-w-[120px] text-center font-medium">
+            {format(currentDate, 'MMMM yyyy')}
+          </div>
+          <Button variant="outline" size="sm" onClick={handleNextMonth}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-4">
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="h-full rounded-md border">
+            {/* Calendar header */}
+            <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">
+              {weekdays.map((day) => (
+                <div key={day} className="bg-background p-2 text-xs font-medium text-muted-foreground">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar grid */}
+            <div className="grid h-[calc(100%-2rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
+              {weeks.flat().map((dayObj, index) => (
+                <div
+                  key={index}
+                  className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
+                    } ${dayObj.day && new Date().getDate() === dayObj.day &&
+                      new Date().getMonth() === currentDate.getMonth() &&
+                      new Date().getFullYear() === currentDate.getFullYear()
+                      ? 'bg-accent'
+                      : ''
+                    }`}
+                >
+                  {dayObj.day && (
+                    <>
+                      <div className="absolute right-1 top-1 text-xs">{dayObj.day}</div>
+                      {dayObj.events && dayObj.events.length > 0 && (
+                        <div className="mt-4 flex max-h-[80px] flex-col gap-1 overflow-y-auto">
+                          {dayObj.events.map((event) => (
+                            <Link
+                              href={event.message?.channelId
+                                ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
+                                : event.message?.conversationId
+                                  ? `/workspace/${workspaceId}/member/${event.memberId}`
+                                  : '#'}
+                              key={event._id}
+                              className="rounded-sm bg-primary/10 p-1 text-[10px] leading-tight block hover:bg-primary/20 transition-colors"
+                              title={event?.message?.body ? JSON.parse(event.message.body).ops[0].insert : ''}
+                            >
+                              {event.time && <span className="font-bold">{event.time}</span>}
+                              <div className="truncate">
+                                {event?.message?.body ? (
+                                  <Renderer
+                                    value={event.message.body}
+                                    calendarEvent={event.message.calendarEvent}
+                                  />
+                                ) : 'Event'}
+                              </div>
+                              <div className="text-[8px] text-muted-foreground">
+                                by {event?.user?.name || 'Unknown'}
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
