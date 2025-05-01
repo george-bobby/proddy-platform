@@ -6,9 +6,9 @@ import { type QueryCtx, mutation, query } from './_generated/server';
 
 // Update user status (online/offline)
 export const update = mutation({
-  args: { 
-    status: v.string(), 
-    workspaceId: v.id('workspaces') 
+  args: {
+    status: v.string(),
+    workspaceId: v.id('workspaces')
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -81,9 +81,9 @@ export const getForWorkspace = query({
 
 // Get status for a specific user in a workspace
 export const getUserStatus = query({
-  args: { 
+  args: {
     workspaceId: v.id('workspaces'),
-    userId: v.id('users')
+    userId: v.optional(v.id('users'))
   },
   handler: async (ctx, args) => {
     const currentUserId = await getAuthUserId(ctx);
@@ -97,6 +97,9 @@ export const getUserStatus = query({
       .unique();
 
     if (!member) return null;
+
+    // If no userId is provided, return default offline status
+    if (!args.userId) return { status: 'offline', lastSeen: 0 };
 
     // Get status for the specified user
     const status = await ctx.db
