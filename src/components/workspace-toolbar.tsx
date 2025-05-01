@@ -4,7 +4,6 @@ import { Bell, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
-import { FaGithub } from 'react-icons/fa';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,6 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { links } from '@/config';
 import { UserButton } from '@/features/auth/components/user-button';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useGetMembers } from '@/features/members/api/use-get-members';
@@ -31,7 +29,7 @@ interface WorkspaceHeaderProps {
   showCreateWorkspace?: boolean;
 }
 
-export const WorkspaceHeader = ({ 
+export const WorkspaceHeader = ({
   children,
   showCreateWorkspace = true
 }: WorkspaceHeaderProps) => {
@@ -66,7 +64,7 @@ export const WorkspaceHeader = ({
   }, []);
 
   return (
-    <nav className="flex h-16 items-center overflow-hidden border-b bg-primary text-primary-foreground shadow-md">
+    <nav className="flex h-16 items-center overflow-hidden border-b bg-tertiary text-primary-foreground shadow-md">
       {/* Left section - Entity info (Channel/Member/etc) */}
       <div className="flex items-center px-6">
         {children}
@@ -114,7 +112,7 @@ export const WorkspaceHeader = ({
 
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
-        {showCreateWorkspace && (
+        {/* {showCreateWorkspace && (
           <Button
             variant="ghost"
             size="sm"
@@ -124,8 +122,8 @@ export const WorkspaceHeader = ({
             <Plus className="size-4 transition-transform duration-200 group-hover:scale-125" />
             <span className="hidden sm:inline">Create Workspace</span>
           </Button>
-        )}
-        <Button variant="transparent" size="iconSm" asChild>
+        )} */}
+        {/* <Button variant="transparent" size="iconSm" asChild>
           <Link
             href={links.sourceCode}
             target="_blank"
@@ -134,7 +132,7 @@ export const WorkspaceHeader = ({
           >
             <FaGithub className="size-5 text-white" />
           </Link>
-        </Button>
+        </Button> */}
         <Button variant="ghost" size="iconSm" className="text-white">
           <Bell className="size-5" />
         </Button>

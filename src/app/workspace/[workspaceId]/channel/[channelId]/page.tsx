@@ -3,11 +3,11 @@
 import { Loader, TriangleAlert } from 'lucide-react';
 
 import { MessageList } from '@/components/message-list';
+import { ChatInput } from '@/components/chat-input';
 import { useGetChannel } from '@/features/channels/api/use-get-channel';
 import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useChannelId } from '@/hooks/use-channel-id';
 
-import { ChatInput } from './chat-input';
 import { Header } from './header';
 
 const ChannelIdPage = () => {
@@ -46,7 +46,11 @@ const ChannelIdPage = () => {
         canLoadMore={status === 'CanLoadMore'}
       />
 
-      <ChatInput placeholder={`Message # ${channel.name}`} channelName={channel.name} />
+      <ChatInput
+        placeholder={`Message # ${channel.name}`}
+        channelId={channelId}
+        channelName={channel.name}
+      />
     </div>
   );
 };

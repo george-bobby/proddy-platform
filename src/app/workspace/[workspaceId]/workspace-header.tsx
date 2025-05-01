@@ -164,20 +164,20 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   </button>
                 ))}
 
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      setCreateOpen(true);
-                    }}
-                    className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border border-dashed bg-card/50 px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group mt-2"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
-                      <Plus className="size-5 transition-transform duration-200 group-hover:scale-125" />
-                    </div>
-                    <p className="text-sm font-semibold tracking-tight">Create New Workspace</p>
-                  </button>
-                )}
+
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setCreateOpen(true);
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border border-dashed bg-card/50 px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group mt-2"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
+                    <Plus className="size-5 transition-transform duration-200 group-hover:scale-125" />
+                  </div>
+                  <p className="text-sm font-semibold tracking-tight">Create New Workspace</p>
+                </button>
+
               </div>
             </DialogContent>
           </Dialog>

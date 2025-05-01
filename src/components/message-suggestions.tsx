@@ -126,7 +126,7 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
     <div className="mb-2 flex flex-col space-y-2 rounded-md border border-border/30 bg-muted/20 p-2">
       <div className="flex items-center">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Sparkles className="size-3 text-blue-500" />
+          <Sparkles className="size-3 text-tertiary" />
           <span>
             {channelName
               ? `AI suggestions for #${channelName}`
@@ -137,7 +137,7 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground hover:bg-blue-500/10 hover:text-blue-500"
+            className="h-6 px-2 text-xs text-muted-foreground hover:bg-tertiary10 hover:text-tertiary"
             onClick={refreshSuggestions}
             disabled={isLoading}
           >
@@ -152,7 +152,7 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
               key={index}
               variant="outline"
               size="sm"
-              className="h-auto rounded-full border-blue-500/20 bg-blue-500/5 px-3 py-1 text-xs text-muted-foreground hover:bg-blue-500/10 hover:border-blue-500/30 hover:text-foreground"
+              className="h-auto rounded-full border-tertiary20 bg-tertiary5 px-3 py-1 text-xs text-muted-foreground hover:bg-tertiary10 hover:border-tertiary30 hover:text-foreground"
               onClick={() => onSelectSuggestion(suggestion)}
             >
               {suggestion}
