@@ -102,9 +102,11 @@ export const getUserStatus = query({
     if (!args.userId) return { status: 'offline', lastSeen: 0 };
 
     // Get status for the specified user
+    // We can safely use args.userId here because we've already checked that it exists
+    const userId = args.userId; // This helps TypeScript understand that userId is defined
     const status = await ctx.db
       .query('userStatus')
-      .withIndex('by_workspace_id_user_id', (q) => q.eq('workspaceId', args.workspaceId).eq('userId', args.userId))
+      .withIndex('by_workspace_id_user_id', (q) => q.eq('workspaceId', args.workspaceId).eq('userId', userId))
       .unique();
 
     if (!status) return { status: 'offline', lastSeen: 0 };
