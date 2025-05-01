@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthActions } from '@convex-dev/auth/react';
-import { Loader, LogOut, User, Settings, Trash2, AlertTriangle } from 'lucide-react';
+import { Loader, LogOut, Settings, Trash2, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { UserProfileModal } from './user-profile-modal';
 import { useDeleteAccount } from '../api/use-delete-account';
 import { useCurrentUser } from '../api/use-current-user';
 
@@ -30,6 +31,7 @@ export const UserButton = () => {
   const { signOut } = useAuthActions();
   const { data, isLoading } = useCurrentUser();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const deleteAccount = useDeleteAccount();
 
@@ -41,8 +43,13 @@ export const UserButton = () => {
     return null;
   }
 
-  const { image, name } = data;
+  const { image, name, email } = data;
   const avatarFallback = name?.charAt(0).toUpperCase();
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace('/auth');
+  };
 
   const handleDeleteAccount = async () => {
     try {
@@ -67,12 +74,10 @@ export const UserButton = () => {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="center" side="bottom" className="w-60">
-          <DropdownMenuItem className="h-10">
-            <User className="mr-2 size-4" />
-            View Profile
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className="h-10">
+          <DropdownMenuItem
+            onClick={() => setSettingsOpen(true)}
+            className="h-10"
+          >
             <Settings className="mr-2 size-4" />
             Account Settings
           </DropdownMenuItem>
@@ -80,10 +85,7 @@ export const UserButton = () => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={async () => {
-              await signOut();
-              router.replace('/auth');
-            }}
+            onClick={handleSignOut}
             className="h-10"
           >
             <LogOut className="mr-2 size-4" />
@@ -102,6 +104,7 @@ export const UserButton = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Delete Account Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -138,6 +141,18 @@ export const UserButton = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Account Settings Modal */}
+      {data && (
+        <UserProfileModal
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          name={name}
+          email={email}
+          image={image}
+          mode="edit"
+        />
+      )}
     </>
   );
 };

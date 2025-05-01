@@ -90,10 +90,7 @@ export default function ThreadsPage() {
 
   return (
     <div className="flex h-full flex-col gap-y-4 bg-white p-4">
-      <div className="flex items-center gap-x-2">
-        <MessageSquareText className="size-5 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">Threads</h2>
-      </div>
+      <h2 className="text-xl font-semibold">Your Threads</h2>
 
       <div className="flex flex-col gap-y-4">
         {threads.map((thread) => (

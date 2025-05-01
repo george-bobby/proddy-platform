@@ -76,10 +76,7 @@ export default function OutboxPage() {
 
   return (
     <div className="flex h-full flex-col gap-y-4 bg-white p-4">
-      <div className="flex items-center gap-x-2">
-        <Mail className="size-5 text-muted-foreground" />
-        <h2 className="text-xl font-semibold">Outbox</h2>
-      </div>
+      <h2 className="text-xl font-semibold">Your Messages</h2>
 
       <div className="flex flex-col gap-y-4">
         {messages.map((message) => (
