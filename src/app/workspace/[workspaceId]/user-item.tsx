@@ -3,6 +3,9 @@ import Link from 'next/link';
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { StatusIndicator } from '@/components/ui/status-indicator';
+import { useGetMember } from '@/features/members/api/use-get-member';
+import { useGetUserStatus } from '@/features/status/api/use-get-user-status';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +20,18 @@ export const UserItem = ({ id, label = 'Member', image, isActive = false }: User
   const workspaceId = useWorkspaceId();
   const avatarFallback = label.charAt(0).toUpperCase();
 
+  // Get the member data to access the userId
+  const { data: member } = useGetMember({ id });
+
+  // Get the user's status if member data is available
+  const { data: userStatus } = useGetUserStatus({
+    workspaceId,
+    userId: member?.userId || '' as Id<'users'>,
+  });
+
+  // Default to offline if status data is not available
+  const status = userStatus?.status || 'offline';
+
   return (
     <Button
       variant="ghost"
@@ -29,10 +44,13 @@ export const UserItem = ({ id, label = 'Member', image, isActive = false }: User
       size="sm"
       asChild>
       <Link href={`/workspace/${workspaceId}/member/${id}`}>
-        <Avatar className="mr-3 size-7 transition-transform duration-200 group-hover:scale-110">
-          <AvatarImage alt={label} src={image} />
-          <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
-        </Avatar>
+        <div className="relative mr-3">
+          <Avatar className="size-7 transition-transform duration-200 group-hover:scale-110">
+            <AvatarImage alt={label} src={image} />
+            <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+          </Avatar>
+          {member && <StatusIndicator status={status as 'online' | 'offline'} />}
+        </div>
         <span className="truncate text-sm">{label}</span>
       </Link>
     </Button>
