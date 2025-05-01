@@ -90,10 +90,9 @@ const CalendarPage = () => {
 
   return (
     <div className="flex h-full flex-col bg-white">
-      <div className="flex items-center justify-between border-b px-6 py-3">
+      <div className="flex items-center justify-between px-6 py-3 border-t">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-xl font-semibold">Calendar</h1>
+          <h1 className="text-xl font-semibold">Calendar Controls</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
@@ -129,15 +128,13 @@ const CalendarPage = () => {
               {weeks.flat().map((dayObj, index) => (
                 <div
                   key={index}
-                  className={`relative bg-background p-1 ${
-                    dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
-                  } ${
-                    dayObj.day && new Date().getDate() === dayObj.day &&
-                    new Date().getMonth() === currentDate.getMonth() &&
-                    new Date().getFullYear() === currentDate.getFullYear()
+                  className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
+                    } ${dayObj.day && new Date().getDate() === dayObj.day &&
+                      new Date().getMonth() === currentDate.getMonth() &&
+                      new Date().getFullYear() === currentDate.getFullYear()
                       ? 'bg-accent'
                       : ''
-                  }`}
+                    }`}
                 >
                   {dayObj.day && (
                     <>
