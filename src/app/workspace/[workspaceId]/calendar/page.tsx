@@ -4,6 +4,7 @@ import { addMonths, format, getMonth, getYear, subMonths } from 'date-fns';
 import { CalendarIcon, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import Renderer from '@/components/renderer';
 
 import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
@@ -156,10 +157,12 @@ const CalendarPage = () => {
                             >
                               {event.time && <span className="font-bold">{event.time}</span>}
                               <div className="truncate">
-                                {event?.message?.body ?
-                                  JSON.parse(event.message.body).ops[0].insert.substring(0, 20) : 'Event'}
-                                {event?.message?.body &&
-                                  JSON.parse(event.message.body).ops[0].insert.length > 20 ? '...' : ''}
+                                {event?.message?.body ? (
+                                  <Renderer
+                                    value={event.message.body}
+                                    calendarEvent={event.message.calendarEvent}
+                                  />
+                                ) : 'Event'}
                               </div>
                               <div className="text-[8px] text-muted-foreground">
                                 by {event?.user?.name || 'Unknown'}
