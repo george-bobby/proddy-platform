@@ -183,8 +183,42 @@ const Editor = ({
     }
 
     // Format the date and time for display
-    const formattedDate = date.toLocaleDateString();
-    const displayText = time ? `${formattedDate} at ${time}` : formattedDate;
+    let displayText = '';
+
+    // Check if date is today or tomorrow
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Calculate next week range (Monday to Sunday)
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysUntilNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+    const nextWeekStart = new Date(today);
+    nextWeekStart.setDate(today.getDate() + daysUntilNextMonday);
+    const nextWeekEnd = new Date(nextWeekStart);
+    nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+
+    // Format date based on when it is
+    if (date.toDateString() === today.toDateString()) {
+      displayText = 'Today';
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      displayText = 'Tomorrow';
+    } else if (
+      date >= nextWeekStart &&
+      date <= nextWeekEnd
+    ) {
+      // For next week dates, show "Next week - Monday", "Next week - Tuesday", etc.
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      displayText = `Next week - ${dayNames[date.getDay()]}`;
+    } else {
+      // Use standard date format for other dates
+      displayText = date.toLocaleDateString();
+    }
+
+    // Add time if provided
+    if (time) {
+      displayText += ` at ${time}`;
+    }
 
     // Insert the formatted date at the cursor position
     quill.insertText(quill.getSelection()?.index || quill.getText().length, displayText + ' ');

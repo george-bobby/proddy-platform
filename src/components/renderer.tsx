@@ -52,8 +52,21 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
         dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }),
         dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+        dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+        dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' }),
+        dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
         `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`,
-        `${dateObj.getMonth() + 1}-${dateObj.getDate()}-${dateObj.getFullYear()}`
+        `${dateObj.getMonth() + 1}-${dateObj.getDate()}-${dateObj.getFullYear()}`,
+        'Today',
+        'Tomorrow',
+        'Next week',
+        'Next week - Monday',
+        'Next week - Tuesday',
+        'Next week - Wednesday',
+        'Next week - Thursday',
+        'Next week - Friday',
+        'Next week - Saturday',
+        'Next week - Sunday'
       ];
 
       // Create time variations
