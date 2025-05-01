@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
+import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
 
 import { InviteModal } from './invite-modal';
 import { PreferencesModal } from './preferences-modal';
@@ -38,6 +39,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
   const [inviteOpen, setInviteOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [_, setCreateOpen] = useCreateWorkspaceModal();
+  const [__, setSearchOpen] = useWorkspaceSearch();
   const { data: workspaces } = useGetWorkspaces();
 
   const onWorkspaceClick = (id: string) => {
@@ -184,7 +186,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
         </div>
 
         <div className="flex items-center gap-3">
-          <Hint label="Filter conversations" side="bottom">
+          {/* <Hint label="Filter conversations" side="bottom">
             <Button
               variant="ghost"
               size="sm"
@@ -192,10 +194,11 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
             >
               <ListFilter className="size-5" />
             </Button>
-          </Hint>
+          </Hint> */}
 
           <Hint label="New message" side="bottom">
             <Button
+              onClick={() => setSearchOpen(true)}
               variant="ghost"
               size="sm"
               className="flex h-10 w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"
