@@ -9,9 +9,10 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/componen
 import { MessageSelectionProvider } from '@/contexts/message-selection-context';
 import { Profile } from '@/features/members/components/profile';
 import { Thread } from '@/features/messages/components/thread';
+import { StatusTracker } from '@/features/status/components/status-tracker';
 import { usePanel } from '@/hooks/use-panel';
 
-import { WorkspaceSidebar } from './workspace-sidebar';
+import { WorkspaceSidebar } from './sidebar';
 
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
@@ -20,6 +21,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
 
   return (
     <MessageSelectionProvider>
+      <StatusTracker />
       <div className="h-full">
         <div className="flex h-full">
           <ResizablePanelGroup direction="horizontal" autoSaveId="workspace-layout">

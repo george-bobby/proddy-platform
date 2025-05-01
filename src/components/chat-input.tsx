@@ -7,13 +7,12 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
-import { DirectMessageSuggestions } from '@/components/direct-message-suggestions';
+import { DirectMessageSuggestions } from '@/components/member-suggestions';
+import { MessageSuggestions } from '@/components/channel-suggestions';
 import { useCreateCalendarEvent } from '@/features/calendar/api/use-create-calendar-event';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { useGetMember } from '@/features/members/api/use-get-member';
-import { useMemberId } from '@/hooks/use-member-id';
 
 const Editor = dynamic(() => import('@/components/editor'), {
   ssr: false,
@@ -26,11 +25,14 @@ const Editor = dynamic(() => import('@/components/editor'), {
 
 interface ChatInputProps {
   placeholder?: string;
-  conversationId: Id<'conversations'>;
+  channelId?: Id<'channels'>;
+  conversationId?: Id<'conversations'>;
+  channelName?: string;
+  memberName?: string;
+  memberImage?: string;
 }
 
 type CreateMessageValues = {
-  conversationId: Id<'conversations'>;
   workspaceId: Id<'workspaces'>;
   body: string;
   image?: Id<'_storage'>;
@@ -38,17 +40,23 @@ type CreateMessageValues = {
     date: number;
     time?: string;
   };
+  channelId?: Id<'channels'>;
+  conversationId?: Id<'conversations'>;
 };
 
-export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
+export const ChatInput = ({
+  placeholder,
+  channelId,
+  conversationId,
+  channelName,
+  memberName
+}: ChatInputProps) => {
   const [editorKey, setEditorKey] = useState(0);
   const [isPending, setIsPending] = useState(false);
 
   const innerRef = useRef<Quill | null>(null);
 
   const workspaceId = useWorkspaceId();
-  const memberId = useMemberId();
-  const { data: member } = useGetMember({ id: memberId });
 
   const { mutate: createMessage } = useCreateMessage();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
@@ -71,11 +79,19 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
       innerRef.current?.enable(false);
 
       const values: CreateMessageValues = {
-        conversationId,
         workspaceId,
         body,
         image: undefined,
       };
+
+      // Set either channelId or conversationId based on which is provided
+      if (channelId) {
+        values.channelId = channelId;
+      } else if (conversationId) {
+        values.conversationId = conversationId;
+      } else {
+        throw new Error('Either channelId or conversationId must be provided');
+      }
 
       // Add calendar event if present
       if (calendarEvent) {
@@ -90,7 +106,7 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
           {},
           {
             throwError: true,
-          }
+          },
         );
 
         if (!url) throw new Error('URL not found.');
@@ -147,11 +163,18 @@ export const ChatInput = ({ placeholder, conversationId }: ChatInputProps) => {
 
   return (
     <div className="w-full px-5">
-      <DirectMessageSuggestions
-        onSelectSuggestion={handleSuggestionSelect}
-        conversationId={conversationId}
-        memberName={member?.user?.name}
-      />
+      {conversationId ? (
+        <DirectMessageSuggestions
+          onSelectSuggestion={handleSuggestionSelect}
+          conversationId={conversationId}
+          memberName={memberName}
+        />
+      ) : (
+        <MessageSuggestions
+          onSelectSuggestion={handleSuggestionSelect}
+          channelName={channelName}
+        />
+      )}
       <Editor
         placeholder={placeholder}
         key={editorKey}
