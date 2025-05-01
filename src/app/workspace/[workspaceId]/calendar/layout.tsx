@@ -1,0 +1,12 @@
+'use client';
+
+import { Header } from './header';
+
+export default function CalendarLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-full flex-col">
+      <Header />
+      {children}
+    </div>
+  );
+}
