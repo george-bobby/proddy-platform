@@ -2,13 +2,14 @@
 
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
-import { useChannelId } from '@/hooks/use-channel-id';
-import { useGetRecentChannelMessages } from '@/features/messages/api/use-get-recent-channel-messages';
+import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { Button } from '@/components/ui/button';
+import { Id } from '@/../convex/_generated/dataModel';
 
-interface MessageSuggestionsProps {
+interface DirectMessageSuggestionsProps {
   onSelectSuggestion: (suggestion: string) => void;
-  channelName?: string; // Optional channel name to provide context
+  conversationId: Id<'conversations'>;
+  memberName?: string; // Optional member name to provide context
 }
 
 // Fallback suggestions in case the API fails
@@ -18,17 +19,14 @@ const FALLBACK_SUGGESTIONS = [
   'Thanks for sharing! This is really helpful.',
 ];
 
-export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageSuggestionsProps) => {
-  const channelId = useChannelId();
+export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, memberName }: DirectMessageSuggestionsProps) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
 
-  // Get recent messages for the current channel
-  const { data: recentMessages, isLoading: messagesLoading } = useGetRecentChannelMessages({
-    channelId,
-    limit: 10,
-    enabled: !!channelId,
+  // Get recent messages for the current conversation
+  const { results: recentMessages, status: messagesStatus } = useGetMessages({
+    conversationId,
   });
 
   // Function to fetch suggestions from the API - wrapped in useCallback to avoid dependency issues
@@ -43,7 +41,7 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
 
       // Validate message format before sending
       const validMessages = recentMessages.filter(msg => {
-        return msg && msg.id && msg.authorName;
+        return msg && msg._id && msg.user?.name;
       });
 
       if (validMessages.length === 0) {
@@ -52,14 +50,22 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
         return;
       }
 
+      // Format messages to match the expected API format
+      const formattedMessages = validMessages.map(msg => ({
+        id: msg._id,
+        body: msg.body,
+        authorName: msg.user?.name || 'Unknown',
+        creationTime: msg._creationTime
+      }));
+
       const response = await fetch('/api/suggestions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: validMessages,
-          channelName
+          messages: formattedMessages,
+          memberName
         }),
       });
 
@@ -80,12 +86,12 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
     } finally {
       setIsLoading(false);
     }
-  }, [recentMessages, channelName]);
+  }, [recentMessages, memberName]);
 
   // Track the most recent message ID to detect new messages
   useEffect(() => {
     if (recentMessages && recentMessages.length > 0) {
-      const mostRecentMessageId = recentMessages[recentMessages.length - 1].id;
+      const mostRecentMessageId = recentMessages[0]._id;
 
       // If we have a new message, refresh suggestions
       if (lastMessageId !== null && lastMessageId !== mostRecentMessageId) {
@@ -96,26 +102,26 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
     }
   }, [recentMessages, lastMessageId, fetchSuggestions]);
 
-  // Initial fetch of suggestions when component mounts or channel changes
+  // Initial fetch of suggestions when component mounts or conversation changes
   useEffect(() => {
-    if (channelId && !messagesLoading) {
+    if (conversationId && messagesStatus !== 'LoadingFirstPage') {
       // Delay to ensure messages are fully loaded
       const timer = setTimeout(() => {
         if (recentMessages && recentMessages.length > 0) {
           fetchSuggestions();
         } else {
-          // Empty channel suggestions
+          // Empty conversation suggestions
           setSuggestions([
             "Let's start a conversation!",
-            "Hello team, how is everyone doing today?",
-            "Any updates on our current projects?"
+            "How can I help you today?",
+            "What's on your mind?"
           ]);
         }
       }, 1000); // Reduced delay to 1 second
 
       return () => clearTimeout(timer);
     }
-  }, [channelId, messagesLoading, recentMessages, fetchSuggestions]);
+  }, [conversationId, messagesStatus, recentMessages, fetchSuggestions]);
 
   // Refresh suggestions manually
   const refreshSuggestions = () => {
@@ -126,10 +132,10 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
     <div className="mb-2 flex flex-col space-y-2 rounded-md border border-border/30 bg-muted/20 p-2">
       <div className="flex items-center">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Sparkles className="size-3 text-blue-500" />
+          <Sparkles className="size-3 text-tertiary" />
           <span>
-            {channelName
-              ? `AI suggestions for #${channelName}`
+            {memberName
+              ? `AI suggestions for conversation with ${memberName}`
               : 'AI message suggestions'}
           </span>
         </div>
@@ -137,7 +143,7 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground hover:bg-blue-500/10 hover:text-blue-500"
+            className="h-6 px-2 text-xs text-muted-foreground hover:bg-tertiary/10 hover:text-tertiary"
             onClick={refreshSuggestions}
             disabled={isLoading}
           >
@@ -152,7 +158,7 @@ export const MessageSuggestions = ({ onSelectSuggestion, channelName }: MessageS
               key={index}
               variant="outline"
               size="sm"
-              className="h-auto rounded-full border-blue-500/20 bg-blue-500/5 px-3 py-1 text-xs text-muted-foreground hover:bg-blue-500/10 hover:border-blue-500/30 hover:text-foreground"
+              className="h-auto rounded-full border-tertiary/20 bg-tertiary/5 px-3 py-1 text-xs text-muted-foreground hover:bg-tertiary/10 hover:border-tertiary/30 hover:text-foreground"
               onClick={() => onSelectSuggestion(suggestion)}
             >
               {suggestion}

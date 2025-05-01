@@ -43,7 +43,3 @@ export const siteConfig: Metadata = {
     url: 'https://github.com/george-bobby',
   },
 } as const;
-
-export const links = {
-  sourceCode: 'https://github.com/george-bobby/proddy-platform',
-} as const;

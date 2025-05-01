@@ -47,7 +47,7 @@ const Editor = ({
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
   const [calendarPickerOpen, setCalendarPickerOpen] = useState(false);
   const [lastKeyWasExclamation, setLastKeyWasExclamation] = useState(false);
-  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState<{date: Date, time?: string} | null>(null);
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState<{ date: Date, time?: string } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageElementRef = useRef<HTMLInputElement>(null);
@@ -330,7 +330,7 @@ const Editor = ({
                   });
                 }}
                 size="sm"
-                className="bg-[#007a5a] text-white hover:bg-[#007a5a]/80"
+                className="bg-tertiary text-white hover:bg-tertiary/80"
               >
                 Save
               </Button>
@@ -354,7 +354,7 @@ const Editor = ({
                 'ml-auto',
                 isEmpty
                   ? 'bg-white text-muted-foreground hover:bg-white/80'
-                  : 'bg-[#007a5a] text-white hover:bg-[#007a5a]/80'
+                  : 'bg-tertiary text-white hover:bg-tertiary/80'
               )}
               size="iconSm"
             >

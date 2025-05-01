@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { PropsWithChildren } from 'react';
 
-import { ConvexClientProvider } from '@/components/convex-client-provider';
+import { ConvexClientProvider } from '@/config/convex-client-provider';
 import { JotaiProvider } from '@/components/jotai-provider';
 import { ModalProvider } from '@/components/modal-provider';
 import { Toaster } from '@/components/ui/sonner';

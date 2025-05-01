@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
+import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
 
-import { InviteModal } from './invite-modal';
-import { PreferencesModal } from './preferences-modal';
+import { InviteModal } from './invitation';
+import { PreferencesModal } from './preferences';
 
 interface WorkspaceHeaderProps {
   workspace: Doc<'workspaces'>;
@@ -38,6 +39,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
   const [inviteOpen, setInviteOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [_, setCreateOpen] = useCreateWorkspaceModal();
+  const [__, setSearchOpen] = useWorkspaceSearch();
   const { data: workspaces } = useGetWorkspaces();
 
   const onWorkspaceClick = (id: string) => {
@@ -91,18 +93,6 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                 </div>
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem
-                className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
-                onClick={() => setOpen(true)}
-              >
-                <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
-                  <RefreshCw className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-45" />
-                </div>
-                <span className="font-medium">Switch workspace</span>
-              </DropdownMenuItem>
-
               {isAdmin && (
                 <>
                   <DropdownMenuSeparator />
@@ -114,7 +104,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                     <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
                       <Plus className="size-3.5 text-primary transition-transform duration-200 group-hover:scale-125" />
                     </div>
-                    <span className="font-medium">Invite people to {workspace.name}</span>
+                    <span className="font-medium">Invite to {workspace.name}</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
@@ -130,6 +120,18 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   </DropdownMenuItem>
                 </>
               )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
+                onClick={() => setOpen(true)}
+              >
+                <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
+                  <RefreshCw className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-45" />
+                </div>
+                <span className="font-medium">Switch Workspace</span>
+              </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -164,27 +166,27 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   </button>
                 ))}
 
-                {isAdmin && (
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      setCreateOpen(true);
-                    }}
-                    className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border border-dashed bg-card/50 px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group mt-2"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
-                      <Plus className="size-5 transition-transform duration-200 group-hover:scale-125" />
-                    </div>
-                    <p className="text-sm font-semibold tracking-tight">Create New Workspace</p>
-                  </button>
-                )}
+
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    setCreateOpen(true);
+                  }}
+                  className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border border-dashed bg-card/50 px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group mt-2"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
+                    <Plus className="size-5 transition-transform duration-200 group-hover:scale-125" />
+                  </div>
+                  <p className="text-sm font-semibold tracking-tight">Create New Workspace</p>
+                </button>
+
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
         <div className="flex items-center gap-3">
-          <Hint label="Filter conversations" side="bottom">
+          {/* <Hint label="Filter conversations" side="bottom">
             <Button
               variant="ghost"
               size="sm"
@@ -192,10 +194,11 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
             >
               <ListFilter className="size-5" />
             </Button>
-          </Hint>
+          </Hint> */}
 
           <Hint label="New message" side="bottom">
             <Button
+              onClick={() => setSearchOpen(true)}
               variant="ghost"
               size="sm"
               className="flex h-10 w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"

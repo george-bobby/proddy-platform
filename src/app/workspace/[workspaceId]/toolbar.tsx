@@ -1,15 +1,12 @@
 'use client';
 
-import { Bell, Plus, Search } from 'lucide-react';
-import Link from 'next/link';
+import { Bell, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { ReactNode, useEffect, useState } from 'react';
-import { FaGithub } from 'react-icons/fa';
+import { ReactNode, useEffect } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -18,27 +15,24 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
-import { links } from '@/config';
 import { UserButton } from '@/features/auth/components/user-button';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
-import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
+import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
+
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
 interface WorkspaceHeaderProps {
   children: ReactNode;
-  showCreateWorkspace?: boolean;
 }
 
-export const WorkspaceHeader = ({ 
-  children,
-  showCreateWorkspace = true
+export const WorkspaceHeader = ({
+  children
 }: WorkspaceHeaderProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [_, setCreateOpen] = useCreateWorkspaceModal();
+  const [searchOpen, setSearchOpen] = useWorkspaceSearch();
 
   const { data: workspace } = useGetWorkspace({ id: workspaceId });
   const { data: channels } = useGetChannels({ workspaceId });
@@ -63,10 +57,10 @@ export const WorkspaceHeader = ({
     };
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [setSearchOpen]);
 
   return (
-    <nav className="flex h-16 items-center overflow-hidden border-b bg-primary text-primary-foreground shadow-md">
+    <nav className="flex h-16 items-center overflow-hidden border-b bg-tertiary text-primary-foreground shadow-md">
       {/* Left section - Entity info (Channel/Member/etc) */}
       <div className="flex items-center px-6">
         {children}
@@ -114,27 +108,6 @@ export const WorkspaceHeader = ({
 
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
-        {showCreateWorkspace && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="group flex items-center gap-x-2 text-white hover:bg-white/10 transition-standard"
-            onClick={() => setCreateOpen(true)}
-          >
-            <Plus className="size-4 transition-transform duration-200 group-hover:scale-125" />
-            <span className="hidden sm:inline">Create Workspace</span>
-          </Button>
-        )}
-        <Button variant="transparent" size="iconSm" asChild>
-          <Link
-            href={links.sourceCode}
-            target="_blank"
-            rel="noreferrer noopener"
-            title="Source Code"
-          >
-            <FaGithub className="size-5 text-white" />
-          </Link>
-        </Button>
         <Button variant="ghost" size="iconSm" className="text-white">
           <Bell className="size-5" />
         </Button>

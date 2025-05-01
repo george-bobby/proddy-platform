@@ -12,7 +12,7 @@ import { Thread } from '@/features/messages/components/thread';
 import { StatusTracker } from '@/features/status/components/status-tracker';
 import { usePanel } from '@/hooks/use-panel';
 
-import { WorkspaceSidebar } from './workspace-sidebar';
+import { WorkspaceSidebar } from './sidebar';
 
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
