@@ -1,7 +1,7 @@
 'use client';
 
 import { type LucideIcon } from 'lucide-react';
-import { Hash } from 'lucide-react';
+
 import Link from 'next/link';
 
 import type { Id } from '@/../convex/_generated/dataModel';
@@ -129,7 +129,7 @@ export const ChannelItem = ({ id, label, isActive = false }: ChannelItemProps) =
       )}
       size="sm"
       asChild>
-      <Link href={`/workspace/${workspaceId}/channel/${id}/chat`} className="w-full overflow-hidden">
+      <Link href={`/workspace/${workspaceId}/channel/${id}/chats`} className="w-full overflow-hidden">
         <div className="relative mr-2 md:mr-3 flex-shrink-0">
           <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
             <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>

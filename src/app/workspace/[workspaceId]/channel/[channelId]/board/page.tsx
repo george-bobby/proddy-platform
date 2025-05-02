@@ -1,9 +1,15 @@
-import React from 'react'
+'use client';
 
-const page = () => {
+import { LayoutGrid } from 'lucide-react';
+
+const BoardPage = () => {
     return (
-        <div>page</div>
-    )
-}
+        <div className="flex h-full flex-col items-center justify-center gap-y-4 bg-white">
+            <LayoutGrid className="size-16 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold">Boards</h2>
+            <p className="text-sm text-muted-foreground">Boards feature coming soon.</p>
+        </div>
+    );
+};
 
-export default page
+export default BoardPage;

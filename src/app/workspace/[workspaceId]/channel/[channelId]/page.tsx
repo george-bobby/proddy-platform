@@ -13,8 +13,8 @@ const ChannelIdPage = () => {
   const channelId = useChannelId();
 
   useEffect(() => {
-    // Redirect to the chat subdirectory
-    router.replace(`/workspace/${workspaceId}/channel/${channelId}/chat`);
+    // Redirect to the chats subdirectory
+    router.replace(`/workspace/${workspaceId}/channel/${channelId}/chats`);
   }, [router, workspaceId, channelId]);
 
   // Show a loading indicator while redirecting
