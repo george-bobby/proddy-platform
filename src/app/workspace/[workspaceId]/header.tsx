@@ -61,21 +61,21 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
         joinCode={workspace.joinCode}
       />
 
-      <div className="flex h-16 items-center justify-between gap-1 px-6 border-b border-tertiary/20">
+      <div className="flex h-14 md:h-16 items-center justify-between gap-1 px-2 md:px-6 border-b border-tertiary/20">
         <div className="flex items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="mt-5 h-14 group flex items-center gap-4 overflow-hidden p-2.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center gap-2 md:gap-4 overflow-hidden p-1.5 md:p-2.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
                 size="lg"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
+                <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
                   {workspace.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="flex flex-col items-start">
-                  <span className="text-base font-semibold tracking-tight">{workspace.name}</span>
-                  <span className="text-xs text-primary-foreground/70">Active Workspace</span>
+                <div className="flex flex-col items-start min-w-0">
+                  <span className="text-sm md:text-base font-semibold tracking-tight truncate max-w-[100px] md:max-w-full">{workspace.name}</span>
+                  <span className="text-xs text-primary-foreground/70 hidden md:inline-block">Active Workspace</span>
                 </div>
                 <ChevronDown className="ml-0.5 size-3.5 shrink-0 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
               </Button>
@@ -184,15 +184,15 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
           </Dialog>
         </div>
 
-        <div className="flex items-center gap-3 mt-5">
+        <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-5">
           <Hint label="New message" side="bottom">
             <Button
               onClick={() => setSearchOpen(true)}
               variant="ghost"
               size="sm"
-              className="flex h-10 w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"
+              className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"
             >
-              <SquarePen className="size-5" />
+              <SquarePen className="size-4 md:size-5" />
             </Button>
           </Hint>
         </div>

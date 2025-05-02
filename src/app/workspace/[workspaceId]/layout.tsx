@@ -25,29 +25,35 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
       <div className="h-full">
         <div className="flex h-full">
           <ResizablePanelGroup direction="horizontal" autoSaveId="workspace-layout">
-            <ResizablePanel defaultSize={20} minSize={11} className="bg-tertiary/50">
-              <WorkspaceSidebar />
+            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-tertiary/50">
+              <div className="h-full overflow-y-auto overflow-x-hidden w-full">
+                <WorkspaceSidebar />
+              </div>
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            <ResizablePanel defaultSize={80} minSize={20}>
-              {children}
+            <ResizablePanel defaultSize={80} minSize={30}>
+              <div className="h-full overflow-auto">
+                {children}
+              </div>
             </ResizablePanel>
 
             {showPanel && (
               <>
                 <ResizableHandle withHandle />
-                <ResizablePanel minSize={20} defaultSize={29}>
-                  {parentMessageId ? (
-                    <Thread messageId={parentMessageId as Id<'messages'>} onClose={onClose} />
-                  ) : profileMemberId ? (
-                    <Profile memberId={profileMemberId as Id<'members'>} onClose={onClose} />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <Loader className="size-5 animate-spin text-muted-foreground" />
-                    </div>
-                  )}
+                <ResizablePanel minSize={25} defaultSize={29} maxSize={40}>
+                  <div className="h-full overflow-auto">
+                    {parentMessageId ? (
+                      <Thread messageId={parentMessageId as Id<'messages'>} onClose={onClose} />
+                    ) : profileMemberId ? (
+                      <Profile memberId={profileMemberId as Id<'members'>} onClose={onClose} />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <Loader className="size-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
                 </ResizablePanel>
               </>
             )}
