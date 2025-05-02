@@ -1,21 +1,24 @@
 'use client';
 
-import { type VariantProps, cva } from 'class-variance-authority';
 import {
   AlertTriangle,
   CalendarIcon,
+  ChevronDown,
+  ChevronRight,
   HashIcon,
   Loader,
   MessageSquareText,
+  PlusIcon,
   SendHorizonal,
-  type LucideIcon
+  Users,
+  AtSign,
+  Hash
 } from 'lucide-react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { IconType } from 'react-icons/lib';
+import { useToggle } from 'react-use';
 
-import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
+import { Hint } from '@/components/hint';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useCreateChannelModal } from '@/features/channels/store/use-create-channel-modal';
 import { useCurrentMember } from '@/features/members/api/use-current-member';
@@ -25,71 +28,67 @@ import { useChannelId } from '@/hooks/use-channel-id';
 import { useMemberId } from '@/hooks/use-member-id';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
-// SidebarItem Component
-const sidebarItemVariants = cva(
-  'flex items-center gap-3 justify-start font-medium h-10 px-4 text-sm overflow-hidden rounded-[10px] transition-standard',
-  {
-    variants: {
-      variant: {
-        default: 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1',
-        active: 'text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-);
+import { WorkspaceHeader } from './header';
+import { SidebarItem, MemberItem, ChannelItem } from './options';
 
-interface SidebarItemProps {
+// DroppableItem Component
+interface DroppableItemProps {
   label: string;
-  icon: LucideIcon;
-  id: string;
-  href?: string;
-  isActive?: boolean;
+  hint: string;
+  icon: React.ElementType;
+  onNew?: () => void;
+  children: React.ReactNode;
 }
 
-export const SidebarItem = ({
+const DroppableItem = ({
+  children,
+  hint,
   label,
   icon: Icon,
-  id,
-  href,
-  isActive,
-}: SidebarItemProps) => {
-  const workspaceId = useWorkspaceId();
+  onNew,
+}: DroppableItemProps) => {
+  const [on, toggle] = useToggle(true);
 
-  const content = (
-    <div
-      className={cn(
-        'group flex w-full cursor-pointer items-center gap-x-3 rounded-[10px] px-4 py-2.5 text-sm font-medium transition-standard',
-        isActive
-          ? 'bg-primary-foreground/20 text-primary-foreground shadow-sm hover:bg-primary-foreground/30'
-          : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1'
-      )}
-    >
-      <Icon className="size-5 transition-transform duration-200 group-hover:scale-110" />
-      <span className="truncate">{label}</span>
+  return (
+    <div className="flex flex-col px-2 md:px-4 w-full">
+      <div
+        className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-primary-foreground/80 hover:bg-primary-foreground/10"
+        onClick={toggle}
+      >
+        <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+        <span className="truncate min-w-0">{label}</span>
+        <ChevronDown
+          className={cn(
+            'ml-auto size-4 flex-shrink-0 transition-transform duration-200',
+            !on && '-rotate-90'
+          )}
+        />
+
+        {onNew && (
+          <Hint label={hint} side="top" align="center">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onNew();
+              }}
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 flex-shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
+            >
+              <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
+            </Button>
+          </Hint>
+        )}
+      </div>
+
+      {on && <div className="mt-2 space-y-1.5 pl-1 md:pl-2">{children}</div>}
     </div>
   );
-
-  if (href) {
-    return <Link href={href}>{content}</Link>;
-  }
-
-  // For channels, use the channel ID
-  if (id.startsWith('channels/')) {
-    const channelId = id.replace('channels/', '');
-    return <Link href={`/workspace/${workspaceId}/channel/${channelId}`}>{content}</Link>;
-  }
-
-  return content;
 };
 
-// Import the UserItem and WorkspaceSection components
-import { UserItem } from './user-item';
-import { WorkspaceHeader } from './header';
-import { WorkspaceSection } from './options';
+
 
 // WorkspaceSidebar Component
 export const WorkspaceSidebar = () => {
@@ -123,16 +122,66 @@ export const WorkspaceSidebar = () => {
   }
 
   return (
-    <div className="flex h-full flex-col gap-y-2 bg-tertiary transition-standard">
-      <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
+    <div className="flex h-full flex-col bg-tertiary transition-standard">
+      {/* Workspace Header */}
+      <div className="flex-shrink-0">
+        <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
+      </div>
 
-      <div className="mt-4 flex flex-col gap-2 px-4">
+      {/* Channels Section */}
+      {channels && channels.length > 0 && (
+        <div className="mt-4">
+          <DroppableItem
+            label="Channels"
+            hint="New Channel"
+            icon={Hash}
+            onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
+          >
+            {channels.map((item) => (
+              <ChannelItem
+                key={item._id}
+                id={item._id}
+                label={item.name}
+                isActive={channelId === item._id}
+              />
+            ))}
+          </DroppableItem>
+        </div>
+      )}
+
+      {/* Members Section */}
+      {members && members.length > 0 && (
+        <div className="mt-2">
+          <DroppableItem
+            label="Members"
+            hint="New Direct Message"
+            icon={Users}
+            onNew={member.role === 'admin' ? () => { } : undefined}
+          >
+            {members.map((item) => (
+              <MemberItem
+                key={item._id}
+                id={item._id}
+                label={item.user.name}
+                image={item.user.image}
+                isActive={item._id === memberId}
+              />
+            ))}
+          </DroppableItem>
+        </div>
+      )}
+
+      {/* Divider between dynamic and static sections */}
+      <Separator className="my-4 mx-4 bg-primary-foreground/10" />
+
+      {/* Static Items */}
+      <div className="flex flex-col gap-2 px-4">
         <SidebarItem
-          label="Calendar"
-          icon={CalendarIcon}
-          id="calendar"
-          href={`/workspace/${workspaceId}/calendar`}
-          isActive={pathname.includes('/calendar')}
+          label="Outbox"
+          icon={SendHorizonal}
+          id="outbox"
+          href={`/workspace/${workspaceId}/outbox`}
+          isActive={pathname.includes('/outbox')}
         />
         <SidebarItem
           label="Threads"
@@ -142,49 +191,20 @@ export const WorkspaceSidebar = () => {
           isActive={pathname.includes('/threads')}
         />
         <SidebarItem
-          label="Outbox"
-          icon={SendHorizonal}
-          id="outbox"
-          href={`/workspace/${workspaceId}/outbox`}
-          isActive={pathname.includes('/outbox')}
+          label="Mentions"
+          icon={AtSign}
+          id="mentions"
+          href={`/workspace/${workspaceId}/mentions`}
+          isActive={pathname.includes('/mentions')}
+        />
+        <SidebarItem
+          label="Calendar"
+          icon={CalendarIcon}
+          id="calendar"
+          href={`/workspace/${workspaceId}/calendar`}
+          isActive={pathname.includes('/calendar')}
         />
       </div>
-
-      {channels && channels.length > 0 && (
-        <WorkspaceSection
-          label="Channels"
-          hint="New Channel"
-          onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
-        >
-          {channels.map((item) => (
-            <SidebarItem
-              isActive={channelId === item._id}
-              key={item._id}
-              id={`channels/${item._id}`}
-              icon={HashIcon}
-              label={item.name}
-            />
-          ))}
-        </WorkspaceSection>
-      )}
-
-      {members && members.length > 0 && (
-        <WorkspaceSection
-          label="Members"
-          hint="New Direct Message"
-          onNew={member.role === 'admin' ? () => { } : undefined}
-        >
-          {members.map((item) => (
-            <UserItem
-              key={item._id}
-              id={item._id}
-              label={item.user.name}
-              image={item.user.image}
-              isActive={item._id === memberId}
-            />
-          ))}
-        </WorkspaceSection>
-      )}
     </div>
   );
 };

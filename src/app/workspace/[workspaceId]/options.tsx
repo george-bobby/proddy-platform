@@ -1,62 +1,142 @@
 'use client';
 
-import { ChevronDown, PlusIcon } from 'lucide-react';
-import type { PropsWithChildren } from 'react';
-import { useToggle } from 'react-use';
+import { type LucideIcon } from 'lucide-react';
+import { Hash } from 'lucide-react';
+import Link from 'next/link';
 
-import { Hint } from '@/components/hint';
+import type { Id } from '@/../convex/_generated/dataModel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { StatusIndicator } from '@/components/ui/status-indicator';
+import { useGetMember } from '@/features/members/api/use-get-member';
+import { useGetUserStatus } from '@/features/status/api/use-get-user-status';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
-interface WorkspaceSectionProps {
+// SidebarItem Component
+interface SidebarItemProps {
   label: string;
-  hint: string;
-  onNew?: () => void;
+  icon: LucideIcon;
+  id: string;
+  href?: string;
+  isActive?: boolean;
 }
 
-export const WorkspaceSection = ({
-  children,
-  hint,
+export const SidebarItem = ({
   label,
-  onNew,
-}: PropsWithChildren<WorkspaceSectionProps>) => {
-  const [on, toggle] = useToggle(true);
+  icon: Icon,
+  id,
+  href,
+  isActive,
+}: SidebarItemProps) => {
+  const workspaceId = useWorkspaceId();
+
+  const content = (
+    <div
+      className={cn(
+        'group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2 md:py-2.5 text-sm font-medium transition-standard',
+        isActive
+          ? 'bg-primary-foreground/20 text-primary-foreground shadow-sm hover:bg-primary-foreground/30'
+          : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1'
+      )}
+    >
+      <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+      <span className="truncate min-w-0">{label}</span>
+    </div>
+  );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  // For channels, use the channel ID
+  if (id.startsWith('channels/')) {
+    const channelId = id.replace('channels/', '');
+    return <Link href={`/workspace/${workspaceId}/channel/${channelId}`}>{content}</Link>;
+  }
+
+  return content;
+};
+
+// MemberItem Component
+interface MemberItemProps {
+  id: Id<'members'>;
+  label?: string;
+  image?: string;
+  isActive?: boolean;
+}
+
+export const MemberItem = ({ id, label = 'Member', image, isActive = false }: MemberItemProps) => {
+  const workspaceId = useWorkspaceId();
+  const avatarFallback = label.charAt(0).toUpperCase();
+
+  // Get the member data to access the userId
+  const { data: member } = useGetMember({ id });
+
+  // Get the user's status, passing userId only if available
+  const { data: userStatus } = useGetUserStatus({
+    workspaceId,
+    userId: member?.userId || null,
+  });
+
+  // Default to offline if status data is not available
+  const status = userStatus?.status || 'offline';
 
   return (
-    <div className="mt-4 flex flex-col px-4">
-      <div className="group flex items-center px-2 mb-2">
-        <Button
-          onClick={toggle}
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 shrink-0 p-0 text-primary-foreground/80 rounded-[8px] transition-standard hover:bg-primary-foreground/10"
-        >
-          <ChevronDown className={cn('size-4 transition-transform duration-200', !on && '-rotate-90')} />
-        </Button>
+    <Button
+      variant="ghost"
+      className={cn(
+        "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 justify-start font-medium h-9 md:h-10 px-2 md:px-4 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
+        isActive
+          ? "text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm"
+          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1"
+      )}
+      size="sm"
+      asChild>
+      <Link href={`/workspace/${workspaceId}/member/${id}`} className="w-full overflow-hidden">
+        <div className="relative mr-2 md:mr-3 flex-shrink-0">
+          <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
+            <AvatarImage alt={label} src={image} />
+            <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+          </Avatar>
+          {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+        </div>
+        <span className="truncate min-w-0 text-sm flex-1">{label}</span>
+      </Link>
+    </Button>
+  );
+};
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 items-center justify-start overflow-hidden px-2 text-sm font-semibold tracking-tight text-primary-foreground/90 transition-standard"
-        >
-          <span className="truncate">{label}</span>
-        </Button>
+// ChannelItem Component
+interface ChannelItemProps {
+  id: Id<'channels'>;
+  label: string;
+  isActive?: boolean;
+}
 
-        {onNew && (
-          <Hint label={hint} side="top" align="center">
-            <Button
-              onClick={onNew}
-              variant="ghost"
-              size="sm"
-              className="ml-auto h-7 w-7 shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
-            >
-              <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
-            </Button>
-          </Hint>
-        )}
-      </div>
+export const ChannelItem = ({ id, label, isActive = false }: ChannelItemProps) => {
+  const workspaceId = useWorkspaceId();
+  const channelFallback = label.charAt(0).toLowerCase();
 
-      {on && <div className="mt-2 space-y-1.5">{children}</div>}
-    </div>
+  return (
+    <Button
+      variant="ghost"
+      className={cn(
+        "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 justify-start font-medium h-9 md:h-10 px-2 md:px-4 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
+        isActive
+          ? "text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm"
+          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1"
+      )}
+      size="sm"
+      asChild>
+      <Link href={`/workspace/${workspaceId}/channel/${id}`} className="w-full overflow-hidden">
+        <div className="relative mr-2 md:mr-3 flex-shrink-0">
+          <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
+            <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+          </div>
+        </div>
+        <span className="truncate min-w-0 text-sm flex-1">{label}</span>
+      </Link>
+    </Button>
   );
 };
