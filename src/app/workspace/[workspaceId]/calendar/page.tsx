@@ -131,7 +131,7 @@ const CalendarPage = () => {
                 ))}
               </div>
               {/* Calendar grid */}
-              <div className="grid h-[calc(100%-2rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
+              <div className="grid h-[calc(100%-1rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
                 {weeks.flat().map((dayObj, index) => (
                   <div
                     key={index}

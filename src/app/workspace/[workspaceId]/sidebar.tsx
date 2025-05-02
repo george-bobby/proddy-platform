@@ -52,9 +52,9 @@ const DroppableItem = ({
   const [on, toggle] = useToggle(true);
 
   return (
-    <div className="flex flex-col px-2 md:px-4 w-full overflow-hidden">
+    <div className="flex flex-col px-2 md:px-4 w-full">
       <div
-        className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-primary-foreground/80 hover:bg-primary-foreground/10 overflow-hidden"
+        className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-primary-foreground/80 hover:bg-primary-foreground/10"
         onClick={toggle}
       >
         <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -83,7 +83,7 @@ const DroppableItem = ({
         )}
       </div>
 
-      {on && <div className="mt-2 space-y-1.5 pl-1 md:pl-2 overflow-hidden">{children}</div>}
+      {on && <div className="mt-2 space-y-1.5 pl-1 md:pl-2">{children}</div>}
     </div>
   );
 };
@@ -122,7 +122,7 @@ export const WorkspaceSidebar = () => {
   }
 
   return (
-    <div className="flex h-full flex-col bg-tertiary transition-standard overflow-y-auto">
+    <div className="flex h-full flex-col bg-tertiary transition-standard">
       {/* Workspace Header */}
       <div className="flex-shrink-0">
         <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
