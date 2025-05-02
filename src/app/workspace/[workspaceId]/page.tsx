@@ -15,7 +15,7 @@ export default function WorkspacePage() {
 
   useEffect(() => {
     if (channels?.length) {
-      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}`);
+      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/chats`);
     }
   }, [channels, router, workspaceId]);
 

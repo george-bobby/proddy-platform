@@ -52,7 +52,7 @@ export const SidebarItem = ({
   // For channels, use the channel ID
   if (id.startsWith('channels/')) {
     const channelId = id.replace('channels/', '');
-    return <Link href={`/workspace/${workspaceId}/channel/${channelId}`}>{content}</Link>;
+    return <Link href={`/workspace/${workspaceId}/channel/${channelId}/chats`}>{content}</Link>;
   }
 
   return content;
@@ -129,7 +129,7 @@ export const ChannelItem = ({ id, label, isActive = false }: ChannelItemProps) =
       )}
       size="sm"
       asChild>
-      <Link href={`/workspace/${workspaceId}/channel/${id}`} className="w-full overflow-hidden">
+      <Link href={`/workspace/${workspaceId}/channel/${id}/chat`} className="w-full overflow-hidden">
         <div className="relative mr-2 md:mr-3 flex-shrink-0">
           <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
             <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
