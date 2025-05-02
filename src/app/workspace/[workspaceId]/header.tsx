@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
-import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
 
 import { InviteModal } from './invitation';
 import { PreferencesModal } from './preferences';
@@ -39,7 +38,6 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
   const [inviteOpen, setInviteOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false); // renamed here
   const [_, setCreateOpen] = useCreateWorkspaceModal();
-  const [__, setSearchOpen] = useWorkspaceSearch();
   const { data: workspaces } = useGetWorkspaces();
 
   const onWorkspaceClick = (id: string) => {
@@ -182,19 +180,6 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
               </div>
             </DialogContent>
           </Dialog>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-5">
-          <Hint label="New message" side="bottom">
-            <Button
-              onClick={() => setSearchOpen(true)}
-              variant="ghost"
-              size="sm"
-              className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"
-            >
-              <SquarePen className="size-4 md:size-5" />
-            </Button>
-          </Hint>
         </div>
       </div>
     </>
