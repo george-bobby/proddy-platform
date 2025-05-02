@@ -67,8 +67,8 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="mt-5 group flex items-center gap-4 overflow-hidden p-5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
-                size="sm"
+                className="mt-5 h-14 group flex items-center gap-4 overflow-hidden p-2.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                size="lg"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
                   {workspace.name.charAt(0).toUpperCase()}
