@@ -83,7 +83,7 @@ export default function ThreadsPage() {
 
   const getThreadUrl = (thread: ThreadMessage) => {
     if (thread.context.type === 'channel') {
-      return `/workspace/${workspaceId}/channel/${thread.context.id}`;
+      return `/workspace/${workspaceId}/channel/${thread.context.id}/chats`;
     } else if (thread.context.type === 'conversation' && thread.context.memberId) {
       return `/workspace/${workspaceId}/member/${thread.context.memberId}`;
     }

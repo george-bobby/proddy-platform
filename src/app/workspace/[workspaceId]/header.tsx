@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Doc } from '@/../convex/_generated/dataModel';
 import { Hint } from '@/components/hint';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
 import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
-import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
 
 import { InviteModal } from './invitation';
 import { PreferencesModal } from './preferences';
@@ -31,15 +31,15 @@ import { PreferencesModal } from './preferences';
 interface WorkspaceHeaderProps {
   workspace: Doc<'workspaces'>;
   isAdmin: boolean;
+  isCollapsed?: boolean;
 }
 
-export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) => {
+export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: WorkspaceHeaderProps) => {
   const router = useRouter();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false); // renamed here
   const [_, setCreateOpen] = useCreateWorkspaceModal();
-  const [__, setSearchOpen] = useWorkspaceSearch();
   const { data: workspaces } = useGetWorkspaces();
 
   const onWorkspaceClick = (id: string) => {
@@ -61,24 +61,41 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
         joinCode={workspace.joinCode}
       />
 
-      <div className="flex h-14 md:h-16 items-center justify-between gap-1 px-2 md:px-6 border-b border-tertiary/20">
+      <div className={cn(
+        "flex h-14 md:h-16 items-center justify-between gap-1 border-b border-tertiary/20",
+        isCollapsed ? "px-1 md:px-2" : "px-2 md:px-6"
+      )}>
         <div className="flex items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center gap-2 md:gap-4 overflow-hidden p-1.5 md:p-2.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
-                size="lg"
-              >
-                <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
-                  {workspace.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex flex-col items-start min-w-0">
-                  <span className="text-sm md:text-base font-semibold tracking-tight truncate max-w-[100px] md:max-w-full">{workspace.name}</span>
-                  <span className="text-xs text-primary-foreground/70 hidden md:inline-block">Active Workspace</span>
-                </div>
-                <ChevronDown className="ml-0.5 size-3.5 shrink-0 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
-              </Button>
+              {isCollapsed ? (
+                <Hint label={workspace.name} side="right" align="center">
+                  <Button
+                    variant="ghost"
+                    className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center justify-center p-1 md:p-1.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                    size="icon"
+                  >
+                    <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
+                      {workspace.name.charAt(0).toUpperCase()}
+                    </div>
+                  </Button>
+                </Hint>
+              ) : (
+                <Button
+                  variant="ghost"
+                  className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center gap-2 md:gap-4 overflow-hidden p-1.5 md:p-2.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                  size="lg"
+                >
+                  <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
+                    {workspace.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex flex-col items-start min-w-0">
+                    <span className="text-sm md:text-base font-semibold tracking-tight truncate max-w-[100px] md:max-w-full">{workspace.name}</span>
+                    <span className="text-xs text-primary-foreground/70 hidden md:inline-block">Active Workspace</span>
+                  </div>
+                  <ChevronDown className="ml-0.5 size-3.5 shrink-0 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
+                </Button>
+              )}
             </DropdownMenuTrigger>
 
             <DropdownMenuContent side="bottom" align="start" className="w-64 p-2">
@@ -182,19 +199,6 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
               </div>
             </DialogContent>
           </Dialog>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-5">
-          <Hint label="New message" side="bottom">
-            <Button
-              onClick={() => setSearchOpen(true)}
-              variant="ghost"
-              size="sm"
-              className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"
-            >
-              <SquarePen className="size-4 md:size-5" />
-            </Button>
-          </Hint>
         </div>
       </div>
     </>

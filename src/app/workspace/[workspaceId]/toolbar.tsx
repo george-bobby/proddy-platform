@@ -40,7 +40,7 @@ export const WorkspaceHeader = ({
 
   const onChannelClick = (channelId: Id<'channels'>) => {
     setSearchOpen(false);
-    router.push(`/workspace/${workspaceId}/channel/${channelId}`);
+    router.push(`/workspace/${workspaceId}/channel/${channelId}/chats`);
   };
 
   const onMemberClick = (memberId: Id<'members'>) => {
