@@ -1,5 +1,8 @@
 import Quill from 'quill';
 import { useEffect, useRef, useState } from 'react';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { addMentionClickHandlers } from '@/lib/mention-handler';
+import { useGetMembers } from '@/features/members/api/use-get-members';
 
 interface RendererProps {
   value: string;
@@ -12,6 +15,8 @@ interface RendererProps {
 const Renderer = ({ value, calendarEvent }: RendererProps) => {
   const [isEmpty, setIsEmpty] = useState(false);
   const rendererRef = useRef<HTMLDivElement>(null);
+  const workspaceId = useWorkspaceId();
+  const { data: members } = useGetMembers({ workspaceId });
 
   useEffect(() => {
     if (!rendererRef.current) return;
@@ -19,7 +24,7 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     const container = rendererRef.current;
 
     const quill = new Quill(document.createElement('div'), {
-      theme: 'snow',
+      theme: 'snow'
     });
 
     quill.enable(false);
@@ -95,12 +100,19 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     // Get the HTML content after cleaning
     let htmlContent = quill.root.innerHTML;
 
+    // Add the HTML content to the container
     container.innerHTML = htmlContent;
+
+    // Add click handlers to mentions
+    addMentionClickHandlers(container);
+
+    // Log for debugging
+    console.log('Renderer: Added click handlers to mentions in workspace:', workspaceId);
 
     return () => {
       if (container) container.innerHTML = '';
     };
-  }, [value, calendarEvent]);
+  }, [value, calendarEvent, workspaceId, members]);
 
   if (isEmpty) return null;
 

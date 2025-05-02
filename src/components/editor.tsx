@@ -7,12 +7,16 @@ import { type MutableRefObject, useEffect, useLayoutEffect, useRef, useState } f
 import { MdSend } from 'react-icons/md';
 import { PiTextAa } from 'react-icons/pi';
 
+import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { createMentionElement } from '@/lib/mention-handler';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
 import { CalendarPicker } from './calendar-picker';
 import { EmojiPopover } from './emoji-popover';
 import { Hint } from './hint';
+import { MentionPicker } from './mention-picker';
 
 type EditorValue = {
   image: File | null;
@@ -42,12 +46,19 @@ const Editor = ({
   innerRef,
   variant = 'create',
 }: EditorProps) => {
+  const workspaceId = useWorkspaceId();
   const [text, setText] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
   const [calendarPickerOpen, setCalendarPickerOpen] = useState(false);
+  const [mentionPickerOpen, setMentionPickerOpen] = useState(false);
   const [lastKeyWasExclamation, setLastKeyWasExclamation] = useState(false);
+  const [lastKeyWasAt, setLastKeyWasAt] = useState(false);
+  const [mentionSearchQuery, setMentionSearchQuery] = useState('');
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState<{ date: Date, time?: string } | null>(null);
+  const mentionPickerRef = useRef<HTMLDivElement>(null);
+
+  // No need for custom module registration with our simpler approach
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imageElementRef = useRef<HTMLInputElement>(null);
@@ -64,6 +75,34 @@ const Editor = ({
     defaultValueRef.current = defaultValue;
     disabledRef.current = disabled;
   });
+
+  // Add click outside handler to close the mention picker
+  useEffect(() => {
+    if (!mentionPickerOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      // If the click is outside the mention picker and not on the @ button, close it
+      if (
+        mentionPickerRef.current &&
+        !mentionPickerRef.current.contains(e.target as Node) &&
+        !(e.target as HTMLElement).closest('button[data-mention-button="true"]')
+      ) {
+        console.log('Click outside detected, closing mention picker');
+        setMentionPickerOpen(false);
+        setLastKeyWasAt(false);
+      }
+    };
+
+    // Add the event listener with a slight delay to prevent immediate closing
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mentionPickerOpen]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -105,7 +144,7 @@ const Editor = ({
               },
             },
           },
-        },
+        }
       },
       placeholder: placeholderRef.current,
       theme: 'snow',
@@ -132,6 +171,60 @@ const Editor = ({
       } else if (!newText.trim().endsWith('!')) {
         setLastKeyWasExclamation(false);
       }
+
+      // Check if the last character is "@" to trigger mention picker
+      const lastChar = newText.slice(-1);
+      console.log('Last character typed:', lastChar, 'Text:', newText);
+
+      if (newText.trim().endsWith('@') && !lastKeyWasAt) {
+        console.log('@ character detected, opening mention picker');
+        setLastKeyWasAt(true);
+        setMentionPickerOpen(true);
+        setMentionSearchQuery('');
+      } else if (lastKeyWasAt) {
+        // If we're already in mention mode, check if we're still typing a mention
+        const atIndex = newText.lastIndexOf('@');
+        if (atIndex >= 0) {
+          // Extract the text after the @ symbol for filtering
+          const query = newText.substring(atIndex + 1).trim();
+          console.log('Mention query:', query);
+          setMentionSearchQuery(query);
+
+          // If user presses space after typing some text, close the mention picker
+          if (query.includes(' ')) {
+            console.log('Space detected, closing mention picker');
+            setLastKeyWasAt(false);
+            setMentionPickerOpen(false);
+          }
+
+          // If the @ symbol is the only character and it's deleted, close the picker
+          if (atIndex === -1 || newText.trim() === '') {
+            console.log('@ character deleted, closing mention picker');
+            setLastKeyWasAt(false);
+            setMentionPickerOpen(false);
+          }
+        } else {
+          // If @ is deleted, close the mention picker
+          console.log('@ character deleted, closing mention picker');
+          setLastKeyWasAt(false);
+          setMentionPickerOpen(false);
+        }
+      }
+
+      // If the text is completely empty, close the mention picker
+      if (newText.trim() === '' && mentionPickerOpen) {
+        console.log('Text is empty, closing mention picker');
+        setLastKeyWasAt(false);
+        setMentionPickerOpen(false);
+      }
+
+      // Add event listener for Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mentionPickerOpen) {
+          setMentionPickerOpen(false);
+          setLastKeyWasAt(false);
+        }
+      }, { once: true });
     });
 
     return () => {
@@ -224,6 +317,59 @@ const Editor = ({
     quill.insertText(quill.getSelection()?.index || quill.getText().length, displayText + ' ');
   };
 
+  const handleMentionSelect = (memberId: Id<'members'>, memberName: string) => {
+    console.log('Mention selected:', memberName);
+    const quill = quillRef.current;
+    if (!quill) {
+      console.error('Quill editor not initialized');
+      return;
+    }
+
+    // Remove the @ symbol that triggered the mention picker
+    const currentText = quill.getText();
+    const atIndex = currentText.lastIndexOf('@');
+
+    console.log('Current text:', currentText);
+    console.log('@ index:', atIndex);
+
+    if (atIndex >= 0) {
+      // Delete from @ to current cursor position
+      const currentPosition = quill.getSelection()?.index || currentText.length;
+      console.log('Current cursor position:', currentPosition);
+
+      quill.deleteText(atIndex, currentPosition - atIndex);
+
+      // Create the mention HTML element with workspace ID
+      const mentionHTML = createMentionElement(memberId, memberName, workspaceId);
+
+      // Insert the mention HTML at the cursor position
+      quill.clipboard.dangerouslyPasteHTML(atIndex, mentionHTML + ' ');
+
+      // Move cursor to the end of the mention + space
+      quill.setSelection(atIndex + mentionHTML.length + 1, 0);
+      quill.focus();
+    } else {
+      console.error('Could not find @ symbol in text');
+
+      // If we can't find the @ symbol, just insert the mention at the current cursor position
+      const position = quill.getSelection()?.index || currentText.length;
+
+      // Create the mention HTML element with workspace ID
+      const mentionHTML = createMentionElement(memberId, memberName, workspaceId);
+
+      // Insert the mention HTML at the cursor position
+      quill.clipboard.dangerouslyPasteHTML(position, mentionHTML + ' ');
+
+      // Move cursor to the end of the mention + space
+      quill.setSelection(position + mentionHTML.length + 1, 0);
+      quill.focus();
+    }
+
+    // Close the mention picker
+    setLastKeyWasAt(false);
+    setMentionPickerOpen(false);
+  };
+
   return (
     <div className="flex flex-col">
       <CalendarPicker
@@ -239,6 +385,21 @@ const Editor = ({
         onChange={(e) => setImage(e.target.files![0])}
         className="hidden"
       />
+
+      {/* Render the MentionPicker outside of any container for fixed positioning */}
+      {mentionPickerOpen && (
+        <div ref={mentionPickerRef}>
+          <MentionPicker
+            open={mentionPickerOpen}
+            onClose={() => {
+              setMentionPickerOpen(false);
+              setLastKeyWasAt(false);
+            }}
+            onSelect={handleMentionSelect}
+            searchQuery={mentionSearchQuery}
+          />
+        </div>
+      )}
 
       <div
         className={cn(
@@ -307,6 +468,35 @@ const Editor = ({
                   onClick={() => setCalendarPickerOpen(true)}
                 >
                   <CalendarIcon className="size-4" />
+                </Button>
+              </Hint>
+              <Hint label="Mention User">
+                <Button
+                  disabled={disabled}
+                  size="iconSm"
+                  variant="ghost"
+                  data-mention-button="true"
+                  onClick={() => {
+                    console.log('Mention button clicked');
+                    // Just open the mention picker directly
+                    setLastKeyWasAt(true);
+                    setMentionPickerOpen(true);
+                    setMentionSearchQuery('');
+
+                    // Insert @ symbol at cursor position
+                    const quill = quillRef.current;
+                    if (quill) {
+                      const position = quill.getSelection()?.index || quill.getText().length;
+                      console.log('Inserting @ at position:', position);
+                      quill.insertText(position, '@');
+                      quill.focus();
+                    }
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                  </svg>
                 </Button>
               </Hint>
             </>

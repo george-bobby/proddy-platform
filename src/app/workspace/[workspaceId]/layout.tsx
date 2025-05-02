@@ -2,6 +2,7 @@
 
 import { Loader } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
+import { useEffect } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { SummarizeButton } from '@/components/summarize-button';
@@ -11,6 +12,8 @@ import { Profile } from '@/features/members/components/profile';
 import { Thread } from '@/features/messages/components/thread';
 import { StatusTracker } from '@/features/status/components/status-tracker';
 import { usePanel } from '@/hooks/use-panel';
+import { setupGlobalMentionHandler } from '@/lib/global-mention-handler';
+import { debugMentions } from '@/lib/debug-mentions';
 
 import { WorkspaceSidebar } from './sidebar';
 
@@ -18,6 +21,18 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
 
   const showPanel = !!parentMessageId || !!profileMemberId;
+
+  // Set up global mention handler
+  useEffect(() => {
+    setupGlobalMentionHandler();
+
+    // Set up a timer to debug mentions after the page has loaded
+    const timer = setTimeout(() => {
+      debugMentions();
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <MessageSelectionProvider>
