@@ -37,13 +37,13 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
   const router = useRouter();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false); // renamed here
   const [_, setCreateOpen] = useCreateWorkspaceModal();
   const [__, setSearchOpen] = useWorkspaceSearch();
   const { data: workspaces } = useGetWorkspaces();
 
   const onWorkspaceClick = (id: string) => {
-    setOpen(false);
+    setSwitchOpen(false); // updated reference
     router.push(`/workspace/${id}`);
   };
 
@@ -67,7 +67,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="group flex items-center gap-4 overflow-hidden p-3 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                className="mt-5 group flex items-center gap-4 overflow-hidden p-5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
                 size="sm"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
@@ -75,7 +75,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="text-base font-semibold tracking-tight">{workspace.name}</span>
-                  <span className="text-xs text-primary-foreground/70">Active workspace</span>
+                  <span className="text-xs text-primary-foreground/70">Active Workspace</span>
                 </div>
                 <ChevronDown className="ml-0.5 size-3.5 shrink-0 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
               </Button>
@@ -124,22 +124,23 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
-                onClick={() => setOpen(true)}
+                onClick={() => setSwitchOpen(true)} // updated here
               >
                 <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
                   <RefreshCw className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-45" />
                 </div>
                 <span className="font-medium">Switch Workspace</span>
               </DropdownMenuItem>
-
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={switchOpen} onOpenChange={setSwitchOpen}> {/* updated here */}
             <DialogContent className="overflow-hidden p-0 rounded-[12px] border-0 shadow-xl">
               <DialogHeader className="border-b p-5 bg-muted/30">
                 <DialogTitle className="text-xl font-semibold tracking-tight">Workspaces</DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">Select a workspace to switch to.</DialogDescription>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  Select a workspace to switch to.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="flex flex-col gap-y-3 p-5">
@@ -166,10 +167,9 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   </button>
                 ))}
 
-
                 <button
                   onClick={() => {
-                    setOpen(false);
+                    setSwitchOpen(false); // updated here
                     setCreateOpen(true);
                   }}
                   className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border border-dashed bg-card/50 px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group mt-2"
@@ -179,23 +179,12 @@ export const WorkspaceHeader = ({ workspace, isAdmin }: WorkspaceHeaderProps) =>
                   </div>
                   <p className="text-sm font-semibold tracking-tight">Create New Workspace</p>
                 </button>
-
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* <Hint label="Filter conversations" side="bottom">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex h-10 w-10 items-center justify-center rounded-[10px] p-0 text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground transition-standard"
-            >
-              <ListFilter className="size-5" />
-            </Button>
-          </Hint> */}
-
+        <div className="flex items-center gap-3 mt-5">
           <Hint label="New message" side="bottom">
             <Button
               onClick={() => setSearchOpen(true)}
