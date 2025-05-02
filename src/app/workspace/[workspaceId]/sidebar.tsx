@@ -12,10 +12,13 @@ import {
   SendHorizonal,
   Users,
   AtSign,
-  Hash
+  Hash,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useToggle } from 'react-use';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Hint } from '@/components/hint';
@@ -40,6 +43,7 @@ interface DroppableItemProps {
   icon: React.ElementType;
   onNew?: () => void;
   children: React.ReactNode;
+  isCollapsed?: boolean;
 }
 
 const DroppableItem = ({
@@ -48,38 +52,53 @@ const DroppableItem = ({
   label,
   icon: Icon,
   onNew,
+  isCollapsed = false,
 }: DroppableItemProps) => {
   const [on, toggle] = useToggle(true);
 
   return (
-    <div className="flex flex-col px-2 md:px-4 w-full">
+    <div className={cn(
+      "flex flex-col w-full",
+      isCollapsed ? "px-1" : "px-2 md:px-4"
+    )}>
       <div
         className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-primary-foreground/80 hover:bg-primary-foreground/10"
         onClick={toggle}
       >
-        <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-        <span className="truncate min-w-0">{label}</span>
-        <ChevronDown
-          className={cn(
-            'ml-auto size-4 flex-shrink-0 transition-transform duration-200',
-            !on && '-rotate-90'
-          )}
-        />
-
-        {onNew && (
-          <Hint label={hint} side="top" align="center">
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                onNew();
-              }}
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 flex-shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
-            >
-              <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
-            </Button>
+        {isCollapsed ? (
+          <Hint label={label} side="right" align="center">
+            <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
           </Hint>
+        ) : (
+          <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+        )}
+
+        {!isCollapsed && (
+          <>
+            <span className="truncate min-w-0">{label}</span>
+            <ChevronDown
+              className={cn(
+                'ml-auto size-4 flex-shrink-0 transition-transform duration-200',
+                !on && '-rotate-90'
+              )}
+            />
+
+            {onNew && (
+              <Hint label={hint} side="top" align="center">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNew();
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 flex-shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
+                >
+                  <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
+                </Button>
+              </Hint>
+            )}
+          </>
         )}
       </div>
 
@@ -96,6 +115,7 @@ export const WorkspaceSidebar = () => {
   const channelId = useChannelId();
   const memberId = useMemberId();
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [_open, setOpen] = useCreateChannelModal();
 
@@ -122,10 +142,15 @@ export const WorkspaceSidebar = () => {
   }
 
   return (
-    <div className="flex h-full flex-col bg-tertiary transition-standard">
+    <div
+      className={cn(
+        "flex h-full flex-col bg-tertiary transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-[70px]" : "w-[240px]"
+      )}
+    >
       {/* Workspace Header */}
       <div className="flex-shrink-0">
-        <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} />
+        <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} isCollapsed={isCollapsed} />
       </div>
 
       {/* Channels Section */}
@@ -136,6 +161,7 @@ export const WorkspaceSidebar = () => {
             hint="New Channel"
             icon={Hash}
             onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
+            isCollapsed={isCollapsed}
           >
             {channels.map((item) => (
               <ChannelItem
@@ -143,6 +169,7 @@ export const WorkspaceSidebar = () => {
                 id={item._id}
                 label={item.name}
                 isActive={channelId === item._id}
+                isCollapsed={isCollapsed}
               />
             ))}
           </DroppableItem>
@@ -157,6 +184,7 @@ export const WorkspaceSidebar = () => {
             hint="New Direct Message"
             icon={Users}
             onNew={member.role === 'admin' ? () => { } : undefined}
+            isCollapsed={isCollapsed}
           >
             {members.map((item) => (
               <MemberItem
@@ -165,6 +193,7 @@ export const WorkspaceSidebar = () => {
                 label={item.user.name}
                 image={item.user.image}
                 isActive={item._id === memberId}
+                isCollapsed={isCollapsed}
               />
             ))}
           </DroppableItem>
@@ -182,6 +211,7 @@ export const WorkspaceSidebar = () => {
           id="outbox"
           href={`/workspace/${workspaceId}/outbox`}
           isActive={pathname.includes('/outbox')}
+          isCollapsed={isCollapsed}
         />
         <SidebarItem
           label="Threads"
@@ -189,6 +219,7 @@ export const WorkspaceSidebar = () => {
           id="threads"
           href={`/workspace/${workspaceId}/threads`}
           isActive={pathname.includes('/threads')}
+          isCollapsed={isCollapsed}
         />
         <SidebarItem
           label="Mentions"
@@ -196,6 +227,7 @@ export const WorkspaceSidebar = () => {
           id="mentions"
           href={`/workspace/${workspaceId}/mentions`}
           isActive={pathname.includes('/mentions')}
+          isCollapsed={isCollapsed}
         />
         <SidebarItem
           label="Calendar"
@@ -203,7 +235,26 @@ export const WorkspaceSidebar = () => {
           id="calendar"
           href={`/workspace/${workspaceId}/calendar`}
           isActive={pathname.includes('/calendar')}
+          isCollapsed={isCollapsed}
         />
+      </div>
+
+      {/* Collapse/Expand Button */}
+      <div className="mt-auto mb-4 flex justify-center">
+        <Hint label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
+          <Button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 rounded-full p-0 flex items-center justify-center hover:bg-primary-foreground/10"
+          >
+            {isCollapsed ? (
+              <PanelLeftOpen className="size-4 text-primary-foreground/80" />
+            ) : (
+              <PanelLeftClose className="size-4 text-primary-foreground/80" />
+            )}
+          </Button>
+        </Hint>
       </div>
     </div>
   );

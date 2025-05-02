@@ -8,6 +8,7 @@ import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { StatusIndicator } from '@/components/ui/status-indicator';
+import { Hint } from '@/components/hint';
 import { useGetMember } from '@/features/members/api/use-get-member';
 import { useGetUserStatus } from '@/features/status/api/use-get-user-status';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
@@ -20,6 +21,7 @@ interface SidebarItemProps {
   id: string;
   href?: string;
   isActive?: boolean;
+  isCollapsed?: boolean;
 }
 
 export const SidebarItem = ({
@@ -28,6 +30,7 @@ export const SidebarItem = ({
   id,
   href,
   isActive,
+  isCollapsed = false,
 }: SidebarItemProps) => {
   const workspaceId = useWorkspaceId();
 
@@ -37,11 +40,20 @@ export const SidebarItem = ({
         'group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2 md:py-2.5 text-sm font-medium transition-standard',
         isActive
           ? 'bg-primary-foreground/20 text-primary-foreground shadow-sm hover:bg-primary-foreground/30'
-          : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1'
+          : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1',
+        isCollapsed && 'justify-center px-1 md:px-2'
       )}
     >
-      <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-      <span className="truncate min-w-0">{label}</span>
+      {isCollapsed ? (
+        <Hint label={label} side="right" align="center">
+          <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+        </Hint>
+      ) : (
+        <>
+          <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+          <span className="truncate min-w-0">{label}</span>
+        </>
+      )}
     </div>
   );
 
@@ -64,9 +76,10 @@ interface MemberItemProps {
   label?: string;
   image?: string;
   isActive?: boolean;
+  isCollapsed?: boolean;
 }
 
-export const MemberItem = ({ id, label = 'Member', image, isActive = false }: MemberItemProps) => {
+export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCollapsed = false }: MemberItemProps) => {
   const workspaceId = useWorkspaceId();
   const avatarFallback = label.charAt(0).toUpperCase();
 
@@ -86,22 +99,37 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false }: Me
     <Button
       variant="ghost"
       className={cn(
-        "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 justify-start font-medium h-9 md:h-10 px-2 md:px-4 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
+        "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 font-medium h-9 md:h-10 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
         isActive
           ? "text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm"
-          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1"
+          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1",
+        isCollapsed ? "justify-center px-1 md:px-2" : "justify-start px-2 md:px-4"
       )}
       size="sm"
       asChild>
       <Link href={`/workspace/${workspaceId}/member/${id}`} className="w-full overflow-hidden">
-        <div className="relative mr-2 md:mr-3 flex-shrink-0">
-          <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
-            <AvatarImage alt={label} src={image} />
-            <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
-          </Avatar>
-          {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
-        </div>
-        <span className="truncate min-w-0 text-sm flex-1">{label}</span>
+        {isCollapsed ? (
+          <Hint label={label} side="right" align="center">
+            <div className="relative flex-shrink-0">
+              <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
+                <AvatarImage alt={label} src={image} />
+                <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+              </Avatar>
+              {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+            </div>
+          </Hint>
+        ) : (
+          <>
+            <div className="relative mr-2 md:mr-3 flex-shrink-0">
+              <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
+                <AvatarImage alt={label} src={image} />
+                <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+              </Avatar>
+              {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+            </div>
+            <span className="truncate min-w-0 text-sm flex-1">{label}</span>
+          </>
+        )}
       </Link>
     </Button>
   );
@@ -112,9 +140,10 @@ interface ChannelItemProps {
   id: Id<'channels'>;
   label: string;
   isActive?: boolean;
+  isCollapsed?: boolean;
 }
 
-export const ChannelItem = ({ id, label, isActive = false }: ChannelItemProps) => {
+export const ChannelItem = ({ id, label, isActive = false, isCollapsed = false }: ChannelItemProps) => {
   const workspaceId = useWorkspaceId();
   const channelFallback = label.charAt(0).toLowerCase();
 
@@ -122,20 +151,33 @@ export const ChannelItem = ({ id, label, isActive = false }: ChannelItemProps) =
     <Button
       variant="ghost"
       className={cn(
-        "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 justify-start font-medium h-9 md:h-10 px-2 md:px-4 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
+        "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 font-medium h-9 md:h-10 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
         isActive
           ? "text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm"
-          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1"
+          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1",
+        isCollapsed ? "justify-center px-1 md:px-2" : "justify-start px-2 md:px-4"
       )}
       size="sm"
       asChild>
       <Link href={`/workspace/${workspaceId}/channel/${id}/chats`} className="w-full overflow-hidden">
-        <div className="relative mr-2 md:mr-3 flex-shrink-0">
-          <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
-            <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
-          </div>
-        </div>
-        <span className="truncate min-w-0 text-sm flex-1">{label}</span>
+        {isCollapsed ? (
+          <Hint label={label} side="right" align="center">
+            <div className="relative flex-shrink-0">
+              <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
+                <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+              </div>
+            </div>
+          </Hint>
+        ) : (
+          <>
+            <div className="relative mr-2 md:mr-3 flex-shrink-0">
+              <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
+                <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+              </div>
+            </div>
+            <span className="truncate min-w-0 text-sm flex-1">{label}</span>
+          </>
+        )}
       </Link>
     </Button>
   );
