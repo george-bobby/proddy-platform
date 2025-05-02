@@ -3,6 +3,7 @@
 import { FaChevronDown } from 'react-icons/fa';
 import { Loader, TriangleAlert } from 'lucide-react';
 
+import type { Id } from '@/../convex/_generated/dataModel';
 import { MessageList } from '@/components/message-list';
 import { ChatInput } from '@/components/chat-input';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,10 @@ import { WorkspaceHeader } from '../../toolbar';
 const ChannelIdPage = () => {
   const channelId = useChannelId();
 
-  const { results, status, loadMore } = useGetMessages({ channelId });
+  // Always call the hook, but with a valid channelId
+  const { results, status, loadMore } = useGetMessages({
+    channelId: channelId as Id<'channels'>
+  });
   const { data: channel, isLoading: channelLoading } = useGetChannel({ id: channelId });
 
   if (channelLoading || status == 'LoadingFirstPage') {
