@@ -1,6 +1,7 @@
 import { differenceInMinutes, format, isToday, isYesterday } from 'date-fns';
-import { Loader } from 'lucide-react';
+import { Loader, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { useCurrentMember } from '@/features/members/api/use-current-member';
 import type { GetMessagesReturnType } from '@/features/messages/api/use-get-messages';
@@ -10,6 +11,9 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ChannelHero } from './channel-hero';
 import { ConversationHero } from './conversation-hero';
 import { Message } from './message';
+import { DailyRecapModal } from './daily-recap-modal';
+import { Button } from './ui/button';
+import { Hint } from './hint';
 
 const TIME_THRESHOLD = 5;
 
@@ -46,6 +50,9 @@ export const MessageList = ({
   canLoadMore,
 }: MessageListProps) => {
   const [editingId, setEditingId] = useState<Id<'messages'> | null>(null);
+  const [isRecapModalOpen, setIsRecapModalOpen] = useState(false);
+  const [recapData, setRecapData] = useState<{ recap: string; date: string; messageCount: number; isCached?: boolean } | null>(null);
+  const [isGeneratingRecap, setIsGeneratingRecap] = useState(false);
 
   const workspaceId = useWorkspaceId();
 
@@ -67,16 +74,102 @@ export const MessageList = ({
     {} as Record<string, typeof data>
   );
 
+  const handleGenerateRecap = async (dateKey: string, messages: typeof data) => {
+    if (!messages || messages.length === 0 || isGeneratingRecap) return;
+
+    setIsGeneratingRecap(true);
+
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading('Generating daily recap...', {
+        duration: 10000,
+      });
+
+      // Format messages for the API
+      const formattedMessages = messages.map(message => ({
+        id: message._id,
+        body: message.body,
+        authorName: message.user.name,
+        creationTime: message._creationTime
+      }));
+
+      // Send request to the API
+      const response = await fetch('/api/dailyrecap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: formattedMessages,
+          date: dateKey,
+          channelName
+        }),
+      });
+
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate daily recap');
+      }
+
+      const data = await response.json();
+
+      // Set recap data and open modal
+      setRecapData({
+        recap: data.recap,
+        date: dateKey,
+        messageCount: messages.length,
+        isCached: !!data.cached
+      });
+      setIsRecapModalOpen(true);
+
+      // Show a small toast notification
+      toast.success(data.cached ? 'Recap retrieved from cache' : 'Daily recap generated successfully');
+    } catch (error) {
+      console.error('Error generating daily recap:', error);
+      toast.error('Failed to generate daily recap. Please try again.');
+    } finally {
+      setIsGeneratingRecap(false);
+    }
+  };
+
   return (
     <div className="messages-scrollbar flex flex-1 flex-col-reverse overflow-y-auto pb-4">
+      {recapData && (
+        <DailyRecapModal
+          isOpen={isRecapModalOpen}
+          onClose={() => setIsRecapModalOpen(false)}
+          recap={recapData.recap}
+          date={recapData.date}
+          messageCount={recapData.messageCount}
+          isCached={recapData.isCached}
+        />
+      )}
+
       {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
         <div key={dateKey}>
           <div className="relative my-2 text-center">
             <hr className="absolute left-0 right-0 top-1/2 border-t border-gray-300" />
 
-            <span className="relative inline-block rounded-full border border-gray-300 bg-white px-4 py-1 text-xs shadow-sm">
-              {formatDateLabel(dateKey)}
-            </span>
+            <div className="relative inline-flex items-center gap-2">
+              <span className="inline-block rounded-full border border-gray-300 bg-white px-4 py-1 text-xs shadow-sm">
+                {formatDateLabel(dateKey)}
+              </span>
+
+              <Hint label="Generate daily recap">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 rounded-full bg-white border border-gray-300 shadow-sm hover:bg-blue-50"
+                  onClick={() => handleGenerateRecap(dateKey, messages)}
+                  disabled={isGeneratingRecap}
+                >
+                  <Sparkles className="size-3 text-blue-500" />
+                </Button>
+              </Hint>
+            </div>
           </div>
 
           {messages.map((message, i) => {
