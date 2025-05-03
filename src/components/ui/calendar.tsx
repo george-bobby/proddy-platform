@@ -53,7 +53,7 @@ function Calendar({
   const startingDayOfWeek = getDay(firstDayOfMonth); // 0 = Sunday, 1 = Monday, etc.
 
   // Create array of day numbers with empty slots for the start of the month
-  const days = Array.from({ length: startingDayOfWeek }, () => null);
+  const days: (number | null)[] = Array.from({ length: startingDayOfWeek }, () => null);
   for (let i = 1; i <= daysInMonth; i++) {
     days.push(i);
   }
