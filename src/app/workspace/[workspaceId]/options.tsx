@@ -45,9 +45,11 @@ export const SidebarItem = ({
       )}
     >
       {isCollapsed ? (
-        <Hint label={label} side="right" align="center">
-          <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-        </Hint>
+        <div className="relative flex-shrink-0">
+          <Hint label={label} side="right" align="center">
+            <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+          </Hint>
+        </div>
       ) : (
         <>
           <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
@@ -109,15 +111,17 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
       asChild>
       <Link href={`/workspace/${workspaceId}/member/${id}`} className="w-full overflow-hidden">
         {isCollapsed ? (
-          <Hint label={label} side="right" align="center">
-            <div className="relative flex-shrink-0">
-              <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
-                <AvatarImage alt={label} src={image} />
-                <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
-              </Avatar>
-              {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
-            </div>
-          </Hint>
+          <div className="relative flex-shrink-0">
+            <Hint label={label} side="right" align="center">
+              <div className="relative">
+                <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
+                  <AvatarImage alt={label} src={image} />
+                  <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+                </Avatar>
+                {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+              </div>
+            </Hint>
+          </div>
         ) : (
           <>
             <div className="relative mr-2 md:mr-3 flex-shrink-0">
@@ -161,13 +165,15 @@ export const ChannelItem = ({ id, label, isActive = false, isCollapsed = false }
       asChild>
       <Link href={`/workspace/${workspaceId}/channel/${id}/chats`} className="w-full overflow-hidden">
         {isCollapsed ? (
-          <Hint label={label} side="right" align="center">
-            <div className="relative flex-shrink-0">
-              <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
-                <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+          <div className="relative flex-shrink-0">
+            <Hint label={label} side="right" align="center">
+              <div className="relative">
+                <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
+                  <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+                </div>
               </div>
-            </div>
-          </Hint>
+            </Hint>
+          </div>
         ) : (
           <>
             <div className="relative mr-2 md:mr-3 flex-shrink-0">

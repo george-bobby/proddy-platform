@@ -4,8 +4,6 @@ import {
   AlertTriangle,
   CalendarIcon,
   ChevronDown,
-  ChevronRight,
-  HashIcon,
   Loader,
   MessageSquareText,
   PlusIcon,
@@ -18,7 +16,6 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useToggle } from 'react-use';
-import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Hint } from '@/components/hint';
@@ -66,9 +63,11 @@ const DroppableItem = ({
         onClick={toggle}
       >
         {isCollapsed ? (
-          <Hint label={label} side="right" align="center">
-            <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
-          </Hint>
+          <div className="relative flex-shrink-0">
+            <Hint label={label} side="right" align="center">
+              <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+            </Hint>
+          </div>
         ) : (
           <Icon className="size-4 md:size-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
         )}
@@ -110,12 +109,17 @@ const DroppableItem = ({
 
 
 // WorkspaceSidebar Component
-export const WorkspaceSidebar = () => {
+export const WorkspaceSidebar = ({
+  isCollapsed,
+  setIsCollapsed
+}: {
+  isCollapsed: boolean;
+  setIsCollapsed: (value: boolean) => void
+}) => {
   const workspaceId = useWorkspaceId();
   const channelId = useChannelId();
   const memberId = useMemberId();
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [_open, setOpen] = useCreateChannelModal();
 
@@ -145,7 +149,7 @@ export const WorkspaceSidebar = () => {
     <div
       className={cn(
         "flex h-full flex-col bg-tertiary transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-[70px]" : "w-[240px]"
+        isCollapsed ? "w-[70px]" : "w-[280px]"
       )}
     >
       {/* Workspace Header */}
