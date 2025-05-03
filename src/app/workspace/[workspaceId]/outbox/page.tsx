@@ -50,7 +50,7 @@ export default function OutboxPage() {
 
   const getMessageUrl = (message: Message) => {
     if (message.context.type === 'channel') {
-      return `/workspace/${workspaceId}/channel/${message.context.id}`;
+      return `/workspace/${workspaceId}/channel/${message.context.id}/chats`;
     } else if (message.context.type === 'conversation' && message.context.memberId) {
       return `/workspace/${workspaceId}/member/${message.context.memberId}`;
     }

@@ -9,13 +9,19 @@ interface UseGetRecentChannelMessagesProps {
   enabled?: boolean;
 }
 
-export const useGetRecentChannelMessages = ({ channelId, limit = 10, enabled = true }: UseGetRecentChannelMessagesProps) => {
+export const useGetRecentChannelMessages = ({ channelId, limit = 20, enabled = true }: UseGetRecentChannelMessagesProps) => {
   // Only enable the query if we have a valid channelId and enabled is true
   const shouldEnable = enabled && !!channelId;
 
-  const data = useQuery(api.messages.getRecentChannelMessages, shouldEnable ? { channelId: channelId as Id<'channels'>, limit } : 'skip');
+  // Add a check for valid ID format
+  const isValidId = typeof channelId === 'string' && channelId.length > 0;
 
-  const isLoading = shouldEnable && data === undefined;
+  const data = useQuery(
+    api.messages.getRecentChannelMessages,
+    shouldEnable && isValidId ? { channelId: channelId as Id<'channels'>, limit } : 'skip'
+  );
+
+  const isLoading = shouldEnable && isValidId && data === undefined;
 
   return { data: data || [], isLoading };
 };

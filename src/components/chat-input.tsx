@@ -7,8 +7,7 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
-import { DirectMessageSuggestions } from '@/components/member-suggestions';
-import { MessageSuggestions } from '@/components/channel-suggestions';
+import { Suggestions } from '@/components/suggestions';
 import { useCreateCalendarEvent } from '@/features/calendar/api/use-create-calendar-event';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
@@ -161,20 +160,15 @@ export const ChatInput = ({
     }
   };
 
+  // Only show suggestions for channel messages, not for direct messages
   return (
     <div className="w-full px-5">
-      {conversationId ? (
-        <DirectMessageSuggestions
-          onSelectSuggestion={handleSuggestionSelect}
-          conversationId={conversationId}
-          memberName={memberName}
-        />
-      ) : (
-        <MessageSuggestions
+      {channelId && channelName && !conversationId ? (
+        <Suggestions
           onSelectSuggestion={handleSuggestionSelect}
           channelName={channelName}
         />
-      )}
+      ) : null}
       <Editor
         placeholder={placeholder}
         key={editorKey}

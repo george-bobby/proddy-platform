@@ -2,14 +2,14 @@
 
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
-import { useGetMessages } from '@/features/messages/api/use-get-messages';
+import { useChannelId } from '@/hooks/use-channel-id';
+import { useGetRecentChannelMessages } from '@/features/messages/api/use-get-recent-channel-messages';
 import { Button } from '@/components/ui/button';
-import { Id } from '@/../convex/_generated/dataModel';
 
-interface DirectMessageSuggestionsProps {
+interface SuggestionsProps {
   onSelectSuggestion: (suggestion: string) => void;
-  conversationId: Id<'conversations'>;
-  memberName?: string; // Optional member name to provide context
+  // For channel context
+  channelName?: string;
 }
 
 // Fallback suggestions in case the API fails
@@ -19,20 +19,33 @@ const FALLBACK_SUGGESTIONS = [
   'Thanks for sharing! This is really helpful.',
 ];
 
-export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, memberName }: DirectMessageSuggestionsProps) => {
+// Empty channel suggestions
+const EMPTY_CHANNEL_SUGGESTIONS = [
+  "Let's start a conversation!",
+  "Hello team, how is everyone doing today?",
+  "Any updates on our current projects?"
+];
+
+export const Suggestions = ({
+  onSelectSuggestion,
+  channelName
+}: SuggestionsProps) => {
+  const channelId = useChannelId();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
 
-  // Get recent messages for the current conversation
-  const { results: recentMessages, status: messagesStatus } = useGetMessages({
-    conversationId,
+  // Get recent channel messages - always enabled since we only show this component for channels
+  const { data: channelMessages, isLoading: channelMessagesLoading } = useGetRecentChannelMessages({
+    channelId,
+    limit: 20,
+    enabled: true,
   });
 
   // Function to fetch suggestions from the API - wrapped in useCallback to avoid dependency issues
   const fetchSuggestions = useCallback(async () => {
-    if (!recentMessages || recentMessages.length === 0) {
-      setSuggestions(FALLBACK_SUGGESTIONS);
+    if (!channelMessages || channelMessages.length === 0) {
+      setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
       return;
     }
 
@@ -40,58 +53,57 @@ export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, m
       setIsLoading(true);
 
       // Validate message format before sending
-      const validMessages = recentMessages.filter(msg => {
-        return msg && msg._id && msg.user?.name;
+      const validMessages = channelMessages.filter(msg => {
+        return msg && msg.id && msg.authorName;
       });
 
       if (validMessages.length === 0) {
-        setSuggestions(FALLBACK_SUGGESTIONS);
+        setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
         setIsLoading(false);
         return;
       }
 
-      // Format messages to match the expected API format
-      const formattedMessages = validMessages.map(msg => ({
-        id: msg._id,
-        body: msg.body,
-        authorName: msg.user?.name || 'Unknown',
-        creationTime: msg._creationTime
-      }));
+      const payload = {
+        messages: validMessages,
+        channelName
+      };
 
-      const response = await fetch('/api/suggestions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: formattedMessages,
-          memberName
-        }),
-      });
+      try {
+        const response = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch suggestions: ${response.status}`);
-      }
+        if (!response.ok) {
+          setSuggestions(FALLBACK_SUGGESTIONS);
+          setIsLoading(false);
+          return;
+        }
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.suggestions && data.suggestions.length > 0) {
-        setSuggestions(data.suggestions);
-      } else {
-        setSuggestions(FALLBACK_SUGGESTIONS);
+        if (data.suggestions && data.suggestions.length > 0) {
+          setSuggestions(data.suggestions);
+        } else {
+          setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+        }
+      } catch (fetchError) {
+        setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
       }
     } catch (error) {
-      console.error('Error fetching suggestions:', error);
-      setSuggestions(FALLBACK_SUGGESTIONS);
+      setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
     } finally {
       setIsLoading(false);
     }
-  }, [recentMessages, memberName]);
+  }, [channelMessages, channelName]);
 
   // Track the most recent message ID to detect new messages
   useEffect(() => {
-    if (recentMessages && recentMessages.length > 0) {
-      const mostRecentMessageId = recentMessages[0]._id;
+    if (channelMessages && channelMessages.length > 0) {
+      const mostRecentMessageId = channelMessages[channelMessages.length - 1].id;
 
       // If we have a new message, refresh suggestions
       if (lastMessageId !== null && lastMessageId !== mostRecentMessageId) {
@@ -100,32 +112,46 @@ export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, m
 
       setLastMessageId(mostRecentMessageId);
     }
-  }, [recentMessages, lastMessageId, fetchSuggestions]);
+  }, [channelMessages, lastMessageId, fetchSuggestions]);
 
-  // Initial fetch of suggestions when component mounts or conversation changes
+  // Initial fetch of suggestions when component mounts or context changes
   useEffect(() => {
-    if (conversationId && messagesStatus !== 'LoadingFirstPage') {
+    if (channelId && !channelMessagesLoading) {
       // Delay to ensure messages are fully loaded
       const timer = setTimeout(() => {
-        if (recentMessages && recentMessages.length > 0) {
+        if (channelMessages && channelMessages.length > 0) {
           fetchSuggestions();
         } else {
-          // Empty conversation suggestions
-          setSuggestions([
-            "Let's start a conversation!",
-            "How can I help you today?",
-            "What's on your mind?"
-          ]);
+          // Empty channel suggestions
+          setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
         }
       }, 1000); // Reduced delay to 1 second
 
       return () => clearTimeout(timer);
     }
-  }, [conversationId, messagesStatus, recentMessages, fetchSuggestions]);
+  }, [
+    channelId,
+    channelMessagesLoading,
+    channelMessages,
+    fetchSuggestions
+  ]);
 
   // Refresh suggestions manually
   const refreshSuggestions = () => {
-    fetchSuggestions();
+    if (channelMessages && channelMessages.length > 0) {
+      fetchSuggestions();
+    } else {
+      setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+    }
+  };
+
+  // Get context label for channel
+  const getContextLabel = () => {
+    if (channelName) {
+      return `AI suggestions for #${channelName}`;
+    } else {
+      return 'AI message suggestions';
+    }
   };
 
   return (
@@ -133,11 +159,7 @@ export const DirectMessageSuggestions = ({ onSelectSuggestion, conversationId, m
       <div className="flex items-center">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Sparkles className="size-3 text-tertiary" />
-          <span>
-            {memberName
-              ? `AI suggestions for conversation with ${memberName}`
-              : 'AI message suggestions'}
-          </span>
+          <span>{getContextLabel()}</span>
         </div>
         <div className="ml-auto">
           <Button
