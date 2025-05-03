@@ -17,17 +17,13 @@ interface MessageData {
 const extractionCache = new Map<string, string>();
 
 function extractTextFromRichText(body: string): string {
-  console.log('extractTextFromRichText - Input type:', typeof body);
-  console.log('extractTextFromRichText - Input preview:', typeof body === 'string' ? body.substring(0, 100) : String(body).substring(0, 100));
-
+ 
   if (typeof body !== 'string') {
-    console.log('extractTextFromRichText - Not a string, converting');
     return String(body);
   }
 
   // Check cache first
   if (extractionCache.has(body)) {
-    console.log('extractTextFromRichText - Cache hit');
     return extractionCache.get(body)!;
   }
 
@@ -37,10 +33,8 @@ function extractTextFromRichText(body: string): string {
   if (trimmedBody.startsWith('{') && trimmedBody.endsWith('}')) {
     try {
       const parsed = JSON.parse(trimmedBody);
-      console.log('extractTextFromRichText - Successfully parsed JSON');
 
       if (parsed && Array.isArray(parsed.ops)) {
-        console.log('extractTextFromRichText - Found ops array with length:', parsed.ops.length);
         // Use a more efficient string building approach
         const textParts: string[] = [];
 
@@ -55,7 +49,6 @@ function extractTextFromRichText(body: string): string {
           .replace(/\\n|\\N|\n/g, ' ')
           .trim();
 
-        console.log('extractTextFromRichText - Extracted text preview:', result.substring(0, 100));
       } else {
         console.log('extractTextFromRichText - No ops array found in parsed JSON');
       }
