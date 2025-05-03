@@ -8,9 +8,9 @@ interface UseGetMessagesWithCalendarEventsProps {
 }
 
 export const useGetMessagesWithCalendarEvents = ({ workspaceId }: UseGetMessagesWithCalendarEventsProps) => {
-  const data = useQuery(api.calendar.getMessagesWithCalendarEvents, { 
-    workspaceId, 
-    paginationOpts: { numItems: 100 } 
+  const data = useQuery(api.calendar.getMessagesWithCalendarEvents, {
+    workspaceId,
+    paginationOpts: { numItems: 100, cursor: null }
   });
 
   const isLoading = data === undefined;
