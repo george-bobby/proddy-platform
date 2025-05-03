@@ -160,14 +160,15 @@ export const ChatInput = ({
     }
   };
 
+  // Only show suggestions for channel messages, not for direct messages
   return (
     <div className="w-full px-5">
-      <Suggestions
-        onSelectSuggestion={handleSuggestionSelect}
-        conversationId={conversationId}
-        channelName={channelName}
-        memberName={memberName}
-      />
+      {channelId && channelName && !conversationId ? (
+        <Suggestions
+          onSelectSuggestion={handleSuggestionSelect}
+          channelName={channelName}
+        />
+      ) : null}
       <Editor
         placeholder={placeholder}
         key={editorKey}
