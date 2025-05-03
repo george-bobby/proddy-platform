@@ -161,12 +161,13 @@ export const MessageList = ({
               <Hint label="Generate daily recap">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="size-6 rounded-full bg-white border border-gray-300 shadow-sm hover:bg-blue-50"
+                  size="sm"
+                  className="h-6 px-2 rounded-full bg-white border border-gray-300 shadow-sm hover:bg-blue-50"
                   onClick={() => handleGenerateRecap(dateKey, messages)}
                   disabled={isGeneratingRecap}
                 >
-                  <Sparkles className="size-3 text-blue-500" />
+                  <Sparkles className="size-3 text-blue-500 mr-1" />
+                  <span className="text-xs font-medium text-blue-500">Recap</span>
                 </Button>
               </Hint>
             </div>
