@@ -17,12 +17,17 @@ interface MessageData {
 const extractionCache = new Map<string, string>();
 
 function extractTextFromRichText(body: string): string {
+  console.log('extractTextFromRichText - Input type:', typeof body);
+  console.log('extractTextFromRichText - Input preview:', typeof body === 'string' ? body.substring(0, 100) : String(body).substring(0, 100));
+
   if (typeof body !== 'string') {
+    console.log('extractTextFromRichText - Not a string, converting');
     return String(body);
   }
 
   // Check cache first
   if (extractionCache.has(body)) {
+    console.log('extractTextFromRichText - Cache hit');
     return extractionCache.get(body)!;
   }
 
@@ -32,8 +37,10 @@ function extractTextFromRichText(body: string): string {
   if (trimmedBody.startsWith('{') && trimmedBody.endsWith('}')) {
     try {
       const parsed = JSON.parse(trimmedBody);
+      console.log('extractTextFromRichText - Successfully parsed JSON');
 
       if (parsed && Array.isArray(parsed.ops)) {
+        console.log('extractTextFromRichText - Found ops array with length:', parsed.ops.length);
         // Use a more efficient string building approach
         const textParts: string[] = [];
 
@@ -47,10 +54,17 @@ function extractTextFromRichText(body: string): string {
           .join('')
           .replace(/\\n|\\N|\n/g, ' ')
           .trim();
+
+        console.log('extractTextFromRichText - Extracted text preview:', result.substring(0, 100));
+      } else {
+        console.log('extractTextFromRichText - No ops array found in parsed JSON');
       }
     } catch (error) {
+      console.log('extractTextFromRichText - JSON parsing failed:', error);
       // If parsing fails, just use the original body
     }
+  } else {
+    console.log('extractTextFromRichText - Not JSON format, using as is');
   }
 
   // Store in cache for future use
@@ -107,9 +121,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON in request' }, { status: 400 });
     }
 
-    const { messages, channelName, memberName } = requestData;
-    // Use either channelName or memberName as the context
-    const contextName = channelName || memberName;
+    const { messages, channelName } = requestData;
+
+    // Use channelName as the context - this API now only handles channel suggestions
+    const contextName = channelName || 'channel';
 
     // Validate messages
     if (!messages || !Array.isArray(messages)) {
@@ -171,12 +186,6 @@ export async function POST(req: NextRequest) {
 
           return `${msg.authorName}: ${plainText}`;
         } catch (error) {
-          console.error('Error extracting text from message:', error);
-          console.error('Message body type:', typeof msg.body);
-          console.error(
-            'Message body preview:',
-            typeof msg.body === 'string' ? msg.body.substring(0, 100) : JSON.stringify(msg.body).substring(0, 100),
-          );
           return '';
         }
       })
@@ -202,38 +211,53 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const { text } = await generateText({
-        model: google('gemini-1.5-pro'),
-        messages: [
-          {
-            role: 'system',
-            content: `You are an AI assistant that generates contextually relevant message suggestions for a chat conversation.
+      const prompt = `You are an AI assistant that generates contextually relevant message suggestions for a channel conversation.
 Your task is to analyze the recent conversation history and suggest 3 possible responses that the user might want to send next.
 
 Guidelines:
 - Generate exactly 3 suggestions, separated by a special marker "|||"
 - Each suggestion should be a complete, standalone message (1-2 sentences)
 - Make suggestions relevant to the conversation context
-- If this is a direct message with a specific person, make suggestions appropriate for a one-on-one conversation
-- If this is a channel, tailor suggestions to the channel topic
+- Tailor suggestions to the channel topic
 - Suggestions should be helpful, professional, and natural-sounding
 - Vary the tone and purpose of suggestions (e.g., question, statement, action item)
 - Keep suggestions concise (max 100 characters each)
 - Do not include any explanations or commentary, just the 3 suggestions
 
 Example output format:
-Let's discuss this in our next meeting. ||| I've completed the task you assigned. ||| Could you provide more details about the requirements?`,
-          },
-          {
-            role: 'user',
-            content: memberName
-              ? `Direct message with: ${memberName}\n\nRecent conversation:\n${chatHistory}\n\nGenerate 3 contextually relevant message suggestions:`
-              : `Channel name: ${channelName || 'General'}\n\nRecent conversation:\n${chatHistory}\n\nGenerate 3 contextually relevant message suggestions:`,
-          },
-        ],
-        temperature: 0.7, // Add some randomness
-        maxTokens: 200, // Limit response size
-      });
+Let's discuss this in our next meeting. ||| I've completed the task you assigned. ||| Could you provide more details about the requirements?`;
+
+      const userContent = `Channel name: ${channelName || 'General'}\n\nRecent conversation:\n${chatHistory}\n\nGenerate 3 contextually relevant message suggestions:`;
+
+      let text;
+      try {
+        const response = await generateText({
+          model: google('gemini-1.5-pro'),
+          messages: [
+            {
+              role: 'system',
+              content: prompt,
+            },
+            {
+              role: 'user',
+              content: userContent,
+            },
+          ],
+          temperature: 0.7, // Add some randomness
+          maxTokens: 200, // Limit response size
+        });
+
+        text = response.text;
+      } catch (error) {
+        const aiError = error as Error;
+        console.error('Error calling Gemini API:', aiError);
+        // Return fallback suggestions instead of throwing
+        return NextResponse.json({
+          suggestions: ["Let's discuss this further.", "I have some thoughts on this topic.", "Could we schedule a meeting about this?"],
+          cached: false,
+          error: `Gemini API error: ${aiError.message || 'Unknown error'}`
+        });
+      }
 
       // Parse the suggestions from the response
       const suggestions = text
@@ -263,8 +287,6 @@ Let's discuss this in our next meeting. ||| I've completed the task you assigned
 
       return NextResponse.json({ suggestions: finalSuggestions, cached: false });
     } catch (aiError) {
-      console.error('AI suggestion generation error:', aiError);
-
       // Fallback suggestions
       const fallbackSuggestions = [
         "I'll look into this and get back to you.",

@@ -228,11 +228,23 @@ export const create = mutation({
     })),
   },
   handler: async (ctx, args) => {
+    console.log('Convex: create message called with args:', {
+      workspaceId: args.workspaceId,
+      channelId: args.channelId,
+      conversationId: args.conversationId,
+      parentMessageId: args.parentMessageId,
+      bodyPreview: args.body.substring(0, 50),
+      hasImage: !!args.image,
+      hasCalendarEvent: !!args.calendarEvent
+    });
+
     const userId = await getAuthUserId(ctx);
+    console.log('Convex: create message - userId:', userId);
 
     if (!userId) throw new Error('Unauthorized.');
 
     const member = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
+    console.log('Convex: create message - member found:', !!member);
 
     if (!member) throw new Error('Unauthorized.');
 
@@ -240,12 +252,29 @@ export const create = mutation({
 
     // replying in a thread in 1-1 conversation
     if (!args.conversationId && !args.channelId && args.parentMessageId) {
+      console.log('Convex: create message - looking for parent message for thread');
       const parentMessage = await ctx.db.get(args.parentMessageId);
 
       if (!parentMessage) throw new Error('Parent message not found.');
 
       _conversationId = parentMessage.conversationId;
+      console.log('Convex: create message - using conversationId from parent message:', _conversationId);
     }
+
+    // Verify channel exists if channelId is provided
+    if (args.channelId) {
+      const channel = await ctx.db.get(args.channelId);
+      console.log('Convex: create message - channel exists:', !!channel);
+      if (!channel) {
+        throw new Error('Channel not found.');
+      }
+    }
+
+    console.log('Convex: create message - inserting message with:', {
+      memberId: member._id,
+      channelId: args.channelId,
+      conversationId: _conversationId,
+    });
 
     const messageId = await ctx.db.insert('messages', {
       memberId: member._id,
@@ -258,6 +287,7 @@ export const create = mutation({
       calendarEvent: args.calendarEvent,
     });
 
+    console.log('Convex: create message - message created with ID:', messageId);
     return messageId;
   },
 });
@@ -710,20 +740,27 @@ export const getRecentChannelMessages = query({
         return [];
       }
 
-      const limit = args.limit || 10; // Default to 10 messages if not specified
+      const limit = args.limit || 20; // Default to 20 messages if not specified
 
-      // Get the most recent messages for this channel
+      // Query for messages in this specific channel
       const messages = await ctx.db
         .query('messages')
         .withIndex('by_channel_id', (q) => q.eq('channelId', args.channelId))
-        .filter((q) => q.eq(q.field('parentMessageId'), null)) // Exclude thread replies
         .order('desc') // Most recent first
         .take(limit);
 
-      if (messages.length === 0) return [];
+      // Filter out thread replies after fetching
+      const nonThreadMessages = messages.filter(msg => !msg.parentMessageId);
 
-      // Extract all unique member IDs from messages
-      const memberIds = new Set(messages.map((msg) => msg.memberId));
+      // Use the filtered messages for processing
+      const filteredMessages = nonThreadMessages.length > 0 ? nonThreadMessages : messages;
+
+      if (filteredMessages.length === 0) {
+        return [];
+      }
+
+      // Extract all unique member IDs from filtered messages
+      const memberIds = new Set(filteredMessages.map((msg) => msg.memberId));
 
       // Fetch all members in a single batch
       const members = await ctx.db
@@ -746,8 +783,8 @@ export const getRecentChannelMessages = query({
       // Create a map of user ID to user
       const userMap = new Map(users.map((user) => [user._id, user]));
 
-      // Map messages to the required format and reverse to get chronological order
-      const formattedMessages = messages
+      // Map filtered messages to the required format and reverse to get chronological order
+      const formattedMessages = filteredMessages
         .map((message) => {
           const member = memberMap.get(message.memberId);
           if (!member) {

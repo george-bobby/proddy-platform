@@ -10,6 +10,5 @@ type ChannelIdParams = {
 
 export const useChannelId = () => {
   const params = useParams<ChannelIdParams>();
-
   return params.channelId;
 };

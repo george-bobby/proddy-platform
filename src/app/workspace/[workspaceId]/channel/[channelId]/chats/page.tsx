@@ -11,12 +11,16 @@ import { useChannelId } from '@/hooks/use-channel-id';
 
 const ChannelChatPage = () => {
     const channelId = useChannelId();
+    console.log('ChannelChatPage - channelId from useChannelId:', channelId);
+    console.log('ChannelChatPage - URL params:', window.location.pathname);
 
     // Always call the hook, but with a valid channelId
     const { results, status, loadMore } = useGetMessages({
         channelId: channelId as Id<'channels'>
     });
     const { data: channel, isLoading: channelLoading } = useGetChannel({ id: channelId });
+
+    console.log('ChannelChatPage - channel data:', channel);
 
     if (channelLoading || status == 'LoadingFirstPage') {
         return (
@@ -34,6 +38,12 @@ const ChannelChatPage = () => {
             </div>
         );
     }
+
+    // Log the exact values being passed to ChatInput
+    console.log('ChannelChatPage - Passing to ChatInput:', {
+        channelId,
+        channelName: channel.name
+    });
 
     return (
         <div className="flex h-full flex-col">

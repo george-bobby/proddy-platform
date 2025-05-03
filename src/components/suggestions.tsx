@@ -4,17 +4,12 @@ import { Sparkles } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useChannelId } from '@/hooks/use-channel-id';
 import { useGetRecentChannelMessages } from '@/features/messages/api/use-get-recent-channel-messages';
-import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { Button } from '@/components/ui/button';
-import { Id } from '@/../convex/_generated/dataModel';
 
 interface SuggestionsProps {
   onSelectSuggestion: (suggestion: string) => void;
   // For channel context
   channelName?: string;
-  // For direct message context
-  conversationId?: Id<'conversations'>;
-  memberName?: string;
 }
 
 // Fallback suggestions in case the API fails
@@ -31,162 +26,83 @@ const EMPTY_CHANNEL_SUGGESTIONS = [
   "Any updates on our current projects?"
 ];
 
-// Empty conversation suggestions
-const EMPTY_CONVERSATION_SUGGESTIONS = [
-  "Let's start a conversation!",
-  "How can I help you today?",
-  "What's on your mind?"
-];
-
-export const Suggestions = ({ 
-  onSelectSuggestion, 
-  channelName, 
-  conversationId, 
-  memberName 
+export const Suggestions = ({
+  onSelectSuggestion,
+  channelName
 }: SuggestionsProps) => {
   const channelId = useChannelId();
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
 
-  // Determine if we're in a channel or direct message context
-  const isDirectMessage = !!conversationId;
-
-  // Get recent messages based on context
+  // Get recent channel messages - always enabled since we only show this component for channels
   const { data: channelMessages, isLoading: channelMessagesLoading } = useGetRecentChannelMessages({
     channelId,
-    limit: 10,
-    enabled: !isDirectMessage && !!channelId,
-  });
-
-  const { results: conversationMessages, status: conversationMessagesStatus } = useGetMessages({
-    conversationId: conversationId as Id<'conversations'>,
+    limit: 20,
+    enabled: true,
   });
 
   // Function to fetch suggestions from the API - wrapped in useCallback to avoid dependency issues
   const fetchSuggestions = useCallback(async () => {
-    // Handle direct messages
-    if (isDirectMessage) {
-      if (!conversationMessages || conversationMessages.length === 0) {
-        setSuggestions(FALLBACK_SUGGESTIONS);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-
-        // Validate message format before sending
-        const validMessages = conversationMessages.filter(msg => {
-          return msg && msg._id && msg.user?.name;
-        });
-
-        if (validMessages.length === 0) {
-          setSuggestions(FALLBACK_SUGGESTIONS);
-          setIsLoading(false);
-          return;
-        }
-
-        // Format messages to match the expected API format
-        const formattedMessages = validMessages.map(msg => ({
-          id: msg._id,
-          body: msg.body,
-          authorName: msg.user?.name || 'Unknown',
-          creationTime: msg._creationTime
-        }));
-
-        const response = await fetch('/api/suggestions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages: formattedMessages,
-            memberName
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch suggestions: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.suggestions && data.suggestions.length > 0) {
-          setSuggestions(data.suggestions);
-        } else {
-          setSuggestions(FALLBACK_SUGGESTIONS);
-        }
-      } catch (error) {
-        console.error('Error fetching suggestions:', error);
-        setSuggestions(FALLBACK_SUGGESTIONS);
-      } finally {
-        setIsLoading(false);
-      }
-    } 
-    // Handle channel messages
-    else {
-      if (!channelMessages || channelMessages.length === 0) {
-        setSuggestions(FALLBACK_SUGGESTIONS);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-
-        // Validate message format before sending
-        const validMessages = channelMessages.filter(msg => {
-          return msg && msg.id && msg.authorName;
-        });
-
-        if (validMessages.length === 0) {
-          setSuggestions(FALLBACK_SUGGESTIONS);
-          setIsLoading(false);
-          return;
-        }
-
-        const response = await fetch('/api/suggestions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages: validMessages,
-            channelName
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch suggestions: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.suggestions && data.suggestions.length > 0) {
-          setSuggestions(data.suggestions);
-        } else {
-          setSuggestions(FALLBACK_SUGGESTIONS);
-        }
-      } catch (error) {
-        console.error('Error fetching suggestions:', error);
-        setSuggestions(FALLBACK_SUGGESTIONS);
-      } finally {
-        setIsLoading(false);
-      }
+    if (!channelMessages || channelMessages.length === 0) {
+      setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+      return;
     }
-  }, [isDirectMessage, conversationMessages, channelMessages, memberName, channelName]);
+
+    try {
+      setIsLoading(true);
+
+      // Validate message format before sending
+      const validMessages = channelMessages.filter(msg => {
+        return msg && msg.id && msg.authorName;
+      });
+
+      if (validMessages.length === 0) {
+        setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+        setIsLoading(false);
+        return;
+      }
+
+      const payload = {
+        messages: validMessages,
+        channelName
+      };
+
+      try {
+        const response = await fetch('/api/suggestions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          setSuggestions(FALLBACK_SUGGESTIONS);
+          setIsLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.suggestions && data.suggestions.length > 0) {
+          setSuggestions(data.suggestions);
+        } else {
+          setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+        }
+      } catch (fetchError) {
+        setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+      }
+    } catch (error) {
+      setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [channelMessages, channelName]);
 
   // Track the most recent message ID to detect new messages
   useEffect(() => {
-    if (isDirectMessage && conversationMessages && conversationMessages.length > 0) {
-      const mostRecentMessageId = conversationMessages[0]._id;
-
-      // If we have a new message, refresh suggestions
-      if (lastMessageId !== null && lastMessageId !== mostRecentMessageId) {
-        fetchSuggestions();
-      }
-
-      setLastMessageId(mostRecentMessageId);
-    } else if (!isDirectMessage && channelMessages && channelMessages.length > 0) {
+    if (channelMessages && channelMessages.length > 0) {
       const mostRecentMessageId = channelMessages[channelMessages.length - 1].id;
 
       // If we have a new message, refresh suggestions
@@ -196,23 +112,11 @@ export const Suggestions = ({
 
       setLastMessageId(mostRecentMessageId);
     }
-  }, [isDirectMessage, conversationMessages, channelMessages, lastMessageId, fetchSuggestions]);
+  }, [channelMessages, lastMessageId, fetchSuggestions]);
 
   // Initial fetch of suggestions when component mounts or context changes
   useEffect(() => {
-    if (isDirectMessage && conversationId && conversationMessagesStatus !== 'LoadingFirstPage') {
-      // Delay to ensure messages are fully loaded
-      const timer = setTimeout(() => {
-        if (conversationMessages && conversationMessages.length > 0) {
-          fetchSuggestions();
-        } else {
-          // Empty conversation suggestions
-          setSuggestions(EMPTY_CONVERSATION_SUGGESTIONS);
-        }
-      }, 1000); // Reduced delay to 1 second
-
-      return () => clearTimeout(timer);
-    } else if (!isDirectMessage && channelId && !channelMessagesLoading) {
+    if (channelId && !channelMessagesLoading) {
       // Delay to ensure messages are fully loaded
       const timer = setTimeout(() => {
         if (channelMessages && channelMessages.length > 0) {
@@ -226,26 +130,24 @@ export const Suggestions = ({
       return () => clearTimeout(timer);
     }
   }, [
-    isDirectMessage, 
-    conversationId, 
-    channelId, 
-    conversationMessagesStatus, 
-    channelMessagesLoading, 
-    conversationMessages, 
-    channelMessages, 
+    channelId,
+    channelMessagesLoading,
+    channelMessages,
     fetchSuggestions
   ]);
 
   // Refresh suggestions manually
   const refreshSuggestions = () => {
-    fetchSuggestions();
+    if (channelMessages && channelMessages.length > 0) {
+      fetchSuggestions();
+    } else {
+      setSuggestions(EMPTY_CHANNEL_SUGGESTIONS);
+    }
   };
 
-  // Determine the context label
+  // Get context label for channel
   const getContextLabel = () => {
-    if (isDirectMessage && memberName) {
-      return `AI suggestions for conversation with ${memberName}`;
-    } else if (!isDirectMessage && channelName) {
+    if (channelName) {
       return `AI suggestions for #${channelName}`;
     } else {
       return 'AI message suggestions';
