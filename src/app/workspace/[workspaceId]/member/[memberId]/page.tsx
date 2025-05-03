@@ -16,7 +16,7 @@ import { useCreateOrGetConversation } from '@/features/conversations/api/use-cre
 import { useMemberId } from '@/hooks/use-member-id';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { usePanel } from '@/hooks/use-panel';
-import { WorkspaceHeader } from '../../toolbar';
+import { WorkspaceToolbar } from '../../toolbar';
 
 const MemberIdPage = () => {
   const workspaceId = useWorkspaceId();
@@ -81,7 +81,7 @@ const MemberIdPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <WorkspaceHeader>
+      <WorkspaceToolbar>
         <Button
           variant="ghost"
           className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
@@ -95,7 +95,7 @@ const MemberIdPage = () => {
           <span className="truncate">{member?.user.name || 'Member'}</span>
           <FaChevronDown className="ml-2 size-2.5 transition-transform duration-200 group-hover:rotate-180" />
         </Button>
-      </WorkspaceHeader>
+      </WorkspaceToolbar>
 
       <MessageList
         data={results}

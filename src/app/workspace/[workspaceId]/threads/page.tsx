@@ -1,14 +1,20 @@
 'use client';
 
-import { format } from 'date-fns';
-import { Loader, MessageSquareText } from 'lucide-react';
+import { format, formatDistanceToNow } from 'date-fns';
+import { ArrowRight, Clock, Filter, Hash, Loader, MessageSquareText, Search, SortDesc, User } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetThreadMessages } from '@/features/messages/api/use-get-thread-messages';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { WorkspaceHeader } from '../toolbar';
+import { WorkspaceToolbar } from '../toolbar';
 
 interface ThreadMessage {
   message: {
@@ -48,26 +54,10 @@ interface ThreadMessage {
 export default function ThreadsPage() {
   const workspaceId = useWorkspaceId();
   const threads = useGetThreadMessages() as ThreadMessage[] | undefined;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'channels' | 'direct'>('all');
 
-  if (!threads) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-white">
-        <Loader className="size-12 animate-spin text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Loading threads...</p>
-      </div>
-    );
-  }
-
-  if (!threads.length) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-white">
-        <MessageSquareText className="size-12 text-muted-foreground" />
-        <h2 className="text-2xl font-semibold">Threads</h2>
-        <p className="text-sm text-muted-foreground">No threads yet.</p>
-      </div>
-    );
-  }
-
+  // Define helper functions first
   const parseMessageBody = (body: string) => {
     try {
       const parsed = JSON.parse(body);
@@ -90,9 +80,63 @@ export default function ThreadsPage() {
     return '#';
   };
 
+  // Filter threads based on search query and active filter
+  const filteredThreads = threads?.filter(thread => {
+    const matchesSearch = searchQuery === '' ||
+      parseMessageBody(thread.message.body).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      parseMessageBody(thread.parentMessage.body).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      thread.context.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesFilter =
+      activeFilter === 'all' ||
+      (activeFilter === 'channels' && thread.context.type === 'channel') ||
+      (activeFilter === 'direct' && thread.context.type === 'conversation');
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Group threads by date (today, yesterday, this week, earlier)
+  const groupedThreads = filteredThreads?.reduce((groups, thread) => {
+    const date = new Date(thread.message._creationTime);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const isYesterday = new Date(now.setDate(now.getDate() - 1)).toDateString() === date.toDateString();
+    const isThisWeek = date > new Date(now.setDate(now.getDate() - 6));
+
+    const group = isToday ? 'today' : isYesterday ? 'yesterday' : isThisWeek ? 'thisWeek' : 'earlier';
+
+    if (!groups[group]) {
+      groups[group] = [];
+    }
+
+    groups[group].push(thread);
+    return groups;
+  }, {} as Record<string, ThreadMessage[]>) || {};
+
+  if (!threads) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-white">
+        <Loader className="size-12 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Loading threads...</p>
+      </div>
+    );
+  }
+
+  if (!threads.length) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-y-2 bg-white">
+        <MessageSquareText className="size-12 text-muted-foreground" />
+        <h2 className="text-2xl font-semibold">Threads</h2>
+        <p className="text-sm text-muted-foreground">No threads yet.</p>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="flex h-full flex-col">
-      <WorkspaceHeader>
+      <WorkspaceToolbar>
         <Button
           variant="ghost"
           className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
@@ -101,53 +145,226 @@ export default function ThreadsPage() {
           <MessageSquareText className="mr-2 size-5" />
           <span className="truncate">Threads</span>
         </Button>
-      </WorkspaceHeader>
+      </WorkspaceToolbar>
 
-      <div className="flex h-full flex-col gap-y-4 bg-white p-4">
-        <h2 className="text-xl font-semibold">Your Threads</h2>
+      <div className="flex h-full flex-col bg-white">
+        <div className="border-b p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Your Threads</h2>
+            <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-8 w-8">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Filter threads</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-        <div className="flex flex-col gap-y-4">
-          {threads.map((thread) => (
-            <Link
-              key={thread.message._id}
-              href={getThreadUrl(thread)}
-              className="flex flex-col gap-y-2 rounded-lg border bg-white p-3 shadow-sm hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-x-2">
-                <span className="text-sm font-medium text-muted-foreground">
-                  {thread.context.type === 'channel' ? '#' : ''}{thread.context.name}
-                </span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-8 w-8">
+                      <SortDesc className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Sort threads</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
 
-              {/* Parent Message */}
-              <div className="flex flex-col gap-y-1 rounded-lg bg-gray-50 p-2">
-                <div className="flex items-center gap-x-2">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {thread.parentUser.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(thread.parentMessage._creationTime), 'MMM d, yyyy h:mm a')}
-                  </span>
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search threads..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            <Tabs defaultValue="all" className="w-[300px]">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger
+                  value="all"
+                  onClick={() => setActiveFilter('all')}
+                >
+                  All
+                </TabsTrigger>
+                <TabsTrigger
+                  value="channels"
+                  onClick={() => setActiveFilter('channels')}
+                >
+                  Channels
+                </TabsTrigger>
+                <TabsTrigger
+                  value="direct"
+                  onClick={() => setActiveFilter('direct')}
+                >
+                  Direct
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          {filteredThreads?.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center gap-y-2">
+              <Search className="size-12 text-muted-foreground" />
+              <h3 className="text-lg font-medium">No matching threads</h3>
+              <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Today's threads */}
+              {groupedThreads.today?.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="outline" className="rounded-full px-3 py-1 bg-primary/5">
+                      <Clock className="mr-1 h-3 w-3" />
+                      Today
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {groupedThreads.today.map((thread) => renderThreadCard(thread))}
+                  </div>
                 </div>
-                <p className="text-sm">{parseMessageBody(thread.parentMessage.body)}</p>
-              </div>
+              )}
 
-              {/* Thread Message */}
-              <div className="flex flex-col gap-y-1">
-                <div className="flex items-center gap-x-2">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {thread.currentUser.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(thread.message._creationTime), 'MMM d, yyyy h:mm a')}
-                  </span>
+              {/* Yesterday's threads */}
+              {groupedThreads.yesterday?.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
+                      <Clock className="mr-1 h-3 w-3" />
+                      Yesterday
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {groupedThreads.yesterday.map((thread) => renderThreadCard(thread))}
+                  </div>
                 </div>
-                <p className="text-sm">{parseMessageBody(thread.message.body)}</p>
-              </div>
-            </Link>
-          ))}
+              )}
+
+              {/* This week's threads */}
+              {groupedThreads.thisWeek?.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
+                      <Clock className="mr-1 h-3 w-3" />
+                      This Week
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {groupedThreads.thisWeek.map((thread) => renderThreadCard(thread))}
+                  </div>
+                </div>
+              )}
+
+              {/* Earlier threads */}
+              {groupedThreads.earlier?.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
+                      <Clock className="mr-1 h-3 w-3" />
+                      Earlier
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {groupedThreads.earlier.map((thread) => renderThreadCard(thread))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+
+  function renderThreadCard(thread: ThreadMessage) {
+    return (
+      <div
+        key={thread.message._id}
+        className="flex flex-col rounded-lg border bg-white p-4 shadow-sm hover:shadow-md transition-all"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={`rounded-full px-2 py-0.5 ${thread.context.type === 'channel' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}
+            >
+              {thread.context.type === 'channel' ? (
+                <span className="flex items-center">
+                  <Hash className="mr-1 h-3 w-3" />
+                  {thread.context.name}
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <User className="mr-1 h-3 w-3" />
+                  {thread.context.name}
+                </span>
+              )}
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(thread.message._creationTime), { addSuffix: true })}
+            </span>
+          </div>
+
+          <Link
+            href={getThreadUrl(thread)}
+            className="text-xs font-medium text-primary hover:underline flex items-center"
+          >
+            View <ArrowRight className="ml-1 h-3 w-3" />
+          </Link>
+        </div>
+
+        {/* Parent Message */}
+        <div className="flex items-start gap-3 mb-3 p-3 rounded-lg bg-muted/30">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={thread.parentUser.image} />
+            <AvatarFallback>{thread.parentUser.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-sm">{thread.parentUser.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {format(new Date(thread.parentMessage._creationTime), 'MMM d, h:mm a')}
+              </span>
+            </div>
+            <p className="text-sm">{parseMessageBody(thread.parentMessage.body)}</p>
+          </div>
+        </div>
+
+        {/* Thread Message */}
+        <div className="flex items-start gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={thread.currentUser.image} />
+            <AvatarFallback>{thread.currentUser.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-sm">{thread.currentUser.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {format(new Date(thread.message._creationTime), 'MMM d, h:mm a')}
+              </span>
+            </div>
+            <p className="text-sm">{parseMessageBody(thread.message.body)}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }

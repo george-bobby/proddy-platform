@@ -23,13 +23,13 @@ import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-se
 
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
-interface WorkspaceHeaderProps {
+interface WorkspaceToolbarProps {
   children: ReactNode;
 }
 
-export const WorkspaceHeader = ({
+export const WorkspaceToolbar = ({
   children
-}: WorkspaceHeaderProps) => {
+}: WorkspaceToolbarProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const [searchOpen, setSearchOpen] = useWorkspaceSearch();

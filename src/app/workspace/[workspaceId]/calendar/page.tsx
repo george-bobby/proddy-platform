@@ -9,7 +9,7 @@ import Renderer from '@/components/renderer';
 import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { WorkspaceHeader } from '../toolbar';
+import { WorkspaceToolbar } from '../toolbar';
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -85,7 +85,7 @@ const CalendarPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <WorkspaceHeader>
+      <WorkspaceToolbar>
         <Button
           variant="ghost"
           className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
@@ -94,7 +94,7 @@ const CalendarPage = () => {
           <CalendarIcon className="mr-2 size-5" />
           <span className="truncate">Calendar</span>
         </Button>
-      </WorkspaceHeader>
+      </WorkspaceToolbar>
       <div className="flex h-full flex-col bg-white">
         <div className="flex items-center justify-between px-6 py-3 border-t">
           <div className="flex items-center gap-2">
