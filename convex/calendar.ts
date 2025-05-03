@@ -91,8 +91,10 @@ export const getCalendarEvents = query({
 
     // Get all members
     const memberIds = messages.map((message) => message?.memberId).filter(Boolean) as Id<'members'>[];
+    // Convert Set to Array explicitly to avoid TypeScript iteration error
+    const uniqueMemberIds = Array.from(new Set(memberIds));
     const members = await Promise.all(
-      [...new Set(memberIds)].map(async (memberId) => {
+      uniqueMemberIds.map(async (memberId) => {
         const member = await ctx.db.get(memberId);
         return member;
       })
@@ -100,8 +102,10 @@ export const getCalendarEvents = query({
 
     // Get all users
     const userIds = members.map((member) => member?.userId).filter(Boolean) as Id<'users'>[];
+    // Convert Set to Array explicitly to avoid TypeScript iteration error
+    const uniqueUserIds = Array.from(new Set(userIds));
     const users = await Promise.all(
-      [...new Set(userIds)].map(async (userId) => {
+      uniqueUserIds.map(async (userId) => {
         const user = await ctx.db.get(userId);
         return user;
       })
@@ -163,8 +167,10 @@ export const getMessagesWithCalendarEvents = query({
 
     // Get all members
     const memberIds = messages.page.map((message) => message.memberId);
+    // Convert Set to Array explicitly to avoid TypeScript iteration error
+    const uniqueMemberIds = Array.from(new Set(memberIds));
     const members = await Promise.all(
-      [...new Set(memberIds)].map(async (memberId) => {
+      uniqueMemberIds.map(async (memberId) => {
         const member = await ctx.db.get(memberId);
         return member;
       })
@@ -172,8 +178,10 @@ export const getMessagesWithCalendarEvents = query({
 
     // Get all users
     const userIds = members.map((member) => member?.userId).filter(Boolean) as Id<'users'>[];
+    // Convert Set to Array explicitly to avoid TypeScript iteration error
+    const uniqueUserIds = Array.from(new Set(userIds));
     const users = await Promise.all(
-      [...new Set(userIds)].map(async (userId) => {
+      uniqueUserIds.map(async (userId) => {
         const user = await ctx.db.get(userId);
         return user;
       })
