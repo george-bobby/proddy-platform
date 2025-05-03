@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { SummarizeButton } from '@/components/summarize-button';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+
 import { MessageSelectionProvider } from '@/contexts/message-selection-context';
 import { Profile } from '@/features/members/components/profile';
 import { Thread } from '@/features/messages/components/thread';
@@ -41,64 +41,36 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
       <StatusTracker />
       <div className="h-full">
         <div className="flex h-full">
-          <ResizablePanelGroup direction="horizontal" autoSaveId="workspace-layout">
-            <ResizablePanel
-              defaultSize={isCollapsed ? 5 : 25}
-              minSize={isCollapsed ? 5 : 20}
-              maxSize={isCollapsed ? 5 : 35}
-              className="bg-tertiary/50"
-              style={{
-                width: isCollapsed ? '70px' : '280px',
-                transition: 'width 300ms ease-in-out'
-              }}
-            >
-              <div className="h-full overflow-y-auto overflow-x-hidden w-full">
-                <WorkspaceSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-              </div>
-            </ResizablePanel>
-
-            <ResizableHandle
-              withHandle
-              className={cn(
-                "transition-opacity duration-300",
-                isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
-              )}
-            />
-
-            <ResizablePanel
-              defaultSize={isCollapsed ? 95 : 75}
-              minSize={30}
-              style={{ transition: 'width 300ms ease-in-out' }}
-            >
-              <div className="h-full overflow-auto">
-                {children}
-              </div>
-            </ResizablePanel>
-
-            {showPanel && (
-              <>
-                <ResizableHandle withHandle />
-                <ResizablePanel
-                  minSize={25}
-                  defaultSize={29}
-                  maxSize={40}
-                  style={{ transition: 'width 300ms ease-in-out' }}
-                >
-                  <div className="h-full overflow-auto">
-                    {parentMessageId ? (
-                      <Thread messageId={parentMessageId as Id<'messages'>} onClose={onClose} />
-                    ) : profileMemberId ? (
-                      <Profile memberId={profileMemberId as Id<'members'>} onClose={onClose} />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <Loader className="size-5 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                </ResizablePanel>
-              </>
+          {/* Fixed-width sidebar with collapse/expand functionality */}
+          <div
+            className={cn(
+              "h-full bg-tertiary/50 overflow-y-auto overflow-x-hidden",
+              "transition-all duration-300 ease-in-out flex-shrink-0 relative z-10",
+              isCollapsed ? "w-[70px]" : "w-[280px]"
             )}
-          </ResizablePanelGroup>
+          >
+            <WorkspaceSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+          </div>
+
+          {/* Main content area */}
+          <div className="flex-1 h-full overflow-auto">
+            {children}
+          </div>
+
+          {/* Right panel for threads and profiles */}
+          {showPanel && (
+            <div className="w-[350px] h-full overflow-auto border-l border-border/30 flex-shrink-0 transition-all duration-300 ease-in-out">
+              {parentMessageId ? (
+                <Thread messageId={parentMessageId as Id<'messages'>} onClose={onClose} />
+              ) : profileMemberId ? (
+                <Profile memberId={profileMemberId as Id<'members'>} onClose={onClose} />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <Loader className="size-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <SummarizeButton />
       </div>

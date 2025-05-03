@@ -10,16 +10,16 @@ interface HintProps {
   align?: 'start' | 'center' | 'end';
 }
 
-export const Hint = ({ label, children, side, align }: PropsWithChildren<HintProps>) => {
+export const Hint = ({ label, children, side = "top", align = "center" }: PropsWithChildren<HintProps>) => {
   return (
-    <TooltipProvider>
-      <Tooltip delayDuration={50}>
+    <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+      <Tooltip>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-
         <TooltipContent
           side={side}
           align={align}
-          className="border border-white/5 bg-black text-white z-[100]"
+          className="border border-white/5 bg-black text-white"
+          sideOffset={8}
         >
           <p className="text-xs font-medium">{label}</p>
         </TooltipContent>
