@@ -12,7 +12,8 @@ import {
   AtSign,
   Hash,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  CheckSquare
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useToggle } from 'react-use';
@@ -148,7 +149,7 @@ export const WorkspaceSidebar = ({
   return (
     <div
       className={cn(
-        "flex h-full flex-col bg-tertiary transition-all duration-300 ease-in-out",
+        "flex h-full flex-col bg-tertiary transition-all duration-300 ease-in-out border-r-2 border-white",
         isCollapsed ? "w-[70px]" : "w-[280px]"
       )}
     >
@@ -223,6 +224,14 @@ export const WorkspaceSidebar = ({
           id="threads"
           href={`/workspace/${workspaceId}/threads`}
           isActive={pathname.includes('/threads')}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem
+          label="Tasks"
+          icon={CheckSquare}
+          id="tasks"
+          href={`/workspace/${workspaceId}/tasks`}
+          isActive={pathname.includes('/tasks')}
           isCollapsed={isCollapsed}
         />
         <SidebarItem
