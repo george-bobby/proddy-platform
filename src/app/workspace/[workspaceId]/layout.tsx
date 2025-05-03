@@ -2,7 +2,7 @@
 
 import { Loader } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { SummarizeButton } from '@/components/summarize-button';
@@ -14,11 +14,13 @@ import { StatusTracker } from '@/features/status/components/status-tracker';
 import { usePanel } from '@/hooks/use-panel';
 import { setupGlobalMentionHandler } from '@/lib/global-mention-handler';
 import { debugMentions } from '@/lib/debug-mentions';
+import { cn } from '@/lib/utils';
 
 import { WorkspaceSidebar } from './sidebar';
 
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const showPanel = !!parentMessageId || !!profileMemberId;
 
@@ -40,15 +42,34 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
       <div className="h-full">
         <div className="flex h-full">
           <ResizablePanelGroup direction="horizontal" autoSaveId="workspace-layout">
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-tertiary/50">
+            <ResizablePanel
+              defaultSize={isCollapsed ? 5 : 25}
+              minSize={isCollapsed ? 5 : 20}
+              maxSize={isCollapsed ? 5 : 35}
+              className="bg-tertiary/50"
+              style={{
+                width: isCollapsed ? '70px' : '280px',
+                transition: 'width 300ms ease-in-out'
+              }}
+            >
               <div className="h-full overflow-y-auto overflow-x-hidden w-full">
-                <WorkspaceSidebar />
+                <WorkspaceSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
             </ResizablePanel>
 
-            <ResizableHandle withHandle />
+            <ResizableHandle
+              withHandle
+              className={cn(
+                "transition-opacity duration-300",
+                isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
+              )}
+            />
 
-            <ResizablePanel defaultSize={80} minSize={30}>
+            <ResizablePanel
+              defaultSize={isCollapsed ? 95 : 75}
+              minSize={30}
+              style={{ transition: 'width 300ms ease-in-out' }}
+            >
               <div className="h-full overflow-auto">
                 {children}
               </div>
@@ -57,7 +78,12 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
             {showPanel && (
               <>
                 <ResizableHandle withHandle />
-                <ResizablePanel minSize={25} defaultSize={29} maxSize={40}>
+                <ResizablePanel
+                  minSize={25}
+                  defaultSize={29}
+                  maxSize={40}
+                  style={{ transition: 'width 300ms ease-in-out' }}
+                >
                   <div className="h-full overflow-auto">
                     {parentMessageId ? (
                       <Thread messageId={parentMessageId as Id<'messages'>} onClose={onClose} />
