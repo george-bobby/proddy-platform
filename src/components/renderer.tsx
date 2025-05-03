@@ -81,7 +81,6 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
         `, ${timeStr}`
       ] : [''];
 
-      // Remove date/time patterns from the text content
       let cleanedText = textContent;
       for (const dateFormat of dateFormats) {
         for (const timeVariation of timeVariations) {
@@ -90,24 +89,15 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
         }
       }
 
-      // Clean up any double spaces left after removal
       cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
-
-      // Set the cleaned text back to the quill instance
       quill.setText(cleanedText);
     }
 
-    // Get the HTML content after cleaning
     let htmlContent = quill.root.innerHTML;
-
-    // Add the HTML content to the container
     container.innerHTML = htmlContent;
 
     // Add click handlers to mentions
     addMentionClickHandlers(container);
-
-    // Log for debugging
-    console.log('Renderer: Added click handlers to mentions in workspace:', workspaceId);
 
     return () => {
       if (container) container.innerHTML = '';

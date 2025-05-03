@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Search, User } from 'lucide-react';
@@ -82,7 +83,7 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
       const membersWithStatus: MemberWithStatus[] = members.map((member) => ({
         _id: member._id,
         user: {
-          name: member.user.name,
+          name: member.user.name || '', // Add fallback to empty string
           image: member.user.image,
         },
         status: 'offline', // Default status
@@ -94,8 +95,8 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
       const filtered = searchTerm.trim() === ''
         ? membersWithStatus
         : membersWithStatus.filter((member) =>
-            member.user.name.toLowerCase().includes(searchTerm.toLowerCase())
-          );
+          member.user.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
       debug('Filtered members', {
         count: filtered.length,
