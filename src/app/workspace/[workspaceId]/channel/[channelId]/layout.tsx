@@ -36,8 +36,8 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
   const { data: channel, isLoading: channelLoading } = useGetChannel({ id: channelId });
   const { data: member, isLoading: memberLoading } = useCurrentMember({ workspaceId });
   const [ConfirmDialog, confirm] = useConfirm(
-    'Delete this channel?',
-    'You are about to delete this channel and any of its associated messages. This action is irreversible.',
+    "Delete this channel?",
+    "You are about to delete this channel and any of its associated messages. This action is irreversible.",
   );
 
   const [value, setValue] = useState('');
@@ -69,11 +69,11 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
       { id: channelId, name: value },
       {
         onSuccess: () => {
-          toast.success('Channel updated.');
+          toast.success("Channel updated.");
           setEditOpen(false);
         },
         onError: () => {
-          toast.error('Failed to update channel.');
+          toast.error("Failed to update channel.");
         },
       },
     );
@@ -88,11 +88,11 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
       { id: channelId },
       {
         onSuccess: () => {
-          toast.success('Channel deleted');
+          toast.success("Channel deleted");
           router.push(`/workspace/${workspaceId}`);
         },
         onError: () => {
-          toast.error('Failed to delete channel.');
+          toast.error("Failed to delete channel.");
         },
       },
     );
