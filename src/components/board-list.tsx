@@ -56,7 +56,6 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
 
     // Get priority counts
     const priorityCounts = {
-        critical: cards.filter(c => c.priority === 'critical').length,
         highest: cards.filter(c => c.priority === 'highest').length,
         high: cards.filter(c => c.priority === 'high').length,
         medium: cards.filter(c => c.priority === 'medium').length,
@@ -115,11 +114,6 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                         <span>{cards.length} cards</span>
                     </div>
                     <div className="flex gap-1 flex-wrap">
-                        {priorityCounts.critical > 0 && (
-                            <Badge className="text-[9px] px-1 py-0 h-4 bg-red-600 text-white">
-                                {priorityCounts.critical} crit
-                            </Badge>
-                        )}
                         {priorityCounts.highest > 0 && (
                             <Badge variant="destructive" className="text-[9px] px-1 py-0 h-4">
                                 {priorityCounts.highest} high+

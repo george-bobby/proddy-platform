@@ -92,8 +92,7 @@ const schema = defineSchema({
       v.literal('low'),
       v.literal('medium'),
       v.literal('high'),
-      v.literal('highest'),
-      v.literal('critical')
+      v.literal('highest')
     )),
     dueDate: v.optional(v.number()),
   }).index('by_list_id', ['listId']),

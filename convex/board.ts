@@ -54,12 +54,11 @@ export const createCard = mutation({
       v.literal('low'),
       v.literal('medium'),
       v.literal('high'),
-      v.literal('highest'),
-      v.literal('critical')
+      v.literal('highest')
     )),
     dueDate: v.optional(v.number()),
   },
-  handler: async (ctx: MutationCtx, args: { listId: Id<'lists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, args: { listId: Id<'lists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest'; dueDate?: number }) => {
     return await ctx.db.insert('cards', args);
   },
 });
@@ -77,12 +76,11 @@ export const updateCard = mutation({
       v.literal('low'),
       v.literal('medium'),
       v.literal('high'),
-      v.literal('highest'),
-      v.literal('critical')
+      v.literal('highest')
     )),
     dueDate: v.optional(v.number()),
   },
-  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'cards'>; title?: string; description?: string; order?: number; listId?: Id<'lists'>; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'cards'>; title?: string; description?: string; order?: number; listId?: Id<'lists'>; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest'; dueDate?: number }) => {
     return await ctx.db.patch(cardId, updates);
   },
 });

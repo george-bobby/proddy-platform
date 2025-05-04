@@ -98,8 +98,8 @@ interface BoardAddCardModalProps {
     setDescription: (v: string) => void;
     labels: string;
     setLabels: (v: string) => void;
-    priority: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical';
-    setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical') => void;
+    priority: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+    setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest') => void;
     dueDate: Date | undefined;
     setDueDate: (v: Date | undefined) => void;
     labelSuggestions: string[];
@@ -141,7 +141,7 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
                 <div>
                     <Select
                         value={priority}
-                        onValueChange={v => setPriority(v as '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical')}
+                        onValueChange={v => setPriority(v as '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest')}
                     >
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Priority" />
@@ -152,7 +152,6 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
                             <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="high">High</SelectItem>
                             <SelectItem value="highest">Highest</SelectItem>
-                            <SelectItem value="critical">Critical</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -215,8 +214,8 @@ interface BoardEditCardModalProps {
     setDescription: (v: string) => void;
     labels: string;
     setLabels: (v: string) => void;
-    priority: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical';
-    setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical') => void;
+    priority: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+    setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest') => void;
     dueDate: Date | undefined;
     setDueDate: (v: Date | undefined) => void;
     labelSuggestions: string[];
@@ -257,7 +256,7 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
                 <div>
                     <Select
                         value={priority}
-                        onValueChange={v => setPriority(v as '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical')}
+                        onValueChange={v => setPriority(v as '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest')}
                     >
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Priority" />
@@ -268,7 +267,6 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
                             <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="high">High</SelectItem>
                             <SelectItem value="highest">Highest</SelectItem>
-                            <SelectItem value="critical">Critical</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

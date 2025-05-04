@@ -42,7 +42,7 @@ const BoardPage = () => {
     const [cardTitle, setCardTitle] = useState('');
     const [cardDesc, setCardDesc] = useState('');
     const [cardLabels, setCardLabels] = useState('');
-    const [cardPriority, setCardPriority] = useState<'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical' | ''>('');
+    const [cardPriority, setCardPriority] = useState<'lowest' | 'low' | 'medium' | 'high' | 'highest' | ''>('');
     const [cardDueDate, setCardDueDate] = useState<Date | undefined>(undefined);
 
     // Mutations
