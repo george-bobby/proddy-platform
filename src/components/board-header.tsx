@@ -94,112 +94,88 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3 w-full">
-          <form onSubmit={handleSearch} className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search cards..."
-              className="pl-9 bg-white/80 w-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </form>
+        <form onSubmit={handleSearch} className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search cards..."
+            className="pl-9 bg-white/80 w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </form>
 
-          {/* Current view label */}
-          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Current view:</span>
-            <Badge variant="outline" className="bg-white font-medium">
-              {view === 'board' && (
-                <><LayoutGrid className="w-3 h-3 mr-1" /> Board</>
-              )}
-              {view === 'table' && (
-                <><Table className="w-3 h-3 mr-1" /> Table</>
-              )}
-              {view === 'calendar' && (
-                <><Calendar className="w-3 h-3 mr-1" /> Calendar</>
-              )}
-              {view === 'gantt' && (
-                <><GanttChart className="w-3 h-3 mr-1" /> Gantt Chart</>
-              )}
-            </Badge>
-          </div>
-        </div>
+        <div className="flex items-center gap-3 bg-white/80 p-1 rounded-md border shadow-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn("px-2 py-1", view === 'board' && "bg-primary/10")}
+                  onClick={() => setView('board')}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Board View</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-        <div className="flex items-center gap-2">
-          {/* View switcher */}
-          <div className="flex items-center gap-1 bg-white/80 p-1 rounded-md border shadow-sm">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1", view === 'board' && "bg-primary/10")}
-                    onClick={() => setView('board')}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Board View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn("px-2 py-1", view === 'table' && "bg-secondary/10")}
+                  onClick={() => setView('table')}
+                >
+                  <Table className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Table View</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1", view === 'table' && "bg-secondary/10")}
-                    onClick={() => setView('table')}
-                  >
-                    <Table className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Table View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn("px-2 py-1", view === 'calendar' && "bg-primary/10")}
+                  onClick={() => setView('calendar')}
+                >
+                  <Calendar className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Calendar View</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1", view === 'calendar' && "bg-primary/10")}
-                    onClick={() => setView('calendar')}
-                  >
-                    <Calendar className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Calendar View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1", view === 'gantt' && "bg-secondary/10")}
-                    onClick={() => setView('gantt')}
-                  >
-                    <GanttChart className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Gantt Chart View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn("px-2 py-1", view === 'gantt' && "bg-secondary/10")}
+                  onClick={() => setView('gantt')}
+                >
+                  <GanttChart className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Gantt Chart View</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </div>

@@ -216,120 +216,41 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
     );
   };
 
-  // Calculate zoom level buttons
-  const zoomLevels = [
-    { label: 'Day', value: 1 * 24 * 60 * 60 * 1000 },
-    { label: 'Week', value: 7 * 24 * 60 * 60 * 1000 },
-    { label: 'Month', value: 30 * 24 * 60 * 60 * 1000 },
-    { label: 'Quarter', value: 90 * 24 * 60 * 60 * 1000 },
-  ];
-
-  // Function to handle zoom level change
-  const handleZoomChange = (zoomValue: number) => {
-    const currentMiddle = (timeRange.visibleTimeStart + timeRange.visibleTimeEnd) / 2;
-    const newVisibleTimeStart = currentMiddle - zoomValue / 2;
-    const newVisibleTimeEnd = currentMiddle + zoomValue / 2;
-    setTimeRange({
-      visibleTimeStart: newVisibleTimeStart,
-      visibleTimeEnd: newVisibleTimeEnd
-    });
-  };
-
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Toolbar for Gantt chart */}
-      <div className="flex items-center justify-between p-2 border-b bg-gray-50">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-muted-foreground">Zoom:</span>
-          <div className="flex items-center gap-1">
-            {zoomLevels.map((level) => (
-              <Button
-                key={level.label}
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => handleZoomChange(level.value)}
-              >
-                {level.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          {items.length} tasks • {groups.length} lists
-        </div>
-      </div>
-
-      {/* Timeline component */}
-      <div className="flex-1 overflow-hidden">
-        <Timeline
-          groups={groups}
-          items={items}
-          visibleTimeStart={timeRange.visibleTimeStart}
-          visibleTimeEnd={timeRange.visibleTimeEnd}
-          onTimeChange={handleTimeChange}
-          onItemMove={handleItemMove}
-          onItemResize={handleItemResize}
-          itemRenderer={itemRenderer}
-          stackItems
-          sidebarWidth={180}
-          lineHeight={44}
-          itemHeightRatio={0.65}
-          canMove={true}
-          canResize="both"
-          canChangeGroup={true}
-          minZoom={24 * 60 * 60 * 1000} // 1 day
-          maxZoom={365 * 24 * 60 * 60 * 1000} // 1 year
-          traditionalZoom
-          horizontalLineClassNamesForGroup={(group) => ["bg-gray-50"]}
-        >
-          <TimelineHeaders className="border-b">
-            <SidebarHeader>
-              {({ getRootProps }) => {
-                return (
-                  <div
-                    {...getRootProps()}
-                    className="font-medium text-sm px-4 py-2 bg-gray-100 flex items-center"
-                  >
-                    Lists / Tasks
-                  </div>
-                );
-              }}
-            </SidebarHeader>
-            <DateHeader
-              unit="primaryHeader"
-              className="bg-gray-100 text-sm font-medium"
-            />
-            <DateHeader
-              className="text-xs"
-            />
-          </TimelineHeaders>
-          <TimelineMarkers>
-            <TodayMarker>
-              {({ styles }) => (
-                <div
-                  style={{
-                    ...styles,
-                    backgroundColor: 'rgba(237, 18, 142, 0.3)',
-                    width: '2px'
-                  }}
-                />
-              )}
-            </TodayMarker>
-            <CursorMarker>
-              {({ styles }) => (
-                <div
-                  style={{
-                    ...styles,
-                    backgroundColor: 'rgba(74, 13, 104, 0.4)',
-                    width: '1px'
-                  }}
-                />
-              )}
-            </CursorMarker>
-          </TimelineMarkers>
-        </Timeline>
-      </div>
+    <div className="h-full bg-white">
+      <Timeline
+        groups={groups}
+        items={items}
+        visibleTimeStart={timeRange.visibleTimeStart}
+        visibleTimeEnd={timeRange.visibleTimeEnd}
+        onTimeChange={handleTimeChange}
+        onItemMove={handleItemMove}
+        onItemResize={handleItemResize}
+        itemRenderer={itemRenderer}
+        stackItems
+        sidebarWidth={150}
+        lineHeight={40}
+        itemHeightRatio={0.6}
+        canMove={true}
+        canResize="both"
+        canChangeGroup={true}
+        minZoom={24 * 60 * 60 * 1000} // 1 day
+        maxZoom={365 * 24 * 60 * 60 * 1000} // 1 year
+      >
+        <TimelineHeaders>
+          <SidebarHeader>
+            {({ getRootProps }) => {
+              return <div {...getRootProps()} className="font-medium">Lists</div>;
+            }}
+          </SidebarHeader>
+          <DateHeader unit="primaryHeader" />
+          <DateHeader />
+        </TimelineHeaders>
+        <TimelineMarkers>
+          <TodayMarker />
+          <CursorMarker />
+        </TimelineMarkers>
+      </Timeline>
     </div>
   );
 };
