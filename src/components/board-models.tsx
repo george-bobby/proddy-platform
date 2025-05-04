@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import type { Id } from '@/../convex/_generated/dataModel';
+import LabelInput from './label-input';
 
 // BoardAddListModal
 interface BoardAddListModalProps {
@@ -97,10 +98,11 @@ interface BoardAddCardModalProps {
     setDescription: (v: string) => void;
     labels: string;
     setLabels: (v: string) => void;
-    priority: '' | 'low' | 'medium' | 'high';
-    setPriority: (v: '' | 'low' | 'medium' | 'high') => void;
+    priority: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical';
+    setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical') => void;
     dueDate: Date | undefined;
     setDueDate: (v: Date | undefined) => void;
+    labelSuggestions: string[];
     onAdd: () => void;
 }
 
@@ -117,6 +119,7 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
     setPriority,
     dueDate,
     setDueDate,
+    labelSuggestions,
     onAdd
 }) => (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -127,18 +130,29 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
             </DialogHeader>
             <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Card title" autoFocus />
             <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" />
-            <Input value={labels} onChange={e => setLabels(e.target.value)} placeholder="Labels (comma separated)" />
+            <LabelInput
+                value={labels}
+                onChange={setLabels}
+                suggestions={labelSuggestions}
+                placeholder="Labels (comma separated)"
+            />
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <Select value={priority} onValueChange={v => setPriority(v as 'low' | 'medium' | 'high' | '')}>
+                    <Select
+                        value={priority}
+                        onValueChange={v => setPriority(v as '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical')}
+                    >
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Priority" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="lowest">Lowest</SelectItem>
                             <SelectItem value="low">Low</SelectItem>
                             <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="high">High</SelectItem>
+                            <SelectItem value="highest">Highest</SelectItem>
+                            <SelectItem value="critical">Critical</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -201,10 +215,11 @@ interface BoardEditCardModalProps {
     setDescription: (v: string) => void;
     labels: string;
     setLabels: (v: string) => void;
-    priority: '' | 'low' | 'medium' | 'high';
-    setPriority: (v: '' | 'low' | 'medium' | 'high') => void;
+    priority: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical';
+    setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical') => void;
     dueDate: Date | undefined;
     setDueDate: (v: Date | undefined) => void;
+    labelSuggestions: string[];
     onSave: () => void;
 }
 
@@ -221,6 +236,7 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
     setPriority,
     dueDate,
     setDueDate,
+    labelSuggestions,
     onSave
 }) => (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -230,18 +246,29 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
             </DialogHeader>
             <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Card title" autoFocus />
             <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" />
-            <Input value={labels} onChange={e => setLabels(e.target.value)} placeholder="Labels (comma separated)" />
+            <LabelInput
+                value={labels}
+                onChange={setLabels}
+                suggestions={labelSuggestions}
+                placeholder="Labels (comma separated)"
+            />
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <Select value={priority} onValueChange={v => setPriority(v as 'low' | 'medium' | 'high' | '')}>
+                    <Select
+                        value={priority}
+                        onValueChange={v => setPriority(v as '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical')}
+                    >
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Priority" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="lowest">Lowest</SelectItem>
                             <SelectItem value="low">Low</SelectItem>
                             <SelectItem value="medium">Medium</SelectItem>
                             <SelectItem value="high">High</SelectItem>
+                            <SelectItem value="highest">Highest</SelectItem>
+                            <SelectItem value="critical">Critical</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

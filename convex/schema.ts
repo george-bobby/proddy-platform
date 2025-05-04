@@ -87,7 +87,14 @@ const schema = defineSchema({
     description: v.optional(v.string()),
     order: v.number(),
     labels: v.optional(v.array(v.string())),
-    priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
+    priority: v.optional(v.union(
+      v.literal('lowest'),
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('highest'),
+      v.literal('critical')
+    )),
     dueDate: v.optional(v.number()),
   }).index('by_list_id', ['listId']),
 });

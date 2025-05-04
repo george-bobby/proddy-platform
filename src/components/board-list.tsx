@@ -56,9 +56,12 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
 
     // Get priority counts
     const priorityCounts = {
+        critical: cards.filter(c => c.priority === 'critical').length,
+        highest: cards.filter(c => c.priority === 'highest').length,
         high: cards.filter(c => c.priority === 'high').length,
         medium: cards.filter(c => c.priority === 'medium').length,
         low: cards.filter(c => c.priority === 'low').length,
+        lowest: cards.filter(c => c.priority === 'lowest').length,
     };
 
     return (
@@ -111,15 +114,35 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                         <LayoutGrid className="w-3 h-3" />
                         <span>{cards.length} cards</span>
                     </div>
-                    <div className="flex gap-2">
-                        {priorityCounts.high > 0 && (
+                    <div className="flex gap-1 flex-wrap">
+                        {priorityCounts.critical > 0 && (
+                            <Badge className="text-[9px] px-1 py-0 h-4 bg-red-600 text-white">
+                                {priorityCounts.critical} crit
+                            </Badge>
+                        )}
+                        {priorityCounts.highest > 0 && (
                             <Badge variant="destructive" className="text-[9px] px-1 py-0 h-4">
+                                {priorityCounts.highest} high+
+                            </Badge>
+                        )}
+                        {priorityCounts.high > 0 && (
+                            <Badge className="text-[9px] px-1 py-0 h-4 bg-orange-500 text-white">
                                 {priorityCounts.high} high
                             </Badge>
                         )}
                         {priorityCounts.medium > 0 && (
                             <Badge variant="secondary" className="text-[9px] px-1 py-0 h-4">
                                 {priorityCounts.medium} med
+                            </Badge>
+                        )}
+                        {priorityCounts.low > 0 && (
+                            <Badge className="text-[9px] px-1 py-0 h-4 bg-blue-400 text-white">
+                                {priorityCounts.low} low
+                            </Badge>
+                        )}
+                        {priorityCounts.lowest > 0 && (
+                            <Badge className="text-[9px] px-1 py-0 h-4 bg-primary/30 text-primary-foreground">
+                                {priorityCounts.lowest} low-
                             </Badge>
                         )}
                     </div>

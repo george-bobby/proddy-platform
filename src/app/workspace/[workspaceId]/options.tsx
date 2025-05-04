@@ -7,7 +7,7 @@ import Link from 'next/link';
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { StatusIndicator } from '@/components/ui/status-indicator';
+import { StatusIndicator } from '@/components/status-indicator';
 import { Hint } from '@/components/hint';
 import { useGetMember } from '@/features/members/api/use-get-member';
 import { useGetUserStatus } from '@/features/status/api/use-get-user-status';

@@ -22,6 +22,7 @@ const BoardPage = () => {
     const channelId = useChannelId();
     const lists = useQuery(api.board.getLists, { channelId });
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
+    const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
     const [view, setView] = useState<'board' | 'table'>('board');
 
     // Modal state
@@ -41,7 +42,7 @@ const BoardPage = () => {
     const [cardTitle, setCardTitle] = useState('');
     const [cardDesc, setCardDesc] = useState('');
     const [cardLabels, setCardLabels] = useState('');
-    const [cardPriority, setCardPriority] = useState<'low' | 'medium' | 'high' | ''>('');
+    const [cardPriority, setCardPriority] = useState<'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical' | ''>('');
     const [cardDueDate, setCardDueDate] = useState<Date | undefined>(undefined);
 
     // Mutations
@@ -337,6 +338,7 @@ const BoardPage = () => {
                 setPriority={setCardPriority}
                 dueDate={cardDueDate}
                 setDueDate={setCardDueDate}
+                labelSuggestions={uniqueLabels}
                 onAdd={() => addCardOpen && handleAddCard(addCardOpen)}
             />
             <BoardEditCardModal
@@ -354,6 +356,7 @@ const BoardPage = () => {
                 setPriority={setCardPriority}
                 dueDate={cardDueDate}
                 setDueDate={setCardDueDate}
+                labelSuggestions={uniqueLabels}
                 onSave={handleEditCard}
             />
         </div>

@@ -49,10 +49,17 @@ export const createCard = mutation({
     description: v.optional(v.string()),
     order: v.number(),
     labels: v.optional(v.array(v.string())),
-    priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
+    priority: v.optional(v.union(
+      v.literal('lowest'),
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('highest'),
+      v.literal('critical')
+    )),
     dueDate: v.optional(v.number()),
   },
-  handler: async (ctx: MutationCtx, args: { listId: Id<'lists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'low' | 'medium' | 'high'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, args: { listId: Id<'lists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical'; dueDate?: number }) => {
     return await ctx.db.insert('cards', args);
   },
 });
@@ -65,10 +72,17 @@ export const updateCard = mutation({
     order: v.optional(v.number()),
     listId: v.optional(v.id('lists')),
     labels: v.optional(v.array(v.string())),
-    priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
+    priority: v.optional(v.union(
+      v.literal('lowest'),
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('highest'),
+      v.literal('critical')
+    )),
     dueDate: v.optional(v.number()),
   },
-  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'cards'>; title?: string; description?: string; order?: number; listId?: Id<'lists'>; labels?: string[]; priority?: 'low' | 'medium' | 'high'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'cards'>; title?: string; description?: string; order?: number; listId?: Id<'lists'>; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest' | 'critical'; dueDate?: number }) => {
     return await ctx.db.patch(cardId, updates);
   },
 });
@@ -112,6 +126,29 @@ export const getAllCardsForChannel = query({
       allCards.push(...cards);
     }
     return allCards;
+  },
+});
+
+export const getUniqueLabels = query({
+  args: { channelId: v.id('channels') },
+  handler: async (ctx, { channelId }) => {
+    const lists = await ctx.db.query('lists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).collect();
+    const allLabels = new Set<string>();
+
+    for (const list of lists) {
+      const cards = await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', list._id)).collect();
+
+      // Collect all labels
+      for (const card of cards) {
+        if (card.labels && Array.isArray(card.labels)) {
+          card.labels.forEach(label => {
+            if (label) allLabels.add(label);
+          });
+        }
+      }
+    }
+
+    return Array.from(allLabels);
   },
 });
 

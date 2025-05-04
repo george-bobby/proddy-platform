@@ -39,11 +39,17 @@ const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete }) => {
     // Get priority color for card styling
     const getPriorityColor = () => {
         switch (card.priority) {
-            case 'high':
+            case 'critical':
+                return 'border-l-4 border-l-red-600 bg-red-50';
+            case 'highest':
                 return 'border-l-4 border-l-destructive bg-destructive/5';
+            case 'high':
+                return 'border-l-4 border-l-orange-500 bg-orange-50';
             case 'medium':
                 return 'border-l-4 border-l-secondary bg-secondary/5';
             case 'low':
+                return 'border-l-4 border-l-blue-400 bg-blue-50';
+            case 'lowest':
                 return 'border-l-4 border-l-primary/30 bg-primary/5';
             default:
                 return '';
@@ -53,11 +59,17 @@ const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete }) => {
     // Get priority icon
     const getPriorityIcon = () => {
         switch (card.priority) {
-            case 'high':
+            case 'critical':
+                return <AlertCircle className="w-3 h-3 text-red-600" />;
+            case 'highest':
                 return <AlertCircle className="w-3 h-3 text-destructive" />;
+            case 'high':
+                return <AlertCircle className="w-3 h-3 text-orange-500" />;
             case 'medium':
                 return <ArrowRightCircle className="w-3 h-3 text-secondary" />;
             case 'low':
+                return <ArrowRightCircle className="w-3 h-3 text-blue-400" />;
+            case 'lowest':
                 return <CheckCircle2 className="w-3 h-3 text-primary/70" />;
             default:
                 return null;
