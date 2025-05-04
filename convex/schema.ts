@@ -46,7 +46,7 @@ const schema = defineSchema({
     .index('by_conversation_id', ['conversationId'])
     .index('by_parent_message_id', ['parentMessageId'])
     .index('by_channel_id_parent_message_id_conversation_id', ['channelId', 'parentMessageId', 'conversationId']),
-  calendarEvents: defineTable({
+  events: defineTable({
     title: v.string(),
     date: v.number(), // timestamp for the event date
     time: v.optional(v.string()), // optional time string
@@ -67,7 +67,7 @@ const schema = defineSchema({
     .index('by_workspace_id', ['workspaceId'])
     .index('by_message_id', ['messageId'])
     .index('by_member_id', ['memberId']),
-  userStatus: defineTable({
+  history: defineTable({
     userId: v.id('users'),
     workspaceId: v.id('workspaces'),
     status: v.string(), // "online" or "offline"
@@ -76,6 +76,26 @@ const schema = defineSchema({
     .index('by_user_id', ['userId'])
     .index('by_workspace_id', ['workspaceId'])
     .index('by_workspace_id_user_id', ['workspaceId', 'userId']),
+  lists: defineTable({
+    channelId: v.id('channels'),
+    title: v.string(),
+    order: v.number(),
+  }).index('by_channel_id', ['channelId']),
+  cards: defineTable({
+    listId: v.id('lists'),
+    title: v.string(),
+    description: v.optional(v.string()),
+    order: v.number(),
+    labels: v.optional(v.array(v.string())),
+    priority: v.optional(v.union(
+      v.literal('lowest'),
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('highest')
+    )),
+    dueDate: v.optional(v.number()),
+  }).index('by_list_id', ['listId']),
 });
 
 export default schema;

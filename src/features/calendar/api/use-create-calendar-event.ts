@@ -12,7 +12,7 @@ type RequestType = {
   workspaceId: Id<'workspaces'>;
 };
 
-type ResponseType = Id<'calendarEvents'> | null;
+type ResponseType = Id<'events'> | null;
 
 type Options = {
   onSuccess?: (data: ResponseType) => void;

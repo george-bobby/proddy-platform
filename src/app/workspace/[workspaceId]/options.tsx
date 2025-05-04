@@ -7,7 +7,7 @@ import Link from 'next/link';
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { StatusIndicator } from '@/components/ui/status-indicator';
+import { StatusIndicator } from '@/components/status-indicator';
 import { Hint } from '@/components/hint';
 import { useGetMember } from '@/features/members/api/use-get-member';
 import { useGetUserStatus } from '@/features/status/api/use-get-user-status';
@@ -89,13 +89,13 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
   const { data: member } = useGetMember({ id });
 
   // Get the user's status, passing userId only if available
-  const { data: userStatus } = useGetUserStatus({
+  const { data: history } = useGetUserStatus({
     workspaceId,
     userId: member?.userId || null,
   });
 
   // Default to offline if status data is not available
-  const status = userStatus?.status || 'offline';
+  const status = history?.status || 'offline';
 
   return (
     <Button
