@@ -10,6 +10,60 @@ import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
+import { Id } from '@/../convex/_generated/dataModel';
+
+// Define types for calendar events
+interface CalendarEventUser {
+  _id: Id<'users'>;
+  name: string;
+  image: string | null;
+}
+
+interface CalendarEventMessage {
+  _id: Id<'messages'>;
+  body: string;
+  _creationTime: number;
+  channelId?: Id<'channels'>;
+  conversationId?: Id<'conversations'>;
+  calendarEvent?: {
+    date: number;
+    time?: string;
+  };
+}
+
+interface BoardCard {
+  _id: Id<'cards'>;
+  title: string;
+  description?: string;
+  priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+  labels?: string[];
+  listId: Id<'lists'>;
+  listTitle: string;
+  channelId: Id<'channels'>;
+  channelName: string;
+}
+
+interface CalendarEvent {
+  _id: Id<'events'>;
+  _creationTime: number;
+  date: number;
+  title?: string;
+  time?: string;
+  type: string; // Using string instead of union type to accommodate all possible values
+  boardCard?: BoardCard;
+  message?: CalendarEventMessage | null; // Allow null values
+  user?: CalendarEventUser | null; // Allow null values
+  memberId: Id<'members'>;
+  workspaceId: Id<'workspaces'>;
+  messageId?: Id<'messages'>;
+}
+
+// Define type for calendar day objects
+interface CalendarDay {
+  day: number | null;
+  isCurrentMonth: boolean;
+  events?: CalendarEvent[];
+}
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -29,17 +83,18 @@ const CalendarPage = () => {
   };
 
   // Group events by day
-  const eventsByDay = events?.reduce((acc, event) => {
+  const eventsByDay = events?.reduce<Record<number, CalendarEvent[]>>((acc, event) => {
     const day = new Date(event.date).getDate();
     if (!acc[day]) {
       acc[day] = [];
     }
-    acc[day].push(event);
+    // Type assertion to ensure event matches CalendarEvent interface
+    acc[day].push(event as CalendarEvent);
     return acc;
-  }, {} as Record<number, typeof events>);
+  }, {});
 
   // Generate calendar days for the current month
-  const generateCalendarDays = () => {
+  const generateCalendarDays = (): CalendarDay[][] => {
     if (!currentDate) return [];
 
     const year = currentDate.getFullYear();
@@ -52,7 +107,7 @@ const CalendarPage = () => {
     const firstDayOfMonth = new Date(year, month, 1).getDay();
 
     // Create an array of day objects
-    const days = [];
+    const days: CalendarDay[] = [];
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
@@ -61,7 +116,11 @@ const CalendarPage = () => {
 
     // Add days of the current month
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push({ day, isCurrentMonth: true, events: eventsByDay?.[day] || [] });
+      days.push({
+        day,
+        isCurrentMonth: true,
+        events: eventsByDay?.[day] || []
+      });
     }
 
     // Add empty cells to complete the last week if needed
@@ -73,7 +132,7 @@ const CalendarPage = () => {
     }
 
     // Group days into weeks
-    const weeks = [];
+    const weeks: CalendarDay[][] = [];
     for (let i = 0; i < days.length; i += 7) {
       weeks.push(days.slice(i, i + 7));
     }
@@ -164,8 +223,8 @@ const CalendarPage = () => {
                                 }
                                 key={event._id}
                                 className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
-                                    ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
-                                    : 'bg-primary/10 hover:bg-primary/20'
+                                  ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                  : 'bg-primary/10 hover:bg-primary/20'
                                   }`}
                                 title={
                                   event.type === 'board-card' && event.boardCard
@@ -182,7 +241,7 @@ const CalendarPage = () => {
                                   {event.type === 'board-card' && event.boardCard ? (
                                     <>
                                       <div className="font-medium">{event.boardCard.title}</div>
-                                      {event.boardCard.description && (
+                                      {event.type === 'board-card' && 'boardCard' in event && event.boardCard && event.boardCard.description && (
                                         <div className="text-[8px] text-muted-foreground truncate">
                                           {event.boardCard.description}
                                         </div>
@@ -207,10 +266,10 @@ const CalendarPage = () => {
                                   </span>
                                   {event.type === 'board-card' && event.boardCard?.priority && (
                                     <span className={`text-[8px] px-1 rounded ${event.boardCard.priority === 'high'
-                                        ? 'bg-destructive/20 text-destructive'
-                                        : event.boardCard.priority === 'medium'
-                                          ? 'bg-secondary/20 text-secondary'
-                                          : 'bg-primary/20 text-primary'
+                                      ? 'bg-destructive/20 text-destructive'
+                                      : event.boardCard.priority === 'medium'
+                                        ? 'bg-secondary/20 text-secondary'
+                                        : 'bg-primary/20 text-primary'
                                       }`}>
                                       {event.boardCard.priority}
                                     </span>

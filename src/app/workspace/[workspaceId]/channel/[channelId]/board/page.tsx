@@ -25,7 +25,7 @@ const BoardPage = () => {
     const lists = useQuery(api.board.getLists, { channelId });
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
-    const [view, setView] = useState<'board' | 'table' | 'calendar' | 'gantt'>('board');
+    const [view, setView] = useState<'kanban' | 'table' | 'calendar' | 'gantt'>('kanban');
 
     // Modal state
     const [addListOpen, setAddListOpen] = useState(false);
@@ -266,7 +266,7 @@ const BoardPage = () => {
             />
 
             <div className="flex-1 overflow-hidden">
-                {view === 'board' && (
+                {view === 'kanban' && (
                     <BoardKanbanView
                         lists={lists}
                         cardsByList={cardsByList}

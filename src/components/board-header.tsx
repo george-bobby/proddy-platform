@@ -11,8 +11,8 @@ interface BoardHeaderProps {
   title?: string;
   totalCards: number;
   listsCount: number;
-  view: 'board' | 'table' | 'calendar' | 'gantt';
-  setView: (view: 'board' | 'table' | 'calendar' | 'gantt') => void;
+  view: 'kanban' | 'table' | 'calendar' | 'gantt';
+  setView: (view: 'kanban' | 'table' | 'calendar' | 'gantt') => void;
   onAddList: () => void;
   onSearch?: (query: string) => void;
 }
@@ -108,7 +108,7 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">
               Current View: <span className="font-semibold text-foreground">
-                {view === 'board' && 'Board'}
+                {view === 'kanban' && 'Kanban'}
                 {view === 'table' && 'Table'}
                 {view === 'calendar' && 'Calendar'}
                 {view === 'gantt' && 'Gantt Chart'}
@@ -123,17 +123,17 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
                     variant="ghost"
                     size="sm"
                     className={cn("px-2 py-1 flex items-center gap-1.5",
-                      view === 'board' && "bg-primary/10 text-primary font-medium"
+                      view === 'kanban' && "bg-primary/10 text-primary font-medium"
                     )}
-                    onClick={() => setView('board')}
+                    onClick={() => setView('kanban')}
                   >
                     <LayoutGrid className="w-4 h-4" />
-                    <span className="text-xs hidden sm:inline">Board</span>
-                    {view === 'board' && <span className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-0.5 -right-0.5"></span>}
+                    <span className="text-xs hidden sm:inline">Kanban</span>
+                    {view === 'kanban' && <span className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-0.5 -right-0.5"></span>}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Board View</p>
+                  <p>Kanban View</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
