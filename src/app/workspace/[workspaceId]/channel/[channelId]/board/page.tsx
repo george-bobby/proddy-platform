@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useChannelId } from '@/hooks/use-channel-id';
 import { useQuery, useMutation } from 'convex/react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { LayoutGrid, Table, Plus } from 'lucide-react';
-import BoardList from '@/components/board-list';
+import { DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import {
     BoardAddListModal,
     BoardEditListModal,
@@ -14,9 +12,11 @@ import {
     BoardAddCardModal,
     BoardEditCardModal
 } from '@/components/board-models';
-import { Button } from '@/components/ui/button';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
+import BoardKanbanView from '@/components/board-kanban-view';
+import BoardTableView from '@/components/board-table-view';
+import BoardHeader from '@/components/board-header';
 
 const BoardPage = () => {
     const channelId = useChannelId();
@@ -42,6 +42,7 @@ const BoardPage = () => {
     const [cardDesc, setCardDesc] = useState('');
     const [cardLabels, setCardLabels] = useState('');
     const [cardPriority, setCardPriority] = useState<'low' | 'medium' | 'high' | ''>('');
+    const [cardDueDate, setCardDueDate] = useState<Date | undefined>(undefined);
 
     // Mutations
     const createList = useMutation(api.board.createList);
@@ -108,11 +109,13 @@ const BoardPage = () => {
             order,
             labels: cardLabels.split(',').map(l => l.trim()).filter(Boolean),
             priority: cardPriority || undefined,
+            dueDate: cardDueDate ? cardDueDate.getTime() : undefined,
         });
         setCardTitle('');
         setCardDesc('');
         setCardLabels('');
         setCardPriority('');
+        setCardDueDate(undefined);
         setAddCardOpen(null);
     };
     const handleEditCard = async () => {
@@ -123,6 +126,7 @@ const BoardPage = () => {
             description: cardDesc,
             labels: cardLabels.split(',').map(l => l.trim()).filter(Boolean),
             priority: cardPriority || undefined,
+            dueDate: cardDueDate ? cardDueDate.getTime() : undefined,
         });
         setEditCardOpen(null);
     };
@@ -134,95 +138,224 @@ const BoardPage = () => {
     // Drag-and-drop for lists and cards
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
-        if (!active || !over || active.id === over.id) return;
-        // List reordering
-        if (lists && lists.some(l => l._id === active.id) && lists.some(l => l._id === over.id)) {
-            const oldIndex = lists.findIndex(l => l._id === active.id);
-            const newIndex = lists.findIndex(l => l._id === over.id);
-            if (oldIndex === -1 || newIndex === -1) return;
-            const newOrder = arrayMove(lists, oldIndex, newIndex).map((l, idx) => ({ listId: l._id, order: idx }));
-            await reorderLists({ listOrders: newOrder });
+        if (!active || !over) {
+            console.log('No active or over element');
             return;
         }
-        // Card drag-and-drop
-        let fromListId: Id<'lists'> | null = null;
-        let toListId: Id<'lists'> | null = null;
-        let toIndex = -1;
-        let cardToMove: any = null;
-        if (!lists) return;
-        for (const list of lists) {
-            const cards = cardsByList[list._id] || [];
-            const idx = cards.findIndex((c: any) => c._id === active.id);
-            if (idx !== -1) {
-                fromListId = list._id;
-                cardToMove = cards[idx];
+
+        // Log the drag event for debugging
+        console.log('Drag end event:', {
+            activeId: active.id,
+            overId: over.id,
+            activeType: active.data.current?.type,
+            overType: over.data.current?.type,
+            overData: over.data.current
+        });
+
+        // Get data from the dragged item
+        const activeType = active.data.current?.type;
+
+        // List reordering
+        if (activeType === 'list' && lists) {
+            const oldIndex = lists.findIndex(l => l._id === active.id);
+            const newIndex = lists.findIndex(l => l._id === over.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newOrder = arrayMove(lists, oldIndex, newIndex).map((l, idx) => ({
+                    listId: l._id,
+                    order: idx
+                }));
+                await reorderLists({ listOrders: newOrder });
             }
-            if (list._id === over.data?.current?.listId) {
-                toListId = list._id;
-                toIndex = over.data?.current?.index ?? 0;
+            return;
+        }
+
+        // Card drag-and-drop
+        if (activeType === 'card') {
+            const cardId = active.id as Id<'cards'>;
+            let fromListId: Id<'lists'> | null = null;
+            let toListId: Id<'lists'> | null = null;
+
+            // Find the source list
+            for (const list of lists || []) {
+                const cards = cardsByList[list._id] || [];
+                if (cards.some(c => c._id === cardId)) {
+                    fromListId = list._id;
+                    break;
+                }
+            }
+
+            // Determine the target list
+            const overId = over.id.toString();
+
+            // Check if dropped on a droppable area (list container)
+            if (overId.startsWith('droppable-')) {
+                toListId = overId.replace('droppable-', '') as Id<'lists'>;
+                console.log('Dropped on droppable area:', toListId);
+            }
+            // Check if dropped on a list
+            else if (over.data.current?.type === 'list') {
+                toListId = over.data.current.listId || over.id as Id<'lists'>;
+                console.log('Dropped on list:', toListId);
+            }
+            // Check if dropped on a card
+            else if (over.data.current?.type === 'card') {
+                // Find the list that contains this card
+                const overCardId = over.id;
+                for (const list of lists || []) {
+                    const cards = cardsByList[list._id] || [];
+                    if (cards.some(c => c._id === overCardId)) {
+                        toListId = list._id;
+                        console.log('Dropped on card in list:', toListId);
+                        break;
+                    }
+                }
+            }
+
+            console.log('Move card:', { cardId, fromListId, toListId });
+
+            if (fromListId && toListId) {
+                // Calculate the new order
+                const targetCards = cardsByList[toListId] || [];
+                let newOrder = 0;
+
+                // If dropped on a card, place it at that card's position
+                if (over.data.current?.type === 'card') {
+                    const overCardIndex = targetCards.findIndex(c => c._id === over.id);
+                    if (overCardIndex !== -1) {
+                        newOrder = overCardIndex;
+                    }
+                } else {
+                    // If dropped directly on a list, place at the end
+                    newOrder = targetCards.length;
+                }
+
+                console.log('Moving card to position:', newOrder);
+
+                try {
+                    await moveCard({
+                        cardId,
+                        toListId,
+                        order: newOrder
+                    });
+                    console.log('Card moved successfully');
+                } catch (error) {
+                    console.error('Error moving card:', error);
+                }
+            } else {
+                console.warn('Could not determine source or target list');
             }
         }
-        if (!cardToMove || !fromListId || !toListId) return;
-        await moveCard({ cardId: cardToMove._id, toListId, order: toIndex });
     };
 
     if (!channelId) return <div className="p-4">No channel selected.</div>;
     if (!lists) return <div className="p-4">Loading board...</div>;
 
     return (
-        <div className="h-full flex flex-col">
-            <div className="flex items-center gap-2 p-2 border-b bg-muted">
-                <Button onClick={() => setView('board')} variant={view === 'board' ? 'default' : 'outline'}><LayoutGrid className="w-4 h-4 mr-1" /> Board View</Button>
-                <Button onClick={() => setView('table')} variant={view === 'table' ? 'default' : 'outline'}><Table className="w-4 h-4 mr-1" /> Table View</Button>
-                <Button variant="outline" className="ml-auto" onClick={() => setAddListOpen(true)}><Plus className="w-4 h-4 mr-1" /> Add List</Button>
+        <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+            <BoardHeader
+                totalCards={allCards.length}
+                listsCount={lists?.length || 0}
+                view={view}
+                setView={setView}
+                onAddList={() => setAddListOpen(true)}
+                onSearch={(query) => console.log('Search:', query)}
+            />
+
+            <div className="flex-1 overflow-hidden">
+                {view === 'board' ? (
+                    <BoardKanbanView
+                        lists={lists}
+                        cardsByList={cardsByList}
+                        onEditList={(list) => {
+                            setListToEdit(list);
+                            setEditListTitle(list.title);
+                            setEditListOpen(true);
+                        }}
+                        onDeleteList={(list) => {
+                            setListToDelete(list);
+                            setDeleteListOpen(true);
+                        }}
+                        onAddCard={(listId) => {
+                            setAddCardOpen(listId);
+                            setCardTitle('');
+                            setCardDesc('');
+                            setCardLabels('');
+                            setCardPriority('');
+                        }}
+                        onEditCard={(card) => {
+                            setEditCardOpen({ card });
+                            setCardTitle(card.title);
+                            setCardDesc(card.description || '');
+                            setCardLabels((card.labels || []).join(', '));
+                            setCardPriority(card.priority || '');
+                            setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                        }}
+                        onDeleteCard={handleDeleteCard}
+                        handleDragEnd={handleDragEnd}
+                    />
+                ) : (
+                    <BoardTableView
+                        lists={lists}
+                        allCards={allCards}
+                        onEditCard={(card) => {
+                            setEditCardOpen({ card });
+                            setCardTitle(card.title);
+                            setCardDesc(card.description || '');
+                            setCardLabels((card.labels || []).join(', '));
+                            setCardPriority(card.priority || '');
+                            setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                        }}
+                        onDeleteCard={handleDeleteCard}
+                    />
+                )}
             </div>
-            {view === 'board' ? (
-                <div className="flex flex-1 overflow-x-auto gap-4 p-4 bg-white">
-                    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                        <SortableContext items={lists.map(l => l._id)} strategy={horizontalListSortingStrategy}>
-                            {lists.map(list => (
-                                <BoardList
-                                    key={list._id}
-                                    list={list}
-                                    cards={cardsByList[list._id] || []}
-                                    onEditList={() => {
-                                        setListToEdit(list);
-                                        setEditListTitle(list.title);
-                                        setEditListOpen(true);
-                                    }}
-                                    onDeleteList={() => {
-                                        setListToDelete(list);
-                                        setDeleteListOpen(true);
-                                    }}
-                                    onAddCard={() => {
-                                        setAddCardOpen(list._id);
-                                        setCardTitle('');
-                                        setCardDesc('');
-                                        setCardLabels('');
-                                        setCardPriority('');
-                                    }}
-                                    onEditCard={card => {
-                                        setEditCardOpen({ card });
-                                        setCardTitle(card.title);
-                                        setCardDesc(card.description || '');
-                                        setCardLabels((card.labels || []).join(', '));
-                                        setCardPriority(card.priority || '');
-                                    }}
-                                    onDeleteCard={handleDeleteCard}
-                                />
-                            ))}
-                        </SortableContext>
-                    </DndContext>
-                </div>
-            ) : (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground">Table view coming soon</div>
-            )}
+
             {/* Modals */}
             <BoardAddListModal open={addListOpen} onOpenChange={setAddListOpen} title={newListTitle} setTitle={setNewListTitle} onAdd={handleAddList} />
             <BoardEditListModal open={editListOpen} onOpenChange={setEditListOpen} title={editListTitle} setTitle={setEditListTitle} onSave={handleEditList} />
             <BoardDeleteListModal open={deleteListOpen} onOpenChange={setDeleteListOpen} onDelete={handleDeleteList} />
-            <BoardAddCardModal open={!!addCardOpen} onOpenChange={(open: boolean) => { if (!open) { setAddCardOpen(null); setCardTitle(''); setCardDesc(''); setCardLabels(''); setCardPriority(''); } }} title={cardTitle} setTitle={setCardTitle} description={cardDesc} setDescription={setCardDesc} labels={cardLabels} setLabels={setCardLabels} priority={cardPriority} setPriority={setCardPriority} onAdd={() => addCardOpen && handleAddCard(addCardOpen)} />
-            <BoardEditCardModal open={!!editCardOpen} onOpenChange={(open: boolean) => { if (!open) setEditCardOpen(null); }} title={cardTitle} setTitle={setCardTitle} description={cardDesc} setDescription={setCardDesc} labels={cardLabels} setLabels={setCardLabels} priority={cardPriority} setPriority={setCardPriority} onSave={handleEditCard} />
+            <BoardAddCardModal
+                open={!!addCardOpen}
+                onOpenChange={(open: boolean) => {
+                    if (!open) {
+                        setAddCardOpen(null);
+                        setCardTitle('');
+                        setCardDesc('');
+                        setCardLabels('');
+                        setCardPriority('');
+                        setCardDueDate(undefined);
+                    }
+                }}
+                title={cardTitle}
+                setTitle={setCardTitle}
+                description={cardDesc}
+                setDescription={setCardDesc}
+                labels={cardLabels}
+                setLabels={setCardLabels}
+                priority={cardPriority}
+                setPriority={setCardPriority}
+                dueDate={cardDueDate}
+                setDueDate={setCardDueDate}
+                onAdd={() => addCardOpen && handleAddCard(addCardOpen)}
+            />
+            <BoardEditCardModal
+                open={!!editCardOpen}
+                onOpenChange={(open: boolean) => {
+                    if (!open) setEditCardOpen(null);
+                }}
+                title={cardTitle}
+                setTitle={setCardTitle}
+                description={cardDesc}
+                setDescription={setCardDesc}
+                labels={cardLabels}
+                setLabels={setCardLabels}
+                priority={cardPriority}
+                setPriority={setCardPriority}
+                dueDate={cardDueDate}
+                setDueDate={setCardDueDate}
+                onSave={handleEditCard}
+            />
         </div>
     );
 };

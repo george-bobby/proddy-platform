@@ -2,7 +2,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
 
-import type { Doc, Id } from './_generated/dataModel';
+import type { Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
 
 const getMember = async (ctx: QueryCtx, workspaceId: Id<'workspaces'>, userId: Id<'users'>) => {
@@ -118,14 +118,82 @@ export const getCalendarEvents = query({
     // Create a map of message ID to message
     const messageMap = new Map(messages.map((message) => [message?._id, message]));
 
+    // Get board cards with due dates for this month
+    const channels = await ctx.db.query('channels')
+      .withIndex('by_workspace_id', q => q.eq('workspaceId', args.workspaceId))
+      .collect();
+
+    const boardEvents = [];
+
+    // For each channel, get all lists and cards with due dates in the current month
+    for (const channel of channels) {
+      const lists = await ctx.db.query('lists')
+        .withIndex('by_channel_id', q => q.eq('channelId', channel._id))
+        .collect();
+
+      for (const list of lists) {
+        const cards = await ctx.db.query('cards')
+          .withIndex('by_list_id', q => q.eq('listId', list._id))
+          .filter(q =>
+            q.and(
+              q.neq(q.field('dueDate'), undefined),
+              q.gte(q.field('dueDate'), startDate),
+              q.lte(q.field('dueDate'), endDate)
+            )
+          )
+          .collect();
+
+        // Convert cards to calendar events
+        for (const card of cards) {
+          boardEvents.push({
+            _id: card._id as unknown as Id<'events'>, // Type cast for compatibility
+            _creationTime: card._creationTime,
+            date: card.dueDate as number,
+            title: card.title,
+            time: undefined,
+            type: 'board-card',
+            boardCard: {
+              _id: card._id,
+              title: card.title,
+              description: card.description,
+              priority: card.priority,
+              labels: card.labels,
+              listId: list._id,
+              listTitle: list.title,
+              channelId: channel._id,
+              channelName: channel.name
+            },
+            message: {
+              _id: card._id as unknown as Id<'messages'>, // Type cast for compatibility
+              body: JSON.stringify({ ops: [{ insert: card.title }] }),
+              _creationTime: card._creationTime,
+              channelId: channel._id,
+              calendarEvent: {
+                date: card.dueDate as number,
+                time: undefined
+              }
+            },
+            user: {
+              _id: userId as Id<'users'>,
+              name: 'Board Card',
+              image: null
+            },
+            memberId: member._id,
+            workspaceId: args.workspaceId
+          });
+        }
+      }
+    }
+
     // Map events to include message and user info
-    return events.map((event) => {
+    const messageEvents = events.map((event) => {
       const message = messageMap.get(event.messageId);
       const member = message ? memberMap.get(message.memberId) : null;
       const user = member ? userMap.get(member.userId) : null;
 
       return {
         ...event,
+        type: 'calendar-event',
         message: message ? {
           _id: message._id,
           body: message.body,
@@ -141,6 +209,9 @@ export const getCalendarEvents = query({
         } : null,
       };
     });
+
+    // Combine both types of events
+    return [...messageEvents, ...boardEvents];
   },
 });
 

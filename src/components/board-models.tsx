@@ -3,6 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './ui/select';
+import { Calendar } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 // BoardAddListModal
@@ -94,10 +99,26 @@ interface BoardAddCardModalProps {
     setLabels: (v: string) => void;
     priority: '' | 'low' | 'medium' | 'high';
     setPriority: (v: '' | 'low' | 'medium' | 'high') => void;
+    dueDate: Date | undefined;
+    setDueDate: (v: Date | undefined) => void;
     onAdd: () => void;
 }
 
-export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({ open, onOpenChange, title, setTitle, description, setDescription, labels, setLabels, priority, setPriority, onAdd }) => (
+export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
+    open,
+    onOpenChange,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    labels,
+    setLabels,
+    priority,
+    setPriority,
+    dueDate,
+    setDueDate,
+    onAdd
+}) => (
     <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
             <DialogHeader>
@@ -107,16 +128,59 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({ open, onOp
             <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Card title" autoFocus />
             <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" />
             <Input value={labels} onChange={e => setLabels(e.target.value)} placeholder="Labels (comma separated)" />
-            <Select value={priority} onValueChange={v => setPriority(v as 'low' | 'medium' | 'high' | '')}>
-                <SelectTrigger className="w-full mt-2">
-                    <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-            </Select>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Select value={priority} onValueChange={v => setPriority(v as 'low' | 'medium' | 'high' | '')}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !dueDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {dueDate ? format(dueDate, "PPP") : <span>Due Date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={dueDate}
+                                onSelect={setDueDate}
+                                initialFocus
+                            />
+                            {dueDate && (
+                                <div className="p-2 border-t">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setDueDate(undefined)}
+                                        className="text-destructive hover:text-destructive/90"
+                                    >
+                                        Clear Date
+                                    </Button>
+                                </div>
+                            )}
+                        </PopoverContent>
+                    </Popover>
+                </div>
+            </div>
+
             <DialogFooter>
                 <Button onClick={onAdd}>Add</Button>
                 <DialogClose asChild>
@@ -139,10 +203,26 @@ interface BoardEditCardModalProps {
     setLabels: (v: string) => void;
     priority: '' | 'low' | 'medium' | 'high';
     setPriority: (v: '' | 'low' | 'medium' | 'high') => void;
+    dueDate: Date | undefined;
+    setDueDate: (v: Date | undefined) => void;
     onSave: () => void;
 }
 
-export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({ open, onOpenChange, title, setTitle, description, setDescription, labels, setLabels, priority, setPriority, onSave }) => (
+export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
+    open,
+    onOpenChange,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    labels,
+    setLabels,
+    priority,
+    setPriority,
+    dueDate,
+    setDueDate,
+    onSave
+}) => (
     <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
             <DialogHeader>
@@ -151,16 +231,59 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({ open, on
             <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Card title" autoFocus />
             <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" />
             <Input value={labels} onChange={e => setLabels(e.target.value)} placeholder="Labels (comma separated)" />
-            <Select value={priority} onValueChange={v => setPriority(v as 'low' | 'medium' | 'high' | '')}>
-                <SelectTrigger className="w-full mt-2">
-                    <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-            </Select>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Select value={priority} onValueChange={v => setPriority(v as 'low' | 'medium' | 'high' | '')}>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !dueDate && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {dueDate ? format(dueDate, "PPP") : <span>Due Date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={dueDate}
+                                onSelect={setDueDate}
+                                initialFocus
+                            />
+                            {dueDate && (
+                                <div className="p-2 border-t">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setDueDate(undefined)}
+                                        className="text-destructive hover:text-destructive/90"
+                                    >
+                                        Clear Date
+                                    </Button>
+                                </div>
+                            )}
+                        </PopoverContent>
+                    </Popover>
+                </div>
+            </div>
+
             <DialogFooter>
                 <Button onClick={onSave}>Save</Button>
                 <DialogClose asChild>

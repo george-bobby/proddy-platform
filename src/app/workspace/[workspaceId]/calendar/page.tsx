@@ -154,25 +154,41 @@ const CalendarPage = () => {
                             {dayObj.events.map((event) => (
                               <Link
                                 href={
-                                  event.message?.channelId
-                                    ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
-                                    : event.message?.conversationId
-                                      ? `/workspace/${workspaceId}/member/${event.memberId}`
-                                      : '#'
+                                  event.type === 'board-card' && event.boardCard
+                                    ? `/workspace/${workspaceId}/channel/${event.boardCard.channelId}/board`
+                                    : event.message?.channelId
+                                      ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
+                                      : event.message?.conversationId
+                                        ? `/workspace/${workspaceId}/member/${event.memberId}`
+                                        : '#'
                                 }
                                 key={event._id}
-                                className="block rounded-sm bg-primary/10 p-1 text-[10px] leading-tight hover:bg-primary/20 transition-colors"
+                                className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
+                                    ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                    : 'bg-primary/10 hover:bg-primary/20'
+                                  }`}
                                 title={
-                                  event?.message?.body
-                                    ? JSON.parse(event.message.body).ops[0].insert
-                                    : ''
+                                  event.type === 'board-card' && event.boardCard
+                                    ? `${event.boardCard.title} (${event.boardCard.listTitle})`
+                                    : event?.message?.body
+                                      ? JSON.parse(event.message.body).ops[0].insert
+                                      : ''
                                 }
                               >
                                 {event.time && (
                                   <span className="font-bold">{event.time}</span>
                                 )}
                                 <div className="truncate">
-                                  {event?.message?.body ? (
+                                  {event.type === 'board-card' && event.boardCard ? (
+                                    <>
+                                      <div className="font-medium">{event.boardCard.title}</div>
+                                      {event.boardCard.description && (
+                                        <div className="text-[8px] text-muted-foreground truncate">
+                                          {event.boardCard.description}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : event?.message?.body ? (
                                     <Renderer
                                       value={event.message.body}
                                       calendarEvent={event.message.calendarEvent}
@@ -181,8 +197,24 @@ const CalendarPage = () => {
                                     'Event'
                                   )}
                                 </div>
-                                <div className="text-[8px] text-muted-foreground">
-                                  by {event?.user?.name || 'Unknown'}
+                                <div className="text-[8px] text-muted-foreground flex items-center justify-between">
+                                  <span>
+                                    {event.type === 'board-card' ? (
+                                      <>Board Card in {event.boardCard?.listTitle}</>
+                                    ) : (
+                                      <>by {event?.user?.name || 'Unknown'}</>
+                                    )}
+                                  </span>
+                                  {event.type === 'board-card' && event.boardCard?.priority && (
+                                    <span className={`text-[8px] px-1 rounded ${event.boardCard.priority === 'high'
+                                        ? 'bg-destructive/20 text-destructive'
+                                        : event.boardCard.priority === 'medium'
+                                          ? 'bg-secondary/20 text-secondary'
+                                          : 'bg-primary/20 text-primary'
+                                      }`}>
+                                      {event.boardCard.priority}
+                                    </span>
+                                  )}
                                 </div>
                               </Link>
                             ))}

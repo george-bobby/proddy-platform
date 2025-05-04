@@ -113,4 +113,42 @@ export const getAllCardsForChannel = query({
     }
     return allCards;
   },
-}); 
+});
+
+export const getCardsWithDueDate = query({
+  args: { workspaceId: v.id('workspaces') },
+  handler: async (ctx, { workspaceId }) => {
+    // Get all channels in the workspace
+    const channels = await ctx.db.query('channels')
+      .withIndex('by_workspace_id', q => q.eq('workspaceId', workspaceId))
+      .collect();
+
+    const cardsWithDueDate = [];
+
+    // For each channel, get all lists and cards
+    for (const channel of channels) {
+      const lists = await ctx.db.query('lists')
+        .withIndex('by_channel_id', q => q.eq('channelId', channel._id))
+        .collect();
+
+      for (const list of lists) {
+        const cards = await ctx.db.query('cards')
+          .withIndex('by_list_id', q => q.eq('listId', list._id))
+          .filter(q => q.neq(q.field('dueDate'), undefined))
+          .collect();
+
+        // Add channel and list info to each card
+        const cardsWithContext = cards.map(card => ({
+          ...card,
+          channelId: channel._id,
+          channelName: channel.name,
+          listTitle: list.title
+        }));
+
+        cardsWithDueDate.push(...cardsWithContext);
+      }
+    }
+
+    return cardsWithDueDate;
+  },
+});
