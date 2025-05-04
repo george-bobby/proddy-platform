@@ -104,78 +104,106 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
           />
         </form>
 
-        <div className="flex items-center gap-3 bg-white/80 p-1 rounded-md border shadow-sm">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn("px-2 py-1", view === 'board' && "bg-primary/10")}
-                  onClick={() => setView('board')}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Board View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">
+              Current View: <span className="font-semibold text-foreground">
+                {view === 'board' && 'Board'}
+                {view === 'table' && 'Table'}
+                {view === 'calendar' && 'Calendar'}
+                {view === 'gantt' && 'Gantt Chart'}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center gap-3 bg-white/80 p-1 rounded-md border shadow-sm">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1 flex items-center gap-1.5",
+                      view === 'board' && "bg-primary/10 text-primary font-medium"
+                    )}
+                    onClick={() => setView('board')}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                    <span className="text-xs hidden sm:inline">Board</span>
+                    {view === 'board' && <span className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-0.5 -right-0.5"></span>}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Board View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn("px-2 py-1", view === 'table' && "bg-secondary/10")}
-                  onClick={() => setView('table')}
-                >
-                  <Table className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Table View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1 flex items-center gap-1.5",
+                      view === 'table' && "bg-secondary/10 text-secondary font-medium"
+                    )}
+                    onClick={() => setView('table')}
+                  >
+                    <Table className="w-4 h-4" />
+                    <span className="text-xs hidden sm:inline">Table</span>
+                    {view === 'table' && <span className="w-1.5 h-1.5 rounded-full bg-secondary absolute -top-0.5 -right-0.5"></span>}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Table View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn("px-2 py-1", view === 'calendar' && "bg-primary/10")}
-                  onClick={() => setView('calendar')}
-                >
-                  <Calendar className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Calendar View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1 flex items-center gap-1.5",
+                      view === 'calendar' && "bg-primary/10 text-primary font-medium"
+                    )}
+                    onClick={() => setView('calendar')}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-xs hidden sm:inline">Calendar</span>
+                    {view === 'calendar' && <span className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-0.5 -right-0.5"></span>}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Calendar View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn("px-2 py-1", view === 'gantt' && "bg-secondary/10")}
-                  onClick={() => setView('gantt')}
-                >
-                  <GanttChart className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Gantt Chart View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1 flex items-center gap-1.5",
+                      view === 'gantt' && "bg-secondary/10 text-secondary font-medium"
+                    )}
+                    onClick={() => setView('gantt')}
+                  >
+                    <GanttChart className="w-4 h-4" />
+                    <span className="text-xs hidden sm:inline">Gantt</span>
+                    {view === 'gantt' && <span className="w-1.5 h-1.5 rounded-full bg-secondary absolute -top-0.5 -right-0.5"></span>}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Gantt Chart View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
     </div>
