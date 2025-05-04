@@ -6,12 +6,14 @@ import { useQuery, useMutation } from 'convex/react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { LayoutGrid, Table, Plus } from 'lucide-react';
-import BoardList from '@/components/board/BoardList';
-import BoardAddListModal from '@/components/board/BoardAddListModal';
-import BoardEditListModal from '@/components/board/BoardEditListModal';
-import BoardDeleteListModal from '@/components/board/BoardDeleteListModal';
-import BoardAddCardModal from '@/components/board/BoardAddCardModal';
-import BoardEditCardModal from '@/components/board/BoardEditCardModal';
+import BoardList from '@/components/board-list';
+import {
+    BoardAddListModal,
+    BoardEditListModal,
+    BoardDeleteListModal,
+    BoardAddCardModal,
+    BoardEditCardModal
+} from '@/components/board-models';
 import { Button } from '@/components/ui/button';
 import { api } from '../../../../../../convex/_generated/api';
 import type { Id } from '../../../../../../convex/_generated/dataModel';

@@ -1,9 +1,9 @@
 import React from 'react';
 import type { Id } from '../../convex/_generated/dataModel';
 import { Pencil, Trash, Plus } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from './ui/button';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import BoardCard from './BoardCard';
+import BoardCard from './board-card';
 
 interface BoardListProps {
     list: any;
