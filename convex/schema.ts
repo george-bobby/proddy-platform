@@ -46,7 +46,7 @@ const schema = defineSchema({
     .index('by_conversation_id', ['conversationId'])
     .index('by_parent_message_id', ['parentMessageId'])
     .index('by_channel_id_parent_message_id_conversation_id', ['channelId', 'parentMessageId', 'conversationId']),
-  calendarEvents: defineTable({
+  events: defineTable({
     title: v.string(),
     date: v.number(), // timestamp for the event date
     time: v.optional(v.string()), // optional time string

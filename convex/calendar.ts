@@ -41,7 +41,7 @@ export const createCalendarEvent = mutation({
     });
 
     // Create a calendar event
-    const calendarEventId = await ctx.db.insert('calendarEvents', {
+    const calendarEventId = await ctx.db.insert('events', {
       title: args.title,
       date: args.date,
       time: args.time,
@@ -75,7 +75,7 @@ export const getCalendarEvents = query({
 
     // Get all calendar events for the month
     const events = await ctx.db
-      .query('calendarEvents')
+      .query('events')
       .withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
       .filter((q) => q.and(q.gte(q.field('date'), startDate), q.lte(q.field('date'), endDate)))
       .collect();
