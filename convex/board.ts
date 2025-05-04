@@ -99,6 +99,30 @@ export const moveCard = mutation({
   },
 });
 
+export const updateCardInGantt = mutation({
+  args: {
+    cardId: v.id('cards'),
+    dueDate: v.number(),
+    listId: v.optional(v.id('lists'))
+  },
+  handler: async (ctx: MutationCtx, { cardId, dueDate, listId }: { cardId: Id<'cards'>; dueDate: number; listId?: Id<'lists'> }) => {
+    const updates: any = { dueDate };
+
+    if (listId) {
+      updates.listId = listId;
+
+      // If we're changing the list, put the card at the end of the new list
+      const cards = await ctx.db.query('cards')
+        .withIndex('by_list_id', q => q.eq('listId', listId))
+        .collect();
+
+      updates.order = cards.length;
+    }
+
+    return await ctx.db.patch(cardId, updates);
+  },
+});
+
 // QUERIES
 export const getLists = query({
   args: { channelId: v.id('channels') },

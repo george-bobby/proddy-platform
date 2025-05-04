@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Filter, LayoutGrid, Table, BarChart, Calendar, Clock } from 'lucide-react';
+import { Search, Filter, LayoutGrid, Table, BarChart, Calendar, Clock, GanttChart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Switch } from './ui/switch';
-import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
@@ -13,8 +11,8 @@ interface BoardHeaderProps {
   title?: string;
   totalCards: number;
   listsCount: number;
-  view: 'board' | 'table';
-  setView: (view: 'board' | 'table') => void;
+  view: 'board' | 'table' | 'calendar' | 'gantt';
+  setView: (view: 'board' | 'table' | 'calendar' | 'gantt') => void;
   onAddList: () => void;
   onSearch?: (query: string) => void;
 }
@@ -96,73 +94,112 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <form onSubmit={handleSearch} className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search cards..."
-            className="pl-9 bg-white/80 w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </form>
-
-        <div className="flex items-center gap-3 bg-white/80 p-1 rounded-md border shadow-sm">
-          <div className="flex items-center gap-2 px-2">
-            <Switch
-              id="view-switch"
-              checked={view === 'table'}
-              onCheckedChange={(checked: boolean) => setView(checked ? 'table' : 'board')}
-              className="data-[state=checked]:bg-secondary"
+        <div className="flex items-center gap-3 w-full">
+          <form onSubmit={handleSearch} className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search cards..."
+              className="pl-9 bg-white/80 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Label htmlFor="view-switch" className="flex items-center gap-1.5 text-sm font-medium">
-              {view === 'board' ? (
-                <><LayoutGrid className="w-4 h-4 text-primary" /> Board</>
-              ) : (
-                <><Table className="w-4 h-4 text-secondary" /> Table</>
+          </form>
+
+          {/* Current view label */}
+          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+            <span>Current view:</span>
+            <Badge variant="outline" className="bg-white font-medium">
+              {view === 'board' && (
+                <><LayoutGrid className="w-3 h-3 mr-1" /> Board</>
               )}
-            </Label>
+              {view === 'table' && (
+                <><Table className="w-3 h-3 mr-1" /> Table</>
+              )}
+              {view === 'calendar' && (
+                <><Calendar className="w-3 h-3 mr-1" /> Calendar</>
+              )}
+              {view === 'gantt' && (
+                <><GanttChart className="w-3 h-3 mr-1" /> Gantt Chart</>
+              )}
+            </Badge>
           </div>
+        </div>
 
-          <div className="h-6 w-px bg-border"></div>
+        <div className="flex items-center gap-2">
+          {/* View switcher */}
+          <div className="flex items-center gap-1 bg-white/80 p-1 rounded-md border shadow-sm">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1", view === 'board' && "bg-primary/10")}
+                    onClick={() => setView('board')}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Board View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className={cn("px-2 py-1", view === 'board' && "bg-primary/10")}>
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Board View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1", view === 'table' && "bg-secondary/10")}
+                    onClick={() => setView('table')}
+                  >
+                    <Table className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Table View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className={cn("px-2 py-1", view === 'table' && "bg-secondary/10")}>
-                  <Table className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Table View</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1", view === 'calendar' && "bg-primary/10")}
+                    onClick={() => setView('calendar')}
+                  >
+                    <Calendar className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Calendar View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="px-2 py-1">
-                  <Calendar className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Calendar View (Coming Soon)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("px-2 py-1", view === 'gantt' && "bg-secondary/10")}
+                    onClick={() => setView('gantt')}
+                  >
+                    <GanttChart className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Gantt Chart View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
     </div>

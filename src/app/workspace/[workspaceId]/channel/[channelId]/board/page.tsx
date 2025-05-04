@@ -16,6 +16,8 @@ import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
 import BoardKanbanView from '@/components/board-kanban-view';
 import BoardTableView from '@/components/board-table-view';
+import BoardCalendarView from '@/components/board-calendar-view';
+import BoardGanttView from '@/components/board-gantt-view';
 import BoardHeader from '@/components/board-header';
 
 const BoardPage = () => {
@@ -23,7 +25,7 @@ const BoardPage = () => {
     const lists = useQuery(api.board.getLists, { channelId });
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
-    const [view, setView] = useState<'board' | 'table'>('board');
+    const [view, setView] = useState<'board' | 'table' | 'calendar' | 'gantt'>('board');
 
     // Modal state
     const [addListOpen, setAddListOpen] = useState(false);
@@ -264,7 +266,7 @@ const BoardPage = () => {
             />
 
             <div className="flex-1 overflow-hidden">
-                {view === 'board' ? (
+                {view === 'board' && (
                     <BoardKanbanView
                         lists={lists}
                         cardsByList={cardsByList}
@@ -295,8 +297,42 @@ const BoardPage = () => {
                         onDeleteCard={handleDeleteCard}
                         handleDragEnd={handleDragEnd}
                     />
-                ) : (
+                )}
+
+                {view === 'table' && (
                     <BoardTableView
+                        lists={lists}
+                        allCards={allCards}
+                        onEditCard={(card) => {
+                            setEditCardOpen({ card });
+                            setCardTitle(card.title);
+                            setCardDesc(card.description || '');
+                            setCardLabels((card.labels || []).join(', '));
+                            setCardPriority(card.priority || '');
+                            setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                        }}
+                        onDeleteCard={handleDeleteCard}
+                    />
+                )}
+
+                {view === 'calendar' && (
+                    <BoardCalendarView
+                        lists={lists}
+                        allCards={allCards}
+                        onEditCard={(card) => {
+                            setEditCardOpen({ card });
+                            setCardTitle(card.title);
+                            setCardDesc(card.description || '');
+                            setCardLabels((card.labels || []).join(', '));
+                            setCardPriority(card.priority || '');
+                            setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                        }}
+                        onDeleteCard={handleDeleteCard}
+                    />
+                )}
+
+                {view === 'gantt' && (
+                    <BoardGanttView
                         lists={lists}
                         allCards={allCards}
                         onEditCard={(card) => {
