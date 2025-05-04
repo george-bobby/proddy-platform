@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Pencil,
   Trash,
@@ -13,13 +13,15 @@ import {
   ZoomOut,
   ArrowLeft,
   ArrowRight,
-  Info
+  Info,
+  GripHorizontal
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
+import { useToast } from '@/components/ui/use-toast';
 import {
   addDays,
   format,
@@ -77,6 +79,18 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
 
   const [zoomLevel, setZoomLevel] = useState<number>(14); // Number of days to show
   const [selectedTask, setSelectedTask] = useState<GanttTask | null>(null);
+  const [draggingTask, setDraggingTask] = useState<GanttTask | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartDate, setDragStartDate] = useState<Date | null>(null);
+
+  // Ref for the timeline container to calculate positions
+  const timelineContainerRef = useRef<HTMLDivElement>(null);
+
+  // Mutation to update card due date
+  const updateCardInGantt = useMutation(api.board.updateCardInGantt);
+  const { toast } = useToast();
 
   // Process cards into Gantt tasks
   const tasks = useMemo(() => {
@@ -209,6 +223,138 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
     };
   };
 
+  // Handle drag start
+  const handleDragStart = (e: React.MouseEvent, task: GanttTask) => {
+    // Prevent task selection when starting drag
+    e.stopPropagation();
+
+    // Store the task we're dragging
+    setDraggingTask(task);
+    setDragStartDate(new Date(task.endDate));
+
+    // Calculate the offset from the left edge of the task
+    const taskElement = e.currentTarget as HTMLElement;
+    const rect = taskElement.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+
+    // Set initial drag position
+    setDragPosition({
+      x: e.clientX,
+      y: e.clientY
+    });
+
+    setIsDragging(true);
+
+    // Add event listeners for drag and drop
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+  };
+
+  // Handle drag move
+  const handleDragMove = (e: MouseEvent) => {
+    if (!isDragging || !draggingTask || !timelineContainerRef.current) return;
+
+    // Update drag position
+    setDragPosition({
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
+  // Handle drag end
+  const handleDragEnd = (e: MouseEvent) => {
+    if (!isDragging || !draggingTask || !timelineContainerRef.current || !dragStartDate) {
+      cleanupDrag();
+      return;
+    }
+
+    // Calculate the new date based on drag position
+    const timelineRect = timelineContainerRef.current.getBoundingClientRect();
+    const timelineWidth = timelineRect.width - 250; // Subtract the width of the list name column
+    const timelineLeft = timelineRect.left + 250; // Add the width of the list name column
+
+    // Calculate the relative position within the timeline (0 to 1)
+    const relativePosition = Math.max(0, Math.min(1, (e.clientX - timelineLeft) / timelineWidth));
+
+    // Calculate the day offset from the start of the timeline
+    const dayOffset = Math.floor(relativePosition * zoomLevel);
+
+    // Calculate the new due date
+    const newDueDate = addDays(currentStartDate, dayOffset);
+
+    // Only update if the date has changed
+    if (newDueDate.getTime() !== draggingTask.endDate.getTime()) {
+      // Update the card due date in the backend
+      updateCardInGantt({
+        cardId: draggingTask.id,
+        dueDate: newDueDate.getTime()
+      })
+        .then(() => {
+          toast({
+            title: "Due date updated",
+            description: `"${draggingTask.title}" due date changed to ${format(newDueDate, 'MMM d, yyyy')}`,
+          });
+        })
+        .catch(error => {
+          toast({
+            title: "Error updating due date",
+            description: error.message,
+            variant: "destructive"
+          });
+        });
+    }
+
+    cleanupDrag();
+  };
+
+  // Clean up drag state
+  const cleanupDrag = () => {
+    setIsDragging(false);
+    setDraggingTask(null);
+    setDragStartDate(null);
+
+    // Remove event listeners
+    document.removeEventListener('mousemove', handleDragMove);
+    document.removeEventListener('mouseup', handleDragEnd);
+  };
+
+  // Calculate the position of the dragging task
+  const getDraggingTaskPosition = () => {
+    if (!isDragging || !draggingTask || !timelineContainerRef.current) return null;
+
+    const timelineRect = timelineContainerRef.current.getBoundingClientRect();
+    const timelineWidth = timelineRect.width - 250; // Subtract the width of the list name column
+    const timelineLeft = timelineRect.left + 250; // Add the width of the list name column
+
+    // Calculate the relative position within the timeline (0 to 1)
+    const relativePosition = Math.max(0, Math.min(1, (dragPosition.x - timelineLeft) / timelineWidth));
+
+    // Calculate the day offset from the start of the timeline
+    const dayOffset = Math.floor(relativePosition * zoomLevel);
+
+    // Calculate the task width (keep the same duration)
+    const taskDuration = differenceInDays(draggingTask.endDate, draggingTask.startDate);
+
+    // Calculate the left position as a percentage
+    const startPosition = (dayOffset - taskDuration) / zoomLevel * 100;
+
+    // Ensure it's within bounds
+    const boundedStartPosition = Math.max(0, startPosition);
+
+    return {
+      left: `${boundedStartPosition}%`,
+      width: `${Math.max(3, (taskDuration + 1) / zoomLevel * 100)}%`,
+      position: 'absolute',
+      top: `${dragPosition.y - dragOffset.y}px`,
+      zIndex: 50,
+      opacity: 0.7,
+      pointerEvents: 'none'
+    };
+  };
+
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Gantt Chart Controls */}
@@ -276,7 +422,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
       </div>
 
       {/* Gantt Chart Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto" ref={timelineContainerRef}>
         {/* Timeline Header */}
         <div className="sticky top-0 z-10 bg-white border-b">
           <div className="flex pl-[250px]">
@@ -324,7 +470,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
 
                   {/* Tasks for this list */}
                   <div className="relative p-2">
-                    {tasksByList[list._id]?.map(task => {
+                    {tasksByList[list._id]?.map((task: GanttTask) => {
                       const style = getTaskPosition(task);
                       return (
                         <div
@@ -339,10 +485,12 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
                               backgroundColor: getPriorityColor(task.priority).replace('bg-', '').replace('500', '100').replace('400', '100')
                             }}
                             onClick={() => setSelectedTask(task)}
+                            onMouseDown={(e) => handleDragStart(e, task)}
                           >
                             <div className="absolute inset-0 flex items-center px-2 overflow-hidden">
                               <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityColor(task.priority)}`}></div>
                               <span className="ml-1 text-xs font-medium truncate">{task.title}</span>
+                              <GripHorizontal className="ml-auto h-3 w-3 text-gray-400 opacity-50 hover:opacity-100" />
                             </div>
                           </div>
                         </div>
@@ -353,6 +501,22 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
               </div>
             </div>
           ))}
+
+          {/* Dragging task overlay */}
+          {isDragging && draggingTask && (
+            <div
+              className={`absolute rounded-md border shadow-md ${getPriorityColor(draggingTask.priority).replace('bg-', 'bg-opacity-20 border-')}`}
+              style={Object.assign({
+                backgroundColor: getPriorityColor(draggingTask.priority).replace('bg-', '').replace('500', '100').replace('400', '100'),
+                height: '30px'
+              }, getDraggingTaskPosition() || {})}
+            >
+              <div className="absolute inset-0 flex items-center px-2 overflow-hidden">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityColor(draggingTask.priority)}`}></div>
+                <span className="ml-1 text-xs font-medium truncate">{draggingTask.title}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
