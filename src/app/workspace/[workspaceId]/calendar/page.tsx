@@ -164,8 +164,8 @@ const CalendarPage = () => {
                                 }
                                 key={event._id}
                                 className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
-                                  ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
-                                  : 'bg-primary/10 hover:bg-primary/20'
+                                    ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                    : 'bg-primary/10 hover:bg-primary/20'
                                   }`}
                                 title={
                                   event.type === 'board-card' && event.boardCard
@@ -207,10 +207,10 @@ const CalendarPage = () => {
                                   </span>
                                   {event.type === 'board-card' && event.boardCard?.priority && (
                                     <span className={`text-[8px] px-1 rounded ${event.boardCard.priority === 'high'
-                                      ? 'bg-destructive/20 text-destructive'
-                                      : event.boardCard.priority === 'medium'
-                                        ? 'bg-secondary/20 text-secondary'
-                                        : 'bg-primary/20 text-primary'
+                                        ? 'bg-destructive/20 text-destructive'
+                                        : event.boardCard.priority === 'medium'
+                                          ? 'bg-secondary/20 text-secondary'
+                                          : 'bg-primary/20 text-primary'
                                       }`}>
                                       {event.boardCard.priority}
                                     </span>
