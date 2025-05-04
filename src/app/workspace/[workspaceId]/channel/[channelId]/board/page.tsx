@@ -15,8 +15,8 @@ import {
     BoardEditCardModal
 } from '@/components/board-models';
 import { Button } from '@/components/ui/button';
-import { api } from '../../../../../../convex/_generated/api';
-import type { Id } from '../../../../../../convex/_generated/dataModel';
+import { api } from '@/../convex/_generated/api';
+import type { Id } from '@/../convex/_generated/dataModel';
 
 const BoardPage = () => {
     const channelId = useChannelId();
@@ -41,7 +41,7 @@ const BoardPage = () => {
     const [cardTitle, setCardTitle] = useState('');
     const [cardDesc, setCardDesc] = useState('');
     const [cardLabels, setCardLabels] = useState('');
-    const [cardPriority, setCardPriority] = useState('');
+    const [cardPriority, setCardPriority] = useState<'low' | 'medium' | 'high' | ''>('');
 
     // Mutations
     const createList = useMutation(api.board.createList);
@@ -147,7 +147,6 @@ const BoardPage = () => {
         // Card drag-and-drop
         let fromListId: Id<'boardLists'> | null = null;
         let toListId: Id<'boardLists'> | null = null;
-        let fromIndex = -1;
         let toIndex = -1;
         let cardToMove: any = null;
         if (!lists) return;
@@ -156,7 +155,6 @@ const BoardPage = () => {
             const idx = cards.findIndex((c: any) => c._id === active.id);
             if (idx !== -1) {
                 fromListId = list._id;
-                fromIndex = idx;
                 cardToMove = cards[idx];
             }
             if (list._id === over.data?.current?.listId) {
@@ -223,8 +221,8 @@ const BoardPage = () => {
             <BoardAddListModal open={addListOpen} onOpenChange={setAddListOpen} title={newListTitle} setTitle={setNewListTitle} onAdd={handleAddList} />
             <BoardEditListModal open={editListOpen} onOpenChange={setEditListOpen} title={editListTitle} setTitle={setEditListTitle} onSave={handleEditList} />
             <BoardDeleteListModal open={deleteListOpen} onOpenChange={setDeleteListOpen} onDelete={handleDeleteList} />
-            <BoardAddCardModal open={!!addCardOpen} onOpenChange={open => { if (!open) { setAddCardOpen(null); setCardTitle(''); setCardDesc(''); setCardLabels(''); setCardPriority(''); } }} title={cardTitle} setTitle={setCardTitle} description={cardDesc} setDescription={setCardDesc} labels={cardLabels} setLabels={setCardLabels} priority={cardPriority} setPriority={setCardPriority} onAdd={() => addCardOpen && handleAddCard(addCardOpen)} />
-            <BoardEditCardModal open={!!editCardOpen} onOpenChange={open => { if (!open) setEditCardOpen(null); }} title={cardTitle} setTitle={setCardTitle} description={cardDesc} setDescription={setCardDesc} labels={cardLabels} setLabels={setCardLabels} priority={cardPriority} setPriority={setCardPriority} onSave={handleEditCard} />
+            <BoardAddCardModal open={!!addCardOpen} onOpenChange={(open: boolean) => { if (!open) { setAddCardOpen(null); setCardTitle(''); setCardDesc(''); setCardLabels(''); setCardPriority(''); } }} title={cardTitle} setTitle={setCardTitle} description={cardDesc} setDescription={setCardDesc} labels={cardLabels} setLabels={setCardLabels} priority={cardPriority} setPriority={setCardPriority} onAdd={() => addCardOpen && handleAddCard(addCardOpen)} />
+            <BoardEditCardModal open={!!editCardOpen} onOpenChange={(open: boolean) => { if (!open) setEditCardOpen(null); }} title={cardTitle} setTitle={setCardTitle} description={cardDesc} setDescription={setCardDesc} labels={cardLabels} setLabels={setCardLabels} priority={cardPriority} setPriority={setCardPriority} onSave={handleEditCard} />
         </div>
     );
 };

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './ui/select';
-import type { Id } from '../../convex/_generated/dataModel';
+import type { Id } from '@/../convex/_generated/dataModel';
 
 // BoardAddListModal
 interface BoardAddListModalProps {
@@ -92,8 +92,8 @@ interface BoardAddCardModalProps {
     setDescription: (v: string) => void;
     labels: string;
     setLabels: (v: string) => void;
-    priority: string;
-    setPriority: (v: string) => void;
+    priority: '' | 'low' | 'medium' | 'high';
+    setPriority: (v: '' | 'low' | 'medium' | 'high') => void;
     onAdd: () => void;
 }
 
@@ -137,8 +137,8 @@ interface BoardEditCardModalProps {
     setDescription: (v: string) => void;
     labels: string;
     setLabels: (v: string) => void;
-    priority: string;
-    setPriority: (v: string) => void;
+    priority: '' | 'low' | 'medium' | 'high';
+    setPriority: (v: '' | 'low' | 'medium' | 'high') => void;
     onSave: () => void;
 }
 
