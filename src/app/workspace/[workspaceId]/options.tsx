@@ -89,13 +89,13 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
   const { data: member } = useGetMember({ id });
 
   // Get the user's status, passing userId only if available
-  const { data: userStatus } = useGetUserStatus({
+  const { data: history } = useGetUserStatus({
     workspaceId,
     userId: member?.userId || null,
   });
 
   // Default to offline if status data is not available
-  const status = userStatus?.status || 'offline';
+  const status = history?.status || 'offline';
 
   return (
     <Button

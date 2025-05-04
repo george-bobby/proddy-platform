@@ -12,7 +12,7 @@ interface BoardListProps {
     onDeleteList: () => void;
     onAddCard: () => void;
     onEditCard: (card: any) => void;
-    onDeleteCard: (cardId: Id<'boardCards'>) => void;
+    onDeleteCard: (cardId: Id<'cards'>) => void;
 }
 
 const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDeleteList, onAddCard, onEditCard, onDeleteCard }) => {

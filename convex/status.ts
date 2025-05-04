@@ -25,7 +25,7 @@ export const update = mutation({
 
     // Check if there's an existing status entry
     const existing = await ctx.db
-      .query('userStatus')
+      .query('history')
       .withIndex('by_workspace_id_user_id', (q) => q.eq('workspaceId', args.workspaceId).eq('userId', userId))
       .unique();
 
@@ -37,7 +37,7 @@ export const update = mutation({
       });
     } else {
       // Create new status entry
-      await ctx.db.insert('userStatus', {
+      await ctx.db.insert('history', {
         userId,
         workspaceId: args.workspaceId,
         status: args.status,
@@ -67,7 +67,7 @@ export const getForWorkspace = query({
 
     // Get all status entries for the workspace
     const statusEntries = await ctx.db
-      .query('userStatus')
+      .query('history')
       .withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
       .collect();
 
@@ -105,7 +105,7 @@ export const getUserStatus = query({
     // We can safely use args.userId here because we've already checked that it exists
     const userId = args.userId; // This helps TypeScript understand that userId is defined
     const status = await ctx.db
-      .query('userStatus')
+      .query('history')
       .withIndex('by_workspace_id_user_id', (q) => q.eq('workspaceId', args.workspaceId).eq('userId', userId))
       .unique();
 

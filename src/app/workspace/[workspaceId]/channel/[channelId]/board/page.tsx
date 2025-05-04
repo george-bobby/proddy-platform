@@ -28,7 +28,7 @@ const BoardPage = () => {
     const [addListOpen, setAddListOpen] = useState(false);
     const [editListOpen, setEditListOpen] = useState(false);
     const [deleteListOpen, setDeleteListOpen] = useState(false);
-    const [addCardOpen, setAddCardOpen] = useState<null | Id<'boardLists'>>(null);
+    const [addCardOpen, setAddCardOpen] = useState<null | Id<'lists'>>(null);
     const [editCardOpen, setEditCardOpen] = useState<null | { card: any }>();
 
     // Form state
@@ -97,7 +97,7 @@ const BoardPage = () => {
     };
 
     // Card handlers
-    const handleAddCard = async (listId: Id<'boardLists'>) => {
+    const handleAddCard = async (listId: Id<'lists'>) => {
         if (!cardTitle.trim()) return;
         const cards = cardsByList[listId] || [];
         const order = cards.length;
@@ -126,7 +126,7 @@ const BoardPage = () => {
         });
         setEditCardOpen(null);
     };
-    const handleDeleteCard = async (cardId: Id<'boardCards'>) => {
+    const handleDeleteCard = async (cardId: Id<'cards'>) => {
         await deleteCard({ cardId });
         setEditCardOpen(null);
     };
@@ -145,8 +145,8 @@ const BoardPage = () => {
             return;
         }
         // Card drag-and-drop
-        let fromListId: Id<'boardLists'> | null = null;
-        let toListId: Id<'boardLists'> | null = null;
+        let fromListId: Id<'lists'> | null = null;
+        let toListId: Id<'lists'> | null = null;
         let toIndex = -1;
         let cardToMove: any = null;
         if (!lists) return;

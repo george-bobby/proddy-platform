@@ -7,22 +7,22 @@ import type { Id } from './_generated/dataModel';
 export const createList = mutation({
   args: { channelId: v.id('channels'), title: v.string(), order: v.number() },
   handler: async (ctx: MutationCtx, args: { channelId: Id<'channels'>; title: string; order: number }) => {
-    return await ctx.db.insert('boardLists', args);
+    return await ctx.db.insert('lists', args);
   },
 });
 
 export const updateList = mutation({
-  args: { listId: v.id('boardLists'), title: v.optional(v.string()), order: v.optional(v.number()) },
-  handler: async (ctx: MutationCtx, { listId, ...updates }: { listId: Id<'boardLists'>; title?: string; order?: number }) => {
+  args: { listId: v.id('lists'), title: v.optional(v.string()), order: v.optional(v.number()) },
+  handler: async (ctx: MutationCtx, { listId, ...updates }: { listId: Id<'lists'>; title?: string; order?: number }) => {
     return await ctx.db.patch(listId, updates);
   },
 });
 
 export const deleteList = mutation({
-  args: { listId: v.id('boardLists') },
-  handler: async (ctx: MutationCtx, { listId }: { listId: Id<'boardLists'> }) => {
+  args: { listId: v.id('lists') },
+  handler: async (ctx: MutationCtx, { listId }: { listId: Id<'lists'> }) => {
     // Delete all cards in the list
-    const cards = await ctx.db.query('boardCards').withIndex('by_list_id', q => q.eq('listId', listId)).collect();
+    const cards = await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', listId)).collect();
     for (const card of cards) {
       await ctx.db.delete(card._id);
     }
@@ -32,8 +32,8 @@ export const deleteList = mutation({
 });
 
 export const reorderLists = mutation({
-  args: { listOrders: v.array(v.object({ listId: v.id('boardLists'), order: v.number() })) },
-  handler: async (ctx: MutationCtx, { listOrders }: { listOrders: { listId: Id<'boardLists'>; order: number }[] }) => {
+  args: { listOrders: v.array(v.object({ listId: v.id('lists'), order: v.number() })) },
+  handler: async (ctx: MutationCtx, { listOrders }: { listOrders: { listId: Id<'lists'>; order: number }[] }) => {
     for (const { listId, order } of listOrders) {
       await ctx.db.patch(listId, { order });
     }
@@ -44,7 +44,7 @@ export const reorderLists = mutation({
 // CARDS
 export const createCard = mutation({
   args: {
-    listId: v.id('boardLists'),
+    listId: v.id('lists'),
     title: v.string(),
     description: v.optional(v.string()),
     order: v.number(),
@@ -52,37 +52,37 @@ export const createCard = mutation({
     priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
     dueDate: v.optional(v.number()),
   },
-  handler: async (ctx: MutationCtx, args: { listId: Id<'boardLists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'low' | 'medium' | 'high'; dueDate?: number }) => {
-    return await ctx.db.insert('boardCards', args);
+  handler: async (ctx: MutationCtx, args: { listId: Id<'lists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'low' | 'medium' | 'high'; dueDate?: number }) => {
+    return await ctx.db.insert('cards', args);
   },
 });
 
 export const updateCard = mutation({
   args: {
-    cardId: v.id('boardCards'),
+    cardId: v.id('cards'),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     order: v.optional(v.number()),
-    listId: v.optional(v.id('boardLists')),
+    listId: v.optional(v.id('lists')),
     labels: v.optional(v.array(v.string())),
     priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
     dueDate: v.optional(v.number()),
   },
-  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'boardCards'>; title?: string; description?: string; order?: number; listId?: Id<'boardLists'>; labels?: string[]; priority?: 'low' | 'medium' | 'high'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'cards'>; title?: string; description?: string; order?: number; listId?: Id<'lists'>; labels?: string[]; priority?: 'low' | 'medium' | 'high'; dueDate?: number }) => {
     return await ctx.db.patch(cardId, updates);
   },
 });
 
 export const deleteCard = mutation({
-  args: { cardId: v.id('boardCards') },
-  handler: async (ctx: MutationCtx, { cardId }: { cardId: Id<'boardCards'> }) => {
+  args: { cardId: v.id('cards') },
+  handler: async (ctx: MutationCtx, { cardId }: { cardId: Id<'cards'> }) => {
     return await ctx.db.delete(cardId);
   },
 });
 
 export const moveCard = mutation({
-  args: { cardId: v.id('boardCards'), toListId: v.id('boardLists'), order: v.number() },
-  handler: async (ctx: MutationCtx, { cardId, toListId, order }: { cardId: Id<'boardCards'>; toListId: Id<'boardLists'>; order: number }) => {
+  args: { cardId: v.id('cards'), toListId: v.id('lists'), order: v.number() },
+  handler: async (ctx: MutationCtx, { cardId, toListId, order }: { cardId: Id<'cards'>; toListId: Id<'lists'>; order: number }) => {
     return await ctx.db.patch(cardId, { listId: toListId, order });
   },
 });
@@ -91,24 +91,24 @@ export const moveCard = mutation({
 export const getLists = query({
   args: { channelId: v.id('channels') },
   handler: async (ctx: QueryCtx, { channelId }: { channelId: Id<'channels'> }) => {
-    return await ctx.db.query('boardLists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).order('asc').collect();
+    return await ctx.db.query('lists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).order('asc').collect();
   },
 });
 
 export const getCards = query({
-  args: { listId: v.id('boardLists') },
-  handler: async (ctx: QueryCtx, { listId }: { listId: Id<'boardLists'> }) => {
-    return await ctx.db.query('boardCards').withIndex('by_list_id', q => q.eq('listId', listId)).order('asc').collect();
+  args: { listId: v.id('lists') },
+  handler: async (ctx: QueryCtx, { listId }: { listId: Id<'lists'> }) => {
+    return await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', listId)).order('asc').collect();
   },
 });
 
 export const getAllCardsForChannel = query({
   args: { channelId: v.id('channels') },
   handler: async (ctx, { channelId }) => {
-    const lists = await ctx.db.query('boardLists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).collect();
+    const lists = await ctx.db.query('lists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).collect();
     const allCards = [];
     for (const list of lists) {
-      const cards = await ctx.db.query('boardCards').withIndex('by_list_id', q => q.eq('listId', list._id)).collect();
+      const cards = await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', list._id)).collect();
       allCards.push(...cards);
     }
     return allCards;

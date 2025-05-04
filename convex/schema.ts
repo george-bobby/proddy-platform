@@ -67,7 +67,7 @@ const schema = defineSchema({
     .index('by_workspace_id', ['workspaceId'])
     .index('by_message_id', ['messageId'])
     .index('by_member_id', ['memberId']),
-  userStatus: defineTable({
+  history: defineTable({
     userId: v.id('users'),
     workspaceId: v.id('workspaces'),
     status: v.string(), // "online" or "offline"
@@ -76,13 +76,13 @@ const schema = defineSchema({
     .index('by_user_id', ['userId'])
     .index('by_workspace_id', ['workspaceId'])
     .index('by_workspace_id_user_id', ['workspaceId', 'userId']),
-  boardLists: defineTable({
+  lists: defineTable({
     channelId: v.id('channels'),
     title: v.string(),
     order: v.number(),
   }).index('by_channel_id', ['channelId']),
-  boardCards: defineTable({
-    listId: v.id('boardLists'),
+  cards: defineTable({
+    listId: v.id('lists'),
     title: v.string(),
     description: v.optional(v.string()),
     order: v.number(),
