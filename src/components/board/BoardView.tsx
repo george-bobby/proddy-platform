@@ -1,23 +1,18 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import { useChannelId } from '@/hooks/use-channel-id';
 import { useQuery, useMutation } from 'convex/react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { LayoutGrid, Table, Plus } from 'lucide-react';
-import BoardList from '@/components/board/BoardList';
-import BoardAddListModal from '@/components/board/BoardAddListModal';
-import BoardEditListModal from '@/components/board/BoardEditListModal';
-import BoardDeleteListModal from '@/components/board/BoardDeleteListModal';
-import BoardAddCardModal from '@/components/board/BoardAddCardModal';
-import BoardEditCardModal from '@/components/board/BoardEditCardModal';
-import { Button } from '@/components/ui/button';
-import { api } from '../../../../../../convex/_generated/api';
-import type { Id } from '../../../../../../convex/_generated/dataModel';
+import BoardList from './BoardList';
+import BoardAddListModal from './BoardAddListModal';
+import BoardEditListModal from './BoardEditListModal';
+import BoardDeleteListModal from './BoardDeleteListModal';
+import BoardAddCardModal from './BoardAddCardModal';
+import BoardEditCardModal from './BoardEditCardModal';
+import { Button } from '../ui/button';
+import type { Id } from '../../convex/_generated/dataModel';
 
-const BoardPage = () => {
-    const channelId = useChannelId();
+const BoardView = ({ channelId }: { channelId: Id<'channels'> }) => {
     const lists = useQuery(api.board.getLists, { channelId });
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const [view, setView] = useState<'board' | 'table'>('board');
@@ -53,7 +48,7 @@ const BoardPage = () => {
 
     // Default lists on first load
     useEffect(() => {
-        if (lists && lists.length === 0 && channelId) {
+        if (lists && lists.length === 0) {
             const defaultLists = [
                 { title: 'Planning', order: 0 },
                 { title: 'Developing', order: 1 },
@@ -166,7 +161,6 @@ const BoardPage = () => {
         await moveCard({ cardId: cardToMove._id, toListId, order: toIndex });
     };
 
-    if (!channelId) return <div className="p-4">No channel selected.</div>;
     if (!lists) return <div className="p-4">Loading board...</div>;
 
     return (
@@ -227,4 +221,4 @@ const BoardPage = () => {
     );
 };
 
-export default BoardPage;
+export default BoardView; 

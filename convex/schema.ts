@@ -76,6 +76,20 @@ const schema = defineSchema({
     .index('by_user_id', ['userId'])
     .index('by_workspace_id', ['workspaceId'])
     .index('by_workspace_id_user_id', ['workspaceId', 'userId']),
+  boardLists: defineTable({
+    channelId: v.id('channels'),
+    title: v.string(),
+    order: v.number(),
+  }).index('by_channel_id', ['channelId']),
+  boardCards: defineTable({
+    listId: v.id('boardLists'),
+    title: v.string(),
+    description: v.optional(v.string()),
+    order: v.number(),
+    labels: v.optional(v.array(v.string())),
+    priority: v.optional(v.union(v.literal('low'), v.literal('medium'), v.literal('high'))),
+    dueDate: v.optional(v.number()),
+  }).index('by_list_id', ['listId']),
 });
 
 export default schema;
