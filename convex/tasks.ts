@@ -2,7 +2,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
-import { type QueryCtx, type MutationCtx, mutation, query, internalMutation } from './_generated/server';
+import { type QueryCtx, type MutationCtx, mutation, query } from './_generated/server';
 
 // Helper function to get the current member
 const getMember = async (ctx: QueryCtx, workspaceId: Id<'workspaces'>, userId: Id<'users'>) => {
@@ -368,5 +368,105 @@ export const deleteTaskCategory = mutation({
     );
 
     return args.id;
+  },
+});
+
+// Create a task from a message
+export const createTaskFromMessage = mutation({
+  args: {
+    messageId: v.id('messages'),
+    workspaceId: v.id('workspaces'),
+    title: v.optional(v.string()),
+    dueDate: v.optional(v.number()),
+    priority: v.optional(v.union(
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high')
+    )),
+    categoryId: v.optional(v.id('taskCategories')),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+
+    if (!userId) throw new Error('Unauthorized');
+
+    // Check if the user is a member of the workspace
+    const member = await getMember(ctx, args.workspaceId, userId);
+    if (!member) throw new Error('Not a member of this workspace');
+
+    // Get the message
+    const message = await ctx.db.get(args.messageId);
+    if (!message) throw new Error('Message not found');
+
+    // Parse the message body (stored as JSON string)
+    let messageContent = '';
+    try {
+      const parsedBody = JSON.parse(message.body);
+      if (typeof parsedBody === 'string') {
+        messageContent = parsedBody;
+      } else if (Array.isArray(parsedBody) && parsedBody.length > 0) {
+        // Handle slate.js format
+        messageContent = parsedBody
+          .map((node) => {
+            if (typeof node === 'string') return node;
+            if (node.text) return node.text;
+            if (node.children) {
+              return node.children
+                .map((child: any) => (typeof child === 'string' ? child : child.text || ''))
+                .join('');
+            }
+            return '';
+          })
+          .join('\n');
+      }
+    } catch (error) {
+      // If parsing fails, use the raw body
+      messageContent = message.body;
+    }
+
+    // Use the entire message content as the title if not provided
+    const title = args.title || messageContent;
+
+    // Get the author of the message
+    let authorName = "Unknown";
+    try {
+      // Get the member who sent the message
+      const messageMember = await ctx.db.get(message.memberId);
+      if (messageMember) {
+        // Get the user associated with the member
+        const user = await ctx.db.get(messageMember.userId);
+        if (user) {
+          authorName = user.name || "Unknown";
+        }
+      }
+    } catch (error) {
+      console.error("Error getting message author:", error);
+    }
+
+    // Format the date
+    const messageDate = new Date(message._creationTime).toLocaleString();
+
+    // Create a description with metadata only (since message content is now the title)
+    const description = `Task created from message by ${authorName} on ${messageDate}\n\nReference: Message ID ${args.messageId}`;
+
+    const now = Date.now();
+
+    // Create the task
+    const taskId = await ctx.db.insert('tasks', {
+      title,
+      description,
+      completed: false,
+      status: 'not_started',
+      dueDate: args.dueDate,
+      priority: args.priority,
+      categoryId: args.categoryId,
+      tags: ['from-message', 'message-task', authorName.toLowerCase().replace(/\s+/g, '-')],
+      createdAt: now,
+      updatedAt: now,
+      userId,
+      workspaceId: args.workspaceId,
+    });
+
+    return taskId;
   },
 });

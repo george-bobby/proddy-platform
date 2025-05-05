@@ -10,6 +10,7 @@ import { useUpdateMessage } from '@/features/messages/api/use-update-message';
 import { useToggleReaction } from '@/features/reactions/api/use-toggle-reaction';
 import { useConfirm } from '@/hooks/use-confirm';
 import { usePanel } from '@/hooks/use-panel';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
 import type { Doc, Id } from '../../convex/_generated/dataModel';
@@ -94,6 +95,7 @@ export const Message = ({
   const [ConfirmDialog, confirm] = useConfirm('Delete message', 'Are you sure you want to delete this message? This cannot be undone.');
   const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
   const { isMessageSelected } = useMessageSelection();
+  const workspaceId = useWorkspaceId();
 
   const { mutate: updateMessage, isPending: isUpdatingMessage } = useUpdateMessage();
   const { mutate: removeMessage, isPending: isRemovingMessage } = useRemoveMessage();
@@ -216,6 +218,8 @@ export const Message = ({
               handleReaction={handleReaction}
               hideThreadButton={hideThreadButton}
               messageId={id as string}
+              workspaceId={workspaceId}
+              messageContent={typeof JSON.parse(body) === 'string' ? JSON.parse(body) : ''}
             />
           )}
         </div>
@@ -303,6 +307,8 @@ export const Message = ({
             handleReaction={handleReaction}
             hideThreadButton={hideThreadButton}
             messageId={id as string}
+            workspaceId={workspaceId}
+            messageContent={typeof JSON.parse(body) === 'string' ? JSON.parse(body) : ''}
           />
         )}
       </div>
