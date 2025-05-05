@@ -23,7 +23,7 @@ interface TaskEditFormProps {
   initialDescription?: string;
   initialDueDate?: Date;
   initialPriority?: 'low' | 'medium' | 'high';
-  initialCategoryId?: Id<'taskCategories'>;
+  initialCategoryId?: Id<'categories'>;
   onCancel: () => void;
   onSave: () => void;
 }
@@ -43,7 +43,7 @@ export const TaskEditForm = ({
   const [description, setDescription] = useState(initialDescription);
   const [dueDate, setDueDate] = useState<Date | undefined>(initialDueDate);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(initialPriority);
-  const [categoryId, setCategoryId] = useState<Id<'taskCategories'> | null>(initialCategoryId || null);
+  const [categoryId, setCategoryId] = useState<Id<'categories'> | null>(initialCategoryId || null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateTask = useUpdateTask();

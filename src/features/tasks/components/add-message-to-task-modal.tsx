@@ -61,7 +61,7 @@ export const AddMessageToTaskModal = ({
   });
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
-  const [categoryId, setCategoryId] = useState<Id<'taskCategories'> | null>(null);
+  const [categoryId, setCategoryId] = useState<Id<'categories'> | null>(null);
 
   // Loading state
   const [isSubmitting, setIsSubmitting] = useState(false);

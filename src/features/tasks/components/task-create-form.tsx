@@ -31,7 +31,7 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
-  const [categoryId, setCategoryId] = useState<Id<'taskCategories'> | null>(null);
+  const [categoryId, setCategoryId] = useState<Id<'categories'> | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createTask = useCreateTask();

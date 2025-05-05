@@ -49,8 +49,8 @@ const CATEGORY_COLORS = [
 
 interface TaskCategorySelectorProps {
   workspaceId: Id<'workspaces'>;
-  value: Id<'taskCategories'> | null;
-  onChange: (value: Id<'taskCategories'> | null) => void;
+  value: Id<'categories'> | null;
+  onChange: (value: Id<'categories'> | null) => void;
 }
 
 export const TaskCategorySelector = ({

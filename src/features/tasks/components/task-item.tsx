@@ -22,7 +22,7 @@ interface TaskItemProps {
   completed: boolean;
   dueDate?: number;
   priority?: 'low' | 'medium' | 'high';
-  categoryId?: Id<'taskCategories'>;
+  categoryId?: Id<'categories'>;
   workspaceId: Id<'workspaces'>;
 }
 

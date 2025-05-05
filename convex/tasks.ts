@@ -28,7 +28,7 @@ export const getTaskCategories = query({
 
     // Get all categories for this workspace (both default and user-created)
     const categories = await ctx.db
-      .query('taskCategories')
+      .query('categories')
       .withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
       .collect();
 
@@ -54,7 +54,7 @@ export const createTaskCategory = mutation({
     if (!member) throw new Error('Not a member of this workspace');
 
     // Create the category
-    const categoryId = await ctx.db.insert('taskCategories', {
+    const categoryId = await ctx.db.insert('categories', {
       name: args.name,
       color: args.color,
       workspaceId: args.workspaceId,
@@ -70,7 +70,7 @@ export const createTaskCategory = mutation({
 export const getTasks = query({
   args: {
     workspaceId: v.id('workspaces'),
-    categoryId: v.optional(v.id('taskCategories')),
+    categoryId: v.optional(v.id('categories')),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -126,7 +126,7 @@ export const createTask = mutation({
       v.literal('on_hold'),
       v.literal('cancelled')
     )),
-    categoryId: v.optional(v.id('taskCategories')),
+    categoryId: v.optional(v.id('categories')),
     tags: v.optional(v.array(v.string())),
     workspaceId: v.id('workspaces'),
   },
@@ -181,7 +181,7 @@ export const updateTask = mutation({
       v.literal('medium'),
       v.literal('high')
     )),
-    categoryId: v.optional(v.id('taskCategories')),
+    categoryId: v.optional(v.id('categories')),
     tags: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
@@ -297,7 +297,7 @@ export const createDefaultCategoriesForWorkspace = async (
   // Create each default category
   const categoryIds = await Promise.all(
     defaultCategories.map(async (category) => {
-      return await ctx.db.insert('taskCategories', {
+      return await ctx.db.insert('categories', {
         name: category.name,
         color: category.color,
         workspaceId,
@@ -332,7 +332,7 @@ export const createDefaultTaskCategories = mutation({
 // Delete a task category
 export const deleteTaskCategory = mutation({
   args: {
-    id: v.id('taskCategories'),
+    id: v.id('categories'),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -383,7 +383,7 @@ export const createTaskFromMessage = mutation({
       v.literal('medium'),
       v.literal('high')
     )),
-    categoryId: v.optional(v.id('taskCategories')),
+    categoryId: v.optional(v.id('categories')),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);

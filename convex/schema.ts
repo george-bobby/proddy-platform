@@ -98,7 +98,7 @@ const schema = defineSchema({
     assignees: v.optional(v.array(v.id('members'))),
   }).index('by_list_id', ['listId']),
 
-  taskCategories: defineTable({
+  categories: defineTable({
     name: v.string(),
     color: v.string(),
     workspaceId: v.id('workspaces'),
@@ -125,7 +125,7 @@ const schema = defineSchema({
       v.literal('medium'),
       v.literal('high')
     )),
-    categoryId: v.optional(v.id('taskCategories')),
+    categoryId: v.optional(v.id('categories')),
     tags: v.optional(v.array(v.string())),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
