@@ -11,14 +11,14 @@ import {
     BoardDeleteListModal,
     BoardAddCardModal,
     BoardEditCardModal
-} from '@/components/board-models';
+} from '@/components/board/board-models';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
-import BoardKanbanView from '@/components/board-kanban-view';
-import BoardTableView from '@/components/board-table-view';
-import BoardCalendarView from '@/components/board-calendar-view';
-import BoardGanttView from '@/components/board-gantt-view';
-import BoardHeader from '@/components/board-header';
+import BoardKanbanView from '@/components/board/board-kanban-view';
+import BoardTableView from '@/components/board/board-table-view';
+import BoardCalendarView from '@/components/board/board-calendar-view';
+import BoardGanttView from '@/components/board/board-gantt-view';
+import BoardHeader from '@/components/board/board-header';
 
 const BoardPage = () => {
     const channelId = useChannelId();
@@ -255,7 +255,7 @@ const BoardPage = () => {
     if (!lists) return <div className="p-4">Loading board...</div>;
 
     return (
-        <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
             <BoardHeader
                 totalCards={allCards.length}
                 listsCount={lists?.length || 0}
@@ -265,7 +265,7 @@ const BoardPage = () => {
                 onSearch={(query) => console.log('Search:', query)}
             />
 
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden overflow-x-hidden">
                 {view === 'kanban' && (
                     <BoardKanbanView
                         lists={lists}

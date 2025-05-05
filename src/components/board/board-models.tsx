@@ -1,15 +1,15 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from './ui/dialog';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from './ui/select';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
+import { Calendar } from '../ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import type { Id } from '@/../convex/_generated/dataModel';
-import LabelInput from './label-input';
+import LabelInput from '../label-input';
 
 // BoardAddListModal
 interface BoardAddListModalProps {

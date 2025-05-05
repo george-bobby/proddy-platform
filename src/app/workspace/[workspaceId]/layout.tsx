@@ -5,7 +5,7 @@ import type { PropsWithChildren } from 'react';
 import { useEffect, useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
-import { SummarizeButton } from '@/components/summarize-button';
+import { SummarizeButton } from '@/components/ai/summarize-button';
 
 import { MessageSelectionProvider } from '@/contexts/message-selection-context';
 import { Profile } from '@/features/members/components/profile';

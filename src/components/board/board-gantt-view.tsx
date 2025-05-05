@@ -16,8 +16,8 @@ import {
   Info,
   GripHorizontal
 } from 'lucide-react';
-import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
@@ -422,7 +422,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
       </div>
 
       {/* Gantt Chart Content */}
-      <div className="flex-1 overflow-auto" ref={timelineContainerRef}>
+      <div className="flex-1 overflow-auto overflow-x-auto scrollbar-hide" ref={timelineContainerRef}>
         {/* Timeline Header */}
         <div className="sticky top-0 z-10 bg-white border-b">
           <div className="flex pl-[250px]">

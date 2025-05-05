@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { addMonths, format, getMonth, getYear, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, Loader, Pencil, Trash } from 'lucide-react';
-import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 interface BoardCalendarViewProps {
@@ -38,7 +38,7 @@ const BoardCalendarView: React.FC<BoardCalendarViewProps> = ({
     const day = new Date(card.dueDate).getDate();
     const month = new Date(card.dueDate).getMonth();
     const year = new Date(card.dueDate).getFullYear();
-    
+
     // Only include cards from the current month being viewed
     if (month === currentDate.getMonth() && year === currentDate.getFullYear()) {
       if (!acc[day]) {
@@ -131,7 +131,7 @@ const BoardCalendarView: React.FC<BoardCalendarViewProps> = ({
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto overflow-x-hidden scrollbar-hide p-4">
         <div className="h-full rounded-md border">
           {/* Calendar header */}
           <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">
@@ -178,9 +178,9 @@ const BoardCalendarView: React.FC<BoardCalendarViewProps> = ({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button 
-                                      size="iconXs" 
-                                      variant="ghost" 
+                                    <Button
+                                      size="iconSm"
+                                      variant="ghost"
                                       className="h-4 w-4 p-0"
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -198,9 +198,9 @@ const BoardCalendarView: React.FC<BoardCalendarViewProps> = ({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button 
-                                      size="iconXs" 
-                                      variant="ghost" 
+                                    <Button
+                                      size="iconSm"
+                                      variant="ghost"
                                       className="h-4 w-4 p-0"
                                       onClick={(e) => {
                                         e.stopPropagation();

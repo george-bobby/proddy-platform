@@ -19,8 +19,8 @@ import {
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates
 } from '@dnd-kit/sortable';
-import BoardList from '@/components/board-list';
-import BoardCard from '@/components/board-card';
+import BoardList from '@/components/board/board-list';
+import BoardCard from '@/components/board/board-card';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 interface BoardKanbanViewProps {
@@ -121,7 +121,7 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
   };
 
   return (
-    <div className="flex flex-1 overflow-x-auto gap-4 p-4 bg-white">
+    <div className="flex flex-1 overflow-x-auto scrollbar-hide gap-4 p-4 bg-white">
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetectionStrategy}

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Pencil, Trash, ArrowUpDown, Clock, AlertCircle, ArrowRightCircle, CheckCircle2, Search } from 'lucide-react';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Input } from './ui/input';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { Id } from '@/../convex/_generated/dataModel';
@@ -114,7 +114,7 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
       </div>
 
       {/* Table */}
-      <div className="w-full overflow-auto flex-1 bg-white">
+      <div className="w-full overflow-auto overflow-x-hidden scrollbar-hide flex-1 bg-white">
         <table className="w-full border-collapse">
           <thead className="sticky top-0 bg-muted z-10">
             <tr className="border-b">
