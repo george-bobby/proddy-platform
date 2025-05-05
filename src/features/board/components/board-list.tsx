@@ -1,14 +1,14 @@
 import React from 'react';
-import type { Id } from '../../../convex/_generated/dataModel';
+import type { Id } from '@/../convex/_generated/dataModel';
 import { Pencil, Trash, Plus, MoreHorizontal, GripVertical, LayoutGrid } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import BoardCard from './board-card';
 
 interface BoardListProps {

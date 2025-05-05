@@ -11,7 +11,7 @@ import { Id } from '../../convex/_generated/dataModel';
 import { ChannelHero } from './channel-hero';
 import { ConversationHero } from './conversation-hero';
 import { Message } from './message';
-import { DailyRecapModal } from './ai/daily-recap-modal';
+import { DailyRecapModal } from '@/features/ai/components/daily-recap-modal';
 import { Button } from './ui/button';
 import { Hint } from './hint';
 

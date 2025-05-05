@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { useMessageSelection } from '@/contexts/message-selection-context';
-import { api } from "../../../convex/_generated/api";
+import { api } from "@/../convex/_generated/api";
 import { useQuery } from "convex/react";
 import { SummaryModal } from './summary-modal';
 

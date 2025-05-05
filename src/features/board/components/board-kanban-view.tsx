@@ -19,8 +19,8 @@ import {
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates
 } from '@dnd-kit/sortable';
-import BoardList from '@/components/board/board-list';
-import BoardCard from '@/components/board/board-card';
+import BoardList from './board-list';
+import BoardCard from './board-card';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 interface BoardKanbanViewProps {

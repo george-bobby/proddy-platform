@@ -11,14 +11,14 @@ import {
     BoardDeleteListModal,
     BoardAddCardModal,
     BoardEditCardModal
-} from '@/components/board/board-models';
+} from '@/features/board/components/board-models';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
-import BoardKanbanView from '@/components/board/board-kanban-view';
-import BoardTableView from '@/components/board/board-table-view';
-import BoardCalendarView from '@/components/board/board-calendar-view';
-import BoardGanttView from '@/components/board/board-gantt-view';
-import BoardHeader from '@/components/board/board-header';
+import BoardKanbanView from '@/features/board/components/board-kanban-view';
+import BoardTableView from '@/features/board/components/board-table-view';
+import BoardCalendarView from '@/features/board/components/board-calendar-view';
+import BoardGanttView from '@/features/board/components/board-gantt-view';
+import BoardHeader from '@/features/board/components/board-header';
 
 const BoardPage = () => {
     const channelId = useChannelId();
