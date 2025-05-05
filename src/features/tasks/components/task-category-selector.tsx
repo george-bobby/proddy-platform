@@ -33,6 +33,20 @@ import type { Id } from '@/../convex/_generated/dataModel';
 import { useCreateTaskCategory } from '../api/use-create-task-category';
 import { useGetTaskCategories } from '../api/use-get-task-categories';
 
+// Predefined category colors
+const CATEGORY_COLORS = [
+  { value: '#4A0D68', label: 'Purple' },
+  { value: '#ED128E', label: 'Pink' },
+  { value: '#E11D48', label: 'Red' },
+  { value: '#F97316', label: 'Orange' },
+  { value: '#FACC15', label: 'Yellow' },
+  { value: '#22C55E', label: 'Green' },
+  { value: '#06B6D4', label: 'Cyan' },
+  { value: '#3B82F6', label: 'Blue' },
+  { value: '#8B5CF6', label: 'Violet' },
+  { value: '#6B7280', label: 'Gray' },
+];
+
 interface TaskCategorySelectorProps {
   workspaceId: Id<'workspaces'>;
   value: Id<'taskCategories'> | null;
@@ -47,34 +61,34 @@ export const TaskCategorySelector = ({
   const [open, setOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryColor, setNewCategoryColor] = useState('#4A0D68');
-  
+  const [newCategoryColor, setNewCategoryColor] = useState(CATEGORY_COLORS[0].value);
+
   const { data: categories, isLoading } = useGetTaskCategories({ workspaceId });
   const createCategory = useCreateTaskCategory();
-  
+
   const selectedCategory = categories?.find(category => category._id === value);
-  
+
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!newCategoryName.trim()) return;
-    
+
     try {
       const categoryId = await createCategory({
         name: newCategoryName,
         color: newCategoryColor,
         workspaceId,
       });
-      
+
       onChange(categoryId);
       setNewCategoryName('');
-      setNewCategoryColor('#4A0D68');
+      setNewCategoryColor(CATEGORY_COLORS[0].value);
       setCreateDialogOpen(false);
     } catch (error) {
       console.error('Failed to create category:', error);
     }
   };
-  
+
   return (
     <div className="flex flex-col gap-2">
       <Popover open={open} onOpenChange={setOpen}>
@@ -87,8 +101,8 @@ export const TaskCategorySelector = ({
           >
             {selectedCategory ? (
               <div className="flex items-center gap-2">
-                <div 
-                  className="h-3 w-3 rounded-full" 
+                <div
+                  className="h-3 w-3 rounded-full"
                   style={{ backgroundColor: selectedCategory.color }}
                 />
                 <span>{selectedCategory.name}</span>
@@ -134,8 +148,8 @@ export const TaskCategorySelector = ({
                       <div className="flex h-4 w-4 items-center justify-center">
                         {value === category._id && <Check className="h-3 w-3" />}
                       </div>
-                      <div 
-                        className="h-3 w-3 rounded-full" 
+                      <div
+                        className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: category.color }}
                       />
                       <span>{category.name}</span>
@@ -159,7 +173,7 @@ export const TaskCategorySelector = ({
           </Command>
         </PopoverContent>
       </Popover>
-      
+
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -168,7 +182,7 @@ export const TaskCategorySelector = ({
               Add a new category to organize your tasks.
             </DialogDescription>
           </DialogHeader>
-          
+
           <form onSubmit={handleCreateCategory}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
@@ -184,31 +198,37 @@ export const TaskCategorySelector = ({
                   required
                 />
               </div>
-              
+
               <div className="grid gap-2">
-                <label htmlFor="color" className="text-sm font-medium">
+                <label className="text-sm font-medium">
                   Color
                 </label>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="h-6 w-6 rounded-full border" 
-                    style={{ backgroundColor: newCategoryColor }}
-                  />
-                  <Input
-                    id="color"
-                    type="color"
-                    value={newCategoryColor}
-                    onChange={(e) => setNewCategoryColor(e.target.value)}
-                    className="w-full h-10"
-                  />
+                <div className="grid grid-cols-5 gap-2">
+                  {CATEGORY_COLORS.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => setNewCategoryColor(color.value)}
+                      className={cn(
+                        "h-8 w-8 rounded-full cursor-pointer flex items-center justify-center border-2",
+                        newCategoryColor === color.value ? "border-black dark:border-white" : "border-transparent"
+                      )}
+                      style={{ backgroundColor: color.value }}
+                      title={color.label}
+                    >
+                      {newCategoryColor === color.value && (
+                        <Check className="h-4 w-4 text-white" />
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-            
+
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setCreateDialogOpen(false)}
               >
                 Cancel

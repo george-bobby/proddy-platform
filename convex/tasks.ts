@@ -402,25 +402,40 @@ export const createTaskFromMessage = mutation({
     let messageContent = '';
     try {
       const parsedBody = JSON.parse(message.body);
+
+      // If it's already a string, return it
       if (typeof parsedBody === 'string') {
         messageContent = parsedBody;
-      } else if (Array.isArray(parsedBody) && parsedBody.length > 0) {
-        // Handle slate.js format
-        messageContent = parsedBody
-          .map((node) => {
-            if (typeof node === 'string') return node;
-            if (node.text) return node.text;
-            if (node.children) {
-              return node.children
-                .map((child: any) => (typeof child === 'string' ? child : child.text || ''))
-                .join('');
-            }
-            return '';
-          })
-          .join('\n');
+      }
+      // If it's a Quill/Slate format (array of ops)
+      else if (Array.isArray(parsedBody)) {
+        // Try to extract text from Quill delta format
+        if (parsedBody.length > 0 && parsedBody[0].insert) {
+          messageContent = parsedBody
+            .map(op => typeof op.insert === 'string' ? op.insert : '')
+            .join('')
+            .trim();
+        }
+        // Try to extract text from Slate format
+        else {
+          messageContent = parsedBody
+            .map((node) => {
+              if (typeof node === 'string') return node;
+              if (node.text) return node.text;
+              if (node.children) {
+                return node.children
+                  .map((child: any) => (typeof child === 'string' ? child : child.text || ''))
+                  .join('');
+              }
+              return '';
+            })
+            .join(' ')
+            .trim();
+        }
       }
     } catch (error) {
       // If parsing fails, use the raw body
+      console.error('Failed to parse message body:', error);
       messageContent = message.body;
     }
 
@@ -443,11 +458,28 @@ export const createTaskFromMessage = mutation({
       console.error("Error getting message author:", error);
     }
 
+    // Get the channel name if the message is from a channel
+    let channelInfo = "";
+    let channelName = "";
+    if (message.channelId) {
+      try {
+        const channel = await ctx.db.get(message.channelId);
+        if (channel) {
+          channelName = channel.name;
+          channelInfo = `in channel #${channelName}`;
+        }
+      } catch (error) {
+        console.error("Error getting channel:", error);
+      }
+    } else if (message.conversationId) {
+      channelInfo = "in direct message";
+    }
+
     // Format the date
     const messageDate = new Date(message._creationTime).toLocaleString();
 
-    // Create a description with metadata only (since message content is now the title)
-    const description = `Task created from message by ${authorName} on ${messageDate}\n\nReference: Message ID ${args.messageId}`;
+    // Create a description with metadata including channel name
+    const description = `Task created from message by ${authorName} ${channelInfo} on ${messageDate}`;
 
     const now = Date.now();
 
@@ -460,7 +492,10 @@ export const createTaskFromMessage = mutation({
       dueDate: args.dueDate,
       priority: args.priority,
       categoryId: args.categoryId,
-      tags: ['from-message', 'message-task', authorName.toLowerCase().replace(/\s+/g, '-')],
+      tags: ['from-message', 'message-task', authorName.toLowerCase().replace(/\s+/g, '-'),
+        ...(message.channelId ? ['channel-message', `channel-${channelName.toLowerCase().replace(/\s+/g, '-')}`] : []),
+        ...(message.conversationId ? ['direct-message'] : [])
+      ],
       createdAt: now,
       updatedAt: now,
       userId,

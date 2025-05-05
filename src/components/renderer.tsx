@@ -29,8 +29,23 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
 
     quill.enable(false);
 
-    const contents = JSON.parse(value);
-    quill.setContents(contents);
+    // Try to parse the value as JSON, but handle non-JSON content gracefully
+    try {
+      const contents = JSON.parse(value);
+      quill.setContents(contents);
+    } catch (error) {
+      // If it's not valid JSON, it might be HTML or plain text
+      console.log('Renderer: Failed to parse value as JSON, treating as HTML/text', error);
+
+      // Check if it looks like HTML
+      if (value.trim().startsWith('<') && value.trim().endsWith('>')) {
+        // It's likely HTML, set it directly
+        quill.root.innerHTML = value;
+      } else {
+        // Treat as plain text
+        quill.setText(value);
+      }
+    }
 
     const isEmpty =
       quill

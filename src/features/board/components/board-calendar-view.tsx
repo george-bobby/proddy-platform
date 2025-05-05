@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { addMonths, format, getMonth, getYear, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, Loader, Pencil, Trash } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 interface BoardCalendarViewProps {

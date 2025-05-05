@@ -1,11 +1,13 @@
 'use client';
 
-import { Sparkles, Copy, Check, X, Download, FileText, FileJson } from 'lucide-react';
+import { Sparkles, Copy, Check, X, Download, FileText, FileJson, FileOutput, File } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { jsPDF } from 'jspdf';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 
 interface DailyRecapModalProps {
   isOpen: boolean;
@@ -80,7 +82,7 @@ export const DailyRecapModal = ({ isOpen, onClose, recap, date, messageCount, is
       content: recap,
       exportedAt: new Date().toISOString()
     };
-    
+
     const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -103,7 +105,7 @@ export const DailyRecapModal = ({ isOpen, onClose, recap, date, messageCount, is
       .replace(/>\s?([^\n]+)/g, '  $1\n') // blockquotes
       .replace(/- ([^\n]+)/g, '• $1') // bullet points
       .replace(/\n\n/g, '\n'); // extra newlines
-    
+
     const blob = new Blob([plainText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -114,6 +116,138 @@ export const DailyRecapModal = ({ isOpen, onClose, recap, date, messageCount, is
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast.success('Exported as Text');
+  };
+
+  const handleExportPDF = () => {
+    try {
+      // Create a new PDF document
+      const doc = new jsPDF();
+
+      // Set title
+      const title = `Daily Recap - ${formattedDate}`;
+      doc.setFontSize(16);
+      doc.text(title, 20, 20);
+
+      // Add message count info
+      doc.setFontSize(10);
+      doc.text(`(${messageCount} ${messageCount === 1 ? 'message' : 'messages'})`, 20, 30);
+
+      // Convert markdown to plain text for PDF
+      const plainText = recap
+        .replace(/#{1,6}\s?([^\n]+)/g, '$1\n') // headers
+        .replace(/\*\*([^*]+)\*\*/g, '$1') // bold
+        .replace(/\*([^*]+)\*/g, '$1') // italic
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)') // links
+        .replace(/>\s?([^\n]+)/g, '  $1\n') // blockquotes
+        .replace(/- ([^\n]+)/g, '• $1') // bullet points
+        .replace(/\n\n/g, '\n'); // extra newlines
+
+      // Add content with word wrapping
+      doc.setFontSize(12);
+      const splitText = doc.splitTextToSize(plainText, 170);
+      doc.text(splitText, 20, 40);
+
+      // Save the PDF
+      doc.save(`daily-recap-${date}.pdf`);
+      toast.success('Exported as PDF');
+    } catch (error) {
+      console.error('Error exporting to PDF:', error);
+      toast.error('Failed to export as PDF');
+    }
+  };
+
+  const handleExportWord = async () => {
+    try {
+      // Create a new Word document
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                text: `Daily Recap - ${formattedDate}`,
+                heading: HeadingLevel.HEADING_1,
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `(${messageCount} ${messageCount === 1 ? 'message' : 'messages'})`,
+                    italics: true,
+                  }),
+                ],
+              }),
+              new Paragraph({ text: '' }), // Empty paragraph for spacing
+            ],
+          },
+        ],
+      });
+
+      // Convert markdown to paragraphs for Word
+      const lines = recap.split('\n');
+      let currentParagraph: Paragraph | null = null;
+
+      lines.forEach((line) => {
+        // Check if it's a header
+        const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        if (headerMatch) {
+          const level = headerMatch[1].length;
+          const text = headerMatch[2];
+
+          doc.addSection({
+            children: [
+              new Paragraph({
+                text: text,
+                heading: level <= 2 ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
+              }),
+            ],
+          });
+        }
+        // Check if it's a bullet point
+        else if (line.match(/^- (.+)$/)) {
+          const text = line.replace(/^- /, '');
+          doc.addSection({
+            children: [
+              new Paragraph({
+                text: `• ${text}`,
+                bullet: { level: 0 },
+              }),
+            ],
+          });
+        }
+        // Regular paragraph
+        else if (line.trim() !== '') {
+          // Process bold and italic formatting
+          const processedLine = line
+            .replace(/\*\*([^*]+)\*\*/g, '$1') // bold
+            .replace(/\*([^*]+)\*/g, '$1'); // italic
+
+          doc.addSection({
+            children: [new Paragraph({ text: processedLine })],
+          });
+        }
+      });
+
+      // Generate the Word document
+      const buffer = await Packer.toBuffer(doc);
+
+      // Create a blob from the buffer
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+      // Create a download link
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `daily-recap-${date}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success('Exported as Word Document');
+    } catch (error) {
+      console.error('Error exporting to Word:', error);
+      toast.error('Failed to export as Word Document');
+    }
   };
 
   if (!isOpen) return null;
@@ -170,31 +304,22 @@ export const DailyRecapModal = ({ isOpen, onClose, recap, date, messageCount, is
               {isCopied ? 'Copied' : 'Copy'}
             </Button>
             <Button
-              onClick={handleExportMarkdown}
+              onClick={handleExportWord}
               variant="outline"
               className="flex items-center gap-1 text-xs"
               size="sm"
             >
-              <FileText className="h-3 w-3" />
-              Export MD
+              <File className="h-3 w-3" />
+              Export Word
             </Button>
             <Button
-              onClick={handleExportText}
+              onClick={handleExportPDF}
               variant="outline"
               className="flex items-center gap-1 text-xs"
               size="sm"
             >
-              <FileText className="h-3 w-3" />
-              Export TXT
-            </Button>
-            <Button
-              onClick={handleExportJSON}
-              variant="outline"
-              className="flex items-center gap-1 text-xs"
-              size="sm"
-            >
-              <FileJson className="h-3 w-3" />
-              Export JSON
+              <FileOutput className="h-3 w-3" />
+              Export PDF
             </Button>
           </div>
           <Button

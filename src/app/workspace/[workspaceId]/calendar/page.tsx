@@ -1,13 +1,14 @@
 'use client';
 
 import { addMonths, format, getMonth, getYear, subMonths } from 'date-fns';
-import { CalendarIcon, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight, Loader, MessageSquare, Trello } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Renderer from '@/components/renderer';
 import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
+import { CalendarFilter, CalendarFilterOptions } from '@/features/calendar/components/calendar-filter';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
 import { Id } from '@/../convex/_generated/dataModel';
@@ -74,6 +75,11 @@ const CalendarPage = () => {
     year: getYear(currentDate),
   });
 
+  // Filter state
+  const [filterOptions, setFilterOptions] = useState<CalendarFilterOptions>({
+    eventType: 'all',
+  });
+
   const handlePreviousMonth = () => {
     setCurrentDate((prev) => subMonths(prev, 1));
   };
@@ -82,8 +88,40 @@ const CalendarPage = () => {
     setCurrentDate((prev) => addMonths(prev, 1));
   };
 
+  const handleFilterChange = (newOptions: Partial<CalendarFilterOptions>) => {
+    setFilterOptions(prev => ({ ...prev, ...newOptions }));
+  };
+
+  // Filter events based on filter options
+  const filteredEvents = useMemo(() => {
+    if (!events) return [];
+
+    return events.filter(event => {
+      // Filter by event type
+      if (filterOptions.eventType !== 'all') {
+        if (filterOptions.eventType === 'message') {
+          return event.type === 'calendar-event';
+        }
+        return event.type === filterOptions.eventType;
+      }
+
+      return true;
+    });
+  }, [events, filterOptions]);
+
+  // Count events by type for stats
+  const eventCounts = useMemo(() => {
+    if (!events) return { total: 0, message: 0, boardCard: 0 };
+
+    return {
+      total: events.length,
+      message: events.filter(event => event.type === 'calendar-event').length,
+      boardCard: events.filter(event => event.type === 'board-card').length
+    };
+  }, [events]);
+
   // Group events by day
-  const eventsByDay = events?.reduce<Record<number, CalendarEvent[]>>((acc, event) => {
+  const eventsByDay = filteredEvents.reduce<Record<number, CalendarEvent[]>>((acc, event) => {
     const day = new Date(event.date).getDate();
     if (!acc[day]) {
       acc[day] = [];
@@ -157,7 +195,40 @@ const CalendarPage = () => {
       <div className="flex h-full flex-col bg-white">
         <div className="flex items-center justify-between px-6 py-3 border-t">
           <div className="flex items-center gap-2">
-            {/* <h1 className="text-xl font-semibold">Calendar Controls</h1> */}
+            <CalendarFilter
+              filterOptions={filterOptions}
+              onFilterChange={handleFilterChange}
+            />
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              {filterOptions.eventType === 'all' ? (
+                <>
+                  <span>Showing all events ({eventCounts.total}):</span>
+                  <div className="flex items-center gap-1">
+                    <MessageSquare className="h-3 w-3 text-primary" />
+                    <span>{eventCounts.message}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Trello className="h-3 w-3 text-secondary" />
+                    <span>{eventCounts.boardCard}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span>Showing</span>
+                  {filterOptions.eventType === 'message' ? (
+                    <div className="flex items-center gap-1">
+                      <MessageSquare className="h-3 w-3 text-primary" />
+                      <span>{eventCounts.message} message events</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Trello className="h-3 w-3 text-secondary" />
+                      <span>{eventCounts.boardCard} board card events</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
@@ -224,7 +295,7 @@ const CalendarPage = () => {
                                 key={event._id}
                                 className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
                                   ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
-                                  : 'bg-primary/10 hover:bg-primary/20'
+                                  : 'bg-primary/10 hover:bg-primary/20 border-l-2 border-primary'
                                   }`}
                                 title={
                                   event.type === 'board-card' && event.boardCard
@@ -261,7 +332,7 @@ const CalendarPage = () => {
                                     {event.type === 'board-card' ? (
                                       <>Board Card in {event.boardCard?.listTitle}</>
                                     ) : (
-                                      <>by {event?.user?.name || 'Unknown'}</>
+                                      <>Calendar Event by {event?.user?.name || 'Unknown'}</>
                                     )}
                                   </span>
                                   {event.type === 'board-card' && event.boardCard?.priority && (

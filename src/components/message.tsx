@@ -1,6 +1,8 @@
 import { format, isToday, isYesterday } from 'date-fns';
 import { CalendarIcon, Loader } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Quill from 'quill';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -104,6 +106,51 @@ export const Message = ({
   const avatarFallback = authorName.charAt(0).toUpperCase();
   const isPending = isUpdatingMessage || isRemovingMessage || isTogglingReaction;
   const isSelected = isMessageSelected(id);
+
+  // Create a ref to store the extracted text
+  const extractedTextRef = useRef<Record<string, string>>({});
+
+  // Extract plain text from the message body using Quill
+  const extractTextFromBody = (bodyJson: string): string => {
+    // If we've already extracted this text, return the cached version
+    if (extractedTextRef.current[bodyJson]) {
+      return extractedTextRef.current[bodyJson];
+    }
+
+    try {
+      // Create a temporary Quill instance
+      const quill = new Quill(document.createElement('div'), {
+        theme: 'snow'
+      });
+
+      // Disable editing
+      quill.enable(false);
+
+      // Parse the body and set the contents
+      const contents = JSON.parse(bodyJson);
+
+      // If it's already a string, return it directly
+      if (typeof contents === 'string') {
+        extractedTextRef.current[bodyJson] = contents;
+        return contents;
+      }
+
+      // Set the contents in Quill
+      quill.setContents(contents);
+
+      // Extract the text
+      const extractedText = quill.getText().trim();
+
+      // Cache the result
+      extractedTextRef.current[bodyJson] = extractedText;
+
+      console.log('Extracted text using Quill:', extractedText);
+      return extractedText;
+    } catch (error) {
+      console.error('Failed to extract text using Quill:', error);
+      return '';
+    }
+  };
 
   const handleUpdate = ({ body }: { body: string }) => {
     updateMessage(
@@ -219,7 +266,7 @@ export const Message = ({
               hideThreadButton={hideThreadButton}
               messageId={id as string}
               workspaceId={workspaceId}
-              messageContent={typeof JSON.parse(body) === 'string' ? JSON.parse(body) : ''}
+              messageContent={extractTextFromBody(body)}
             />
           )}
         </div>
@@ -308,7 +355,7 @@ export const Message = ({
             hideThreadButton={hideThreadButton}
             messageId={id as string}
             workspaceId={workspaceId}
-            messageContent={typeof JSON.parse(body) === 'string' ? JSON.parse(body) : ''}
+            messageContent={extractTextFromBody(body)}
           />
         )}
       </div>

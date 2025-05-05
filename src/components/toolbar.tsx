@@ -1,8 +1,9 @@
 import { CheckSquare, ListTodo, MessageSquareText, Pencil, Smile, Trash } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useMessageSelection } from '@/contexts/message-selection-context';
+import { useGetMessage } from '@/features/messages/api/use-get-message';
 import { AddMessageToTaskModal } from '@/features/tasks/components/add-message-to-task-modal';
 import type { Id } from '@/../convex/_generated/dataModel';
 
@@ -34,9 +35,42 @@ export const Toolbar = ({
   workspaceId,
   messageContent,
 }: ToolbarProps) => {
+  console.log('Toolbar received messageContent:', messageContent);
   const [isAddToTaskModalOpen, setIsAddToTaskModalOpen] = useState(false);
+  const [extractedContent, setExtractedContent] = useState(messageContent);
   const { isMessageSelected, toggleMessageSelection } = useMessageSelection();
   const isSelected = isMessageSelected(messageId as any); // Type cast needed because of Id<'messages'>
+
+  // Fetch the message directly to get its content
+  const { data: messageData } = useGetMessage({ id: messageId as Id<'messages'> });
+
+  useEffect(() => {
+    if (messageData && messageData.body) {
+      try {
+        // Try to parse the body
+        const parsedBody = JSON.parse(messageData.body);
+
+        // If it's a string, use it directly
+        if (typeof parsedBody === 'string') {
+          setExtractedContent(parsedBody);
+        }
+        // If it's a Quill delta format
+        else if (Array.isArray(parsedBody) && parsedBody.length > 0) {
+          // Extract text from operations
+          const text = parsedBody
+            .map(op => typeof op.insert === 'string' ? op.insert : '')
+            .join('')
+            .trim();
+
+          setExtractedContent(text || messageContent);
+        }
+      } catch (error) {
+        console.error('Failed to parse message body:', error);
+        // Fallback to the passed messageContent
+        setExtractedContent(messageContent);
+      }
+    }
+  }, [messageData, messageContent]);
 
   return (
     <>
@@ -45,7 +79,7 @@ export const Toolbar = ({
         onClose={() => setIsAddToTaskModalOpen(false)}
         messageId={messageId as Id<'messages'>}
         workspaceId={workspaceId}
-        messageContent={messageContent}
+        messageContent={extractedContent}
       />
 
       <div className="absolute right-5 top-0">

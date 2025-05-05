@@ -1,7 +1,7 @@
 'use client';
 
-import { addDays, format, isAfter, isBefore, isToday, startOfDay } from 'date-fns';
-import { CheckSquare, Loader } from 'lucide-react';
+import { isAfter, isBefore, isToday, startOfDay } from 'date-fns';
+import { CheckSquare, ChevronDown, ChevronRight, Loader } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ const TasksPage = () => {
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
   const [filterOptions, setFilterOptions] = useState<TaskFilterOptions>({
     status: 'all',
     priority: 'all',
@@ -40,6 +41,11 @@ const TasksPage = () => {
     setFilterOptions(prev => ({ ...prev, ...options }));
   }, []);
 
+  // Toggle completed tasks visibility
+  const toggleCompletedTasks = useCallback(() => {
+    setShowCompletedTasks(prev => !prev);
+  }, []);
+
   // Filter and sort tasks
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
@@ -47,13 +53,15 @@ const TasksPage = () => {
     // Start with all tasks
     let filtered = [...tasks];
 
+    // Apply all filters first, then handle completed tasks visibility separately at the end
+
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(task =>
         task.title.toLowerCase().includes(query) ||
         (task.description && task.description.toLowerCase().includes(query)) ||
-        (task.tags && task.tags.some(tag => tag.toLowerCase().includes(query)))
+        (task.tags && task.tags.some((tag: string) => tag.toLowerCase().includes(query)))
       );
     }
 
@@ -116,6 +124,11 @@ const TasksPage = () => {
 
     // Sort tasks
     filtered.sort((a, b) => {
+      // First sort by completion status (active tasks first)
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+
       let comparison = 0;
 
       switch (filterOptions.sortBy) {
@@ -179,16 +192,16 @@ const TasksPage = () => {
               <div className="flex justify-end">
                 {!categoriesLoading && categories && categories.length > 0 && (
                   <Select
-                    value={filterOptions.categoryId || ''}
+                    value={filterOptions.categoryId || 'all'}
                     onValueChange={(value: string) => handleFilterChange({
-                      categoryId: value ? value : null
+                      categoryId: value === 'all' ? null : value
                     })}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       {categories.map(category => (
                         <SelectItem key={category._id} value={category._id}>
                           <div className="flex items-center gap-2">
@@ -227,19 +240,59 @@ const TasksPage = () => {
                     </p>
                   </div>
                 ) : (
-                  filteredTasks.map((task) => (
-                    <TaskItem
-                      key={task._id}
-                      id={task._id}
-                      workspaceId={workspaceId}
-                      title={task.title}
-                      description={task.description}
-                      completed={task.completed}
-                      dueDate={task.dueDate}
-                      priority={task.priority}
-                      categoryId={task.categoryId}
-                    />
-                  ))
+                  <>
+                    {/* Active tasks */}
+                    {filteredTasks.filter(task => !task.completed).map((task) => (
+                      <TaskItem
+                        key={task._id}
+                        id={task._id}
+                        workspaceId={workspaceId}
+                        title={task.title}
+                        description={task.description}
+                        completed={task.completed}
+                        dueDate={task.dueDate}
+                        priority={task.priority}
+                        categoryId={task.categoryId}
+                      />
+                    ))}
+
+                    {/* Completed tasks section */}
+                    {tasks && tasks.some(task => task.completed) && (
+                      <div className="mt-8">
+                        <Button
+                          variant="ghost"
+                          onClick={toggleCompletedTasks}
+                          className="mb-2 w-full flex items-center justify-between py-2 text-sm text-muted-foreground hover:text-foreground"
+                        >
+                          <div className="flex items-center">
+                            {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
+                            <span>Completed tasks</span>
+                          </div>
+                          <span className="text-xs bg-muted rounded-full px-2 py-0.5">
+                            {tasks.filter(task => task.completed).length}
+                          </span>
+                        </Button>
+
+                        {showCompletedTasks && (
+                          <div className="space-y-3 mt-2 animate-in fade-in-50 slide-in-from-top-5 duration-300">
+                            {filteredTasks.filter(task => task.completed).map((task) => (
+                              <TaskItem
+                                key={task._id}
+                                id={task._id}
+                                workspaceId={workspaceId}
+                                title={task.title}
+                                description={task.description}
+                                completed={task.completed}
+                                dueDate={task.dueDate}
+                                priority={task.priority}
+                                categoryId={task.categoryId}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

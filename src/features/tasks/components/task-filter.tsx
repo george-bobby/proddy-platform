@@ -27,6 +27,7 @@ export type TaskFilterOptions = {
   priority: 'all' | 'high' | 'medium' | 'low';
   dueDate: 'all' | 'overdue' | 'today' | 'upcoming' | 'no-date';
   categoryId: string | null;
+  tags: string[];
   sortBy: 'created' | 'dueDate' | 'priority';
   sortDirection: 'asc' | 'desc';
   view: 'list';

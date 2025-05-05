@@ -39,15 +39,28 @@ export const AddMessageToTaskModal = ({
   workspaceId,
   messageContent,
 }: AddMessageToTaskModalProps) => {
+  console.log('AddMessageToTaskModal received messageContent:', messageContent);
+  console.log('messageId:', messageId);
+  console.log('workspaceId:', workspaceId);
+
   // Use the entire message content as the task title
   const extractTitle = (content: string): string => {
-    return content;
+    console.log('extractTitle called with content:', content);
+    return content || 'New Task';
   };
 
   // Form state
-  const [title, setTitle] = useState(extractTitle(messageContent));
+  const [title, setTitle] = useState(() => {
+    if (!messageContent) {
+      console.log('No message content provided, using default title');
+      return 'New Task';
+    }
+    const extractedTitle = extractTitle(messageContent);
+    console.log('Setting initial title to:', extractedTitle);
+    return extractedTitle || 'New Task';
+  });
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>('medium');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>(undefined);
   const [categoryId, setCategoryId] = useState<Id<'taskCategories'> | null>(null);
 
   // Loading state
@@ -56,7 +69,9 @@ export const AddMessageToTaskModal = ({
   // API hook
   const createTaskFromMessage = useCreateTaskFromMessage();
 
-  const createTask = async (quickAdd = false) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!title.trim()) return;
 
     try {
@@ -67,7 +82,7 @@ export const AddMessageToTaskModal = ({
         workspaceId,
         title,
         dueDate: dueDate ? dueDate.getTime() : undefined,
-        priority: quickAdd ? 'medium' : priority,
+        priority,
         categoryId: categoryId || undefined,
       });
 
@@ -80,19 +95,10 @@ export const AddMessageToTaskModal = ({
     }
   };
 
-  const handleQuickAdd = async () => {
-    await createTask(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await createTask();
-  };
-
   const handleClose = () => {
-    setTitle(extractTitle(messageContent));
+    setTitle(messageContent ? extractTitle(messageContent) : 'New Task');
     setDueDate(undefined);
-    setPriority('medium');
+    setPriority(undefined);
     setCategoryId(null);
     setIsSubmitting(false);
     onClose();
@@ -105,19 +111,38 @@ export const AddMessageToTaskModal = ({
           <DialogHeader>
             <DialogTitle>Add Message to Tasks</DialogTitle>
             <DialogDescription>
-              The message content will be used as the task title. You can set additional details below or use default settings.
+              Add this message as a task. You can edit the title and set additional details below.
             </DialogDescription>
           </DialogHeader>
 
           {/* Message preview */}
           <div className="mt-4 rounded-md border bg-gray-50 p-3">
-            <p className="text-xs font-medium text-gray-500 mb-1">Message content (will be used as task title):</p>
-            <p className="text-sm text-gray-700 font-medium">
-              {messageContent}
-            </p>
+            <p className="text-xs font-medium text-gray-500 mb-1">Message content:</p>
+            {messageContent ? (
+              <p className="text-sm text-gray-700 font-medium">
+                {messageContent}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-500 italic">
+                No message content available. Please enter a title manually.
+              </p>
+            )}
           </div>
 
           <div className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="title" className="text-sm font-medium">
+                Task Title
+              </label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter task title"
+                className="w-full"
+                required
+              />
+            </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Due Date</label>
@@ -169,18 +194,7 @@ export const AddMessageToTaskModal = ({
             </div>
           </div>
 
-          <DialogFooter className="mt-6 flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 flex justify-start">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleQuickAdd}
-                disabled={isSubmitting}
-                className="w-full sm:w-auto"
-              >
-                {isSubmitting ? 'Adding...' : 'Add with Default Settings'}
-              </Button>
-            </div>
+          <DialogFooter className="mt-6">
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -191,7 +205,7 @@ export const AddMessageToTaskModal = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Adding...' : 'Add with Custom Settings'}
+                {isSubmitting ? 'Adding...' : 'Add Task'}
               </Button>
             </div>
           </DialogFooter>
