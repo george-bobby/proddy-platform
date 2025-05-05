@@ -20,6 +20,7 @@ import type * as channels from "../channels.js";
 import type * as conversations from "../conversations.js";
 import type * as http from "../http.js";
 import type * as members from "../members.js";
+import type * as mentions from "../mentions.js";
 import type * as messages from "../messages.js";
 import type * as reactions from "../reactions.js";
 import type * as status from "../status.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   http: typeof http;
   members: typeof members;
+  mentions: typeof mentions;
   messages: typeof messages;
   reactions: typeof reactions;
   status: typeof status;

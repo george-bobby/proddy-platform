@@ -1,89 +1,44 @@
 'use client';
 
-import { AtSign, Hash, Loader, MessageSquare, User } from 'lucide-react';
+import { AtSign, Hash, Loader, MessageSquare, Trello, User } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
+import { useGetMentionedMessages } from '@/features/messages/api/use-get-mentioned-messages';
+import { useMarkMentionAsRead } from '@/features/messages/api/use-mark-mention-as-read';
+import { useMarkAllMentionsAsRead } from '@/features/messages/api/use-mark-all-mentions-as-read';
+import { Id } from '@/../convex/_generated/dataModel';
 
-interface Mention {
-  id: string;
-  text: string;
-  context: string;
-  timestamp: string;
-  author: {
-    id: string;
-    name: string;
-    image?: string;
-  };
-  source: {
-    type: 'channel' | 'direct' | 'thread';
-    id: string;
-    name: string;
-  };
-  read: boolean;
-}
-
+// We'll use the interface from the API directly
 export default function MentionsPage() {
   const workspaceId = useWorkspaceId();
-  const [isLoading] = useState(false);
+  const { data: mentions, isLoading } = useGetMentionedMessages(true); // Get all mentions, including read ones
+  const markMentionAsRead = useMarkMentionAsRead();
+  const markAllAsReadMutation = useMarkAllMentionsAsRead();
 
-  const [mentions, setMentions] = useState<Mention[]>([
-    {
-      id: '1',
-      text: '@you Can you review the design mockups by tomorrow?',
-      context: 'We need to finalize the UI before the client meeting on Friday.',
-      timestamp: '2025-03-05T14:30:00Z',
-      author: {
-        id: 'user1',
-        name: 'Sarah Williams',
-        image: '/avatars/01.png'
-      },
-      source: {
-        type: 'channel',
-        id: 'channel1',
-        name: 'design'
-      },
-      read: false
-    },
-    {
-      id: '2',
-      text: "@you I've added your suggestions to the project proposal.",
-      context: 'Thanks for the feedback! Let me know if you have any other thoughts.',
-      timestamp: '2025-03-04T16:45:00Z',
-      author: {
-        id: 'user2',
-        name: 'John Doe',
-        image: '/avatars/02.png'
-      },
-      source: {
-        type: 'channel',
-        id: 'channel2',
-        name: 'marketing'
-      },
-      read: true
-    },
-    // ... more mock data
-  ]);
-
-  const markAsRead = (mentionId: string) => {
-    setMentions(mentions.map(mention =>
-      mention.id === mentionId ? { ...mention, read: true } : mention
-    ));
+  const handleMarkAsRead = async (mentionId: Id<'mentions'>) => {
+    await markMentionAsRead(mentionId);
   };
 
-  const formatRelativeTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    return diffInHours < 24 ? `${diffInHours}h ago` : `${Math.floor(diffInHours / 24)}d ago`;
+  const handleMarkAllAsRead = async () => {
+    await markAllAsReadMutation();
   };
 
-  const getSourceIcon = (type: 'channel' | 'direct' | 'thread') => {
+  const formatRelativeTime = (timestamp: number) => {
+    try {
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+    } catch (error) {
+      return 'Unknown time';
+    }
+  };
+
+  const getSourceIcon = (type: 'channel' | 'direct' | 'thread' | 'card') => {
     switch (type) {
       case 'channel':
         return <Hash className="h-3.5 w-3.5" />;
@@ -91,15 +46,33 @@ export default function MentionsPage() {
         return <User className="h-3.5 w-3.5" />;
       case 'thread':
         return <MessageSquare className="h-3.5 w-3.5" />;
+      case 'card':
+        return <Trello className="h-3.5 w-3.5" />;
     }
   };
 
-  const unreadMentions = mentions.filter((m) => !m.read);
-  const allMentions = mentions;
+  const getSourceLink = (mention: any) => {
+    switch (mention.source.type) {
+      case 'channel':
+        return `/workspace/${workspaceId}/channel/${mention.source.id}`;
+      case 'direct':
+        return `/workspace/${workspaceId}/member/${mention.source.id}`;
+      case 'thread':
+        return `/workspace/${workspaceId}/channel/${mention.source.id}`;
+      case 'card':
+        // For cards, we link to the channel's board page
+        return `/workspace/${workspaceId}/channel/${mention.source.id}/board`;
+      default:
+        return `/workspace/${workspaceId}`;
+    }
+  };
 
-  const renderMentionsList = (mentionsList: Mention[]) => (
+  const unreadMentions = mentions?.filter((m) => !m.read) || [];
+  const allMentions = mentions || [];
+
+  const renderMentionsList = (mentionsList: typeof mentions) => (
     <div className="divide-y">
-      {mentionsList.map((mention) => (
+      {mentionsList?.map((mention) => (
         <div
           key={mention.id}
           className={`p-4 transition-colors hover:bg-muted/20 ${!mention.read ? 'bg-primary/5' : ''}`}
@@ -122,19 +95,16 @@ export default function MentionsPage() {
                 </div>
               </div>
               <p className="text-sm">{mention.text}</p>
-              {mention.context && (
-                <p className="text-xs text-muted-foreground">{mention.context}</p>
-              )}
               <div className="flex gap-2 pt-1">
                 <Link
-                  href={`/workspace/${workspaceId}/${mention.source.type === 'channel' ? 'channel' : 'member'}/${mention.source.id}`}
+                  href={getSourceLink(mention)}
                   className="text-xs font-medium text-primary hover:underline"
                 >
-                  View conversation
+                  {mention.source.type === 'card' ? 'View board' : 'View conversation'}
                 </Link>
                 {!mention.read && (
                   <button
-                    onClick={() => markAsRead(mention.id)}
+                    onClick={() => handleMarkAsRead(mention.id as Id<'mentions'>)}
                     className="text-xs font-medium text-muted-foreground hover:text-foreground"
                   >
                     Mark as read
@@ -151,14 +121,27 @@ export default function MentionsPage() {
   return (
     <div className="flex h-full flex-col">
       <WorkspaceToolbar>
-        <Button
-          variant="ghost"
-          className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
-          size="sm"
-        >
-          <AtSign className="mr-2 size-5" />
-          <span className="truncate">Mentions</span>
-        </Button>
+        <div className="flex items-center justify-between w-full">
+          <Button
+            variant="ghost"
+            className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+            size="sm"
+          >
+            <AtSign className="mr-2 size-5" />
+            <span className="truncate">Mentions</span>
+          </Button>
+
+          {unreadMentions.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10"
+              onClick={handleMarkAllAsRead}
+            >
+              Mark all as read
+            </Button>
+          )}
+        </div>
       </WorkspaceToolbar>
 
       <div className="flex-1 overflow-y-auto">
@@ -183,7 +166,15 @@ export default function MentionsPage() {
             </div>
 
             <TabsContent value="all" className="p-0">
-              {renderMentionsList(allMentions)}
+              {allMentions.length > 0 ? (
+                renderMentionsList(allMentions)
+              ) : (
+                <div className="flex h-[300px] w-full flex-col items-center justify-center gap-y-2 bg-white">
+                  <AtSign className="size-12 text-muted-foreground" />
+                  <h2 className="text-xl font-semibold">No mentions</h2>
+                  <p className="text-sm text-muted-foreground">You haven't been mentioned yet</p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="unread" className="p-0">

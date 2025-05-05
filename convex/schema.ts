@@ -136,6 +136,27 @@ const schema = defineSchema({
     .index('by_workspace_id', ['workspaceId'])
     .index('by_workspace_id_user_id', ['workspaceId', 'userId'])
     .index('by_category_id', ['categoryId']),
+
+  mentions: defineTable({
+    messageId: v.optional(v.id('messages')),
+    mentionedMemberId: v.id('members'),
+    mentionerMemberId: v.id('members'),
+    workspaceId: v.id('workspaces'),
+    channelId: v.optional(v.id('channels')),
+    conversationId: v.optional(v.id('conversations')),
+    parentMessageId: v.optional(v.id('messages')),
+    cardId: v.optional(v.id('cards')),
+    cardTitle: v.optional(v.string()),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_mentioned_member_id', ['mentionedMemberId'])
+    .index('by_mentioner_member_id', ['mentionerMemberId'])
+    .index('by_message_id', ['messageId'])
+    .index('by_card_id', ['cardId'])
+    .index('by_workspace_id_mentioned_member_id', ['workspaceId', 'mentionedMemberId'])
+    .index('by_workspace_id_mentioned_member_id_read', ['workspaceId', 'mentionedMemberId', 'read']),
 });
 
 export default schema;

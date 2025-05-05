@@ -69,7 +69,54 @@ export const createCard = mutation({
     dueDate?: number;
     assignees?: Id<'members'>[];
   }) => {
-    return await ctx.db.insert('cards', args);
+    // Get the list to find the channel and workspace
+    const list = await ctx.db.get(args.listId);
+    if (!list) throw new Error('List not found');
+
+    const channel = await ctx.db.get(list.channelId);
+    if (!channel) throw new Error('Channel not found');
+
+    // Insert the card
+    const cardId = await ctx.db.insert('cards', args);
+
+    // Create mentions for assignees if any
+    if (args.assignees && args.assignees.length > 0) {
+      try {
+        // Get the current user/member who is creating the card
+        const auth = await ctx.auth.getUserIdentity();
+        if (!auth) throw new Error('Not authenticated');
+
+        const userId = auth.subject.split('|')[0] as Id<'users'>;
+
+        const creator = await ctx.db
+          .query('members')
+          .withIndex('by_workspace_id_user_id', (q) =>
+            q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
+          )
+          .unique();
+
+        if (!creator) throw new Error('Creator not found');
+
+        // Create a mention for each assignee
+        for (const assigneeId of args.assignees) {
+          await ctx.db.insert('mentions', {
+            mentionedMemberId: assigneeId,
+            mentionerMemberId: creator._id,
+            workspaceId: channel.workspaceId,
+            channelId: list.channelId,
+            read: false,
+            createdAt: Date.now(),
+            cardId: cardId, // Add the card ID to the mention
+            cardTitle: args.title, // Include the card title for context
+          });
+        }
+      } catch (error) {
+        console.error('Error creating mentions for card assignees:', error);
+        // Don't throw the error, as we still want to return the card ID
+      }
+    }
+
+    return cardId;
   },
 });
 
@@ -102,7 +149,64 @@ export const updateCard = mutation({
     dueDate?: number;
     assignees?: Id<'members'>[];
   }) => {
-    return await ctx.db.patch(cardId, updates);
+    // Get the current card to check for changes in assignees
+    const card = await ctx.db.get(cardId);
+    if (!card) throw new Error('Card not found');
+
+    // Get the list to find the channel and workspace
+    const list = await ctx.db.get(updates.listId || card.listId);
+    if (!list) throw new Error('List not found');
+
+    const channel = await ctx.db.get(list.channelId);
+    if (!channel) throw new Error('Channel not found');
+
+    // Update the card
+    await ctx.db.patch(cardId, updates);
+
+    // Check if assignees were updated
+    if (updates.assignees !== undefined) {
+      try {
+        // Get the current user/member who is updating the card
+        const auth = await ctx.auth.getUserIdentity();
+        if (!auth) throw new Error('Not authenticated');
+
+        const userId = auth.subject.split('|')[0] as Id<'users'>;
+
+        const updater = await ctx.db
+          .query('members')
+          .withIndex('by_workspace_id_user_id', (q) =>
+            q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
+          )
+          .unique();
+
+        if (!updater) throw new Error('Updater not found');
+
+        // Find new assignees (those in updates.assignees but not in card.assignees)
+        const currentAssignees = card.assignees || [];
+        const newAssignees = updates.assignees.filter(
+          assigneeId => !currentAssignees.includes(assigneeId)
+        );
+
+        // Create mentions for new assignees
+        for (const assigneeId of newAssignees) {
+          await ctx.db.insert('mentions', {
+            mentionedMemberId: assigneeId,
+            mentionerMemberId: updater._id,
+            workspaceId: channel.workspaceId,
+            channelId: list.channelId,
+            read: false,
+            createdAt: Date.now(),
+            cardId: cardId, // Add the card ID to the mention
+            cardTitle: updates.title || card.title, // Include the card title for context
+          });
+        }
+      } catch (error) {
+        console.error('Error creating mentions for card assignees:', error);
+        // Don't throw the error, as we still want to return the card ID
+      }
+    }
+
+    return cardId;
   },
 });
 
