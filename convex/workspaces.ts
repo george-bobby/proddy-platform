@@ -2,6 +2,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 
 import { mutation, query } from './_generated/server';
+import { createDefaultCategoriesForWorkspace } from './tasks';
 
 const generateCode = () => {
   const code = Array.from({ length: 6 }, () => '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 36)]).join('');
@@ -97,6 +98,9 @@ export const create = mutation({
       name: 'general',
       workspaceId,
     });
+
+    // Create default task categories for the workspace
+    await createDefaultCategoriesForWorkspace(ctx, workspaceId, userId);
 
     return workspaceId;
   },

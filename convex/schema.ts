@@ -97,6 +97,45 @@ const schema = defineSchema({
     dueDate: v.optional(v.number()),
     assignees: v.optional(v.array(v.id('members'))),
   }).index('by_list_id', ['listId']),
+
+  taskCategories: defineTable({
+    name: v.string(),
+    color: v.string(),
+    workspaceId: v.id('workspaces'),
+    userId: v.id('users'),
+    isDefault: v.optional(v.boolean()),
+  })
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_workspace_id_user_id', ['workspaceId', 'userId']),
+
+  tasks: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    completed: v.boolean(),
+    status: v.optional(v.union(
+      v.literal('not_started'),
+      v.literal('in_progress'),
+      v.literal('completed'),
+      v.literal('on_hold'),
+      v.literal('cancelled')
+    )),
+    dueDate: v.optional(v.number()),
+    priority: v.optional(v.union(
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high')
+    )),
+    categoryId: v.optional(v.id('taskCategories')),
+    tags: v.optional(v.array(v.string())),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+    userId: v.id('users'),
+    workspaceId: v.id('workspaces'),
+  })
+    .index('by_user_id', ['userId'])
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_workspace_id_user_id', ['workspaceId', 'userId'])
+    .index('by_category_id', ['categoryId']),
 });
 
 export default schema;
