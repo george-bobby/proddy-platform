@@ -19,9 +19,10 @@ interface BoardListProps {
     onAddCard: () => void;
     onEditCard: (card: any) => void;
     onDeleteCard: (cardId: Id<'cards'>) => void;
+    assigneeData?: Record<Id<'members'>, { name: string; image?: string }>;
 }
 
-const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDeleteList, onAddCard, onEditCard, onDeleteCard }) => {
+const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDeleteList, onAddCard, onEditCard, onDeleteCard, assigneeData = {} }) => {
     // Make the list sortable
     const {
         attributes,
@@ -167,6 +168,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                                 card={card}
                                 onEdit={() => onEditCard(card)}
                                 onDelete={() => onDeleteCard(card._id)}
+                                assigneeData={assigneeData}
                             />
                         ))}
                         {cards.length > 0 && isOver && (

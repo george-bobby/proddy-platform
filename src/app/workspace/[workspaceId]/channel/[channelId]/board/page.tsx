@@ -25,6 +25,7 @@ const BoardPage = () => {
     const lists = useQuery(api.board.getLists, { channelId });
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
+    const members = useQuery(api.board.getMembersForChannel, { channelId }) || [];
     const [view, setView] = useState<'kanban' | 'table' | 'calendar' | 'gantt'>('kanban');
 
     // Modal state
@@ -46,6 +47,7 @@ const BoardPage = () => {
     const [cardLabels, setCardLabels] = useState('');
     const [cardPriority, setCardPriority] = useState<'lowest' | 'low' | 'medium' | 'high' | 'highest' | ''>('');
     const [cardDueDate, setCardDueDate] = useState<Date | undefined>(undefined);
+    const [cardAssignees, setCardAssignees] = useState<Id<'members'>[]>([]);
 
     // Mutations
     const createList = useMutation(api.board.createList);
@@ -113,12 +115,14 @@ const BoardPage = () => {
             labels: cardLabels.split(',').map(l => l.trim()).filter(Boolean),
             priority: cardPriority || undefined,
             dueDate: cardDueDate ? cardDueDate.getTime() : undefined,
+            assignees: cardAssignees.length > 0 ? cardAssignees : undefined,
         });
         setCardTitle('');
         setCardDesc('');
         setCardLabels('');
         setCardPriority('');
         setCardDueDate(undefined);
+        setCardAssignees([]);
         setAddCardOpen(null);
     };
     const handleEditCard = async () => {
@@ -130,6 +134,7 @@ const BoardPage = () => {
             labels: cardLabels.split(',').map(l => l.trim()).filter(Boolean),
             priority: cardPriority || undefined,
             dueDate: cardDueDate ? cardDueDate.getTime() : undefined,
+            assignees: cardAssignees.length > 0 ? cardAssignees : undefined,
         });
         setEditCardOpen(null);
     };
@@ -298,9 +303,11 @@ const BoardPage = () => {
                             setCardLabels((card.labels || []).join(', '));
                             setCardPriority(card.priority || '');
                             setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                            setCardAssignees(card.assignees || []);
                         }}
                         onDeleteCard={handleDeleteCard}
                         handleDragEnd={handleDragEnd}
+                        members={members}
                     />
                 )}
 
@@ -315,8 +322,10 @@ const BoardPage = () => {
                             setCardLabels((card.labels || []).join(', '));
                             setCardPriority(card.priority || '');
                             setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                            setCardAssignees(card.assignees || []);
                         }}
                         onDeleteCard={handleDeleteCard}
+                        members={members}
                     />
                 )}
 
@@ -331,8 +340,10 @@ const BoardPage = () => {
                             setCardLabels((card.labels || []).join(', '));
                             setCardPriority(card.priority || '');
                             setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                            setCardAssignees(card.assignees || []);
                         }}
                         onDeleteCard={handleDeleteCard}
+                        members={members}
                     />
                 )}
 
@@ -347,8 +358,10 @@ const BoardPage = () => {
                             setCardLabels((card.labels || []).join(', '));
                             setCardPriority(card.priority || '');
                             setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
+                            setCardAssignees(card.assignees || []);
                         }}
                         onDeleteCard={handleDeleteCard}
+                        members={members}
                     />
                 )}
             </div>
@@ -367,6 +380,7 @@ const BoardPage = () => {
                         setCardLabels('');
                         setCardPriority('');
                         setCardDueDate(undefined);
+                        setCardAssignees([]);
                     }
                 }}
                 title={cardTitle}
@@ -379,6 +393,9 @@ const BoardPage = () => {
                 setPriority={setCardPriority}
                 dueDate={cardDueDate}
                 setDueDate={setCardDueDate}
+                assignees={cardAssignees}
+                setAssignees={setCardAssignees}
+                members={members}
                 labelSuggestions={uniqueLabels}
                 onAdd={() => addCardOpen && handleAddCard(addCardOpen)}
             />
@@ -397,6 +414,9 @@ const BoardPage = () => {
                 setPriority={setCardPriority}
                 dueDate={cardDueDate}
                 setDueDate={setCardDueDate}
+                assignees={cardAssignees}
+                setAssignees={setCardAssignees}
+                members={members}
                 labelSuggestions={uniqueLabels}
                 onSave={handleEditCard}
             />

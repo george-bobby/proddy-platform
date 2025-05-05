@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Pencil, Trash, ArrowUpDown, Clock, AlertCircle, ArrowRightCircle, CheckCircle2, Search } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Pencil, Trash, ArrowUpDown, Clock, AlertCircle, ArrowRightCircle, CheckCircle2, Search, Users } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -14,9 +14,23 @@ interface BoardTableViewProps {
   allCards: any[];
   onEditCard: (card: any) => void;
   onDeleteCard: (cardId: Id<'cards'>) => void;
+  members?: any[];
 }
 
-const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEditCard, onDeleteCard }) => {
+const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEditCard, onDeleteCard, members = [] }) => {
+  // Create a map of member data for easy lookup
+  const memberDataMap = useMemo(() => {
+    const map: Record<Id<'members'>, { name: string; image?: string }> = {};
+    members.forEach(member => {
+      if (member._id) {
+        map[member._id] = {
+          name: member.user?.name || 'Unknown',
+          image: member.user?.image
+        };
+      }
+    });
+    return map;
+  }, [members]);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,13 +185,19 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
               </th>
               <th className="p-3 text-left font-medium text-sm">Labels</th>
               <th className="p-3 text-left font-medium text-sm">Due Date</th>
+              <th className="p-3 text-left font-medium text-sm">
+                <div className="flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5" />
+                  <span>Assignees</span>
+                </div>
+              </th>
               <th className="p-3 text-left font-medium text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredCards.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                <td colSpan={8} className="p-8 text-center text-muted-foreground">
                   {searchQuery ? 'No cards match your search' : 'No cards found'}
                 </td>
               </tr>
@@ -186,11 +206,6 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
                 <tr key={card._id} className="border-b hover:bg-muted/30 transition-colors">
                   <td className="p-3 font-medium">
                     <div className="flex items-center gap-2">
-                      <div className="flex -space-x-2 mr-2">
-                        <Avatar className="h-5 w-5 border border-background">
-                          <AvatarFallback className="text-[10px]">U1</AvatarFallback>
-                        </Avatar>
-                      </div>
                       {card.title}
                     </div>
                   </td>
@@ -238,6 +253,49 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
                       </div>
                     ) : (
                       <span className="text-muted-foreground">-</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {card.assignees && card.assignees.length > 0 ? (
+                      <div className="flex -space-x-2">
+                        {card.assignees.slice(0, 3).map((assigneeId: Id<'members'>, index: number) => {
+                          const assignee = memberDataMap[assigneeId];
+                          const fallback = assignee?.name?.charAt(0).toUpperCase() || '?';
+
+                          return (
+                            <TooltipProvider key={assigneeId}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Avatar className="h-6 w-6 border border-background">
+                                    <AvatarImage src={assignee?.image} alt={assignee?.name} />
+                                    <AvatarFallback className="text-[10px]">{fallback}</AvatarFallback>
+                                  </Avatar>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{assignee?.name || 'Unknown user'}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          );
+                        })}
+
+                        {card.assignees.length > 3 && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Avatar className="h-6 w-6 border border-background bg-muted">
+                                  <AvatarFallback className="text-[10px]">+{card.assignees.length - 3}</AvatarFallback>
+                                </Avatar>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{card.assignees.length - 3} more assignees</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
                     )}
                   </td>
                   <td className="p-3">

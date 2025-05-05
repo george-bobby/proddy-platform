@@ -42,6 +42,7 @@ interface BoardGanttViewProps {
   allCards: any[];
   onEditCard: (card: any) => void;
   onDeleteCard: (cardId: Id<'cards'>) => void;
+  members?: any[];
 }
 
 // Define a type for our task items
@@ -62,7 +63,8 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
   lists,
   allCards,
   onEditCard,
-  onDeleteCard
+  onDeleteCard,
+  members = []
 }) => {
   // State for timeline controls
   const [currentStartDate, setCurrentStartDate] = useState<Date>(() => {

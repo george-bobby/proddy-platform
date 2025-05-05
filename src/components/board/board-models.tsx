@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import type { Id } from '@/../convex/_generated/dataModel';
 import LabelInput from '../label-input';
+import MemberSelector from '../member-selector';
 
 // BoardAddListModal
 interface BoardAddListModalProps {
@@ -102,6 +103,9 @@ interface BoardAddCardModalProps {
     setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest') => void;
     dueDate: Date | undefined;
     setDueDate: (v: Date | undefined) => void;
+    assignees: Id<'members'>[];
+    setAssignees: (v: Id<'members'>[]) => void;
+    members: any[];
     labelSuggestions: string[];
     onAdd: () => void;
 }
@@ -119,6 +123,9 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
     setPriority,
     dueDate,
     setDueDate,
+    assignees,
+    setAssignees,
+    members,
     labelSuggestions,
     onAdd
 }) => (
@@ -135,6 +142,12 @@ export const BoardAddCardModal: React.FC<BoardAddCardModalProps> = ({
                 onChange={setLabels}
                 suggestions={labelSuggestions}
                 placeholder="Labels (comma separated)"
+            />
+            <MemberSelector
+                members={members}
+                selectedMemberIds={assignees}
+                onChange={setAssignees}
+                placeholder="Assign members"
             />
 
             <div className="grid grid-cols-2 gap-4">
@@ -218,6 +231,9 @@ interface BoardEditCardModalProps {
     setPriority: (v: '' | 'lowest' | 'low' | 'medium' | 'high' | 'highest') => void;
     dueDate: Date | undefined;
     setDueDate: (v: Date | undefined) => void;
+    assignees: Id<'members'>[];
+    setAssignees: (v: Id<'members'>[]) => void;
+    members: any[];
     labelSuggestions: string[];
     onSave: () => void;
 }
@@ -235,6 +251,9 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
     setPriority,
     dueDate,
     setDueDate,
+    assignees,
+    setAssignees,
+    members,
     labelSuggestions,
     onSave
 }) => (
@@ -250,6 +269,12 @@ export const BoardEditCardModal: React.FC<BoardEditCardModalProps> = ({
                 onChange={setLabels}
                 suggestions={labelSuggestions}
                 placeholder="Labels (comma separated)"
+            />
+            <MemberSelector
+                members={members}
+                selectedMemberIds={assignees}
+                onChange={setAssignees}
+                placeholder="Assign members"
             />
 
             <div className="grid grid-cols-2 gap-4">

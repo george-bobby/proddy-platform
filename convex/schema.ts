@@ -95,6 +95,7 @@ const schema = defineSchema({
       v.literal('highest')
     )),
     dueDate: v.optional(v.number()),
+    assignees: v.optional(v.array(v.id('members'))),
   }).index('by_list_id', ['listId']),
 });
 

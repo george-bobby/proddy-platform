@@ -32,6 +32,7 @@ interface BoardKanbanViewProps {
   onEditCard: (card: any) => void;
   onDeleteCard: (cardId: Id<'cards'>) => void;
   handleDragEnd: (event: DragEndEvent) => void;
+  members?: any[];
 }
 
 const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
@@ -42,8 +43,22 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
   onAddCard,
   onEditCard,
   onDeleteCard,
-  handleDragEnd
+  handleDragEnd,
+  members = []
 }) => {
+  // Create a map of member data for easy lookup
+  const memberDataMap = React.useMemo(() => {
+    const map: Record<Id<'members'>, { name: string; image?: string }> = {};
+    members.forEach(member => {
+      if (member._id) {
+        map[member._id] = {
+          name: member.user?.name || 'Unknown',
+          image: member.user?.image
+        };
+      }
+    });
+    return map;
+  }, [members]);
   const [activeItem, setActiveItem] = React.useState<any>(null);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [overId, setOverId] = React.useState<string | null>(null);
@@ -148,6 +163,7 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
               onAddCard={() => onAddCard(list._id)}
               onEditCard={onEditCard}
               onDeleteCard={onDeleteCard}
+              assigneeData={memberDataMap}
             />
           ))}
         </SortableContext>
@@ -159,6 +175,7 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
               card={activeItem.item}
               onEdit={() => { }}
               onDelete={() => { }}
+              assigneeData={memberDataMap}
             />
           )}
           {activeItem?.type === 'list' && (

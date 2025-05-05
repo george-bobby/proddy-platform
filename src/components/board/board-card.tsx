@@ -1,21 +1,23 @@
 import React from 'react';
-import { Pencil, Trash, Clock, CheckCircle2, AlertCircle, ArrowRightCircle } from 'lucide-react';
+import { Pencil, Trash, Clock, CheckCircle2, AlertCircle, ArrowRightCircle, Users } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import type { Id } from '@/../convex/_generated/dataModel';
 
 interface BoardCardProps {
     card: any;
     onEdit: () => void;
     onDelete: () => void;
+    assigneeData?: Record<Id<'members'>, { name: string; image?: string }>;
 }
 
-const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete }) => {
+const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete, assigneeData = {} }) => {
     const {
         attributes,
         listeners,
@@ -162,12 +164,50 @@ const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete }) => {
                     </div>
                 )}
 
-                {/* Assignees (placeholder) */}
-                <div className="flex -space-x-2">
-                    <Avatar className="h-5 w-5 border border-background">
-                        <AvatarFallback className="text-[10px]">U1</AvatarFallback>
-                    </Avatar>
-                </div>
+                {/* Assignees */}
+                {card.assignees && card.assignees.length > 0 ? (
+                    <div className="flex -space-x-2">
+                        {card.assignees.slice(0, 3).map((assigneeId: Id<'members'>, index: number) => {
+                            const assignee = assigneeData[assigneeId];
+                            const fallback = assignee?.name?.charAt(0).toUpperCase() || '?';
+
+                            return (
+                                <TooltipProvider key={assigneeId}>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Avatar className="h-5 w-5 border border-background">
+                                                <AvatarImage src={assignee?.image} alt={assignee?.name} />
+                                                <AvatarFallback className="text-[10px]">{fallback}</AvatarFallback>
+                                            </Avatar>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{assignee?.name || 'Unknown user'}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            );
+                        })}
+
+                        {card.assignees.length > 3 && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Avatar className="h-5 w-5 border border-background bg-muted">
+                                            <AvatarFallback className="text-[10px]">+{card.assignees.length - 3}</AvatarFallback>
+                                        </Avatar>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{card.assignees.length - 3} more assignees</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )}
+                    </div>
+                ) : (
+                    <div className="flex items-center text-muted-foreground">
+                        <Users className="h-3.5 w-3.5" />
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -12,13 +12,15 @@ interface BoardCalendarViewProps {
   allCards: any[];
   onEditCard: (card: any) => void;
   onDeleteCard: (cardId: Id<'cards'>) => void;
+  members?: any[];
 }
 
 const BoardCalendarView: React.FC<BoardCalendarViewProps> = ({
   lists,
   allCards,
   onEditCard,
-  onDeleteCard
+  onDeleteCard,
+  members = []
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 

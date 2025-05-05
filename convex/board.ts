@@ -57,8 +57,18 @@ export const createCard = mutation({
       v.literal('highest')
     )),
     dueDate: v.optional(v.number()),
+    assignees: v.optional(v.array(v.id('members'))),
   },
-  handler: async (ctx: MutationCtx, args: { listId: Id<'lists'>; title: string; description?: string; order: number; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, args: {
+    listId: Id<'lists'>;
+    title: string;
+    description?: string;
+    order: number;
+    labels?: string[];
+    priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+    dueDate?: number;
+    assignees?: Id<'members'>[];
+  }) => {
     return await ctx.db.insert('cards', args);
   },
 });
@@ -79,8 +89,19 @@ export const updateCard = mutation({
       v.literal('highest')
     )),
     dueDate: v.optional(v.number()),
+    assignees: v.optional(v.array(v.id('members'))),
   },
-  handler: async (ctx: MutationCtx, { cardId, ...updates }: { cardId: Id<'cards'>; title?: string; description?: string; order?: number; listId?: Id<'lists'>; labels?: string[]; priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest'; dueDate?: number }) => {
+  handler: async (ctx: MutationCtx, { cardId, ...updates }: {
+    cardId: Id<'cards'>;
+    title?: string;
+    description?: string;
+    order?: number;
+    listId?: Id<'lists'>;
+    labels?: string[];
+    priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+    dueDate?: number;
+    assignees?: Id<'members'>[];
+  }) => {
     return await ctx.db.patch(cardId, updates);
   },
 });
@@ -209,5 +230,39 @@ export const getCardsWithDueDate = query({
     }
 
     return cardsWithDueDate;
+  },
+});
+
+// Get members for a channel's workspace (for assignee selection)
+export const getMembersForChannel = query({
+  args: { channelId: v.id('channels') },
+  handler: async (ctx, { channelId }) => {
+    // First get the channel to find its workspace
+    const channel = await ctx.db.get(channelId);
+    if (!channel) return [];
+
+    const workspaceId = channel.workspaceId;
+
+    // Get all members in the workspace
+    const members = await ctx.db.query('members')
+      .withIndex('by_workspace_id', q => q.eq('workspaceId', workspaceId))
+      .collect();
+
+    // Populate user data for each member
+    const membersWithUserData = [];
+    for (const member of members) {
+      const user = await ctx.db.get(member.userId);
+      if (user) {
+        membersWithUserData.push({
+          ...member,
+          user: {
+            name: user.name,
+            image: user.image
+          }
+        });
+      }
+    }
+
+    return membersWithUserData;
   },
 });
