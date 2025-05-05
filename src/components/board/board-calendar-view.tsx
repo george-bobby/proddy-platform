@@ -131,7 +131,15 @@ const BoardCalendarView: React.FC<BoardCalendarViewProps> = ({
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex-1 overflow-auto overflow-x-hidden scrollbar-hide p-4">
+      <div className="flex-1 overflow-auto overflow-x-hidden scrollbar-hide p-4" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+        <style jsx>{`
+          ::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+            background: transparent;
+            display: none;
+          }
+        `}</style>
         <div className="h-full rounded-md border">
           {/* Calendar header */}
           <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">

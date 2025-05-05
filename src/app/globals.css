@@ -169,6 +169,19 @@
     scrollbar-color: #dcdcdc #f8f8f8;
   }
 
+  /* Hide scrollbars */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+
   /* Animation Utilities */
   .animate-fade-in {
     animation: fadeIn var(--duration-normal) ease-in-out;

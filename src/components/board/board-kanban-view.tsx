@@ -121,7 +121,15 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
   };
 
   return (
-    <div className="flex flex-1 overflow-x-auto scrollbar-hide gap-4 p-4 bg-white">
+    <div className="flex flex-1 overflow-x-auto scrollbar-hide gap-4 p-4 bg-white" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+      <style jsx>{`
+        ::-webkit-scrollbar {
+          width: 0px;
+          height: 0px;
+          background: transparent;
+          display: none;
+        }
+      `}</style>
       <DndContext
         sensors={sensors}
         collisionDetection={collisionDetectionStrategy}
