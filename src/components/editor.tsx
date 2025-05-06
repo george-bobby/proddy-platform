@@ -1,4 +1,4 @@
-import { CalendarIcon, ImageIcon, Smile, XIcon } from 'lucide-react';
+import { CalendarIcon, ImageIcon, PaintBucket, Smile, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import Quill, { type QuillOptions } from 'quill';
 import type { Delta, Op } from 'quill/core';
@@ -6,12 +6,16 @@ import 'quill/dist/quill.snow.css';
 import { type MutableRefObject, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { MdSend } from 'react-icons/md';
 import { PiTextAa } from 'react-icons/pi';
-
-import type { Id } from '@/../convex/_generated/dataModel';
+import { useRouter } from 'next/navigation';
+import { useMutation } from 'convex/react';
+import { api } from '@/../convex/_generated/api';
+import { toast } from 'sonner';
+import { useCurrentUser } from '@/features/auth/api/use-current-user';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createMentionElement } from '@/lib/mention-handler';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { useChannelId } from '@/hooks/use-channel-id';
 
 import { CalendarPicker } from './calendar-picker';
 import { EmojiPopover } from './emoji-popover';
@@ -46,7 +50,16 @@ const Editor = ({
   innerRef,
   variant = 'create',
 }: EditorProps) => {
+  const router = useRouter();
   const workspaceId = useWorkspaceId();
+  // Use try-catch to handle cases where channelId might not be available
+  let channelId: string | undefined;
+  try {
+    channelId = useChannelId();
+  } catch (error) {
+    console.log('Channel ID not available in this context');
+  }
+
   const [text, setText] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
@@ -370,6 +383,50 @@ const Editor = ({
     setMentionPickerOpen(false);
   };
 
+  // Get current user
+  const { data: currentUser } = useCurrentUser();
+
+  // Create message mutation
+  const createMessage = useMutation(api.messages.create);
+
+  // State to track if we're creating a canvas
+  const [isCreatingCanvas, setIsCreatingCanvas] = useState(false);
+
+  // Function to create a new canvas with a live message
+  const navigateToCanvas = async () => {
+    if (!workspaceId || !channelId || !currentUser) {
+      console.error('Cannot create canvas: missing required data');
+      return;
+    }
+
+    try {
+      // Show loading state
+      setIsCreatingCanvas(true);
+
+      // Generate a unique room ID for the canvas
+      const timestamp = Date.now();
+      const roomId = `canvas-${channelId}-${timestamp}`;
+
+      // Create a live message in the channel
+      await createMessage({
+        workspaceId: workspaceId,
+        channelId: channelId as Id<"channels">,
+        body: JSON.stringify({
+          type: "canvas-live",
+          roomId: roomId,
+          participants: [currentUser._id],
+        }),
+      });
+
+      // Navigate to the canvas page with the room ID and new=true to force a new canvas
+      window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+    } catch (error) {
+      console.error("Error creating canvas:", error);
+      toast.error("Failed to create canvas");
+      setIsCreatingCanvas(false);
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <CalendarPicker
@@ -499,6 +556,22 @@ const Editor = ({
                   </svg>
                 </Button>
               </Hint>
+              {channelId && (
+                <Hint label="Canvas">
+                  <Button
+                    disabled={disabled || isCreatingCanvas}
+                    size="iconSm"
+                    variant="ghost"
+                    onClick={navigateToCanvas}
+                  >
+                    {isCreatingCanvas ? (
+                      <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                    ) : (
+                      <PaintBucket className="size-4" />
+                    )}
+                  </Button>
+                </Hint>
+              )}
             </>
           )}
 

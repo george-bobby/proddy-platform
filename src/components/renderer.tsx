@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { addMentionClickHandlers } from '@/lib/mention-handler';
 import { useGetMembers } from '@/features/members/api/use-get-members';
+import { CanvasMessage } from '@/features/messages/components/canvas-message';
+import { CanvasLiveMessage } from '@/features/messages/components/canvas-live-message';
 
 interface RendererProps {
   value: string;
@@ -18,7 +20,33 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
   const workspaceId = useWorkspaceId();
   const { data: members } = useGetMembers({ workspaceId });
 
+  // Check if this is a canvas message
+  const isCanvasMessage = () => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed.type === 'canvas';
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Check if this is a live canvas message
+  const isCanvasLiveMessage = () => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed.type === 'canvas-live';
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
+    // If this is a canvas message or live canvas message, don't process with Quill
+    if (isCanvasMessage() || isCanvasLiveMessage()) {
+      setIsEmpty(false);
+      return;
+    }
+
     if (!rendererRef.current) return;
 
     const container = rendererRef.current;
@@ -118,6 +146,28 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
       if (container) container.innerHTML = '';
     };
   }, [value, calendarEvent, workspaceId, members]);
+
+  // If this is a canvas message, render the CanvasMessage component
+  if (isCanvasMessage()) {
+    try {
+      const canvasData = JSON.parse(value);
+      return <CanvasMessage data={canvasData} />;
+    } catch (e) {
+      console.error("Error parsing canvas data:", e);
+      return <div>Error displaying canvas</div>;
+    }
+  }
+
+  // If this is a live canvas message, render the CanvasLiveMessage component
+  if (isCanvasLiveMessage()) {
+    try {
+      const canvasLiveData = JSON.parse(value);
+      return <CanvasLiveMessage data={canvasLiveData} />;
+    } catch (e) {
+      console.error("Error parsing live canvas data:", e);
+      return <div>Error displaying live canvas</div>;
+    }
+  }
 
   if (isEmpty) return null;
 
