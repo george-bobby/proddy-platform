@@ -222,14 +222,16 @@ const TasksPage = () => {
                     </div>
                   ) : (
                     <>
-                      {/* Active tasks */}
+                      {/* Active tasks - Hide the section title when filter is set to "completed" */}
                       <div className="space-y-3">
-                        <div className="flex items-center">
-                          <h2 className="text-lg font-medium text-gray-800">Active tasks</h2>
-                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                            {filteredTasks.filter(task => !task.completed).length}
-                          </span>
-                        </div>
+                        {filterOptions.status !== 'completed' && (
+                          <div className="flex items-center">
+                            <h2 className="text-lg font-medium text-gray-800">Active tasks</h2>
+                            <span className="ml-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                              {filteredTasks.filter(task => !task.completed).length}
+                            </span>
+                          </div>
+                        )}
 
                         <div className="grid gap-4">
                           {filteredTasks.filter(task => !task.completed).map((task) => (
@@ -249,38 +251,68 @@ const TasksPage = () => {
                       </div>
 
                       {/* Completed tasks section */}
-                      {tasks && tasks.some(task => task.completed) && (
+                      {tasks && tasks.some(task => task.completed) && filterOptions.status !== 'active' && (
                         <div className="mt-10 pt-4 border-t border-gray-100">
-                          <Button
-                            variant="ghost"
-                            onClick={toggleCompletedTasks}
-                            className="w-full flex items-center justify-between py-2 text-sm hover:bg-gray-50 rounded-md"
-                          >
-                            <div className="flex items-center text-gray-600 font-medium">
-                              {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
-                              <span>Completed tasks</span>
-                            </div>
-                            <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
-                              {tasks.filter(task => task.completed).length}
-                            </span>
-                          </Button>
+                          {filterOptions.status === 'completed' ? (
+                            // When filter is set to "completed", show tasks directly
+                            <>
+                              <div className="flex items-center mb-3">
+                                <h2 className="text-lg font-medium text-gray-800">Completed tasks</h2>
+                                <span className="ml-2 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+                                  {filteredTasks.filter(task => task.completed).length}
+                                </span>
+                              </div>
+                              <div className="space-y-3">
+                                {filteredTasks.filter(task => task.completed).map((task) => (
+                                  <TaskItem
+                                    key={task._id}
+                                    id={task._id}
+                                    workspaceId={workspaceId}
+                                    title={task.title}
+                                    description={task.description}
+                                    completed={task.completed}
+                                    dueDate={task.dueDate}
+                                    priority={task.priority}
+                                    categoryId={task.categoryId}
+                                  />
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            // For other filter statuses, show with dropdown
+                            <>
+                              <Button
+                                variant="ghost"
+                                onClick={toggleCompletedTasks}
+                                className="w-full flex items-center justify-between py-2 text-sm hover:bg-gray-50 rounded-md"
+                              >
+                                <div className="flex items-center text-gray-600 font-medium">
+                                  {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
+                                  <span>Completed tasks</span>
+                                </div>
+                                <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+                                  {tasks.filter(task => task.completed).length}
+                                </span>
+                              </Button>
 
-                          {showCompletedTasks && (
-                            <div className="space-y-3 mt-3 animate-in fade-in-50 slide-in-from-top-5 duration-300">
-                              {filteredTasks.filter(task => task.completed).map((task) => (
-                                <TaskItem
-                                  key={task._id}
-                                  id={task._id}
-                                  workspaceId={workspaceId}
-                                  title={task.title}
-                                  description={task.description}
-                                  completed={task.completed}
-                                  dueDate={task.dueDate}
-                                  priority={task.priority}
-                                  categoryId={task.categoryId}
-                                />
-                              ))}
-                            </div>
+                              {showCompletedTasks && (
+                                <div className="space-y-3 mt-3 animate-in fade-in-50 slide-in-from-top-5 duration-300">
+                                  {filteredTasks.filter(task => task.completed).map((task) => (
+                                    <TaskItem
+                                      key={task._id}
+                                      id={task._id}
+                                      workspaceId={workspaceId}
+                                      title={task.title}
+                                      description={task.description}
+                                      completed={task.completed}
+                                      dueDate={task.dueDate}
+                                      priority={task.priority}
+                                      categoryId={task.categoryId}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
