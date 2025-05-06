@@ -54,15 +54,15 @@ export const Info = ({ boardId, canvasId }: InfoProps) => {
 
   // Data for the canvas title
   const data = {
-    _id: effectiveId,
+    _id: effectiveId || "",
     title: "Canvas",
     orgId: workspaceId || ""
   };
 
   return (
     <div className="absolute top-2 left-2 bg-white rounded-md px-1.5 h-12 flex items-center shadow-md">
-      <Hint label="Channel Canvas" side="bottom" sideOffset={10}>
-        <Button variant="board" className="px-2" asChild>
+      <Hint label="Channel Canvas" side="bottom">
+        <Button variant="ghost" className="px-2" asChild>
           <Link href={`/workspace/${workspaceId}/channel/${effectiveId}/chats`}>
             <Image
               src="/logo.svg"
@@ -81,7 +81,9 @@ export const Info = ({ boardId, canvasId }: InfoProps) => {
                   <Loader className="mr-2 h-3 w-3 animate-spin" />
                   Loading...
                 </>
-              ) : channelName}
+              ) : (
+                channelName
+              )}
             </span>
           </Link>
         </Button>
@@ -89,10 +91,10 @@ export const Info = ({ boardId, canvasId }: InfoProps) => {
 
       <TabSeparator />
 
-      <Hint label="Edit title" side="bottom" sideOffset={10}>
+      <Hint label="Edit title" side="bottom">
         <Button
           onClick={() => onOpen(data._id, data.title)}
-          variant="board"
+          variant="ghost"
           className="text-base font-normal px-2"
         >
           {data.title}
@@ -103,8 +105,8 @@ export const Info = ({ boardId, canvasId }: InfoProps) => {
 
       <Actions id={data._id} title={data.title} side="bottom" sideOffset={10}>
         <div className="">
-          <Hint label="Main menu" side="bottom" sideOffset={10}>
-            <Button size="icon" variant="board">
+          <Hint label="Main menu" side="bottom">
+            <Button size="icon" variant="ghost">
               <Menu />
             </Button>
           </Hint>

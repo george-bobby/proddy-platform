@@ -1,7 +1,7 @@
 "use client";
 
 import { shallow } from "@liveblocks/client";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { colorToCSS } from "../../../lib/utils";
@@ -45,6 +45,7 @@ const Drafts = () => {
       penColor: other.presence.penColor,
       info: other.info,
       connectionId: other.connectionId,
+      id: other.id
     }),
     shallow,
   );
@@ -57,7 +58,7 @@ const Drafts = () => {
 
           // Get real user name from Convex if available
           const defaultName = `${other.connectionId}`;
-          const userId = other.info?.id;
+          const userId = other.id;
 
           // Determine the user name
           let userName = other.info?.name || defaultName;
@@ -133,7 +134,7 @@ export const CursorsPresence = memo(() => {
   const members = useQuery(api.members.get, { workspaceId });
 
   useEffect(() => {
-    console.log("Other users in the room:", others.count);
+    console.log("Other users in the room:", others.length);
 
     // Create a map of Convex users by their ID for quick lookup
     const userMap = new Map();
@@ -147,7 +148,7 @@ export const CursorsPresence = memo(() => {
       // Try to find the real user name from Convex
       const defaultName = `${other.connectionId}`;
       let realName = other.info?.name || defaultName;
-      const userId = other.info?.id;
+      const userId = other.id;
 
       if (userId) {
         // Try exact match first

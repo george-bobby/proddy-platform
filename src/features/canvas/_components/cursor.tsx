@@ -21,7 +21,8 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
   // Use the real Liveblocks useOther hook to get cursor position and user info
   const other = useOther(connectionId, user => ({
     cursor: user.presence.cursor,
-    info: user.info
+    info: user.info,
+    id: user.id
   }));
 
   // Fetch members from Convex database
@@ -36,7 +37,7 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
     if (!other?.cursor) return;
 
     // Try to get user ID from Liveblocks info
-    const userId = other.info?.id;
+    const userId = other?.id;
 
     console.log("Cursor user info:", {
       connectionId,

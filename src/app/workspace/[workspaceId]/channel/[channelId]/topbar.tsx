@@ -101,7 +101,12 @@ const Topbar = () => {
       });
 
       // Navigate to the canvas page with the room ID and explicitly set new=true to force a new canvas
-      window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+      // Use router.push for client-side navigation without page reload
+      const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+      router.push(url);
+
+      // Reset loading state after navigation
+      setIsCreatingLiveMessage(false);
     } catch (error) {
       console.error("Error creating live canvas message:", error);
       toast.error("Failed to create canvas session");

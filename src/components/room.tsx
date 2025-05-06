@@ -61,8 +61,8 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
 
             >
                 <ClientSideSuspense fallback={fallback || <div>
-                    <Loader className="mr-2 h-3 w-3 animate-spin" />
-                    Loading...</div>}>
+                    <Loader className="size-5 animate-spin" />
+                </div>}>
                     {() => children}
                 </ClientSideSuspense>
             </RoomProvider>

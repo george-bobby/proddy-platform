@@ -47,9 +47,10 @@ export const CanvasLiveMessage = ({ data }: CanvasLiveMessageProps) => {
     if (!workspaceId || !channelId) return;
 
     // Navigate to the canvas using the specific room ID from the message data
-    // Use window.location.href to force a full page reload
+    // Use router.push for client-side navigation without page reload
     // Add the roomId parameter to ensure we join the exact same canvas session
-    window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&t=${Date.now()}`;
+    const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&t=${Date.now()}`;
+    router.push(url);
   };
 
   return (

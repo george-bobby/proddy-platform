@@ -90,10 +90,10 @@ export const SavedCanvasesDropdown = () => {
     // Show a loading toast
     toast.loading(`Loading canvas "${canvasName}"...`);
 
-    // Use window.location.href to force a full page reload
-    // This ensures the Liveblocks room is properly reconnected
+    // Use router.push for client-side navigation without page reload
     setTimeout(() => {
-      window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&canvasName=${encodeURIComponent(canvasName)}&t=${Date.now()}`;
+      const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&canvasName=${encodeURIComponent(canvasName)}&t=${Date.now()}`;
+      router.push(url);
     }, 100);
   };
 

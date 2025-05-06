@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Edit2, Save, FilePlus } from "lucide-react";
 import { useChannelId } from "@/hooks/use-channel-id";
 import { useQuery, useMutation } from "convex/react";
@@ -21,6 +22,7 @@ interface CanvasNameProps {
 }
 
 export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
+  const router = useRouter();
   const channelId = useChannelId();
   const workspaceId = useWorkspaceId();
   const [isEditing, setIsEditing] = useState(false);
@@ -106,8 +108,7 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
       return;
     }
 
-    // Use window.location.replace to force a full page reload and replace the current history entry
-    // This ensures we get a completely new canvas with a new room ID
+    // Create a new canvas with a new room ID
     // Add a timestamp to ensure we get a fresh URL that bypasses any caching
     const timestamp = Date.now();
     console.log(`Creating new canvas with timestamp: ${timestamp}`);
@@ -117,7 +118,9 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
 
     // Use setTimeout to ensure the toast is shown before navigation
     setTimeout(() => {
-      window.location.replace(`/workspace/${workspaceId}/channel/${channelId}/canvas?new=true&t=${timestamp}`);
+      const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?new=true&t=${timestamp}`;
+      // Use router.push for client-side navigation without page reload
+      window.location.replace(url);
     }, 100);
   };
 
@@ -174,9 +177,10 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
 
       toast.success(`Canvas saved as "${fileName}"`);
 
-      // Use window.location.href to force a full page reload
-      // This ensures we get a completely new canvas with a new room ID
-      window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas`;
+      // Navigate to the main canvas page
+      // Use router.push for client-side navigation without page reload
+      const url = `/workspace/${workspaceId}/channel/${channelId}/canvas`;
+      router.push(url);
 
     } catch (error) {
       console.error("Error saving canvas:", error);

@@ -25,9 +25,9 @@ export const CanvasMessage = ({ data }: CanvasMessageProps) => {
     if (!workspaceId || !channelId) return;
 
     // Navigate to the saved canvas using the saved room ID and canvas name
-    // Use window.location.href to force a full page reload
-    // This ensures the Liveblocks room is properly reconnected
-    window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&canvasName=${encodeURIComponent(data.canvasName)}&t=${Date.now()}`;
+    // Use router.push for client-side navigation without page reload
+    const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&canvasName=${encodeURIComponent(data.canvasName)}&t=${Date.now()}`;
+    router.push(url);
   };
 
   return (

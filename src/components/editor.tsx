@@ -419,7 +419,9 @@ const Editor = ({
       });
 
       // Navigate to the canvas page with the room ID and new=true to force a new canvas
-      window.location.href = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+      // Use router.push for client-side navigation without page reload
+      const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+      router.push(url);
     } catch (error) {
       console.error("Error creating canvas:", error);
       toast.error("Failed to create canvas");
