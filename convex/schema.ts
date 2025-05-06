@@ -20,6 +20,7 @@ const schema = defineSchema({
   channels: defineTable({
     name: v.string(),
     workspaceId: v.id('workspaces'),
+    icon: v.optional(v.string()), // Store emoji as string
   }).index('by_workspace_id', ['workspaceId']),
   conversations: defineTable({
     workspaceId: v.id('workspaces'),

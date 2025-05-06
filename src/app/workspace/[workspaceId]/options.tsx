@@ -143,11 +143,12 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
 interface ChannelItemProps {
   id: Id<'channels'>;
   label: string;
+  icon?: string;
   isActive?: boolean;
   isCollapsed?: boolean;
 }
 
-export const ChannelItem = ({ id, label, isActive = false, isCollapsed = false }: ChannelItemProps) => {
+export const ChannelItem = ({ id, label, icon, isActive = false, isCollapsed = false }: ChannelItemProps) => {
   const workspaceId = useWorkspaceId();
   const channelFallback = label.charAt(0).toLowerCase();
 
@@ -168,8 +169,12 @@ export const ChannelItem = ({ id, label, isActive = false, isCollapsed = false }
           <div className="relative flex-shrink-0">
             <Hint label={label} side="right" align="center">
               <div className="relative">
-                <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
-                  <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+                <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-gray-100 transition-transform duration-200 group-hover:scale-110">
+                  {icon ? (
+                    <span className="text-base">{icon}</span>
+                  ) : (
+                    <span className="text-xs font-medium text-gray-600">{channelFallback}</span>
+                  )}
                 </div>
               </div>
             </Hint>
@@ -177,8 +182,12 @@ export const ChannelItem = ({ id, label, isActive = false, isCollapsed = false }
         ) : (
           <>
             <div className="relative mr-2 md:mr-3 flex-shrink-0">
-              <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-primary/20 transition-transform duration-200 group-hover:scale-110">
-                <span className="text-xs font-medium text-primary-foreground">{channelFallback}</span>
+              <div className="flex h-6 md:h-7 w-6 md:w-7 items-center justify-center rounded-full bg-gray-100 transition-transform duration-200 group-hover:scale-110">
+                {icon ? (
+                  <span className="text-base">{icon}</span>
+                ) : (
+                  <span className="text-xs font-medium text-gray-600">{channelFallback}</span>
+                )}
               </div>
             </div>
             <span className="truncate min-w-0 text-sm flex-1">{label}</span>

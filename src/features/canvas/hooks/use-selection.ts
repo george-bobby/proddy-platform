@@ -9,7 +9,7 @@ const MULTISELECTION_THRESHOLD = 2;
 
 /**
  * Hook for selection operations
- * 
+ *
  * @param canvasState Current canvas state
  * @param setCanvasState Function to update canvas state
  * @param layerIds Array of layer IDs
@@ -19,7 +19,7 @@ const MULTISELECTION_THRESHOLD = 2;
 export function useSelection(
   canvasState: any,
   setCanvasState: (state: any) => void,
-  layerIds: string[],
+  layerIds: readonly string[],
   history: any
 ) {
   // Unselect all layers
