@@ -184,7 +184,7 @@ export default function MentionsPage() {
                 <div className="flex h-[300px] w-full flex-col items-center justify-center gap-y-2 bg-white">
                   <AtSign className="size-12 text-muted-foreground" />
                   <h2 className="text-xl font-semibold">No unread mentions</h2>
-                  <p className="text-sm text-muted-foreground">You're all caught up!</p>
+                  <p className="text-sm text-muted-foreground">You are all caught up!</p>
                 </div>
               )}
             </TabsContent>
