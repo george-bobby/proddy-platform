@@ -80,51 +80,82 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
     setCategoryId(null);
   };
 
+  const getPriorityStyles = (value: string) => {
+    switch (value) {
+      case 'high':
+        return {
+          icon: <div className="h-3 w-3 rounded-full bg-red-500 mr-2" />,
+          label: 'High Priority'
+        };
+      case 'medium':
+        return {
+          icon: <div className="h-3 w-3 rounded-full bg-yellow-500 mr-2" />,
+          label: 'Medium Priority'
+        };
+      case 'low':
+        return {
+          icon: <div className="h-3 w-3 rounded-full bg-blue-500 mr-2" />,
+          label: 'Low Priority'
+        };
+      default:
+        return {
+          icon: <div className="h-3 w-3 rounded-full border-2 border-dashed border-gray-300 mr-2" />,
+          label: 'Set Priority (optional)'
+        };
+    }
+  };
+
   if (!isExpanded) {
     return (
       <Button
         onClick={() => setIsExpanded(true)}
-        variant="outline"
-        className="w-full flex items-center justify-center gap-2 py-6 border-dashed bg-primary/70 text-white"
+        variant="default"
+        className="w-full flex items-center justify-center gap-2 py-6 bg-primary hover:bg-primary-600 text-white shadow-md hover:shadow-lg transition-all relative overflow-hidden group"
       >
-        <Plus className="h-4 w-4" />
-        <span>Add new task</span>
+        <span className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+        <span className="absolute right-0 bottom-0 size-16 rounded-full -translate-x-5 translate-y-5 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+        <span className="absolute size-4 rounded-full bg-white/30 animate-ping"></span>
+        <Plus className="h-5 w-5" />
+        <span className="font-semibold text-base">Add new task</span>
       </Button>
     );
   }
 
+  const priorityStyles = getPriorityStyles(priority || '');
+
   return (
-    <form onSubmit={handleSubmit} className="p-5 rounded-lg border shadow-md bg-white">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="font-medium">New Task</h3>
+    <form onSubmit={handleSubmit} className="p-6 rounded-xl border shadow-sm bg-white">
+      <div className="flex justify-between items-center mb-4">
+        {/* <h3 className="font-semibold text-lg text-gray-800">Create a new task</h3> */}
         <Button
           type="button"
           variant="ghost"
           size="iconSm"
           onClick={handleCancel}
-          className="h-7 w-7"
+          className="h-8 w-8 rounded-full hover:bg-gray-100"
         >
           <X className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         <Input
           placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="font-medium"
+          className="text-base font-medium border-gray-300 focus-visible:ring-primary"
           autoFocus
           required
         />
+
         <Textarea
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[80px] resize-none"
+          className="min-h-[100px] resize-none border-gray-300 focus-visible:ring-primary text-gray-700"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Popover>
               <PopoverTrigger asChild>
@@ -132,11 +163,11 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
                   type="button"
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !dueDate && "text-muted-foreground"
+                    "w-full justify-start text-left font-normal border-gray-300",
+                    !dueDate ? "text-gray-500" : "text-gray-800"
                   )}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
                   {dueDate ? format(dueDate, 'PPP') : <span>Due date (optional)</span>}
                 </Button>
               </PopoverTrigger>
@@ -146,27 +177,61 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
                   selected={dueDate}
                   onSelect={setDueDate}
                   initialFocus
+                  className="border rounded-md shadow-md"
                 />
+                {dueDate && (
+                  <div className="p-2 border-t flex justify-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDueDate(undefined)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                    >
+                      Clear date
+                    </Button>
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
           </div>
 
           <div>
             <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Priority (optional)" />
+              <SelectTrigger className="border-gray-300">
+                <SelectValue placeholder="Set Priority (optional)">
+                  <div className="flex items-center">
+                    {priorityStyles.icon}
+                    {priorityStyles.label}
+                  </div>
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="high">
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full bg-red-500 mr-2" />
+                    High Priority
+                  </div>
+                </SelectItem>
+                <SelectItem value="medium">
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full bg-yellow-500 mr-2" />
+                    Medium Priority
+                  </div>
+                </SelectItem>
+                <SelectItem value="low">
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full bg-blue-500 mr-2" />
+                    Low Priority
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <div>
-          <label className="text-sm font-medium block mb-2">Category (optional)</label>
+        <div className="pt-2">
+          <label className="text-sm font-medium block mb-2 text-gray-700">Category (optional)</label>
           <TaskCategorySelector
             workspaceId={workspaceId}
             value={categoryId}
@@ -175,12 +240,22 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-4 mt-2 border-t">
-        <Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
+      <div className="flex justify-end gap-3 pt-5 mt-4 border-t">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleCancel}
+          disabled={isSubmitting}
+          className="border-gray-300"
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={!title.trim() || isSubmitting}>
-          Create Task
+        <Button
+          type="submit"
+          disabled={!title.trim() || isSubmitting}
+          className="bg-primary hover:bg-primary-600"
+        >
+          {isSubmitting ? 'Creating...' : 'Create Task'}
         </Button>
       </div>
     </form>

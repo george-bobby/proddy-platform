@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 export type TaskFilterOptions = {
-  status: 'all' | 'completed' | 'active';
+  status: 'all' | 'active' | 'completed' | 'not_started' | 'in_progress' | 'on_hold' | 'cancelled';
   priority: 'all' | 'high' | 'medium' | 'low';
   dueDate: 'all' | 'overdue' | 'today' | 'upcoming' | 'no-date';
   categoryId: string | null;

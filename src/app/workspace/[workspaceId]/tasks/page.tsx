@@ -182,31 +182,39 @@ const TasksPage = () => {
       <div className="flex h-[calc(100%-4rem)] bg-white">
         {/* Main content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="px-6 py-4">
-            <div className="relative mb-6">
-              <Input
-                placeholder="Search tasks..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 max-w-xl"
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="max-w-3xl mx-auto px-6 py-8">
+            {/* Header with search */}
+            <div className="mb-8 space-y-4">
+              <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
+              <div className="relative">
+                <Input
+                  placeholder="Search tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-full bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
             </div>
 
             {isLoading ? (
               <div className="flex h-40 items-center justify-center">
-                <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader className="h-6 w-6 animate-spin text-primary" />
               </div>
             ) : (
-              <div className="space-y-4 pb-6">
-                <div className="grid grid-cols-1 gap-3 max-w-2xl">
+              <div className="space-y-6 pb-8">
+                <div className="pt-4 mt-8 border-t border-gray-100">
+                  <h2 className="text-lg font-medium text-gray-800 mb-4">Create a new task</h2>
+                  <TaskCreateForm workspaceId={workspaceId} onSuccess={handleTaskCreated} />
+                </div>
+                <div className="space-y-4">
                   {filteredTasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="rounded-full bg-muted p-3">
-                        <CheckSquare className="h-6 w-6 text-muted-foreground" />
+                    <div className="flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                      <div className="rounded-full bg-gray-100 p-4">
+                        <CheckSquare className="h-8 w-8 text-gray-400" />
                       </div>
-                      <h3 className="mt-4 text-lg font-medium">No tasks found</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">
+                      <h3 className="mt-4 text-xl font-semibold">No tasks found</h3>
+                      <p className="mt-2 text-gray-500 max-w-md mx-auto">
                         {searchQuery || filterOptions.status !== 'all' || filterOptions.priority !== 'all' || filterOptions.dueDate !== 'all' || filterOptions.categoryId !== null
                           ? "Try adjusting your filters or search query"
                           : "Create your first task to get started"}
@@ -215,39 +223,50 @@ const TasksPage = () => {
                   ) : (
                     <>
                       {/* Active tasks */}
-                      {filteredTasks.filter(task => !task.completed).map((task) => (
-                        <TaskItem
-                          key={task._id}
-                          id={task._id}
-                          workspaceId={workspaceId}
-                          title={task.title}
-                          description={task.description}
-                          completed={task.completed}
-                          dueDate={task.dueDate}
-                          priority={task.priority}
-                          categoryId={task.categoryId}
-                        />
-                      ))}
+                      <div className="space-y-3">
+                        <div className="flex items-center">
+                          <h2 className="text-lg font-medium text-gray-800">Active tasks</h2>
+                          <span className="ml-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                            {filteredTasks.filter(task => !task.completed).length}
+                          </span>
+                        </div>
+
+                        <div className="grid gap-4">
+                          {filteredTasks.filter(task => !task.completed).map((task) => (
+                            <TaskItem
+                              key={task._id}
+                              id={task._id}
+                              workspaceId={workspaceId}
+                              title={task.title}
+                              description={task.description}
+                              completed={task.completed}
+                              dueDate={task.dueDate}
+                              priority={task.priority}
+                              categoryId={task.categoryId}
+                            />
+                          ))}
+                        </div>
+                      </div>
 
                       {/* Completed tasks section */}
                       {tasks && tasks.some(task => task.completed) && (
-                        <div className="mt-8">
+                        <div className="mt-10 pt-4 border-t border-gray-100">
                           <Button
                             variant="ghost"
                             onClick={toggleCompletedTasks}
-                            className="mb-2 w-full flex items-center justify-between py-2 text-sm text-muted-foreground hover:text-foreground"
+                            className="w-full flex items-center justify-between py-2 text-sm hover:bg-gray-50 rounded-md"
                           >
-                            <div className="flex items-center">
+                            <div className="flex items-center text-gray-600 font-medium">
                               {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
                               <span>Completed tasks</span>
                             </div>
-                            <span className="text-xs bg-muted rounded-full px-2 py-0.5">
+                            <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
                               {tasks.filter(task => task.completed).length}
                             </span>
                           </Button>
 
                           {showCompletedTasks && (
-                            <div className="space-y-3 mt-2 animate-in fade-in-50 slide-in-from-top-5 duration-300">
+                            <div className="space-y-3 mt-3 animate-in fade-in-50 slide-in-from-top-5 duration-300">
                               {filteredTasks.filter(task => task.completed).map((task) => (
                                 <TaskItem
                                   key={task._id}
@@ -268,14 +287,9 @@ const TasksPage = () => {
                     </>
                   )}
                 </div>
-
-                <div className="pt-2 max-w-2xl">
-                  <TaskCreateForm workspaceId={workspaceId} onSuccess={handleTaskCreated} />
-                </div>
               </div>
             )}
           </div>
-
         </div>
 
         {/* Right sidebar with filters */}
