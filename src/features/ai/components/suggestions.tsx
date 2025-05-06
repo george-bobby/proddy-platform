@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles } from 'lucide-react';
+import { Loader, Sparkles } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useChannelId } from '@/hooks/use-channel-id';
 import { useGetRecentChannelMessages } from '@/features/messages/api/use-get-recent-channel-messages';
@@ -169,7 +169,12 @@ export const Suggestions = ({
             onClick={refreshSuggestions}
             disabled={isLoading}
           >
-            {isLoading ? 'Loading...' : 'Refresh'}
+            {isLoading ? (
+              <>
+                <Loader className="mr-2 h-3 w-3 animate-spin" />
+                Loading...
+              </>
+            ) : 'Refresh'}
           </Button>
         </div>
       </div>

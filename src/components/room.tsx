@@ -7,6 +7,7 @@ import { useQuery } from "convex/react";
 
 import { api } from "@/../convex/_generated/api";
 import { RoomProvider } from "@/../liveblocks.config";
+import { Loader } from "lucide-react";
 
 interface RoomProps {
     children: ReactNode;
@@ -59,7 +60,9 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
                 }}
 
             >
-                <ClientSideSuspense fallback={fallback || <div>Loading...</div>}>
+                <ClientSideSuspense fallback={fallback || <div>
+                    <Loader className="mr-2 h-3 w-3 animate-spin" />
+                    Loading...</div>}>
                     {() => children}
                 </ClientSideSuspense>
             </RoomProvider>

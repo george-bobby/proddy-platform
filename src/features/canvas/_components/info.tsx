@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Loader, Menu } from "lucide-react";
 import { Poppins } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -76,7 +76,12 @@ export const Info = ({ boardId, canvasId }: InfoProps) => {
                 font.className,
               )}
             >
-              {isLoading ? "Loading..." : channelName}
+              {isLoading ? (
+                <>
+                  <Loader className="mr-2 h-3 w-3 animate-spin" />
+                  Loading...
+                </>
+              ) : channelName}
             </span>
           </Link>
         </Button>
