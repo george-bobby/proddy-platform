@@ -1,11 +1,11 @@
 'use client';
 
 import { isAfter, isBefore, isToday, startOfDay } from 'date-fns';
-import { CheckSquare, ChevronDown, ChevronRight, Loader } from 'lucide-react';
+import { CheckSquare, ChevronDown, ChevronRight, Loader, Search } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
@@ -13,8 +13,9 @@ import { WorkspaceToolbar } from '../toolbar';
 import { useGetTaskCategories } from '@/features/tasks/api/use-get-task-categories';
 import { useGetTasks } from '@/features/tasks/api/use-get-tasks';
 import { TaskCreateForm } from '@/features/tasks/components/task-create-form';
-import { TaskFilter, TaskFilterOptions } from '@/features/tasks/components/task-filter';
+import { TaskFilterOptions } from '@/features/tasks/components/task-filter';
 import { TaskItem } from '@/features/tasks/components/task-item';
+import { TaskSidebar } from '@/features/tasks/components/task-sidebar';
 
 const TasksPage = () => {
   const workspaceId = useWorkspaceId();
@@ -178,130 +179,112 @@ const TasksPage = () => {
           <span className="truncate">Tasks</span>
         </Button>
       </WorkspaceToolbar>
-      <div className="flex h-full flex-col bg-white">
-        <div className="flex-1 overflow-auto px-6 pb-6">
-          <div className="mb-4">
-            <div className="flex flex-col gap-4">
-              <TaskFilter
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                filterOptions={filterOptions}
-                onFilterChange={handleFilterChange}
+      <div className="flex h-[calc(100%-4rem)] bg-white">
+        {/* Main content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-6 py-4">
+            <div className="relative mb-6">
+              <Input
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 max-w-xl"
               />
-
-              <div className="flex justify-end">
-                {!categoriesLoading && categories && categories.length > 0 && (
-                  <Select
-                    value={filterOptions.categoryId || 'all'}
-                    onValueChange={(value: string) => handleFilterChange({
-                      categoryId: value === 'all' ? null : value
-                    })}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(category => (
-                        <SelectItem key={category._id} value={category._id}>
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="h-3 w-3 rounded-full"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            <span>{category.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
+
+            {isLoading ? (
+              <div className="flex h-40 items-center justify-center">
+                <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-4 pb-6">
+                <div className="grid grid-cols-1 gap-3 max-w-2xl">
+                  {filteredTasks.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="rounded-full bg-muted p-3">
+                        <CheckSquare className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="mt-4 text-lg font-medium">No tasks found</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {searchQuery || filterOptions.status !== 'all' || filterOptions.priority !== 'all' || filterOptions.dueDate !== 'all' || filterOptions.categoryId !== null
+                          ? "Try adjusting your filters or search query"
+                          : "Create your first task to get started"}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Active tasks */}
+                      {filteredTasks.filter(task => !task.completed).map((task) => (
+                        <TaskItem
+                          key={task._id}
+                          id={task._id}
+                          workspaceId={workspaceId}
+                          title={task.title}
+                          description={task.description}
+                          completed={task.completed}
+                          dueDate={task.dueDate}
+                          priority={task.priority}
+                          categoryId={task.categoryId}
+                        />
+                      ))}
+
+                      {/* Completed tasks section */}
+                      {tasks && tasks.some(task => task.completed) && (
+                        <div className="mt-8">
+                          <Button
+                            variant="ghost"
+                            onClick={toggleCompletedTasks}
+                            className="mb-2 w-full flex items-center justify-between py-2 text-sm text-muted-foreground hover:text-foreground"
+                          >
+                            <div className="flex items-center">
+                              {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
+                              <span>Completed tasks</span>
+                            </div>
+                            <span className="text-xs bg-muted rounded-full px-2 py-0.5">
+                              {tasks.filter(task => task.completed).length}
+                            </span>
+                          </Button>
+
+                          {showCompletedTasks && (
+                            <div className="space-y-3 mt-2 animate-in fade-in-50 slide-in-from-top-5 duration-300">
+                              {filteredTasks.filter(task => task.completed).map((task) => (
+                                <TaskItem
+                                  key={task._id}
+                                  id={task._id}
+                                  workspaceId={workspaceId}
+                                  title={task.title}
+                                  description={task.description}
+                                  completed={task.completed}
+                                  dueDate={task.dueDate}
+                                  priority={task.priority}
+                                  categoryId={task.categoryId}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="pt-2 max-w-2xl">
+                  <TaskCreateForm workspaceId={workspaceId} onSuccess={handleTaskCreated} />
+                </div>
+              </div>
+            )}
           </div>
 
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
-                {filteredTasks.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="rounded-full bg-muted p-3">
-                      <CheckSquare className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <h3 className="mt-4 text-lg font-medium">No tasks found</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {searchQuery || filterOptions.status !== 'all' || filterOptions.priority !== 'all' || filterOptions.dueDate !== 'all' || filterOptions.categoryId !== null
-                        ? "Try adjusting your filters or search query"
-                        : "Create your first task to get started"}
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Active tasks */}
-                    {filteredTasks.filter(task => !task.completed).map((task) => (
-                      <TaskItem
-                        key={task._id}
-                        id={task._id}
-                        workspaceId={workspaceId}
-                        title={task.title}
-                        description={task.description}
-                        completed={task.completed}
-                        dueDate={task.dueDate}
-                        priority={task.priority}
-                        categoryId={task.categoryId}
-                      />
-                    ))}
-
-                    {/* Completed tasks section */}
-                    {tasks && tasks.some(task => task.completed) && (
-                      <div className="mt-8">
-                        <Button
-                          variant="ghost"
-                          onClick={toggleCompletedTasks}
-                          className="mb-2 w-full flex items-center justify-between py-2 text-sm text-muted-foreground hover:text-foreground"
-                        >
-                          <div className="flex items-center">
-                            {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
-                            <span>Completed tasks</span>
-                          </div>
-                          <span className="text-xs bg-muted rounded-full px-2 py-0.5">
-                            {tasks.filter(task => task.completed).length}
-                          </span>
-                        </Button>
-
-                        {showCompletedTasks && (
-                          <div className="space-y-3 mt-2 animate-in fade-in-50 slide-in-from-top-5 duration-300">
-                            {filteredTasks.filter(task => task.completed).map((task) => (
-                              <TaskItem
-                                key={task._id}
-                                id={task._id}
-                                workspaceId={workspaceId}
-                                title={task.title}
-                                description={task.description}
-                                completed={task.completed}
-                                dueDate={task.dueDate}
-                                priority={task.priority}
-                                categoryId={task.categoryId}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              <div className="pt-2 max-w-2xl mx-auto">
-                <TaskCreateForm workspaceId={workspaceId} onSuccess={handleTaskCreated} />
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Right sidebar with filters */}
+        <TaskSidebar
+          filterOptions={filterOptions}
+          onFilterChange={handleFilterChange}
+          categories={categories}
+          categoriesLoading={categoriesLoading}
+        />
       </div>
     </div>
   );

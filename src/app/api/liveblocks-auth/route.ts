@@ -1,8 +1,6 @@
 import { Liveblocks } from "@liveblocks/node";
 import { NextResponse, type NextRequest } from "next/server";
 
-console.log("Liveblocks secret key:", process.env.LIVEBLOCKS_SECRET_KEY);
-
 const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
 });
