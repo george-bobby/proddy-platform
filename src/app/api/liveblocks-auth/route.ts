@@ -12,8 +12,9 @@ export async function POST(req: NextRequest) {
     const { room } = body;
 
     // Get user information from the request
-    // This should be the real user ID from Convex database
-    const userId = body.userId || `user-${Math.random().toString(36).substring(2, 9)}`;
+    // Use the member ID from the workspace if available, otherwise use a fallback
+    // This ensures a consistent identity across sessions
+    const userId = body.userId || body.memberId || `user-${Date.now().toString(36)}`;
     const userName = body.userName || `User ${userId.substring(5)}`;
     const userAvatar = body.userAvatar || `https://via.placeholder.com/40/4f46e5/ffffff?text=${userName.substring(0, 2).toUpperCase()}`;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { ClientSideSuspense } from "@liveblocks/react";
 import { LiveList, LiveMap } from "@liveblocks/client";
 import { useQuery } from "convex/react";
@@ -8,6 +8,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 import { RoomProvider } from "@/../liveblocks.config";
 import { Loader } from "lucide-react";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
 
 interface RoomProps {
     children: ReactNode;
@@ -22,14 +23,30 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
     // Add a key to force remount when roomId changes
     const key = `room-${normalizedRoomId}`;
 
+    // Get the workspace ID from params
+    const workspaceId = useWorkspaceId();
+
     console.log("Room component rendering with normalized roomId:", normalizedRoomId);
 
     // Get the current user from Convex
     const currentUser = useQuery(api.users.current);
 
-    // Create proper LiveMap and LiveList objects
-    // Important: We need to create these directly in the initialStorage prop
-    // to ensure they're properly recognized by Liveblocks
+    // Get current member info to pass to Liveblocks
+    const currentMember = useQuery(
+        api.members.current,
+        workspaceId ? { workspaceId } : "skip"
+    );
+
+    // Log authentication info for debugging
+    useEffect(() => {
+        if (currentUser && currentMember) {
+            console.log("Authentication info for Liveblocks:", {
+                userId: currentUser._id,
+                memberId: currentMember._id,
+                name: currentUser.name || "Unknown User"
+            });
+        }
+    }, [currentUser, currentMember]);
 
     // If user data is still loading, show a loading indicator
     if (!currentUser) {
@@ -41,6 +58,14 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
         console.error("Invalid room ID provided to Room component");
         return <div className="flex items-center justify-center h-full">Error: Invalid room ID</div>;
     }
+
+    // Set up query parameters with user and member IDs
+    // These will be passed to the liveblocks-auth endpoint
+    const authParams = new URLSearchParams();
+    if (currentUser?._id) authParams.set("userId", currentUser._id);
+    if (currentMember?._id) authParams.set("memberId", currentMember._id);
+    if (currentUser?.name) authParams.set("userName", currentUser.name);
+    if (currentUser?.image) authParams.set("userAvatar", currentUser.image);
 
     return (
         // Use the key to force remount when roomId changes
@@ -58,7 +83,6 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
                     layerIds: new LiveList([]),
                     lastUpdate: Date.now()
                 }}
-
             >
                 <ClientSideSuspense fallback={fallback || <div className="flex h-full w-full items-center justify-center">
                     <Loader className="size-5 animate-spin" />

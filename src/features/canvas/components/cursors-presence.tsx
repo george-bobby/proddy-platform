@@ -103,7 +103,7 @@ const Drafts = () => {
                 fill={other.penColor ? colorToCSS(other.penColor) : "#000"}
               />
               {/* Add a small label showing who is drawing */}
-              {other.pencilDraft.length > 0 && (
+              {/* {other.pencilDraft.length > 0 && (
                 <foreignObject
                   x={other.pencilDraft[other.pencilDraft.length - 1][0]}
                   y={other.pencilDraft[other.pencilDraft.length - 1][1] - 20}
@@ -114,7 +114,7 @@ const Drafts = () => {
                     {userName} drawing...
                   </div>
                 </foreignObject>
-              )}
+              )} */}
             </g>
           );
         }
