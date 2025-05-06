@@ -9,6 +9,7 @@ import { PiTextAa } from 'react-icons/pi';
 import { useRouter } from 'next/navigation';
 import { useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
+import { Id } from '@/../convex/_generated/dataModel';
 import { toast } from 'sonner';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 import { Button } from '@/components/ui/button';
@@ -559,7 +560,7 @@ const Editor = ({
                 </Button>
               </Hint>
               {channelId && (
-                <Hint label="Canvas">
+                <Hint label="New Canvas">
                   <Button
                     disabled={disabled || isCreatingCanvas}
                     size="iconSm"

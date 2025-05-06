@@ -8,16 +8,16 @@ import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
 import { toast } from 'sonner';
 import {
-    CanvasHeader,
     CanvasCanvas,
     CanvasToolbar,
     CanvasLiveblocksProvider,
     CanvasActiveUsers
 } from '@/features/canvas';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { Loader } from 'lucide-react';
+import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 import { CanvasParticipantsTracker } from '@/features/canvas/_components/canvas-participants-tracker';
+import { Button } from '@/components/ui/button';
 
 // Interface for saved canvas data
 interface SavedCanvas {
@@ -34,6 +34,7 @@ const CanvasPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
+    const [isCreatingCanvas, setIsCreatingCanvas] = useState(false);
     const [roomId, setRoomId] = useState<string | null>(null);
     const [canvasName, setCanvasName] = useState<string | null>(null);
     const [liveMessageId, setLiveMessageId] = useState<Id<"messages"> | null>(null);
@@ -54,9 +55,6 @@ const CanvasPage = () => {
     // Get the saved canvas name if provided in the URL
     const canvasNameParam = searchParams.get('canvasName');
 
-    // Get the timestamp parameter (used to force a fresh page load)
-    const timestampParam = searchParams.get('t');
-
     // Get messages from the channel to find saved canvases and live messages
     const messages = useQuery(
         api.messages.get,
@@ -68,6 +66,42 @@ const CanvasPage = () => {
             }
         } : "skip"
     );
+
+    // Function to create a new canvas
+    const handleCreateCanvas = async () => {
+        if (!workspaceId || !channelId || !currentUser) {
+            toast.error("Cannot create canvas: missing required data");
+            return;
+        }
+
+        try {
+            // Show loading state
+            setIsCreatingCanvas(true);
+
+            // Generate a unique room ID for the canvas
+            const timestamp = Date.now();
+            const roomId = `canvas-${channelId}-${timestamp}`;
+
+            // Create a live message in the channel
+            await createMessage({
+                workspaceId: workspaceId,
+                channelId: channelId as Id<"channels">,
+                body: JSON.stringify({
+                    type: "canvas-live",
+                    roomId: roomId,
+                    participants: [currentUser._id],
+                }),
+            });
+
+            // Navigate to the canvas page with the room ID and explicitly set new=true
+            const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+            router.push(url);
+        } catch (error) {
+            console.error("Error creating canvas session:", error);
+            toast.error("Failed to create canvas session");
+            setIsCreatingCanvas(false);
+        }
+    };
 
     // Function to find the live message for this canvas session
     const findLiveMessage = useCallback(() => {
@@ -160,12 +194,9 @@ const CanvasPage = () => {
                     window.history.replaceState({}, '', newUrl);
                 }
             } else {
-                // No saved canvases found, create a new one
-                const timestamp = Date.now();
-                const newRoomId = `canvas-${channelId}-${timestamp}`;
-                console.log(`No saved canvases found. Creating new canvas with roomId: ${newRoomId}`);
-                setRoomId(newRoomId);
-                setCanvasName(null);
+                // No saved canvases found, don't set roomId so we show the canvas creation UI
+                console.log("No saved canvases found. Showing canvas creation UI.");
+                // Don't set roomId here, so we'll show the canvas creation UI
             }
 
             setIsLoading(false);
@@ -207,8 +238,46 @@ const CanvasPage = () => {
         };
     }, [liveMessageId, updateMessage, canvasName, roomId, channelId]);
 
+    // Show the canvas creation UI if we don't have a roomId and we're not loading
+    if (!roomId && !isLoading) {
+        return (
+            <div className="h-full flex flex-col items-center justify-center gap-y-6 bg-white">
+                <PaintBucket className="size-16 text-primary" />
+                <h2 className="text-2xl font-semibold">Canvas</h2>
+                <p className="text-sm text-muted-foreground mb-2">Create a new canvas to start drawing and collaborating</p>
+                <Button
+                    onClick={handleCreateCanvas}
+                    disabled={isCreatingCanvas}
+                    className="flex items-center gap-2"
+                >
+                    {isCreatingCanvas ? (
+                        <>
+                            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                            Creating Canvas...
+                        </>
+                    ) : (
+                        <>
+                            <PaintBucket className="h-4 w-4" />
+                            Create New Canvas
+                        </>
+                    )}
+                </Button>
+            </div>
+        );
+    }
+
     // Show loading state while determining which canvas to load
-    if (isLoading || !roomId) {
+    if (isLoading) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <Loader className="size-6 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
+    // Make sure we have a roomId before rendering the canvas
+    if (!roomId) {
+        // This should not happen at this point, but just in case
         return (
             <div className="flex h-full items-center justify-center">
                 <Loader className="size-6 animate-spin text-muted-foreground" />

@@ -120,7 +120,7 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
     setTimeout(() => {
       const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?new=true&t=${timestamp}`;
       // Use router.push for client-side navigation without page reload
-      window.location.replace(url);
+      router.push(url);
     }, 100);
   };
 
