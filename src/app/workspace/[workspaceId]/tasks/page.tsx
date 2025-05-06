@@ -1,7 +1,7 @@
 'use client';
 
 import { isAfter, isBefore, isToday, startOfDay } from 'date-fns';
-import { CheckSquare, ChevronDown, ChevronRight, Loader, Search } from 'lucide-react';
+import { CheckSquare, Loader, Search } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,8 @@ import { useGetTaskCategories } from '@/features/tasks/api/use-get-task-categori
 import { useGetTasks } from '@/features/tasks/api/use-get-tasks';
 import { TaskCreateForm } from '@/features/tasks/components/task-create-form';
 import { TaskFilterOptions } from '@/features/tasks/components/task-filter';
-import { TaskItem } from '@/features/tasks/components/task-item';
 import { TaskSidebar } from '@/features/tasks/components/task-sidebar';
+import { TaskToggleView } from '@/features/tasks/components/task-toggle-view';
 
 const TasksPage = () => {
   const workspaceId = useWorkspaceId();
@@ -25,7 +25,6 @@ const TasksPage = () => {
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
   const [filterOptions, setFilterOptions] = useState<TaskFilterOptions>({
     status: 'all',
     priority: 'all',
@@ -42,19 +41,12 @@ const TasksPage = () => {
     setFilterOptions(prev => ({ ...prev, ...options }));
   }, []);
 
-  // Toggle completed tasks visibility
-  const toggleCompletedTasks = useCallback(() => {
-    setShowCompletedTasks(prev => !prev);
-  }, []);
-
   // Filter and sort tasks
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
 
     // Start with all tasks
     let filtered = [...tasks];
-
-    // Apply all filters first, then handle completed tasks visibility separately at the end
 
     // Apply search filter
     if (searchQuery) {
@@ -125,11 +117,6 @@ const TasksPage = () => {
 
     // Sort tasks
     filtered.sort((a, b) => {
-      // First sort by completion status (active tasks first)
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
-      }
-
       let comparison = 0;
 
       switch (filterOptions.sortBy) {
@@ -221,102 +208,7 @@ const TasksPage = () => {
                       </p>
                     </div>
                   ) : (
-                    <>
-                      {/* Active tasks - Hide the section title when filter is set to "completed" */}
-                      <div className="space-y-3">
-                        {filterOptions.status !== 'completed' && (
-                          <div className="flex items-center">
-                            <h2 className="text-lg font-medium text-gray-800">Active tasks</h2>
-                            <span className="ml-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                              {filteredTasks.filter(task => !task.completed).length}
-                            </span>
-                          </div>
-                        )}
-
-                        <div className="grid gap-4">
-                          {filteredTasks.filter(task => !task.completed).map((task) => (
-                            <TaskItem
-                              key={task._id}
-                              id={task._id}
-                              workspaceId={workspaceId}
-                              title={task.title}
-                              description={task.description}
-                              completed={task.completed}
-                              dueDate={task.dueDate}
-                              priority={task.priority}
-                              categoryId={task.categoryId}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Completed tasks section */}
-                      {tasks && tasks.some(task => task.completed) && filterOptions.status !== 'active' && (
-                        <div className="mt-10 pt-4 border-t border-gray-100">
-                          {filterOptions.status === 'completed' ? (
-                            // When filter is set to "completed", show tasks directly
-                            <>
-                              <div className="flex items-center mb-3">
-                                <h2 className="text-lg font-medium text-gray-800">Completed tasks</h2>
-                                <span className="ml-2 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
-                                  {filteredTasks.filter(task => task.completed).length}
-                                </span>
-                              </div>
-                              <div className="space-y-3">
-                                {filteredTasks.filter(task => task.completed).map((task) => (
-                                  <TaskItem
-                                    key={task._id}
-                                    id={task._id}
-                                    workspaceId={workspaceId}
-                                    title={task.title}
-                                    description={task.description}
-                                    completed={task.completed}
-                                    dueDate={task.dueDate}
-                                    priority={task.priority}
-                                    categoryId={task.categoryId}
-                                  />
-                                ))}
-                              </div>
-                            </>
-                          ) : (
-                            // For other filter statuses, show with dropdown
-                            <>
-                              <Button
-                                variant="ghost"
-                                onClick={toggleCompletedTasks}
-                                className="w-full flex items-center justify-between py-2 text-sm hover:bg-gray-50 rounded-md"
-                              >
-                                <div className="flex items-center text-gray-600 font-medium">
-                                  {showCompletedTasks ? <ChevronDown className="mr-2 h-4 w-4" /> : <ChevronRight className="mr-2 h-4 w-4" />}
-                                  <span>Completed tasks</span>
-                                </div>
-                                <span className="px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
-                                  {tasks.filter(task => task.completed).length}
-                                </span>
-                              </Button>
-
-                              {showCompletedTasks && (
-                                <div className="space-y-3 mt-3 animate-in fade-in-50 slide-in-from-top-5 duration-300">
-                                  {filteredTasks.filter(task => task.completed).map((task) => (
-                                    <TaskItem
-                                      key={task._id}
-                                      id={task._id}
-                                      workspaceId={workspaceId}
-                                      title={task.title}
-                                      description={task.description}
-                                      completed={task.completed}
-                                      dueDate={task.dueDate}
-                                      priority={task.priority}
-                                      categoryId={task.categoryId}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </>
+                    <TaskToggleView tasks={filteredTasks} workspaceId={workspaceId} />
                   )}
                 </div>
               </div>
