@@ -42,6 +42,7 @@ export const update = mutation({
   args: {
     id: v.id('channels'),
     name: v.string(),
+    icon: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -63,9 +64,15 @@ export const update = mutation({
 
     const parsedName = args.name.replace(/\s+/g, '-').toLowerCase();
 
-    await ctx.db.patch(args.id, {
+    const updateData: { name: string; icon?: string } = {
       name: parsedName,
-    });
+    };
+
+    if (args.icon !== undefined) {
+      updateData.icon = args.icon;
+    }
+
+    await ctx.db.patch(args.id, updateData);
 
     return args.id;
   },
@@ -75,6 +82,7 @@ export const create = mutation({
   args: {
     name: v.string(),
     workspaceId: v.id('workspaces'),
+    icon: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -95,6 +103,7 @@ export const create = mutation({
     const channelId = await ctx.db.insert('channels', {
       name: parsedName,
       workspaceId: args.workspaceId,
+      icon: args.icon,
     });
 
     return channelId;

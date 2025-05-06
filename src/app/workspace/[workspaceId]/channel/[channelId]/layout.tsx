@@ -7,6 +7,7 @@ import { PropsWithChildren, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
+import { EmojiPopover } from '@/components/emoji-popover';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -41,20 +42,26 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
   );
 
   const [value, setValue] = useState('');
+  const [icon, setIcon] = useState<string | undefined>(undefined);
   const [editOpen, setEditOpen] = useState(false);
   const [channelDialogOpen, setChannelDialogOpen] = useState(false);
 
   const { mutate: updateChannel, isPending: isUpdatingChannel } = useUpdateChannel();
   const { mutate: removeChannel, isPending: isRemovingChannel } = useRemoveChannel();
 
-  // Set the initial value when channel data is loaded
+  // Set the initial values when channel data is loaded
   if (channel && value === '') {
     setValue(channel.name);
+    setIcon(channel.icon);
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\s+/g, '-').toLowerCase();
     setValue(value);
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setIcon(emoji);
   };
 
   const handleEditOpen = (value: boolean) => {
@@ -66,7 +73,7 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
     e.preventDefault();
 
     updateChannel(
-      { id: channelId, name: value },
+      { id: channelId, name: value, icon },
       {
         onSuccess: () => {
           toast.success("Channel updated.");
@@ -127,14 +134,32 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
               className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
               size="sm"
             >
-              <span className="truncate"># {channel.name}</span>
+              <div className="flex items-center">
+                {channel.icon ? (
+                  <span className="mr-2 text-xl">{channel.icon}</span>
+                ) : (
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 mr-2">
+                    <span className="text-xs font-medium text-gray-600">{channel.name.charAt(0).toLowerCase()}</span>
+                  </div>
+                )}
+                <span className="truncate"># {channel.name}</span>
+              </div>
               <FaChevronDown className="ml-2 size-2.5 transition-transform duration-200 group-hover:rotate-180" />
             </Button>
           </DialogTrigger>
 
           <DialogContent className="overflow-hidden bg-gray-50 p-0">
             <DialogHeader className="border-b bg-white p-4">
-              <DialogTitle># {channel.name}</DialogTitle>
+              <DialogTitle className="flex items-center">
+                {channel.icon ? (
+                  <span className="mr-2 text-xl">{channel.icon}</span>
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 mr-2">
+                    <span className="text-xs font-medium text-gray-600">{channel.name.charAt(0).toLowerCase()}</span>
+                  </div>
+                )}
+                <span># {channel.name}</span>
+              </DialogTitle>
 
               <VisuallyHidden.Root>
                 <DialogDescription>Your channel preferences</DialogDescription>
@@ -149,17 +174,31 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
                     className="flex w-full cursor-pointer flex-col rounded-lg border bg-white px-5 py-4 hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
                   >
                     <div className="flex w-full items-center justify-between">
-                      <p className="text-sm font-semibold">Channel name</p>
+                      <p className="text-sm font-semibold">Channel name and icon</p>
                       {member?.role === 'admin' && <p className="text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>}
                     </div>
 
-                    <p className="text-sm"># {channel.name}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 border border-gray-200">
+                        {channel.icon ? (
+                          <span className="text-xl">{channel.icon}</span>
+                        ) : (
+                          <span className="text-sm font-medium text-gray-600">{channel.name.charAt(0).toLowerCase()}</span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium"># {channel.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {channel.icon ? "Custom emoji icon" : "Default letter icon"}
+                        </p>
+                      </div>
+                    </div>
                   </button>
                 </DialogTrigger>
 
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Rename this channel</DialogTitle>
+                    <DialogTitle>Edit channel name and icon</DialogTitle>
 
                     <VisuallyHidden.Root>
                       <DialogDescription>Rename this channel to match your case.</DialogDescription>
@@ -167,16 +206,43 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
                   </DialogHeader>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                      value={value}
-                      disabled={isUpdatingChannel}
-                      onChange={handleChange}
-                      required
-                      autoFocus
-                      minLength={3}
-                      maxLength={20}
-                      placeholder="e.g. plan-budget"
-                    />
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium">Channel Icon</label>
+                          <span className="text-xs text-muted-foreground">Click to select an emoji</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0">
+                            <EmojiPopover onEmojiSelect={handleEmojiSelect} hint="Select channel icon">
+                              <div className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-gray-200 hover:border-gray-400 transition-all">
+                                {icon ? (
+                                  <span className="text-2xl">{icon}</span>
+                                ) : (
+                                  <div className="flex flex-col items-center">
+                                    <span className="text-xs text-gray-600">Select</span>
+                                    <span className="text-xs text-gray-600">Icon</span>
+                                  </div>
+                                )}
+                              </div>
+                            </EmojiPopover>
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-sm font-medium mb-1 block">Channel Name</label>
+                            <Input
+                              value={value}
+                              disabled={isUpdatingChannel}
+                              onChange={handleChange}
+                              required
+                              autoFocus
+                              minLength={3}
+                              maxLength={20}
+                              placeholder="e.g. plan-budget"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                     <DialogFooter>
                       <DialogClose asChild>

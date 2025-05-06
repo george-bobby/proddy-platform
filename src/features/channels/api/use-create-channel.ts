@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
 
-type RequestType = { name: string; workspaceId: Id<'workspaces'> };
+type RequestType = { name: string; workspaceId: Id<'workspaces'>; icon?: string };
 type ResponseType = Id<'channels'> | null;
 
 type Options = {

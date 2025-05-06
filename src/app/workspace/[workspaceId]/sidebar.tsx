@@ -173,6 +173,7 @@ export const WorkspaceSidebar = ({
                 key={item._id}
                 id={item._id}
                 label={item.name}
+                icon={item.icon}
                 isActive={channelId === item._id}
                 isCollapsed={isCollapsed}
               />
