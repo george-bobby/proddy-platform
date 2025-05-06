@@ -16,7 +16,7 @@ import {
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
-import { CanvasParticipantsTracker } from '@/features/canvas/_components/canvas-participants-tracker';
+import { CanvasParticipantsTracker } from '@/features/canvas/components/participants-tracker';
 import { Button } from '@/components/ui/button';
 
 // Interface for saved canvas data

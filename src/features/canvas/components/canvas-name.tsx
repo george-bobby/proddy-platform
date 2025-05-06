@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { useRoom } from "../../../../liveblocks.config";
 import { SaveCanvasDialog } from "./save-canvas-dialog";
-import { SavedCanvasesDropdown } from "./saved-canvases-dropdown";
+import { SavedCanvasesDropdown } from "./saved-dropdown";
 import { NewCanvasDialog } from "./new-canvas-dialog";
 
 interface CanvasNameProps {

@@ -11,7 +11,7 @@ import { Hint } from "../../../components/hint";
 import { Button } from "../../../components/ui/button";
 import { cn } from "../../../lib/utils";
 import { useRenameModal } from "../../../store/use-rename-modal";
-import { useGetChannel } from "../../../features/channels/api/use-get-channel";
+import { useGetChannel } from "../../channels/api/use-get-channel";
 import { useWorkspaceId } from "../../../hooks/use-workspace-id";
 import { Id } from "../../../../convex/_generated/dataModel";
 

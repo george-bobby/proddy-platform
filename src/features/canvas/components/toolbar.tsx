@@ -14,9 +14,10 @@ import { useState, useCallback } from "react";
 import { useMutation, useRoom } from "../../../../liveblocks.config";
 import { LiveList } from "@liveblocks/client";
 
-import { CanvasMode, LayerType, type CanvasState } from "../../../types/canvas";
+import { CanvasMode, LayerType, type CanvasState, type Color } from "../../../types/canvas";
 
 import { ToolButton } from "./tool-button";
+import { ColorPicker } from "./color-picker";
 
 type ToolbarProps = {
   canvasState?: CanvasState;
@@ -25,7 +26,9 @@ type ToolbarProps = {
   redo?: () => void;
   canUndo?: boolean;
   canRedo?: boolean;
-  effectiveId?: string; // Add the effectiveId prop
+  effectiveId?: string;
+  onColorChange?: (color: Color) => void;
+  currentColor?: Color;
 };
 
 export const Toolbar = ({
@@ -36,6 +39,8 @@ export const Toolbar = ({
   canRedo = false,
   canUndo = false,
   effectiveId,
+  onColorChange,
+  currentColor,
 }: ToolbarProps = {}) => {
   // Create internal state if external state is not provided
   const [internalCanvasState, setInternalCanvasState] = useState<CanvasState>({
@@ -144,6 +149,16 @@ export const Toolbar = ({
       alert("Failed to clear canvas. Please try again.");
     }
   }, [effectiveId, room.id]);
+  // Default color if none provided
+  const defaultColor: Color = { r: 0, g: 0, b: 0 };
+
+  // Handle color change
+  const handleColorChange = (color: Color) => {
+    if (onColorChange) {
+      onColorChange(color);
+    }
+  };
+
   return (
     <div className="absolute top-[55%] -translate-y-[50%] left-2 flex flex-col gap-y-4">
       <div className="bg-white rounded-md p-1.5 flex gap-y-1 flex-col items-center shadow-md">
@@ -265,6 +280,10 @@ export const Toolbar = ({
           onClick={clearCanvas}
           variant="danger"
         />
+      </div>
+
+      <div className="bg-white rounded-md p-1.5 flex flex-col items-center shadow-md">
+        <ColorPicker onChange={handleColorChange} />
       </div>
     </div>
   );

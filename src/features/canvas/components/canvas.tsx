@@ -1,8 +1,8 @@
 "use client";
 
-import { nanoid } from "nanoid";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { LiveObject, LiveMap, LiveList } from "@liveblocks/client";
+import { nanoid } from "nanoid";
 
 import { useDisableScrollBounce } from "../../../hooks/use-disable-scroll-bounce";
 import { useDeleteLayers } from "../../../hooks/use-delete-layers";
@@ -43,9 +43,11 @@ import { SelectionBox } from "./selection-box";
 import { Toolbar } from "./toolbar";
 import { CanvasName } from "./canvas-name";
 
+// Constants
 const MAX_LAYERS = 100;
 const MULTISELECTION_THRESHOLD = 2; // Reduced from 5 to make selection easier to activate
 
+// Props type definition
 type CanvasProps = {
   boardId?: string;
   canvasId?: string;
@@ -99,6 +101,11 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
     g: 0,
     b: 0,
   });
+
+  // Function to update the last used color (used by the toolbar)
+  const updateLastUsedColor = useCallback((color: Color) => {
+    setLastUsedColor(color);
+  }, []);
 
   useDisableScrollBounce();
   const history = useHistory();
@@ -1026,6 +1033,8 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
         undo={history.undo}
         redo={history.redo}
         effectiveId={effectiveId}
+        onColorChange={updateLastUsedColor}
+        currentColor={lastUsedColor}
       />
 
       <svg

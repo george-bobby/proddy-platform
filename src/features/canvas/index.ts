@@ -1,7 +1,7 @@
 // Export components from the canvas folder
-import { Canvas } from './_components/canvas';
-import { Participants } from './_components/participants';
-import { Toolbar } from './_components/toolbar';
+import { Canvas } from './components/canvas';
+import { Participants } from './components/participants';
+import { Toolbar } from './components/toolbar';
 import { Room } from '@/components/room';
 
 // Export renamed components for canvas feature
