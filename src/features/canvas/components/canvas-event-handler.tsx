@@ -20,7 +20,13 @@ interface CanvasEventHandlerProps {
   updateSelectionNet: (current: Point, origin: Point) => void;
   translateSelectedLayers: (point: Point) => void;
   history: any;
-  children: React.ReactNode;
+  children: (props: {
+    onPointerMove: (e: React.PointerEvent) => void;
+    onPointerLeave: (e: React.PointerEvent) => void;
+    onPointerDown: (e: React.PointerEvent) => void;
+    onPointerUp: (e: React.PointerEvent) => void;
+    onLayerPointerDown: (e: React.PointerEvent, layerId: string) => void;
+  }) => React.ReactNode;
 }
 
 /**
@@ -48,7 +54,7 @@ export const CanvasEventHandler = ({
   const onPointerMove = useMutation(
     ({ setMyPresence, self, storage }, e: React.PointerEvent) => {
       e.preventDefault();
-      
+
       const current = pointerEventToCanvasPoint(e, camera);
 
       // Always update cursor position
