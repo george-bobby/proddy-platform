@@ -53,14 +53,7 @@ const Editor = ({
 }: EditorProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
-  // Use try-catch to handle cases where channelId might not be available
-  let channelId: string | undefined;
-  try {
-    channelId = useChannelId();
-  } catch (error) {
-    console.log('Channel ID not available in this context');
-  }
-
+  const channelId = useChannelId();
   const [text, setText] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [isToolbarVisible, setIsToolbarVisible] = useState(true);
