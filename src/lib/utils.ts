@@ -43,7 +43,6 @@ export function findIntersectingLayersWithRectangle(
   end: Point
 ): string[] {
   if (!layerIds || !layers || !start || !end) {
-    console.warn("Invalid parameters passed to findIntersectingLayersWithRectangle", { layerIds, layers, start, end });
     return [];
   }
 
@@ -121,45 +120,26 @@ export function findLayerAtPoint(
   tolerance: number = 5 // Tolerance radius in pixels
 ): string | null {
   if (!layerIds || !layers || !point) {
-    console.warn("Invalid parameters passed to findLayerAtPoint", { layerIds, layers, point });
     return null;
   }
-
-  console.log("Finding layer at point:", point, "with tolerance:", tolerance);
-  console.log("Available layerIds:", layerIds.length);
 
   // Check from top to bottom (last added layer first)
   for (let i = layerIds.length - 1; i >= 0; i--) {
     const layerId = layerIds[i];
 
     if (!layerId) {
-      console.warn("Null or undefined layerId at index", i);
       continue;
     }
 
     // Check if the layer exists in the map
     if (!layers.has(layerId)) {
-      console.warn(`Layer with ID ${layerId} not found in layers map`);
       continue;
     }
 
     const layer = layers.get(layerId);
 
     if (!layer) {
-      console.warn(`Layer with ID ${layerId} returned null from layers.get`);
       continue;
-    }
-
-    // Log layer details for debugging
-    if (i % 5 === 0) { // Log only every 5th layer to avoid console spam
-      console.log(`Checking layer ${i}:`, {
-        id: layerId,
-        type: layer.type,
-        x: layer.x,
-        y: layer.y,
-        width: layer.width,
-        height: layer.height
-      });
     }
 
     // Use a larger tolerance for path layers
@@ -200,7 +180,8 @@ export function findLayerAtPoint(
  */
 export function penPointsToPathLayer(
   points: [number, number, number][],
-  color: Color
+  color: Color,
+  strokeWidth?: number
 ): Layer {
   if (points.length < 2) {
     throw new Error("Cannot create path with less than 2 points");
@@ -227,6 +208,7 @@ export function penPointsToPathLayer(
     height: maxY - minY,
     fill: color,
     points: points.map(([x, y, pressure]) => [x - minX, y - minY, pressure]),
+    strokeWidth: strokeWidth || 16,
   };
 }
 

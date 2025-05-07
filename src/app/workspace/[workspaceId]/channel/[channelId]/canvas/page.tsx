@@ -18,6 +18,7 @@ import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 import { CanvasParticipantsTracker } from '@/features/canvas/components/participants-tracker';
 import { Button } from '@/components/ui/button';
+import { StreamAudioRoom } from '@/features/audio';
 
 // Interface for saved canvas data
 interface SavedCanvas {
@@ -305,6 +306,14 @@ const CanvasPage = () => {
                         />
                     </div>
                 </div>
+                {/* Audio Room Component */}
+                {roomId && (
+                    <StreamAudioRoom
+                        roomId={channelId} // Use channelId for a stable room ID
+                        canvasName={canvasName || 'Canvas Audio Room'}
+                    />
+                )}
+
             </div>
         </CanvasLiveblocksProvider>
     );

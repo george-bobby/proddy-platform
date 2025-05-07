@@ -92,7 +92,7 @@ function pruneCache() {
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      console.error('Missing GOOGLE_GENERATIVE_AI_API_KEY');
+
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }
 
@@ -100,14 +100,14 @@ export async function POST(req: NextRequest) {
     try {
       requestData = await req.json();
     } catch (parseError) {
-      console.error('Error parsing JSON:', parseError);
+
       return NextResponse.json({ error: 'Invalid JSON in request' }, { status: 400 });
     }
 
     const { messages } = requestData;
 
     if (!messages || !Array.isArray(messages)) {
-      console.error('Invalid messages format:', messages);
+
       return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
     }
 
@@ -190,7 +190,7 @@ Guidelines:
 
       return NextResponse.json({ summary: text });
     } catch (aiError) {
-      console.error('AI summarization error:', aiError);
+
 
       // More efficient fallback with markdown formatting
       const fallbackSummary =
@@ -210,7 +210,7 @@ Guidelines:
       });
     }
   } catch (error) {
-    console.error('Error in summarize route:', error);
+
     return NextResponse.json(
       {
         error: 'Internal server error',

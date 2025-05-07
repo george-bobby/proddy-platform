@@ -10,7 +10,7 @@ const MAX_LAYERS = 100;
 
 /**
  * Hook for layer operations (insert, translate, resize, delete)
- * 
+ *
  * @param lastUsedColor Current color for new layers
  * @returns Object with layer operation functions
  */
@@ -23,7 +23,7 @@ export function useLayerOperations(lastUsedColor: Color) {
       position: Point,
     ) => {
       try {
-        console.log("insertLayer - storage object:", storage);
+
 
         // Get the storage objects
         let liveLayers = storage.get("layers");
@@ -82,7 +82,7 @@ export function useLayerOperations(lastUsedColor: Color) {
 
         setMyPresence({ selection: [layerId] }, { addToHistory: true });
       } catch (error) {
-        console.error("Error adding layer:", error);
+
       }
     },
     [lastUsedColor],
@@ -91,7 +91,7 @@ export function useLayerOperations(lastUsedColor: Color) {
   // Insert a path (drawing)
   const insertPath = useMutation(
     ({ storage, self, setMyPresence }) => {
-      const { pencilDraft } = self.presence;
+      const { pencilDraft, strokeWidth } = self.presence;
 
       if (pencilDraft == null || pencilDraft.length < 2) {
         setMyPresence({ pencilDraft: null });
@@ -123,7 +123,7 @@ export function useLayerOperations(lastUsedColor: Color) {
         const id = nanoid();
 
         // Create the path layer
-        const pathLayer = penPointsToPathLayer(pencilDraft, lastUsedColor);
+        const pathLayer = penPointsToPathLayer(pencilDraft, lastUsedColor, strokeWidth);
 
         // Create a LiveObject and set it in the map
         const liveObject = new LiveObject(pathLayer);
@@ -136,7 +136,7 @@ export function useLayerOperations(lastUsedColor: Color) {
         // Clear the pencil draft after successfully adding the path
         setMyPresence({ pencilDraft: null });
       } catch (error) {
-        console.error("Error adding path layer:", error);
+
         setMyPresence({ pencilDraft: null });
       }
     },
@@ -175,7 +175,7 @@ export function useLayerOperations(lastUsedColor: Color) {
         // Force a storage update to ensure changes are synchronized
         storage.set("lastUpdate", Date.now());
       } catch (error) {
-        console.error("Error erasing layer:", error);
+
       }
     },
     []

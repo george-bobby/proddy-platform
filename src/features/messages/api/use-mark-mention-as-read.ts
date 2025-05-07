@@ -9,7 +9,6 @@ export const useMarkMentionAsRead = () => {
   const execute = async (mentionId: Id<'mentions'>, status?: boolean) => {
     try {
       if (!mentionId) {
-        console.error('No mention ID provided');
         return false;
       }
 
@@ -20,7 +19,6 @@ export const useMarkMentionAsRead = () => {
 
       return true;
     } catch (error) {
-      console.error('Error changing mention read status:', error);
       return false;
     }
   };

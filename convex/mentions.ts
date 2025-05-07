@@ -263,7 +263,7 @@ export const markMentionAsRead = mutation({
 
       return { success: true, read: newStatus };
     } catch (error) {
-      console.error('Error in markMentionAsRead:', error);
+
       throw error;
     }
   },
@@ -306,7 +306,7 @@ export const markAllMentionsAsRead = mutation({
 
       return { success: true, count: unreadMentions.length };
     } catch (error) {
-      console.error('Error in markAllMentionsAsRead:', error);
+
       throw error;
     }
   },
@@ -462,7 +462,7 @@ export const getProcessedMentions = query({
 
       return processedMentions;
     } catch (error) {
-      console.error('Error in getProcessedMentions:', error);
+
       return [];
     }
   },
@@ -488,7 +488,7 @@ export const getAllMentions = query({
 
       return mentions;
     } catch (error) {
-      console.error('Error in getAllMentions:', error);
+
       return [];
     }
   },
@@ -552,7 +552,7 @@ export const createCompleteTestMention = mutation({
 
       return mentionId;
     } catch (error) {
-      console.error('Error creating complete test mention:', error);
+
       throw error;
     }
   },

@@ -134,8 +134,6 @@ export const CursorsPresence = memo(() => {
   const members = useQuery(api.members.get, { workspaceId });
 
   useEffect(() => {
-    console.log("Other users in the room:", others.length);
-
     // Create a map of Convex users by their ID for quick lookup
     const userMap = new Map();
     if (members) {

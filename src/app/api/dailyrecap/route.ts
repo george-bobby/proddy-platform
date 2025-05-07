@@ -200,7 +200,7 @@ Your recap should be comprehensive but well-organized, making it easy for someon
 
       return NextResponse.json({ recap: text, date });
     } catch (aiError) {
-      console.error('AI recap generation error:', aiError);
+
 
       // More efficient fallback with markdown formatting
       const fallbackRecap =
@@ -221,7 +221,7 @@ Your recap should be comprehensive but well-organized, making it easy for someon
       });
     }
   } catch (error) {
-    console.error('Error in dailyrecap route:', error);
+
     return NextResponse.json(
       {
         error: 'Internal server error',

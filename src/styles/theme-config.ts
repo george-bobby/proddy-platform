@@ -13,7 +13,7 @@ export const themeConfig = {
     hover: 'hsl(326, 86%, 45%)', // #d60980
     foreground: 'hsl(0, 0%, 100%)', // #ffffff
   },
-  
+
   // Secondary brand color: Coral (#f9865a)
   secondary: {
     main: 'hsl(17, 93%, 66%)', // #f9865a
@@ -22,7 +22,7 @@ export const themeConfig = {
     hover: 'hsl(17, 93%, 61%)', // #f87545
     foreground: 'hsl(0, 0%, 100%)', // #ffffff
   },
-  
+
   // Tertiary brand color: Deep Purple (#4a0d67)
   tertiary: {
     main: 'hsl(280, 77%, 23%)', // #4a0d67
@@ -31,7 +31,7 @@ export const themeConfig = {
     hover: 'hsl(280, 77%, 20%)', // #410b5b
     foreground: 'hsl(0, 0%, 100%)', // #ffffff
   },
-  
+
   // Border radius
   radius: {
     small: '6px',
@@ -39,14 +39,14 @@ export const themeConfig = {
     large: '12px',
     round: '9999px',
   },
-  
+
   // Animation durations
   duration: {
     fast: '150ms',
     normal: '200ms',
     slow: '300ms',
   },
-  
+
   // Shadows
   shadow: {
     sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
@@ -60,15 +60,14 @@ export const themeConfig = {
 export const getThemeValue = (path: string): string => {
   const keys = path.split('.');
   let value: any = themeConfig;
-  
+
   for (const key of keys) {
     if (value[key] === undefined) {
-      console.warn(`Theme value not found: ${path}`);
       return '';
     }
     value = value[key];
   }
-  
+
   return value;
 };
 

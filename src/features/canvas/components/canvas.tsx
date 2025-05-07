@@ -52,48 +52,36 @@ type CanvasProps = {
 export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
   // Use canvasId if provided, otherwise fall back to boardId for backward compatibility
   const effectiveId = canvasId || boardId;
-  console.log("Canvas component rendering with effectiveId:", effectiveId);
-  console.log("Saved canvas name:", savedCanvasName);
-
-  // Log the room ID for debugging - this should match the one used in the Room component
+  // Get the room instance
   const room = useRoom();
-  console.log("Canvas connected to Liveblocks room:", room.id);
 
-  // Get the entire storage for debugging if needed
+  // Get the entire storage
   useStorage((root) => {
-    // Just log the root object to verify it's properly initialized
-    if (!root.layers || !root.layerIds) {
-      console.warn("Storage root missing layers or layerIds:", root);
-    }
     return root;
   });
 
   // Get the layerIds with fallback
   const layerIds = useStorage((root) => {
-    console.log("Getting layerIds from root:", root);
-
     // Always return root.layerIds, even if it's not a LiveList
     // Our mutation functions will handle creating a LiveList if needed
     if (!root.layerIds) {
-      console.warn("No layerIds found in storage, returning empty array");
       return [];
     }
-
-    // Convert to array for debugging
-    const layerIdsArray = Array.from(root.layerIds);
-    console.log("Current layerIds in storage:", layerIdsArray);
 
     return root.layerIds;
   });
 
   const pencilDraft = useSelf((me) => me.presence.pencilDraft);
+  const presenceStrokeWidth = useSelf((me) => me.presence.strokeWidth);
 
   // Use refactored hooks
   const {
     canvasState,
     setCanvasState,
     lastUsedColor,
-    setLastUsedColor
+    setLastUsedColor,
+    strokeWidth,
+    setStrokeWidth
   } = useCanvasState();
 
   const { camera, onWheel } = useCamera();
@@ -111,7 +99,7 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
   const { insertLayer, insertPath, eraseLayerById } = useLayerOperations(lastUsedColor);
 
   // Use refactored drawing hook
-  const { startDrawing, continueDrawing } = useDrawing(canvasState.mode, lastUsedColor);
+  const { startDrawing, continueDrawing } = useDrawing(canvasState.mode, lastUsedColor, strokeWidth);
 
   // Use refactored selection hook
   const {
@@ -152,7 +140,6 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
         const liveLayers = storage.get("layers");
 
         if (!liveLayers) {
-          console.error("No layers found in storage during pointer move");
           return;
         }
 
@@ -207,7 +194,6 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
         const liveLayers = storage.get("layers");
 
         if (!liveLayers) {
-          console.error("No layers found in storage");
           return;
         }
 
@@ -250,7 +236,7 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
         try {
           storage.set("lastUpdate", Date.now());
         } catch (error) {
-          console.error("Error updating lastUpdate timestamp:", error);
+          // Silently handle error
         }
       } else if (canvasState.mode === CanvasMode.Inserting) {
         insertLayer(canvasState.layerType, point);
@@ -395,6 +381,8 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
         effectiveId={effectiveId}
         onColorChange={setLastUsedColor}
         currentColor={lastUsedColor}
+        strokeWidth={strokeWidth}
+        onStrokeWidthChange={setStrokeWidth}
       />
 
       <svg
@@ -452,6 +440,7 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
               fill={colorToCSS(lastUsedColor)}
               x={0}
               y={0}
+              strokeWidth={presenceStrokeWidth || 16}
             />
           )}
         </g>

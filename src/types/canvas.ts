@@ -72,6 +72,7 @@ export type CanvasState =
     }
   | {
       mode: CanvasMode.Pencil;
+      strokeWidth?: number;
     }
   | {
       mode: CanvasMode.Eraser;
@@ -87,6 +88,7 @@ export type PathLayer = {
   height: number;
   fill: Color;
   points: number[][];
+  strokeWidth?: number;
 };
 
 export type RectangleLayer = {

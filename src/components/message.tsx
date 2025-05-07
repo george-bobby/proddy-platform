@@ -144,10 +144,8 @@ export const Message = ({
       // Cache the result
       extractedTextRef.current[bodyJson] = extractedText;
 
-      console.log('Extracted text using Quill:', extractedText);
       return extractedText;
     } catch (error) {
-      console.error('Failed to extract text using Quill:', error);
       return '';
     }
   };

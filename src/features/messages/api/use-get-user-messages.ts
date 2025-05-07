@@ -8,8 +8,5 @@ export const useGetUserMessages = () => {
 
   const data = useQuery(api.messages.getUserMessages, { workspaceId });
 
-  console.log('useGetUserMessages data:', data);
-  console.log('workspaceId:', workspaceId);
-
   return data;
 };

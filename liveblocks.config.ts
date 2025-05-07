@@ -8,7 +8,7 @@ import { createRoomContext, createLiveblocksContext } from "@liveblocks/react";
 
 import type { Layer, Color } from "./src/types/canvas";
 
-console.log("Creating Liveblocks client with auth endpoint");
+
 
 const client = createClient({
   throttle: 16,
@@ -36,6 +36,7 @@ type Presence = {
   selection: string[];
   pencilDraft: [x: number, y: number, pressure: number][] | null;
   penColor: Color | null;
+  strokeWidth?: number;
 };
 
 // Optionally, Storage represents the shared document that persists in the

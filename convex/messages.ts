@@ -228,23 +228,11 @@ export const create = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    console.log('Convex: create message called with args:', {
-      workspaceId: args.workspaceId,
-      channelId: args.channelId,
-      conversationId: args.conversationId,
-      parentMessageId: args.parentMessageId,
-      bodyPreview: args.body.substring(0, 50),
-      hasImage: !!args.image,
-      hasCalendarEvent: !!args.calendarEvent
-    });
-
     const userId = await getAuthUserId(ctx);
-    console.log('Convex: create message - userId:', userId);
 
     if (!userId) throw new Error('Unauthorized.');
 
     const member = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
-    console.log('Convex: create message - member found:', !!member);
 
     if (!member) throw new Error('Unauthorized.');
 
@@ -252,29 +240,20 @@ export const create = mutation({
 
     // replying in a thread in 1-1 conversation
     if (!args.conversationId && !args.channelId && args.parentMessageId) {
-      console.log('Convex: create message - looking for parent message for thread');
       const parentMessage = await ctx.db.get(args.parentMessageId);
 
       if (!parentMessage) throw new Error('Parent message not found.');
 
       _conversationId = parentMessage.conversationId;
-      console.log('Convex: create message - using conversationId from parent message:', _conversationId);
     }
 
     // Verify channel exists if channelId is provided
     if (args.channelId) {
       const channel = await ctx.db.get(args.channelId);
-      console.log('Convex: create message - channel exists:', !!channel);
       if (!channel) {
         throw new Error('Channel not found.');
       }
     }
-
-    console.log('Convex: create message - inserting message with:', {
-      memberId: member._id,
-      channelId: args.channelId,
-      conversationId: _conversationId,
-    });
 
     const messageId = await ctx.db.insert('messages', {
       memberId: member._id,
@@ -287,11 +266,8 @@ export const create = mutation({
       calendarEvent: args.calendarEvent,
     });
 
-    console.log('Convex: create message - message created with ID:', messageId);
-
     // Process mentions in the message
     try {
-      console.log('Convex: create message - processing mentions');
 
       // Get all members in the workspace to check for mentions
       const workspaceMembers = await ctx.db
@@ -366,7 +342,7 @@ export const create = mutation({
         }
       }
 
-      console.log('Convex: create message - found mentions:', Array.from(mentionedMemberIds));
+
 
       // Create mention records for each mentioned member
       for (const mentionedMemberId of mentionedMemberIds) {
@@ -383,9 +359,7 @@ export const create = mutation({
         });
       }
 
-      console.log('Convex: create message - mentions processed successfully');
     } catch (error) {
-      console.error('Convex: create message - error processing mentions:', error);
       // Don't throw the error, as we still want to return the message ID
       // even if mention processing fails
     }
