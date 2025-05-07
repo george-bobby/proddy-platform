@@ -6,9 +6,7 @@ import { useWorkspaceId } from '@/hooks/use-workspace-id';
 export const useGetUnreadMentionsCount = () => {
   const workspaceId = useWorkspaceId();
 
-  console.log('useGetUnreadMentionsCount - Called with workspaceId:', workspaceId);
-
-  // Use the direct query instead of the hook
+  // Use the direct query
   const result = useQuery(
     api.mentions.getProcessedMentions,
     workspaceId ? {
@@ -16,13 +14,15 @@ export const useGetUnreadMentionsCount = () => {
     } : "skip"
   );
 
-  console.log('useGetUnreadMentionsCount - Query result:', {
-    result,
-    isLoading: result === undefined
-  });
-
   // Initialize counts
-  const counts = {
+  const counts: {
+    total: number;
+    channel: number;
+    direct: number;
+    thread: number;
+    card: number;
+    [key: string]: number;
+  } = {
     total: 0,
     channel: 0,
     direct: 0,
@@ -38,12 +38,11 @@ export const useGetUnreadMentionsCount = () => {
 
     unreadMentions.forEach((mention: any) => {
       if (mention.source && mention.source.type) {
-        counts[mention.source.type] = (counts[mention.source.type] || 0) + 1;
+        const type = mention.source.type as string;
+        counts[type] = (counts[type] || 0) + 1;
       }
     });
   }
-
-  console.log('useGetUnreadMentionsCount - Final counts:', counts);
 
   return {
     counts,

@@ -52,16 +52,6 @@ export const MentionsNotificationDialog = ({
   const markAllAsReadMutation = useMarkAllMentionsAsRead();
   const [activeTab, setActiveTab] = useState('all');
 
-  // Debug logging
-  useEffect(() => {
-    console.log('MentionsNotificationDialog - Render with:', {
-      workspaceId,
-      mentions,
-      isLoading,
-      open
-    });
-  }, [workspaceId, mentions, isLoading, open]);
-
   const handleToggleReadStatus = async (mentionId: Id<'mentions'>, currentStatus: boolean) => {
     await markMentionAsRead(mentionId, !currentStatus);
   };

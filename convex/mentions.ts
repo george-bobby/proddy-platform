@@ -82,15 +82,8 @@ export const getMentionsForCurrentUser = query({
           q.eq('workspaceId', args.workspaceId).eq('mentionedMemberId', currentMember._id)
         );
 
-      console.log('getMentionsForCurrentUser - Query params:', {
-        workspaceId: args.workspaceId,
-        mentionedMemberId: currentMember._id,
-        includeRead: args.includeRead
-      });
-
       // Filter by read status if specified
       if (args.includeRead === false) {
-        console.log('getMentionsForCurrentUser - Filtering for unread mentions only');
         mentionsQuery = ctx.db
           .query('mentions')
           .withIndex('by_workspace_id_mentioned_member_id_read', (q) =>
@@ -102,29 +95,16 @@ export const getMentionsForCurrentUser = query({
 
       // Get mentions and sort by creation time (newest first)
       const mentions = await mentionsQuery.order('desc').collect();
-      console.log('getMentionsForCurrentUser - found mentions:', mentions.length);
-
-      // Log the first few mentions for debugging
-      if (mentions.length > 0) {
-        console.log('getMentionsForCurrentUser - first mention:', mentions[0]);
-      } else {
-        console.log('getMentionsForCurrentUser - no mentions found in database');
-      }
 
       // Process mentions to include all necessary data
       const processedMentions = [];
-      console.log('getMentionsForCurrentUser - Processing mentions:', mentions);
 
       for (const mention of mentions) {
-        console.log('getMentionsForCurrentUser - Processing mention:', mention);
-
         // Get the member who created the mention
         const mentioner = await populateMember(ctx, mention.mentionerMemberId);
         if (!mentioner) {
-          console.log('getMentionsForCurrentUser - Skipping mention, mentioner not found:', mention.mentionerMemberId);
           continue;
         }
-        console.log('getMentionsForCurrentUser - Found mentioner:', mentioner._id);
 
         // Determine the source type and get source data
         let sourceType = 'channel';
@@ -233,13 +213,9 @@ export const getMentionsForCurrentUser = query({
           },
         };
 
-        console.log('getMentionsForCurrentUser - Created processed mention:', processedMention);
-
         // Add the processed mention to the result
         processedMentions.push(processedMention);
       }
-
-      console.log('getMentionsForCurrentUser - Final processed mentions:', processedMentions);
       return processedMentions;
     } catch (error) {
       console.error('Error in getMentionsForCurrentUser:', error);
@@ -285,7 +261,6 @@ export const markMentionAsRead = mutation({
         read: newStatus,
       });
 
-      console.log(`Mention ${args.mentionId} marked as ${newStatus ? 'read' : 'unread'}`);
       return { success: true, read: newStatus };
     } catch (error) {
       console.error('Error in markMentionAsRead:', error);
@@ -337,7 +312,7 @@ export const markAllMentionsAsRead = mutation({
   },
 });
 
-// Get processed mentions for debugging
+// Get processed mentions
 export const getProcessedMentions = query({
   args: {
     workspaceId: v.id('workspaces'),
@@ -346,14 +321,12 @@ export const getProcessedMentions = query({
     try {
       const userId = await getAuthUserId(ctx);
       if (!userId) {
-        console.log('getProcessedMentions - No userId found');
         return [];
       }
 
       // Get the current member
       const currentMember = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
       if (!currentMember) {
-        console.log('getProcessedMentions - No currentMember found for userId:', userId);
         return [];
       }
 
@@ -364,8 +337,6 @@ export const getProcessedMentions = query({
           q.eq('workspaceId', args.workspaceId).eq('mentionedMemberId', currentMember._id)
         )
         .collect();
-
-      console.log(`getProcessedMentions - Found ${mentions.length} raw mentions`);
 
       // Process the mentions
       const processedMentions = [];
@@ -489,7 +460,6 @@ export const getProcessedMentions = query({
         processedMentions.push(processedMention);
       }
 
-      console.log(`getProcessedMentions - Processed ${processedMentions.length} mentions`);
       return processedMentions;
     } catch (error) {
       console.error('Error in getProcessedMentions:', error);
@@ -498,7 +468,7 @@ export const getProcessedMentions = query({
   },
 });
 
-// Get all mentions in the workspace (for debugging)
+// Get all mentions in the workspace
 export const getAllMentions = query({
   args: {
     workspaceId: v.id('workspaces'),
@@ -507,7 +477,6 @@ export const getAllMentions = query({
     try {
       const userId = await getAuthUserId(ctx);
       if (!userId) {
-        console.log('getAllMentions - No userId found');
         return [];
       }
 
@@ -516,8 +485,6 @@ export const getAllMentions = query({
         .query('mentions')
         .withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
         .collect();
-
-      console.log(`getAllMentions - Found ${mentions.length} mentions in workspace`);
 
       return mentions;
     } catch (error) {
@@ -581,13 +548,6 @@ export const createCompleteTestMention = mutation({
         channelId: args.channelId,
         read: false,
         createdAt: Date.now(),
-      });
-
-      console.log('createCompleteTestMention - Created mention:', {
-        mentionId,
-        messageId,
-        channelId: args.channelId,
-        workspaceId: args.workspaceId
       });
 
       return mentionId;

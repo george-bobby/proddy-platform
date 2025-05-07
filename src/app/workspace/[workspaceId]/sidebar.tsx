@@ -235,14 +235,7 @@ export const WorkspaceSidebar = ({
           isActive={pathname.includes('/tasks')}
           isCollapsed={isCollapsed}
         />
-        <SidebarItem
-          label="Mentions"
-          icon={AtSign}
-          id="mentions"
-          href={`/workspace/${workspaceId}/mentions`}
-          isActive={pathname.includes('/mentions')}
-          isCollapsed={isCollapsed}
-        />
+
         <SidebarItem
           label="Calendar"
           icon={CalendarIcon}
