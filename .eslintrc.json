@@ -5,10 +5,10 @@
   },
   "extends": [
     "next/core-web-vitals"
-    // Remove: "plugin:prettier/recommended"
+    // "plugin:prettier/recommended"
   ],
   "rules": {
-    "prettier/prettier": "off", // Turn off Prettier checks
+    "prettier/prettier": "off",
     "react/no-unescaped-entities": "off",
     "react/react-in-jsx-scope": "off"
   }

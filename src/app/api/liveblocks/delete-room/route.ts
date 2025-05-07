@@ -20,20 +20,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Delete the room using the Liveblocks API
-    await liveblocks.deleteRoom({ roomId });
+    // Delete the room using the Liveblocks API - passing roomId directly as string
+    await liveblocks.deleteRoom(roomId);
 
     // Return a success response
     return NextResponse.json(
       { success: true, message: `Room ${roomId} deleted successfully` },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error deleting Liveblocks room:", error);
     
-    // Return an error response
+    // Return an error response with properly typed error handling
     return NextResponse.json(
-      { error: "Failed to delete room", details: error },
+      { 
+        error: "Failed to delete room", 
+        details: error instanceof Error ? error.message : String(error) 
+      },
       { status: 500 }
     );
   }
