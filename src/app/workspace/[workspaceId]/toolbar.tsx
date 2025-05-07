@@ -2,7 +2,7 @@
 
 import { Bell, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
@@ -15,11 +15,14 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
+import { Badge } from '@/components/ui/badge';
+import { MentionsNotificationDialog } from '@/components/mentions-notification-dialog';
 import { UserButton } from '@/features/auth/components/user-button';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
 import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
+import { useGetUnreadMentionsCount } from '@/features/messages/api/use-get-unread-mentions-count';
 
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
@@ -33,10 +36,12 @@ export const WorkspaceToolbar = ({
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const [searchOpen, setSearchOpen] = useWorkspaceSearch();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const { data: workspace } = useGetWorkspace({ id: workspaceId });
   const { data: channels } = useGetChannels({ workspaceId });
   const { data: members } = useGetMembers({ workspaceId });
+  const { counts, isLoading: isLoadingMentions } = useGetUnreadMentionsCount();
 
   const onChannelClick = (channelId: Id<'channels'>) => {
     setSearchOpen(false);
@@ -108,9 +113,28 @@ export const WorkspaceToolbar = ({
 
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
-        <Button variant="ghost" size="iconSm" className="text-white">
-          <Bell className="size-5" />
+        <Button
+          variant="ghost"
+          size="iconSm"
+          className="text-white relative hover:bg-white/15 transition-colors"
+          onClick={() => setNotificationsOpen(true)}
+        >
+          <div className={`relative ${!isLoadingMentions && counts && counts.total > 0 ? 'animate-pulse' : ''}`}>
+            <Bell className="size-5" />
+            {!isLoadingMentions && counts && counts.total > 0 && (
+              <Badge
+                variant="default"
+                className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500 border border-white shadow-sm"
+              >
+                {counts.total}
+              </Badge>
+            )}
+          </div>
         </Button>
+        <MentionsNotificationDialog
+          open={notificationsOpen}
+          onOpenChange={setNotificationsOpen}
+        />
         <UserButton />
       </div>
     </nav>

@@ -9,6 +9,11 @@ export const useMarkAllMentionsAsRead = () => {
 
   const execute = async () => {
     try {
+      if (!workspaceId) {
+        console.error('No workspace ID available');
+        return false;
+      }
+
       await markAllAsRead({ workspaceId });
       return true;
     } catch (error) {

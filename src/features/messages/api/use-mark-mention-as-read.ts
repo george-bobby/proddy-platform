@@ -4,14 +4,23 @@ import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
 
 export const useMarkMentionAsRead = () => {
-  const markAsRead = useMutation(api.mentions.markMentionAsRead);
+  const markMention = useMutation(api.mentions.markMentionAsRead);
 
-  const execute = async (mentionId: Id<'mentions'>) => {
+  const execute = async (mentionId: Id<'mentions'>, status?: boolean) => {
     try {
-      await markAsRead({ mentionId });
+      if (!mentionId) {
+        console.error('No mention ID provided');
+        return false;
+      }
+
+      await markMention({
+        mentionId,
+        status // If undefined, the backend will default to marking as read
+      });
+
       return true;
     } catch (error) {
-      console.error('Error marking mention as read:', error);
+      console.error('Error changing mention read status:', error);
       return false;
     }
   };

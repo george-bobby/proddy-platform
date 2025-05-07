@@ -1,8 +1,7 @@
 'use client';
 
-import { AtSign, Hash, Loader, MessageSquare, Trello, User } from 'lucide-react';
+import { AtSign, Hash, Loader, MessageSquare, LayoutGrid, User } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,6 +12,7 @@ import { WorkspaceToolbar } from '../toolbar';
 import { useGetMentionedMessages } from '@/features/messages/api/use-get-mentioned-messages';
 import { useMarkMentionAsRead } from '@/features/messages/api/use-mark-mention-as-read';
 import { useMarkAllMentionsAsRead } from '@/features/messages/api/use-mark-all-mentions-as-read';
+import { TestMentionButton } from '@/components/test-mention-button';
 import { Id } from '@/../convex/_generated/dataModel';
 
 // We'll use the interface from the API directly
@@ -38,7 +38,7 @@ export default function MentionsPage() {
     }
   };
 
-  const getSourceIcon = (type: 'channel' | 'direct' | 'thread' | 'card') => {
+  const getSourceIcon = (type: string) => {
     switch (type) {
       case 'channel':
         return <Hash className="h-3.5 w-3.5" />;
@@ -47,11 +47,17 @@ export default function MentionsPage() {
       case 'thread':
         return <MessageSquare className="h-3.5 w-3.5" />;
       case 'card':
-        return <Trello className="h-3.5 w-3.5" />;
+        return <LayoutGrid className="h-3.5 w-3.5" />;
+      default:
+        return <AtSign className="h-3.5 w-3.5" />;
     }
   };
 
   const getSourceLink = (mention: any) => {
+    if (!mention.source || !mention.source.type || !mention.source.id) {
+      return `/workspace/${workspaceId}`;
+    }
+
     switch (mention.source.type) {
       case 'channel':
         return `/workspace/${workspaceId}/channel/${mention.source.id}`;
@@ -67,12 +73,12 @@ export default function MentionsPage() {
     }
   };
 
-  const unreadMentions = mentions?.filter((m) => !m.read) || [];
+  const unreadMentions = mentions?.filter((m: any) => !m.read) || [];
   const allMentions = mentions || [];
 
-  const renderMentionsList = (mentionsList: typeof mentions) => (
+  const renderMentionsList = (mentionsList: any[]) => (
     <div className="divide-y">
-      {mentionsList?.map((mention) => (
+      {mentionsList?.map((mention: any) => (
         <div
           key={mention.id}
           className={`p-4 transition-colors hover:bg-muted/20 ${!mention.read ? 'bg-primary/5' : ''}`}
@@ -90,8 +96,8 @@ export default function MentionsPage() {
                   {formatRelativeTime(mention.timestamp)}
                 </span>
                 <div className="ml-auto flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs">
-                  {getSourceIcon(mention.source.type)}
-                  <span>{mention.source.name}</span>
+                  {mention.source && mention.source.type ? getSourceIcon(mention.source.type) : <AtSign className="h-3.5 w-3.5" />}
+                  <span>{mention.source && mention.source.name ? mention.source.name : 'Unknown'}</span>
                 </div>
               </div>
               <p className="text-sm">{mention.text}</p>
@@ -100,7 +106,7 @@ export default function MentionsPage() {
                   href={getSourceLink(mention)}
                   className="text-xs font-medium text-primary hover:underline"
                 >
-                  {mention.source.type === 'card' ? 'View board' : 'View conversation'}
+                  {mention.source && mention.source.type === 'card' ? 'View board' : 'View conversation'}
                 </Link>
                 {!mention.read && (
                   <button
@@ -131,16 +137,20 @@ export default function MentionsPage() {
             <span className="truncate">Mentions</span>
           </Button>
 
-          {unreadMentions.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10"
-              onClick={handleMarkAllAsRead}
-            >
-              Mark all as read
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <TestMentionButton />
+
+            {unreadMentions.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/10"
+                onClick={handleMarkAllAsRead}
+              >
+                Mark all as read
+              </Button>
+            )}
+          </div>
         </div>
       </WorkspaceToolbar>
 
@@ -188,6 +198,8 @@ export default function MentionsPage() {
                 </div>
               )}
             </TabsContent>
+
+
           </Tabs>
         )}
       </div>
