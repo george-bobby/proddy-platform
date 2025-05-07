@@ -121,7 +121,7 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
             const alternativeUser = {
               id: 'anonymous-user',
               name: 'Anonymous',
-              type: 'anonymous' as const
+              type: "guest" as const // Explicitly set type to "guest"
             };
 
             videoClient = new StreamVideoClient({
