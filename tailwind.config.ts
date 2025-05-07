@@ -77,7 +77,7 @@ const config: Config = {
   plugins: [
     require('tailwindcss-animate'),
     require('@tailwindcss/typography'),
-    function({ addUtilities }) {
+    function({ addUtilities }: { addUtilities: (utilities: Record<string, any>) => void }) {
       const newUtilities = {
         '.scrollbar-hide': {
           /* Firefox */
