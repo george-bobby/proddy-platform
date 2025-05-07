@@ -6,7 +6,6 @@ import {
 } from '@stream-io/video-react-sdk';
 import { useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
-import { toast } from 'sonner';
 
 // Stream API credentials from environment variables
 const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY || '';
@@ -14,10 +13,12 @@ const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY || '';
 
 interface UseAudioRoomProps {
   roomId: string;
+  workspaceId: string;
+  channelId: string;
   canvasName?: string;
 }
 
-export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
+export const useAudioRoom = ({ roomId, workspaceId, channelId, canvasName }: UseAudioRoomProps) => {
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<any>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -27,7 +28,30 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
   const currentUser = useQuery(api.users.current);
 
   useEffect(() => {
-    if (!currentUser || !roomId) return;
+    if (!currentUser || !roomId || !workspaceId || !channelId) return;
+
+    // Create a unique room ID that includes workspace, channel, and canvas context
+    // We need to keep it under 64 characters for Stream's API
+    // Use a hash function to create a shorter but still unique ID
+    const createShortHash = (str: string) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash).toString(36); // Convert to base36 (alphanumeric) to make it shorter
+    };
+
+    // Create a unique identifier by combining the IDs but keeping it short
+    const contextId = `${workspaceId}-${channelId}-${roomId}`;
+    const shortHash = createShortHash(contextId);
+    const uniqueRoomId = `ws${workspaceId.slice(-4)}_ch${channelId.slice(-4)}_${shortHash}`;
+
+    // Ensure the ID is under 64 characters
+    const finalRoomId = uniqueRoomId.substring(0, 63);
+
+    console.log('Creating audio room with unique ID:', finalRoomId, '(length:', finalRoomId.length, ')');
 
     const setupAudioRoom = async () => {
       try {
@@ -141,26 +165,32 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
         console.log('Stream client initialized successfully');
         setClient(videoClient);
 
-        // Use the example call ID from Stream's documentation
-        // This is a temporary solution to test if the connection works
-        const callId = 'V4fmPI1qixZ9'; // Example call ID from Stream docs
-
-        console.log('Creating audio room with ID:', callId);
+        // Use our unique room ID that includes workspace, channel, and canvas context
+        // This ensures audio rooms are properly isolated
+        console.log('Creating audio room with ID:', finalRoomId);
 
         // Get the call object
-        const audioCall = videoClient.call('audio_room', callId);
+        const audioCall = videoClient.call('audio_room', finalRoomId);
 
         try {
           // Join or create the call with audio permissions
           console.log('Joining audio room with audio permissions...');
 
           try {
+            // Validate that the room ID is not too long for Stream's API
+            if (finalRoomId.length > 64) {
+              console.error('Room ID is too long:', finalRoomId.length);
+              throw new Error('Room ID exceeds the 64 character limit');
+            }
+
             await audioCall.join({
               create: true,
               data: {
                 custom: {
                   title: canvasName || 'Canvas Audio Room',
                   description: 'Collaborate on canvas with audio',
+                  workspaceId: workspaceId,
+                  channelId: channelId,
                   canvasId: roomId
                 }
               },
@@ -170,11 +200,20 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
           } catch (joinError: any) {
             console.error('Failed to join audio room:', joinError);
 
+            // Check if the error is related to the room ID length
+            if (joinError.message && joinError.message.includes('maximum 64 characters')) {
+              throw new Error('Room ID is too long. Please try again with a shorter room ID.');
+            }
+
             // Try a simpler join without custom data
             console.log('Attempting simplified join...');
-            await audioCall.join({ create: true });
-
-            console.log('Successfully joined audio room with simplified options');
+            try {
+              await audioCall.join({ create: true });
+              console.log('Successfully joined audio room with simplified options');
+            } catch (simplifiedJoinError: any) {
+              console.error('Failed simplified join attempt:', simplifiedJoinError);
+              throw simplifiedJoinError;
+            }
           }
 
           // Set the call in state
@@ -192,16 +231,12 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
         // Don't enable microphone automatically - let users unmute themselves
         console.log('Microphone is muted by default - users can unmute when ready to speak');
 
-        // Show a toast notification to remind users they need to unmute to speak
-        toast.info('Audio room joined. Click the microphone icon to unmute when you want to speak.');
-
         setIsConnecting(false);
       } catch (error: any) {
         console.error('Failed to join audio room:', error);
 
         // Format the error for better debugging
         let formattedError = error;
-        let errorMessage = error.message || 'Unknown error';
 
         // Check for WebSocket connection issues
         if (error.isWSFailure || (error.message && error.message.includes('WS connection') || error.message && error.message.includes('connection could not be established'))) {
@@ -225,7 +260,6 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
               isOnline: navigator.onLine
             }
           };
-          errorMessage = 'WebSocket connection failed. Check your network connection and browser settings.';
         } else if (error.message && error.message.includes('token')) {
           formattedError = {
             ...error,
@@ -236,7 +270,6 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
               originalMessage: error.message
             }
           };
-          errorMessage = 'Authentication failed. Please try again later.';
         } else if (error.code === 43 || (error.message && error.message.includes('signature is not valid'))) {
           formattedError = {
             ...error,
@@ -247,10 +280,8 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
               originalMessage: error.message
             }
           };
-          errorMessage = 'Authentication failed. Please try again later.';
         }
 
-        toast.error(`Failed to join audio room: ${errorMessage}`);
         console.log('Detailed error information:', formattedError);
 
         setError(formattedError);
@@ -269,7 +300,7 @@ export const useAudioRoom = ({ roomId, canvasName }: UseAudioRoomProps) => {
         client.disconnectUser().catch(console.error);
       }
     };
-  }, [currentUser, roomId, canvasName]);
+  }, [currentUser, roomId, workspaceId, channelId, canvasName]);
 
   return {
     client,
