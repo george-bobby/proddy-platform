@@ -23,7 +23,7 @@ export const ToolButton = ({
   variant = "default",
 }: ToolButtonProps) => {
   // Determine the button variant based on the props
-  let buttonVariant: "board" | "boardActive" | "destructive" = isActive ? "boardActive" : "board";
+  let buttonVariant: "default" | "destructive" | "secondary" = isActive ? "secondary" : "default";
 
   // If danger variant is specified, use destructive style
   if (variant === "danger") {
@@ -31,7 +31,7 @@ export const ToolButton = ({
   }
 
   return (
-    <Hint label={label} side="right" sideOffset={14}>
+    <Hint label={label} side="right">
       <Button
         disabled={isDisabled}
         aria-disabled={isDisabled}
