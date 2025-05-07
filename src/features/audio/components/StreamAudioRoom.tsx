@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useAudioRoom } from '../'; // Import from index to get the new implementation
 import { AudioToolbarButton } from './AudioToolbarButton';
+import Image from 'next/image';
 
 interface StreamAudioRoomProps {
   roomId: string;
@@ -300,9 +301,11 @@ const AudioRoomUI = ({ showParticipants, toggleParticipants }: AudioRoomUIProps)
             {speakers.map(p => (
               <div key={p.sessionId} className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${p.isSpeaking ? 'bg-green-500' : 'bg-gray-300'}`} />
-                <img
+                <Image
                   src={p.image || `https://getstream.io/random_svg/?id=${p.userId}&name=${p.name}`}
                   alt={p.name}
+                  width={24}
+                  height={24}
                   className="w-6 h-6 rounded-full"
                 />
                 <span className="text-sm">{p.name}</span>
@@ -321,9 +324,11 @@ const AudioRoomUI = ({ showParticipants, toggleParticipants }: AudioRoomUIProps)
             {listeners.map(p => (
               <div key={p.sessionId} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-gray-300" />
-                <img
+                <Image
                   src={p.image || `https://getstream.io/random_svg/?id=${p.userId}&name=${p.name}`}
                   alt={p.name}
+                  width={24}
+                  height={24}
                   className="w-6 h-6 rounded-full"
                 />
                 <span className="text-sm">{p.name}</span>
