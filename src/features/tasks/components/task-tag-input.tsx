@@ -27,8 +27,8 @@ export const TaskTagInput = ({
 
   // Filter suggestions based on input value
   const filteredSuggestions = suggestions.filter(
-    (tag) => 
-      tag.toLowerCase().includes(inputValue.toLowerCase()) && 
+    (tag) =>
+      tag.toLowerCase().includes(inputValue.toLowerCase()) &&
       !value.includes(tag)
   );
 
@@ -71,7 +71,7 @@ export const TaskTagInput = ({
             <Button
               type="button"
               variant="ghost"
-              size="iconXs"
+              size="iconSm"
               onClick={() => handleRemoveTag(tag)}
               className="h-3 w-3 rounded-full p-0 text-muted-foreground hover:text-foreground"
             >
