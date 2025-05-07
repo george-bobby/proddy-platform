@@ -46,7 +46,7 @@ export const useChannelParticipants = () => {
   // Update participant count whenever others or self changes
   useEffect(() => {
     // Count is others plus self (if present)
-    const count = others.count + (self ? 1 : 0);
+    const count = others.length + (self ? 1 : 0);
 
     // Ensure we have a valid number
     const validCount = isNaN(count) ? 0 : count;
@@ -57,13 +57,13 @@ export const useChannelParticipants = () => {
     // Log all participants for debugging
     others.forEach(other => {
       console.log(`Other participant: ${other.connectionId}`,
-        other.info?.id ? `User ID: ${other.info.id}` : 'No user ID',
+        'id' in (other.info || {}) ? `User ID: ${(other.info as { id: string }).id}` : 'No user ID',
         other.info?.name ? `Name: ${other.info.name}` : 'No name');
     });
 
     if (self) {
       console.log(`Self participant:`,
-        self.info?.id ? `User ID: ${self.info.id}` : 'No user ID',
+        'id' in (self.info || {}) ? `User ID: ${(self.info as { id: string }).id}` : 'No user ID',
         self.info?.name ? `Name: ${self.info.name}` : 'No name');
     }
   }, [others, self, room.id]);
@@ -81,29 +81,31 @@ export const useChannelParticipants = () => {
   const statusMap: Record<string, string> = {};
   if (statuses) {
     for (const status of statuses) {
-      statusMap[status.userId] = status.status;
+      statusMap[status.userId as string] = status.status;
     }
   }
 
   // Create a map of users currently in the canvas room
   const canvasParticipantIds = new Set<string>();
 
-  // Add other users in the canvas
+  // Add other users in the canvas - fixed type safety issues
   others.forEach(other => {
-    if (other.info?.id) {
-      canvasParticipantIds.add(other.info.id);
+    // Check if info exists and has an id property of type string
+    if (other.info && 'id' in other.info && typeof (other.info as any).id === 'string') {
+      // Safe to access as we've verified it exists
+      canvasParticipantIds.add((other.info as any).id);
     }
   });
 
-  // Add current user if they're in the canvas
-  if (self?.info?.id) {
-    canvasParticipantIds.add(self.info.id);
+  // Add current user if they're in the canvas - fixed type safety issues
+  if (self?.info && 'id' in self.info && typeof (self.info as any).id === 'string') {
+    canvasParticipantIds.add((self.info as any).id);
   }
 
   // Map Liveblocks connection IDs to user IDs for accurate tracking
-  const connectionToUserIdMap = new Map();
+  const connectionToUserIdMap = new Map<number, string>();
   others.forEach(other => {
-    if (other.info?.id) {
+    if (other.info && 'id' in other.info && typeof other.info.id === 'string') {
       connectionToUserIdMap.set(other.connectionId, other.info.id);
     }
   });
@@ -116,7 +118,7 @@ export const useChannelParticipants = () => {
 
   // Format participants with their user info
   const participants = others.map(other => {
-    const userId = other.info?.id;
+    const userId = 'id' in (other.info || {}) ? (other.info as { id: string }).id : null;
     let member = userId ? userMap.get(userId) : null;
 
     // If no exact match by ID, try to find a partial match
