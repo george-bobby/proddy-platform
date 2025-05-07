@@ -158,7 +158,48 @@ export const DailyRecapModal = ({ isOpen, onClose, recap, date, messageCount, is
 
   const handleExportWord = async () => {
     try {
-      // Create a new Word document
+      // Process markdown content to create document sections
+      const lines = recap.split('\n');
+      const paragraphs: Paragraph[] = [];
+
+      lines.forEach((line) => {
+        // Check if it's a header
+        const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        if (headerMatch) {
+          const level = headerMatch[1].length;
+          const text = headerMatch[2];
+
+          paragraphs.push(
+            new Paragraph({
+              text: text,
+              heading: level <= 2 ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
+            })
+          );
+        }
+        // Check if it's a bullet point
+        else if (line.match(/^- (.+)$/)) {
+          const text = line.replace(/^- /, '');
+          paragraphs.push(
+            new Paragraph({
+              text: `• ${text}`,
+              bullet: { level: 0 },
+            })
+          );
+        }
+        // Regular paragraph
+        else if (line.trim() !== '') {
+          // Process bold and italic formatting
+          const processedLine = line
+            .replace(/\*\*([^*]+)\*\*/g, '$1') // bold
+            .replace(/\*([^*]+)\*/g, '$1'); // italic
+
+          paragraphs.push(
+            new Paragraph({ text: processedLine })
+          );
+        }
+      });
+
+      // Create a new Word document with all paragraphs
       const doc = new Document({
         sections: [
           {
@@ -177,54 +218,10 @@ export const DailyRecapModal = ({ isOpen, onClose, recap, date, messageCount, is
                 ],
               }),
               new Paragraph({ text: '' }), // Empty paragraph for spacing
+              ...paragraphs,
             ],
           },
         ],
-      });
-
-      // Convert markdown to paragraphs for Word
-      const lines = recap.split('\n');
-      let currentParagraph: Paragraph | null = null;
-
-      lines.forEach((line) => {
-        // Check if it's a header
-        const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
-        if (headerMatch) {
-          const level = headerMatch[1].length;
-          const text = headerMatch[2];
-
-          doc.addSection({
-            children: [
-              new Paragraph({
-                text: text,
-                heading: level <= 2 ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
-              }),
-            ],
-          });
-        }
-        // Check if it's a bullet point
-        else if (line.match(/^- (.+)$/)) {
-          const text = line.replace(/^- /, '');
-          doc.addSection({
-            children: [
-              new Paragraph({
-                text: `• ${text}`,
-                bullet: { level: 0 },
-              }),
-            ],
-          });
-        }
-        // Regular paragraph
-        else if (line.trim() !== '') {
-          // Process bold and italic formatting
-          const processedLine = line
-            .replace(/\*\*([^*]+)\*\*/g, '$1') // bold
-            .replace(/\*([^*]+)\*/g, '$1'); // italic
-
-          doc.addSection({
-            children: [new Paragraph({ text: processedLine })],
-          });
-        }
       });
 
       // Generate the Word document
