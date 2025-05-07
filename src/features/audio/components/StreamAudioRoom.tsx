@@ -288,7 +288,7 @@ const AudioRoomUI = ({ showParticipants, toggleParticipants }: AudioRoomUIProps)
           <div className="flex justify-between items-center mb-2">
             <h4 className="font-medium">Speakers ({speakers.length})</h4>
             <div className="text-xs text-gray-500">
-              {callState === 'reconnecting' ? 'Reconnecting...' : 'Connected'}
+              {callState.toString() === 'reconnecting' ? 'Reconnecting...' : 'Connected'}
             </div>
           </div>
 
