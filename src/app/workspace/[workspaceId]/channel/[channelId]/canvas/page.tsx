@@ -57,10 +57,11 @@ const CanvasPage = () => {
     const canvasNameParam = searchParams.get('canvasName');
 
     // Get messages from the channel to find saved canvases and live messages
+    // Always call the hook, but handle the case when channelId is undefined
     const messages = useQuery(
         api.messages.get,
         channelId ? {
-            channelId: channelId as Id<"channels">,
+            channelId: channelId,
             paginationOpts: {
                 numItems: 100,
                 cursor: null

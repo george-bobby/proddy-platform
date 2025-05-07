@@ -39,13 +39,14 @@ export const SavedCanvasesDropdown = () => {
   const deleteMessage = useMutation(api.messages.remove);
 
   // Get messages from the channel
+  // Always call the hook, but skip the query if channelId is undefined
   const messages = useQuery(
     api.messages.get,
     channelId ? {
-      channelId: channelId as Id<"channels">,
+      channelId: channelId,
       paginationOpts: {
         numItems: 100,
-        cursor: null // Add the required cursor field
+        cursor: null
       }
     } : "skip"
   );
@@ -136,8 +137,7 @@ export const SavedCanvasesDropdown = () => {
     }
   };
 
-  if (!channelId) return null;
-
+  // Always render the component, but handle the case when channelId is undefined
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

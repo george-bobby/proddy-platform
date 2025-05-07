@@ -10,15 +10,20 @@ import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useChannelId } from '@/hooks/use-channel-id';
 
 const ChannelChatPage = () => {
+    // Always call hooks at the top level, never conditionally
     const channelId = useChannelId();
     console.log('ChannelChatPage - channelId from useChannelId:', channelId);
     console.log('ChannelChatPage - URL params:', window.location.pathname);
 
-    // Always call the hook, but with a valid channelId
+    // Pass the channelId to useGetMessages - the hook will handle undefined values
     const { results, status, loadMore } = useGetMessages({
-        channelId: channelId as Id<'channels'>
+        channelId: channelId
     });
-    const { data: channel, isLoading: channelLoading } = useGetChannel({ id: channelId });
+
+    // If channelId is undefined, this will be handled by the hook
+    const { data: channel, isLoading: channelLoading } = useGetChannel({
+        id: channelId
+    });
 
     console.log('ChannelChatPage - channel data:', channel);
 

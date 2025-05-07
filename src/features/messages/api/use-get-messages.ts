@@ -18,14 +18,17 @@ export const useGetMessages = ({
   conversationId,
   parentMessageId,
 }: UseGetMessagesProps) => {
+  // Check if we have valid parameters to make the query
+  const shouldSkip = !channelId && !conversationId && !parentMessageId;
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.messages.get,
-    { channelId, conversationId, parentMessageId },
+    shouldSkip ? 'skip' : { channelId, conversationId, parentMessageId },
     { initialNumItems: BATCH_SIZE }
   );
 
   return {
-    results,
+    results: results || [],
     status,
     loadMore: () => loadMore(BATCH_SIZE),
   };

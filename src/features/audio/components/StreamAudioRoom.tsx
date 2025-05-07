@@ -145,19 +145,23 @@ export const StreamAudioRoom = ({ roomId, canvasName }: StreamAudioRoomProps) =>
     );
   }
 
-  if (!client || !call || !currentUser) {
-    return null;
-  }
-
+  // Always render something, even if client/call/currentUser are not available
   return (
-    <StreamVideo client={client}>
-      <StreamCall call={call}>
-        <AudioRoomUI
-          showParticipants={showParticipants}
-          toggleParticipants={() => setShowParticipants(!showParticipants)}
-        />
-      </StreamCall>
-    </StreamVideo>
+    <>
+      {client && call && currentUser ? (
+        <StreamVideo client={client}>
+          <StreamCall call={call}>
+            <AudioRoomUI
+              showParticipants={showParticipants}
+              toggleParticipants={() => setShowParticipants(!showParticipants)}
+            />
+          </StreamCall>
+        </StreamVideo>
+      ) : (
+        // Render an empty div when not ready instead of returning null
+        <div className="hidden"></div>
+      )}
+    </>
   );
 };
 
@@ -249,7 +253,7 @@ const AudioRoomUI = ({ showParticipants, toggleParticipants }: AudioRoomUIProps)
                     analyser.connect(javascriptNode);
                     javascriptNode.connect(audioContext.destination);
 
-                    javascriptNode.onaudioprocess = function() {
+                    javascriptNode.onaudioprocess = function () {
                       const array = new Uint8Array(analyser.frequencyBinCount);
                       analyser.getByteFrequencyData(array);
                       const values = array.reduce((a, b) => a + b) / array.length;

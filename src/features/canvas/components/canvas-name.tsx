@@ -45,10 +45,11 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
   const createMessage = useMutation(api.messages.create);
 
   // Get channel data to use as initial canvas name
-  // Only run the query if channelId exists
-  const channelData = channelId
-    ? useQuery(api.channels.getById, { id: channelId as Id<"channels"> })
-    : null;
+  // Always call the hook, but skip the query if channelId is undefined
+  const channelData = useQuery(
+    api.channels.getById,
+    channelId ? { id: channelId } : 'skip'
+  );
 
   // Update canvas name when data is loaded or savedCanvasName is provided
   useEffect(() => {
