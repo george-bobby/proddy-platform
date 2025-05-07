@@ -39,6 +39,7 @@ import { Path } from "./path";
 import { SelectionBox } from "./selection-box";
 import { Toolbar } from "./toolbar";
 import { CanvasName } from "./canvas-name";
+import { TopToolbar } from "./top-toolbar";
 
 // Constants are now defined in the hooks
 
@@ -47,13 +48,17 @@ type CanvasProps = {
   boardId?: string;
   canvasId?: string;
   savedCanvasName?: string | null;
+  toggleFullScreen?: () => void;
+  isFullScreen?: boolean;
 };
 
-export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
+export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, isFullScreen }: CanvasProps) => {
   // Use canvasId if provided, otherwise fall back to boardId for backward compatibility
   const effectiveId = canvasId || boardId;
   // Get the room instance
   const room = useRoom();
+
+
 
   // Get the entire storage
   useStorage((root) => {
@@ -369,20 +374,26 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName }: CanvasProps) => {
 
   return (
     <main className="h-full w-full relative bg-neutral-100 touch-none">
-      <Participants />
+      <Participants isFullScreen={isFullScreen} />
       <CanvasName savedCanvasName={savedCanvasName} />
-      <Toolbar
+      <TopToolbar
         canvasState={canvasState}
         setCanvasState={setCanvasState}
+        onColorChange={setLastUsedColor}
+        currentColor={lastUsedColor}
+        strokeWidth={strokeWidth}
+        onStrokeWidthChange={setStrokeWidth}
+        toggleFullScreen={toggleFullScreen}
+        isFullScreen={isFullScreen}
+      />
+      <Toolbar
+        onColorChange={setLastUsedColor}
+        currentColor={lastUsedColor}
         canRedo={canRedo}
         canUndo={canUndo}
         undo={history.undo}
         redo={history.redo}
         effectiveId={effectiveId}
-        onColorChange={setLastUsedColor}
-        currentColor={lastUsedColor}
-        strokeWidth={strokeWidth}
-        onStrokeWidthChange={setStrokeWidth}
       />
 
       <svg

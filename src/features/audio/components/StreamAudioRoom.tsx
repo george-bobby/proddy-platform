@@ -17,9 +17,10 @@ interface StreamAudioRoomProps {
   workspaceId: string;
   channelId: string;
   canvasName?: string;
+  isFullScreen?: boolean;
 }
 
-export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName }: StreamAudioRoomProps) => {
+export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, isFullScreen }: StreamAudioRoomProps) => {
   const [retryKey, setRetryKey] = useState(0);
   const [showFallbackUI, setShowFallbackUI] = useState(false);
 
@@ -153,7 +154,7 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName }: 
       {client && call && currentUser ? (
         <StreamVideo client={client}>
           <StreamCall call={call}>
-            <AudioRoomUI />
+            <AudioRoomUI isFullScreen={isFullScreen} />
           </StreamCall>
         </StreamVideo>
       ) : (
@@ -164,9 +165,11 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName }: 
   );
 };
 
-interface AudioRoomUIProps {}
+interface AudioRoomUIProps {
+  isFullScreen?: boolean;
+}
 
-const AudioRoomUI = ({}: AudioRoomUIProps) => {
+const AudioRoomUI = ({ isFullScreen }: AudioRoomUIProps) => {
   const { useParticipants, useLocalParticipant } = useCallStateHooks();
   const participants = useParticipants();
   const localParticipant = useLocalParticipant();
@@ -193,7 +196,7 @@ const AudioRoomUI = ({}: AudioRoomUIProps) => {
       <ParticipantsAudio participants={participants} />
 
       {/* Audio controls */}
-      <div className="fixed bottom-4 right-4 z-50 bg-white rounded-md p-1.5 shadow-md">
+      <div className={`fixed ${isFullScreen ? 'bottom-8 right-8' : 'bottom-4 right-4'} z-50 bg-white rounded-md p-3 shadow-md`}>
         <AudioToolbarButton />
       </div>
     </div>

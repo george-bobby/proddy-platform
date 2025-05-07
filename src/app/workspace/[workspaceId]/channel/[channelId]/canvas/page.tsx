@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useChannelId } from '@/hooks/use-channel-id';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
@@ -39,9 +39,36 @@ const CanvasPage = () => {
     const [roomId, setRoomId] = useState<string | null>(null);
     const [canvasName, setCanvasName] = useState<string | null>(null);
     const [liveMessageId, setLiveMessageId] = useState<Id<"messages"> | null>(null);
+    const [isFullScreen, setIsFullScreen] = useState(false);
+
+    // Create a reference to the main container for full screen functionality
+    const pageContainerRef = useRef<HTMLDivElement>(null);
 
     // Get current user
     const { data: currentUser } = useCurrentUser();
+
+    // Function to toggle full screen
+    const toggleFullScreen = useCallback(() => {
+        if (!document.fullscreenElement) {
+            // Enter full screen - use the page container element
+            if (pageContainerRef?.current) {
+                pageContainerRef.current.requestFullscreen().then(() => {
+                    setIsFullScreen(true);
+                }).catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            }
+        } else {
+            // Exit full screen
+            if (document.exitFullscreen) {
+                document.exitFullscreen().then(() => {
+                    setIsFullScreen(false);
+                }).catch(err => {
+                    console.error(`Error attempting to exit full-screen mode: ${err.message}`);
+                });
+            }
+        }
+    }, [pageContainerRef]);
 
     // Mutations for updating and creating messages
     const updateMessage = useMutation(api.messages.update);
@@ -218,6 +245,21 @@ const CanvasPage = () => {
         }
     }, [roomId, channelId, workspaceId, currentUser, messages, findLiveMessage]);
 
+    // Effect to handle full screen change events
+    useEffect(() => {
+        const handleFullScreenChange = () => {
+            // Check if our page container is the fullscreen element
+            const isPageFullScreen = document.fullscreenElement === pageContainerRef?.current;
+            setIsFullScreen(isPageFullScreen);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullScreenChange);
+
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullScreenChange);
+        };
+    }, [pageContainerRef]);
+
     // Effect to handle cleanup when the component unmounts
     useEffect(() => {
         return () => {
@@ -295,8 +337,8 @@ const CanvasPage = () => {
 
     return (
         <CanvasLiveblocksProvider roomId={roomId}>
-            <div className="flex flex-col h-full">
-                <CanvasActiveUsers />
+            <div ref={pageContainerRef} className="flex flex-col h-full">
+                <CanvasActiveUsers isFullScreen={isFullScreen} />
                 {liveMessageId && currentUser && (
                     <CanvasParticipantsTracker
                         roomId={roomId}
@@ -310,6 +352,8 @@ const CanvasPage = () => {
                         <CanvasCanvas
                             canvasId={channelId}
                             savedCanvasName={canvasName}
+                            toggleFullScreen={toggleFullScreen}
+                            isFullScreen={isFullScreen}
                         />
                     </div>
                 </div>
@@ -320,9 +364,9 @@ const CanvasPage = () => {
                         workspaceId={workspaceId}
                         channelId={channelId}
                         canvasName={canvasName || 'Canvas Audio Room'}
+                        isFullScreen={isFullScreen}
                     />
                 )}
-
             </div>
         </CanvasLiveblocksProvider>
     );
