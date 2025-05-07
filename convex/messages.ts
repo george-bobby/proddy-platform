@@ -325,21 +325,23 @@ export const create = mutation({
               }
 
               // Check for @username mentions
-              for (const [memberId, name] of memberIdToName.entries()) {
+              // Use Array.from to convert Map entries to an array for compatibility
+              Array.from(memberIdToName.entries()).forEach(([memberId, name]) => {
                 if (op.insert.includes(`@${name}`)) {
                   mentionedMemberIds.add(memberId);
                 }
-              }
+              });
             }
           }
         }
       } catch (e) {
         // Not JSON, check for @username mentions in plain text
-        for (const [memberId, name] of memberIdToName.entries()) {
+        // Use Array.from to convert Map entries to an array for compatibility
+        Array.from(memberIdToName.entries()).forEach(([memberId, name]) => {
           if (args.body.includes(`@${name}`)) {
             mentionedMemberIds.add(memberId);
           }
-        }
+        });
       }
 
 
