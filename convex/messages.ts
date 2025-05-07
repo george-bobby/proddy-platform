@@ -344,10 +344,8 @@ export const create = mutation({
         });
       }
 
-
-
       // Create mention records for each mentioned member
-      for (const mentionedMemberId of mentionedMemberIds) {
+      for (const mentionedMemberId of Array.from(mentionedMemberIds)) {
         await ctx.db.insert('mentions', {
           messageId,
           mentionedMemberId,
