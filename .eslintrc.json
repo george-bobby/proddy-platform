@@ -4,16 +4,11 @@
     "es2021": true
   },
   "extends": [
-    "next/core-web-vitals",
-    "plugin:prettier/recommended"
+    "next/core-web-vitals"
+    // Remove: "plugin:prettier/recommended"
   ],
   "rules": {
-    "prettier/prettier": [
-      "warn",
-      {
-        "endOfLine": "auto"
-      }
-    ],
+    "prettier/prettier": "off", // Turn off Prettier checks
     "react/react-in-jsx-scope": "off"
   }
 }
