@@ -19,7 +19,11 @@ export function useCanvasState(initialColor: Color = { r: 0, g: 0, b: 0 }) {
 
   // Helper functions to update canvas state
   const setMode = (mode: CanvasMode) => {
-    setCanvasState({ mode });
+    if (mode === CanvasMode.None) {
+      setCanvasState({ mode: CanvasMode.None });
+    } else {
+      console.error(`Unsupported mode: ${mode}`);
+    }
   };
 
   const setPressing = (origin: Point) => {
