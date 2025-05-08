@@ -342,19 +342,23 @@ export const ExportCanvasDialog = ({
       console.log(`Found ${canvasElements.length} potential canvas elements`);
 
       // Log all potential canvas elements for debugging
-      canvasElements.forEach((el, index) => {
-        console.log(`Canvas element ${index}: tag=${el.tagName}, class=${el.className}, id=${el.id}`);
+      canvasElements.forEach((element, index) => {
+        // Use type assertion to access element properties safely
+        const el = element as HTMLElement;
+        console.log(`Canvas element ${index}: tag=${el.tagName || 'unknown'}, class=${el.className || 'none'}, id=${el.id || 'none'}`);
       });
 
       // Try to find the element with the most child nodes (likely the main canvas)
       let mainCanvas: Element | null = null;
       let maxChildren = 0;
 
-      canvasElements.forEach(el => {
+      canvasElements.forEach(element => {
+        // Use type assertion to access element properties safely
+        const el = element as HTMLElement;
         const childCount = el.childElementCount;
         if (childCount > maxChildren) {
           maxChildren = childCount;
-          mainCanvas = el;
+          mainCanvas = element;
         }
       });
 
@@ -363,15 +367,30 @@ export const ExportCanvasDialog = ({
         return null;
       }
 
-      console.log(`Selected main canvas: tag=${mainCanvas.tagName}, children=${maxChildren}`);
+      console.log(`Selected main canvas: tag=${(mainCanvas as HTMLElement).tagName || 'unknown'}, children=${maxChildren}`);
 
       // Create a canvas element for rendering
       const canvas = document.createElement("canvas");
-      const rect = mainCanvas.getBoundingClientRect();
 
-      // Set canvas size to match the element
-      canvas.width = rect.width || 800;
-      canvas.height = rect.height || 600;
+      // Get dimensions safely
+      let width = 800;
+      let height = 600;
+
+      try {
+        // Use type assertion to avoid TypeScript errors
+        const element = mainCanvas as HTMLElement;
+        if (element && typeof element.getBoundingClientRect === 'function') {
+          const rect = element.getBoundingClientRect();
+          width = rect.width || width;
+          height = rect.height || height;
+        }
+      } catch (error) {
+        console.error("Error getting element dimensions:", error);
+      }
+
+      // Set canvas size
+      canvas.width = width;
+      canvas.height = height;
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
@@ -384,8 +403,9 @@ export const ExportCanvasDialog = ({
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // If it's an SVG element, render it directly
-      if (mainCanvas.tagName.toLowerCase() === 'svg') {
-        const svgData = new XMLSerializer().serializeToString(mainCanvas);
+      const elementType = (mainCanvas as HTMLElement).tagName;
+      if (elementType && elementType.toLowerCase() === 'svg') {
+        const svgData = new XMLSerializer().serializeToString(mainCanvas as SVGElement);
         const img = new Image();
 
         return new Promise((resolve) => {
@@ -407,9 +427,13 @@ export const ExportCanvasDialog = ({
 
       // For other elements, try to capture using a screenshot approach
       try {
-        // Draw the element directly
-        ctx.drawImage(mainCanvas as any, 0, 0);
-        return canvas.toDataURL("image/png");
+        // Only attempt to draw if it's a valid canvas or image element
+        if (elementType && (elementType.toLowerCase() === 'canvas' || elementType.toLowerCase() === 'img')) {
+          ctx.drawImage(mainCanvas as HTMLCanvasElement | HTMLImageElement, 0, 0);
+          return canvas.toDataURL("image/png");
+        } else {
+          throw new Error(`Cannot directly draw element of type ${elementType}`);
+        }
       } catch (e) {
         console.error("Error drawing element to canvas:", e);
 
@@ -417,7 +441,7 @@ export const ExportCanvasDialog = ({
         const html2canvas = (window as any).html2canvas;
         if (html2canvas) {
           try {
-            const capturedCanvas = await html2canvas(mainCanvas);
+            const capturedCanvas = await html2canvas(mainCanvas as HTMLElement);
             return capturedCanvas.toDataURL("image/png");
           } catch (e2) {
             console.error("html2canvas failed:", e2);
