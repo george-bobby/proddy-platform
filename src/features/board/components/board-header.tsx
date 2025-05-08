@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, LayoutGrid, Table, BarChart, Calendar, Clock, GanttChart } from 'lucide-react';
+import { Search, Filter, LayoutGrid, Table, BarChart, Clock, GanttChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +11,8 @@ interface BoardHeaderProps {
   title?: string;
   totalCards: number;
   listsCount: number;
-  view: 'kanban' | 'table' | 'calendar' | 'gantt';
-  setView: (view: 'kanban' | 'table' | 'calendar' | 'gantt') => void;
+  view: 'kanban' | 'table' | 'gantt';
+  setView: (view: 'kanban' | 'table' | 'gantt') => void;
   onAddList: () => void;
   onSearch?: (query: string) => void;
 }
@@ -104,105 +104,52 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
           />
         </form>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">
-              Current View: <span className="font-semibold text-foreground">
-                {view === 'kanban' && 'Kanban'}
-                {view === 'table' && 'Table'}
-                {view === 'calendar' && 'Calendar'}
-                {view === 'gantt' && 'Gantt Chart'}
-              </span>
-            </span>
-          </div>
-          <div className="flex items-center gap-3 bg-white/80 p-1 rounded-md border shadow-sm">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1 flex items-center gap-1.5",
-                      view === 'kanban' && "bg-primary/10 text-primary font-medium"
-                    )}
-                    onClick={() => setView('kanban')}
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                    <span className="text-xs hidden sm:inline">Kanban</span>
-                    {view === 'kanban' && <span className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-0.5 -right-0.5"></span>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Kanban View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1 bg-white/90 p-1 rounded-lg border shadow-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "px-3 py-1.5 flex items-center gap-2 rounded-md transition-all duration-200",
+                view === 'kanban'
+                  ? "bg-primary/15 text-primary font-medium shadow-sm border-primary/20 border"
+                  : "hover:bg-gray-100 text-gray-700"
+              )}
+              onClick={() => setView('kanban')}
+            >
+              <LayoutGrid className={cn("w-4 h-4", view === 'kanban' ? "text-primary" : "text-gray-500")} />
+              <span className="text-xs font-medium">Kanban</span>
+            </Button>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1 flex items-center gap-1.5",
-                      view === 'table' && "bg-secondary/10 text-secondary font-medium"
-                    )}
-                    onClick={() => setView('table')}
-                  >
-                    <Table className="w-4 h-4" />
-                    <span className="text-xs hidden sm:inline">Table</span>
-                    {view === 'table' && <span className="w-1.5 h-1.5 rounded-full bg-secondary absolute -top-0.5 -right-0.5"></span>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Table View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "px-3 py-1.5 flex items-center gap-2 rounded-md transition-all duration-200",
+                view === 'table'
+                  ? "bg-primary/15 text-primary font-medium shadow-sm border-primary/20 border"
+                  : "hover:bg-gray-100 text-gray-700"
+              )}
+              onClick={() => setView('table')}
+            >
+              <Table className={cn("w-4 h-4", view === 'table' ? "text-primary" : "text-gray-500")} />
+              <span className="text-xs font-medium">Table</span>
+            </Button>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1 flex items-center gap-1.5",
-                      view === 'calendar' && "bg-primary/10 text-primary font-medium"
-                    )}
-                    onClick={() => setView('calendar')}
-                  >
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-xs hidden sm:inline">Calendar</span>
-                    {view === 'calendar' && <span className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-0.5 -right-0.5"></span>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Calendar View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("px-2 py-1 flex items-center gap-1.5",
-                      view === 'gantt' && "bg-secondary/10 text-secondary font-medium"
-                    )}
-                    onClick={() => setView('gantt')}
-                  >
-                    <GanttChart className="w-4 h-4" />
-                    <span className="text-xs hidden sm:inline">Gantt</span>
-                    {view === 'gantt' && <span className="w-1.5 h-1.5 rounded-full bg-secondary absolute -top-0.5 -right-0.5"></span>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Gantt Chart View</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "px-3 py-1.5 flex items-center gap-2 rounded-md transition-all duration-200",
+                view === 'gantt'
+                  ? "bg-primary/15 text-primary font-medium shadow-sm border-primary/20 border"
+                  : "hover:bg-gray-100 text-gray-700"
+              )}
+              onClick={() => setView('gantt')}
+            >
+              <GanttChart className={cn("w-4 h-4", view === 'gantt' ? "text-primary" : "text-gray-500")} />
+              <span className="text-xs font-medium">Gantt</span>
+            </Button>
           </div>
         </div>
       </div>

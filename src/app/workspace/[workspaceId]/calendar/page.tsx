@@ -1,14 +1,15 @@
 'use client';
 
-import { addMonths, format, getMonth, getYear, subMonths } from 'date-fns';
-import { CalendarIcon, ChevronLeft, ChevronRight, Loader, MessageSquare, Trello } from 'lucide-react';
+import { addMonths, getMonth, getYear, subMonths } from 'date-fns';
+import { CalendarIcon, Loader } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import Renderer from '@/components/renderer';
 import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
-import { CalendarFilter, CalendarFilterOptions } from '@/features/calendar/components/calendar-filter';
+import { CalendarFilterOptions, EventType } from '@/features/calendar/components/calendar-filter';
+import { CalendarHeader } from '@/features/calendar/components/calendar-header';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
 import { Id } from '@/../convex/_generated/dataModel';
@@ -44,6 +45,20 @@ interface BoardCard {
   channelName: string;
 }
 
+interface Task {
+  _id: Id<'tasks'>;
+  title: string;
+  description?: string;
+  completed: boolean;
+  status?: 'not_started' | 'in_progress' | 'completed' | 'on_hold' | 'cancelled';
+  dueDate: number;
+  priority?: 'low' | 'medium' | 'high';
+  categoryId?: Id<'categories'>;
+  categoryName?: string;
+  categoryColor?: string;
+  userId: Id<'users'>;
+}
+
 interface CalendarEvent {
   _id: Id<'events'>;
   _creationTime: number;
@@ -53,6 +68,7 @@ interface CalendarEvent {
   type: string; // Using string instead of union type to accommodate all possible values
   boardCard?: BoardCard;
   message?: CalendarEventMessage | null; // Allow null values
+  task?: Task | null; // Allow null values for task data
   user?: CalendarEventUser | null; // Allow null values
   memberId: Id<'members'>;
   workspaceId: Id<'workspaces'>;
@@ -77,7 +93,7 @@ const CalendarPage = () => {
 
   // Filter state
   const [filterOptions, setFilterOptions] = useState<CalendarFilterOptions>({
-    eventType: 'all',
+    eventTypes: ['message', 'board-card', 'task'], // Default to showing all event types
   });
 
   const handlePreviousMonth = () => {
@@ -96,27 +112,33 @@ const CalendarPage = () => {
   const filteredEvents = useMemo(() => {
     if (!events) return [];
 
+    // If no event types are selected, show nothing
+    if (filterOptions.eventTypes.length === 0) return [];
+
     return events.filter(event => {
       // Filter by event type
-      if (filterOptions.eventType !== 'all') {
-        if (filterOptions.eventType === 'message') {
-          return event.type === 'calendar-event';
-        }
-        return event.type === filterOptions.eventType;
+      if (event.type === 'calendar-event' && filterOptions.eventTypes.includes('message')) {
+        return true;
       }
-
-      return true;
+      if (event.type === 'board-card' && filterOptions.eventTypes.includes('board-card')) {
+        return true;
+      }
+      if (event.type === 'task' && filterOptions.eventTypes.includes('task')) {
+        return true;
+      }
+      return false;
     });
   }, [events, filterOptions]);
 
   // Count events by type for stats
   const eventCounts = useMemo(() => {
-    if (!events) return { total: 0, message: 0, boardCard: 0 };
+    if (!events) return { total: 0, message: 0, boardCard: 0, task: 0 };
 
     return {
       total: events.length,
       message: events.filter(event => event.type === 'calendar-event').length,
-      boardCard: events.filter(event => event.type === 'board-card').length
+      boardCard: events.filter(event => event.type === 'board-card').length,
+      task: events.filter(event => event.type === 'task').length
     };
   }, [events]);
 
@@ -193,55 +215,14 @@ const CalendarPage = () => {
         </Button>
       </WorkspaceToolbar>
       <div className="flex h-full flex-col bg-white">
-        <div className="flex items-center justify-between px-6 py-3 border-t">
-          <div className="flex items-center gap-2">
-            <CalendarFilter
-              filterOptions={filterOptions}
-              onFilterChange={handleFilterChange}
-            />
-            <div className="text-sm text-muted-foreground flex items-center gap-2">
-              {filterOptions.eventType === 'all' ? (
-                <>
-                  <span>Showing all events ({eventCounts.total}):</span>
-                  <div className="flex items-center gap-1">
-                    <MessageSquare className="h-3 w-3 text-primary" />
-                    <span>{eventCounts.message}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Trello className="h-3 w-3 text-secondary" />
-                    <span>{eventCounts.boardCard}</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span>Showing</span>
-                  {filterOptions.eventType === 'message' ? (
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3 text-primary" />
-                      <span>{eventCounts.message} message events</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <Trello className="h-3 w-3 text-secondary" />
-                      <span>{eventCounts.boardCard} board card events</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="min-w-[120px] text-center font-medium">
-              {format(currentDate, 'MMMM yyyy')}
-            </div>
-            <Button variant="outline" size="sm" onClick={handleNextMonth}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <CalendarHeader
+          currentDate={currentDate}
+          onPreviousMonth={handlePreviousMonth}
+          onNextMonth={handleNextMonth}
+          filterOptions={filterOptions}
+          onFilterChange={handleFilterChange}
+          eventCounts={eventCounts}
+        />
         <div className="flex-1 overflow-auto p-4">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
@@ -286,23 +267,29 @@ const CalendarPage = () => {
                                 href={
                                   event.type === 'board-card' && event.boardCard
                                     ? `/workspace/${workspaceId}/channel/${event.boardCard.channelId}/board`
-                                    : event.message?.channelId
-                                      ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
-                                      : event.message?.conversationId
-                                        ? `/workspace/${workspaceId}/member/${event.memberId}`
-                                        : '#'
+                                    : event.type === 'task' && event.task
+                                      ? `/workspace/${workspaceId}/tasks`
+                                      : event.message?.channelId
+                                        ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
+                                        : event.message?.conversationId
+                                          ? `/workspace/${workspaceId}/member/${event.memberId}`
+                                          : '#'
                                 }
                                 key={event._id}
                                 className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
-                                  ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
-                                  : 'bg-primary/10 hover:bg-primary/20 border-l-2 border-primary'
+                                    ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                    : event.type === 'task'
+                                      ? 'bg-tertiary/10 hover:bg-tertiary/20 border-l-2 border-tertiary'
+                                      : 'bg-primary/10 hover:bg-primary/20 border-l-2 border-primary'
                                   }`}
                                 title={
                                   event.type === 'board-card' && event.boardCard
                                     ? `${event.boardCard.title} (${event.boardCard.listTitle})`
-                                    : event?.message?.body
-                                      ? JSON.parse(event.message.body).ops[0].insert
-                                      : ''
+                                    : event.type === 'task' && event.task
+                                      ? `${event.task.title}${event.task.categoryName ? ` (${event.task.categoryName})` : ''}`
+                                      : event?.message?.body
+                                        ? JSON.parse(event.message.body).ops[0].insert
+                                        : ''
                                 }
                               >
                                 {event.time && (
@@ -315,6 +302,17 @@ const CalendarPage = () => {
                                       {event.type === 'board-card' && 'boardCard' in event && event.boardCard && event.boardCard.description && (
                                         <div className="text-[8px] text-muted-foreground truncate">
                                           {event.boardCard.description}
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : event.type === 'task' && event.task ? (
+                                    <>
+                                      <div className={`font-medium ${event.task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                        {event.task.title}
+                                      </div>
+                                      {event.task.description && (
+                                        <div className="text-[8px] text-muted-foreground truncate">
+                                          {event.task.description}
                                         </div>
                                       )}
                                     </>
@@ -331,6 +329,8 @@ const CalendarPage = () => {
                                   <span>
                                     {event.type === 'board-card' ? (
                                       <>Board Card in {event.boardCard?.listTitle}</>
+                                    ) : event.type === 'task' ? (
+                                      <>Task {event.task?.categoryName ? `in ${event.task.categoryName}` : ''}</>
                                     ) : (
                                       <>Calendar Event by {event?.user?.name || 'Unknown'}</>
                                     )}
@@ -343,6 +343,21 @@ const CalendarPage = () => {
                                         : 'bg-primary/20 text-primary'
                                       }`}>
                                       {event.boardCard.priority}
+                                    </span>
+                                  )}
+                                  {event.type === 'task' && event.task?.priority && (
+                                    <span className={`text-[8px] px-1 rounded ${event.task.priority === 'high'
+                                      ? 'bg-destructive/20 text-destructive'
+                                      : event.task.priority === 'medium'
+                                        ? 'bg-secondary/20 text-secondary'
+                                        : 'bg-primary/20 text-primary'
+                                      }`}>
+                                      {event.task.priority}
+                                    </span>
+                                  )}
+                                  {event.type === 'task' && event.task?.completed && (
+                                    <span className="text-[8px] px-1 rounded bg-green-100 text-green-600">
+                                      Completed
                                     </span>
                                   )}
                                 </div>

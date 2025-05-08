@@ -16,7 +16,6 @@ import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
 import BoardKanbanView from '@/features/board/components/board-kanban-view';
 import BoardTableView from '@/features/board/components/board-table-view';
-import BoardCalendarView from '@/features/board/components/board-calendar-view';
 import BoardGanttView from '@/features/board/components/board-gantt-view';
 import BoardHeader from '@/features/board/components/board-header';
 
@@ -26,7 +25,7 @@ const BoardPage = () => {
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
     const members = useQuery(api.board.getMembersForChannel, { channelId }) || [];
-    const [view, setView] = useState<'kanban' | 'table' | 'calendar' | 'gantt'>('kanban');
+    const [view, setView] = useState<'kanban' | 'table' | 'gantt'>('kanban');
 
     // Modal state
     const [addListOpen, setAddListOpen] = useState(false);
@@ -313,24 +312,6 @@ const BoardPage = () => {
 
                 {view === 'table' && (
                     <BoardTableView
-                        lists={lists}
-                        allCards={allCards}
-                        onEditCard={(card) => {
-                            setEditCardOpen({ card });
-                            setCardTitle(card.title);
-                            setCardDesc(card.description || '');
-                            setCardLabels((card.labels || []).join(', '));
-                            setCardPriority(card.priority || '');
-                            setCardDueDate(card.dueDate ? new Date(card.dueDate) : undefined);
-                            setCardAssignees(card.assignees || []);
-                        }}
-                        onDeleteCard={handleDeleteCard}
-                        members={members}
-                    />
-                )}
-
-                {view === 'calendar' && (
-                    <BoardCalendarView
                         lists={lists}
                         allCards={allCards}
                         onEditCard={(card) => {
