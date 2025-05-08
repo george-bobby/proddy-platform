@@ -26,7 +26,11 @@ interface CurrentUser extends User {
 // Constants
 const MAX_SHOWN_OTHER_USERS = 2;
 
-export const Participants = () => {
+interface ParticipantsProps {
+  isFullScreen?: boolean;
+}
+
+export const Participants = ({ isFullScreen }: ParticipantsProps = {}) => {
   // Fetch real participants from the database
   const { participants, currentParticipant, participantCount, isLoading } = useChannelParticipants();
   const room = useRoom();
@@ -44,7 +48,7 @@ export const Participants = () => {
   const hasMoreUsers = participants.length > MAX_SHOWN_OTHER_USERS;
 
   return (
-    <div className="absolute h-12 top-32 right-2 bg-white rounded-md p-3 flex items-center shadow-md z-50">
+    <div className={`absolute h-12 ${isFullScreen ? 'top-8' : 'top-32'} right-8 bg-white rounded-md p-3 flex items-center shadow-md z-50`}>
       <div className="flex items-center">
         {participantCount > 0 && (
           <span className="text-sm font-medium mr-2">
@@ -88,10 +92,10 @@ export const Participants = () => {
   );
 };
 
-export const ParticipantsSkeleton = () => {
+export const ParticipantsSkeleton = ({ isFullScreen }: ParticipantsProps = {}) => {
   return (
     <div
-      className="w-[100px] absolute h-12 top-32 right-2 bg-white rounded-md p-3 flex items-center shadow-md z-50"
+      className={`w-[100px] absolute h-12 ${isFullScreen ? 'top-8' : 'top-32'} right-8 bg-white rounded-md p-3 flex items-center shadow-md z-50`}
       aria-hidden
     />
   );
