@@ -80,13 +80,13 @@ export const TopToolbar = ({
         <ToolButton
           label="Select"
           icon={MousePointer2}
-          onClick={() => setCanvasState({ mode: CanvasMode.None })}
+          onClick={() => setCanvasState?.({ mode: CanvasMode.None })}
           isActive={
-            canvasState.mode === CanvasMode.None ||
-            canvasState.mode === CanvasMode.Translating ||
-            canvasState.mode === CanvasMode.SelectionNet ||
-            canvasState.mode === CanvasMode.Pressing ||
-            canvasState.mode === CanvasMode.Resizing
+            canvasState?.mode === CanvasMode.None ||
+            canvasState?.mode === CanvasMode.Translating ||
+            canvasState?.mode === CanvasMode.SelectionNet ||
+            canvasState?.mode === CanvasMode.Pressing ||
+            canvasState?.mode === CanvasMode.Resizing
           }
         />
 
@@ -94,14 +94,14 @@ export const TopToolbar = ({
           label="Text"
           icon={Type}
           onClick={() =>
-            setCanvasState({
+            setCanvasState?.({
               mode: CanvasMode.Inserting,
               layerType: LayerType.Text,
             })
           }
           isActive={
-            canvasState.mode === CanvasMode.Inserting &&
-            canvasState.layerType === LayerType.Text
+            canvasState?.mode === CanvasMode.Inserting &&
+            canvasState?.layerType === LayerType.Text
           }
         />
 
@@ -109,14 +109,14 @@ export const TopToolbar = ({
           label="Sticky note"
           icon={StickyNote}
           onClick={() =>
-            setCanvasState({
+            setCanvasState?.({
               mode: CanvasMode.Inserting,
               layerType: LayerType.Note,
             })
           }
           isActive={
-            canvasState.mode === CanvasMode.Inserting &&
-            canvasState.layerType === LayerType.Note
+            canvasState?.mode === CanvasMode.Inserting &&
+            canvasState?.layerType === LayerType.Note
           }
         />
 
@@ -124,14 +124,14 @@ export const TopToolbar = ({
           label="Rectangle"
           icon={Square}
           onClick={() =>
-            setCanvasState({
+            setCanvasState?.({
               mode: CanvasMode.Inserting,
               layerType: LayerType.Rectangle,
             })
           }
           isActive={
-            canvasState.mode === CanvasMode.Inserting &&
-            canvasState.layerType === LayerType.Rectangle
+            canvasState?.mode === CanvasMode.Inserting &&
+            canvasState?.layerType === LayerType.Rectangle
           }
         />
 
@@ -139,14 +139,14 @@ export const TopToolbar = ({
           label="Ellipse"
           icon={Circle}
           onClick={() =>
-            setCanvasState({
+            setCanvasState?.({
               mode: CanvasMode.Inserting,
               layerType: LayerType.Ellipse,
             })
           }
           isActive={
-            canvasState.mode === CanvasMode.Inserting &&
-            canvasState.layerType === LayerType.Ellipse
+            canvasState?.mode === CanvasMode.Inserting &&
+            canvasState?.layerType === LayerType.Ellipse
           }
         />
 
@@ -154,22 +154,22 @@ export const TopToolbar = ({
           label="Pen"
           icon={Pencil}
           onClick={() =>
-            setCanvasState({
+            setCanvasState?.({
               mode: CanvasMode.Pencil,
             })
           }
-          isActive={canvasState.mode === CanvasMode.Pencil}
+          isActive={canvasState?.mode === CanvasMode.Pencil}
         />
 
         <ToolButton
           label="Eraser"
           icon={Eraser}
           onClick={() =>
-            setCanvasState({
+            setCanvasState?.({
               mode: CanvasMode.Eraser,
             })
           }
-          isActive={canvasState.mode === CanvasMode.Eraser}
+          isActive={canvasState?.mode === CanvasMode.Eraser}
         />
 
         {/* Divider */}
@@ -179,7 +179,7 @@ export const TopToolbar = ({
         <ToolButton
           label={isFullScreen ? "Exit Full Screen" : "Full Screen"}
           icon={isFullScreen ? Minimize2 : Maximize2}
-          onClick={toggleFullScreen}
+          onClick={() => toggleFullScreen?.()}
           isActive={isFullScreen}
         />
       </div>
