@@ -210,8 +210,77 @@ export const getCalendarEvents = query({
       };
     });
 
-    // Combine both types of events
-    return [...messageEvents, ...boardEvents];
+    // Get tasks with due dates for this month that belong to the current user
+    const tasks = await ctx.db
+      .query('tasks')
+      .withIndex('by_workspace_id_user_id', q =>
+        q.eq('workspaceId', args.workspaceId).eq('userId', userId as Id<'users'>)
+      )
+      .filter(q =>
+        q.and(
+          q.neq(q.field('dueDate'), undefined),
+          q.gte(q.field('dueDate'), startDate),
+          q.lte(q.field('dueDate'), endDate)
+        )
+      )
+      .collect();
+
+    // Get categories for tasks
+    const categoryIds = tasks
+      .map(task => task.categoryId)
+      .filter(Boolean) as Id<'categories'>[];
+
+    // Get unique category IDs
+    const uniqueCategoryIds = Array.from(new Set(categoryIds));
+
+    // Fetch categories
+    const categories = await Promise.all(
+      uniqueCategoryIds.map(async (categoryId) => {
+        return await ctx.db.get(categoryId);
+      })
+    );
+
+    // Create a map of category ID to category
+    const categoryMap = new Map(
+      categories.map(category => [category?._id, category])
+    );
+
+    // Convert tasks to calendar events
+    const taskEvents = tasks.map(task => {
+      const category = task.categoryId ? categoryMap.get(task.categoryId) : null;
+
+      return {
+        _id: task._id as unknown as Id<'events'>, // Type cast for compatibility
+        _creationTime: task.createdAt,
+        date: task.dueDate as number,
+        title: task.title,
+        time: undefined,
+        type: 'task',
+        task: {
+          _id: task._id,
+          title: task.title,
+          description: task.description,
+          completed: task.completed,
+          status: task.status,
+          dueDate: task.dueDate,
+          priority: task.priority,
+          categoryId: task.categoryId,
+          categoryName: category ? category.name : undefined,
+          categoryColor: category ? category.color : undefined,
+          userId: task.userId
+        },
+        user: {
+          _id: userId as Id<'users'>,
+          name: 'Task',
+          image: null
+        },
+        memberId: member._id,
+        workspaceId: args.workspaceId
+      };
+    });
+
+    // Combine all types of events
+    return [...messageEvents, ...boardEvents, ...taskEvents];
   },
 });
 
