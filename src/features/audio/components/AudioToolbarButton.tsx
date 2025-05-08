@@ -4,9 +4,9 @@ import { useCallStateHooks, useCall, OwnCapability } from '@stream-io/video-reac
 import { toast } from 'sonner';
 import { ToolButton } from '@/features/canvas/components/tool-button';
 
-interface AudioToolbarButtonProps {}
+interface AudioToolbarButtonProps { }
 
-export const AudioToolbarButton = ({}: AudioToolbarButtonProps) => {
+export const AudioToolbarButton = ({ }: AudioToolbarButtonProps) => {
   const call = useCall();
   const { useMicrophoneState, useHasPermissions } = useCallStateHooks();
   const { microphone, isMute } = useMicrophoneState();
@@ -74,9 +74,9 @@ export const AudioToolbarButton = ({}: AudioToolbarButtonProps) => {
           mutation.addedNodes.forEach(node => {
             if (node.nodeName === 'AUDIO') {
               (node as HTMLAudioElement).muted = speakerMuted;
-            } else if (node.querySelectorAll) {
+            } else if (node instanceof Element) {
               const audioNodes = node.querySelectorAll('audio');
-              audioNodes.forEach(audio => {
+              audioNodes.forEach((audio: HTMLAudioElement) => {
                 audio.muted = speakerMuted;
               });
             }
@@ -161,7 +161,7 @@ export const AudioToolbarButton = ({}: AudioToolbarButtonProps) => {
         />
         {speakerMuted && (
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
-               title="Speaker is muted. Click to unmute and hear others." />
+            title="Speaker is muted. Click to unmute and hear others." />
         )}
       </div>
 
@@ -183,7 +183,7 @@ export const AudioToolbarButton = ({}: AudioToolbarButtonProps) => {
           />
           {isMute && (
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
-                 title="Microphone is muted. Click to unmute and speak." />
+              title="Microphone is muted. Click to unmute and speak." />
           )}
         </div>
       )}
