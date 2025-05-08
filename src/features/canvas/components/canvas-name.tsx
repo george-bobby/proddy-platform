@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Edit2, Save, FilePlus } from "lucide-react";
+import { Edit2, Save, FilePlus, Download } from "lucide-react";
 import { useChannelId } from "@/hooks/use-channel-id";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -16,6 +16,7 @@ import { useRoom } from "../../../../liveblocks.config";
 import { SaveCanvasDialog } from "./save-canvas-dialog";
 import { SavedCanvasesDropdown } from "./saved-dropdown";
 import { NewCanvasDialog } from "./new-canvas-dialog";
+import { ExportCanvasDialog } from "./export-canvas-dialog";
 
 interface CanvasNameProps {
   savedCanvasName?: string | null;
@@ -30,6 +31,7 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
   const [inputValue, setInputValue] = useState("");
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isNewCanvasConfirmOpen, setIsNewCanvasConfirmOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   // Track if this is an existing saved canvas
   const [isExistingSavedCanvas, setIsExistingSavedCanvas] = useState(false);
@@ -242,6 +244,16 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
                   <FilePlus className="h-3.5 w-3.5" />
                 </Button>
               </Hint>
+              <Hint label="Export Canvas" side="right">
+                <Button
+                  onClick={() => setIsExportDialogOpen(true)}
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+              </Hint>
             </div>
           </div>
         )}
@@ -257,6 +269,12 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
         open={isNewCanvasConfirmOpen}
         onOpenChange={setIsNewCanvasConfirmOpen}
         onConfirm={handleNewCanvas}
+      />
+
+      <ExportCanvasDialog
+        open={isExportDialogOpen}
+        onOpenChange={setIsExportDialogOpen}
+        canvasName={canvasName}
       />
     </>
   );

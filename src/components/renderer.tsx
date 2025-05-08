@@ -5,6 +5,7 @@ import { addMentionClickHandlers } from '@/lib/mention-handler';
 import { useGetMembers } from '@/features/members/api/use-get-members';
 import { CanvasMessage } from '@/features/messages/components/canvas-message';
 import { CanvasLiveMessage } from '@/features/messages/components/canvas-live-message';
+import { CanvasExportMessage } from '@/features/messages/components/canvas-export-message';
 
 interface RendererProps {
   value: string;
@@ -40,9 +41,19 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     }
   };
 
+  // Check if this is a canvas export message
+  const isCanvasExportMessage = () => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed.type === 'canvas-export';
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
-    // If this is a canvas message or live canvas message, don't process with Quill
-    if (isCanvasMessage() || isCanvasLiveMessage()) {
+    // If this is a canvas message, live canvas message, or canvas export message, don't process with Quill
+    if (isCanvasMessage() || isCanvasLiveMessage() || isCanvasExportMessage()) {
       setIsEmpty(false);
       return;
     }
@@ -166,6 +177,17 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     } catch (e) {
       console.error("Error parsing live canvas data:", e);
       return <div>Error displaying live canvas</div>;
+    }
+  }
+
+  // If this is a canvas export message, render the CanvasExportMessage component
+  if (isCanvasExportMessage()) {
+    try {
+      const canvasExportData = JSON.parse(value);
+      return <CanvasExportMessage data={canvasExportData} />;
+    } catch (e) {
+      console.error("Error parsing canvas export data:", e);
+      return <div>Error displaying canvas export</div>;
     }
   }
 
