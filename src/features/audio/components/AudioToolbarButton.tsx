@@ -74,7 +74,7 @@ export const AudioToolbarButton = ({ }: AudioToolbarButtonProps) => {
           mutation.addedNodes.forEach(node => {
             if (node.nodeName === 'AUDIO') {
               (node as HTMLAudioElement).muted = speakerMuted;
-            } else if (node instanceof Element) {
+            } else if (node.querySelectorAll) {
               const audioNodes = node.querySelectorAll('audio');
               audioNodes.forEach(audio => {
                 audio.muted = speakerMuted;
