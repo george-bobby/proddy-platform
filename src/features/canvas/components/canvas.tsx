@@ -409,16 +409,23 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
             transform: `translate(${camera.x}px, ${camera.y}px)`,
           }}
         >
-          {Array.isArray(layerIds) && layerIds.length > 0 ? (
-            layerIds.map((layerId) => (
-              <LayerPreview
-                key={layerId}
-                id={layerId}
-                onLayerPointerDown={onLayerPointerDown}
-                selectionColor={layerIdsToColorSelection[layerId]}
-              />
-            ))
-          ) : (
+          {/* Render all layers */}
+          {Array.isArray(layerIds) && layerIds.map((layerId) => (
+            <LayerPreview
+              key={layerId}
+              id={layerId}
+              onLayerPointerDown={onLayerPointerDown}
+              selectionColor={layerIdsToColorSelection[layerId]}
+            />
+          ))}
+
+          {/* Show empty canvas message only if no layers, no active drawing, and not in an active tool mode */}
+          {Array.isArray(layerIds) &&
+           layerIds.length === 0 &&
+           (!pencilDraft || pencilDraft.length === 0) &&
+           canvasState.mode !== CanvasMode.Inserting &&
+           canvasState.mode !== CanvasMode.Pencil &&
+           canvasState.mode !== CanvasMode.Eraser && (
             <g>
               {/* Empty canvas state */}
               <text
