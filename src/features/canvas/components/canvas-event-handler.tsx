@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "../../../../liveblocks.config";
-import { Camera, CanvasMode, CanvasState, Color, Point } from "../../../types/canvas";
+import { Camera, CanvasMode, CanvasState, Color, LayerType, Point } from "../../../types/canvas";
 import { findLayerAtPoint, pointerEventToCanvasPoint } from "../../../lib/utils";
 
 interface CanvasEventHandlerProps {
@@ -192,16 +192,52 @@ export const CanvasEventHandler = ({
         return;
 
       history.pause();
-      e.stopPropagation();
 
+      try {
+        // Get the layer
+        const liveLayers = storage.get("layers");
+        if (!liveLayers || typeof liveLayers.get !== 'function') return;
+
+        const layer = liveLayers.get(layerId);
+        if (!layer) return;
+
+        // Check if it's a text layer
+        const isTextLayer = layer.type === LayerType.Text;
+
+        // For text layers, we handle dragging in the component itself
+        // Just select the layer and don't set the canvas state to translating
+        if (isTextLayer) {
+          // Select the layer if not already selected
+          if (!self.presence.selection.includes(layerId)) {
+            setMyPresence({ selection: [layerId] }, { addToHistory: true });
+          }
+
+          // Force a storage update to ensure changes are synchronized
+          storage.set("lastUpdate", Date.now());
+          return;
+        }
+      } catch (error) {
+        console.error("Error handling layer pointer down:", error);
+        return;
+      }
+
+      // For non-text layers, proceed with normal translation
+      // Calculate the exact pointer position in canvas coordinates
       const point = pointerEventToCanvasPoint(e, camera);
 
+      // Select the layer if not already selected
       if (!self.presence.selection.includes(layerId)) {
         setMyPresence({ selection: [layerId] }, { addToHistory: true });
       }
 
       // Store the current point for translation
-      setCanvasState({ mode: CanvasMode.Translating, current: point });
+      setCanvasState({
+        mode: CanvasMode.Translating,
+        current: point
+      });
+
+      // Force a storage update to ensure changes are synchronized
+      storage.set("lastUpdate", Date.now());
     },
     [setCanvasState, camera, history, canvasState.mode, eraseLayerById],
   );

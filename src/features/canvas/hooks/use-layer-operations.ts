@@ -51,13 +51,24 @@ export function useLayerOperations(lastUsedColor: Color) {
 
         // Create the appropriate layer data
         let layerData;
-        if (layerType === LayerType.Text || layerType === LayerType.Note) {
+        if (layerType === LayerType.Text) {
+          // For text layers, use dimensions that will auto-resize based on content
+          layerData = {
+            type: layerType,
+            x: position.x - 50, // Center at cursor
+            y: position.y - 25, // Center at cursor
+            height: 50,         // Initial height
+            width: 100,         // Initial width
+            fill: lastUsedColor,
+            value: "",
+          };
+        } else if (layerType === LayerType.Note) {
           layerData = {
             type: layerType,
             x: centerX,
             y: centerY,
             height: 100,
-            width: 100,
+            width: 200,         // Notes are wider by default
             fill: lastUsedColor,
             value: "",
           };

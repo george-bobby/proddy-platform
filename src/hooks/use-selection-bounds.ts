@@ -9,6 +9,9 @@ export const useSelectionBounds = (): XYWH | null => {
   // Always call hooks in the same order
   const selection = useSelf((me) => me.presence.selection);
 
+  // Force update when lastUpdate changes
+  const lastUpdate = useStorage((root) => root.lastUpdate);
+
   // Get the layers from storage - always call this hook regardless of selection
   const selectedLayers = useStorage((root) => {
     const layers = root.layers;
@@ -54,12 +57,44 @@ export const useSelectionBounds = (): XYWH | null => {
   for (const layer of selectedLayers) {
     if (!layer) continue;
 
-    const { x, y, width, height } = layer;
+    // Get layer properties safely
+    let x, y, width, height;
 
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x + width);
-    maxY = Math.max(maxY, y + height);
+    try {
+      // Try to get properties using get method first (for LiveObjects)
+      if (typeof layer.get === 'function') {
+        x = layer.get("x");
+        y = layer.get("y");
+        width = layer.get("width");
+        height = layer.get("height");
+      } else {
+        // Fall back to direct property access
+        x = layer.x;
+        y = layer.y;
+        width = layer.width;
+        height = layer.height;
+      }
+
+      // Ensure we have valid numbers
+      if (typeof x !== 'number' || typeof y !== 'number' ||
+          typeof width !== 'number' || typeof height !== 'number') {
+        console.warn('Invalid layer dimensions', { x, y, width, height });
+        continue;
+      }
+
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + width);
+      maxY = Math.max(maxY, y + height);
+    } catch (error) {
+      console.error("Error accessing layer properties:", error);
+      continue;
+    }
+  }
+
+  // If we couldn't calculate valid bounds, return null
+  if (minX === Infinity || minY === Infinity || maxX === -Infinity || maxY === -Infinity) {
+    return null;
   }
 
   return {

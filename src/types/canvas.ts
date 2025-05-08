@@ -56,6 +56,7 @@ export type CanvasState =
   | {
       mode: CanvasMode.Translating;
       current: Point;
+      layerPosition?: Point; // Original position of the layer when translation started
     }
   | {
       mode: CanvasMode.Inserting;

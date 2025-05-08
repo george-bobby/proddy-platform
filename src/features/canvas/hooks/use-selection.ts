@@ -81,21 +81,38 @@ export function useSelection(
       if (canvasState.mode !== CanvasMode.Resizing) return;
 
       try {
+        // Calculate new bounds based on resize operation
         const bounds = resizeBounds(
           canvasState.initialBounds,
           canvasState.corner,
           point,
         );
 
+        // Ensure minimum dimensions
+        const minWidth = 20;
+        const minHeight = 20;
+        const newBounds = {
+          ...bounds,
+          width: Math.max(bounds.width, minWidth),
+          height: Math.max(bounds.height, minHeight)
+        };
+
         const liveLayers = storage.get("layers");
 
         // Check if liveLayers is a LiveMap with a get method
         if (!liveLayers || typeof liveLayers.get !== 'function') return;
 
-        const layer = liveLayers.get(self.presence.selection[0]);
+        const layerId = self.presence.selection[0];
+        if (!layerId) return;
+
+        const layer = liveLayers.get(layerId);
 
         if (layer) {
-          layer.update(bounds);
+          // Update the layer with new bounds
+          layer.update(newBounds);
+
+          // Force a storage update to ensure changes are synchronized
+          storage.set("lastUpdate", Date.now());
         }
       } catch (error) {
         console.error("Error resizing layer:", error);
@@ -139,20 +156,42 @@ export function useSelection(
           const layer = liveLayers.get(id);
 
           if (layer) {
-            // Get current position
-            const currentX = layer.get("x");
-            const currentY = layer.get("y");
+            try {
+              // Get current position
+              let currentX, currentY;
 
-            // Update the layer position
-            layer.update({
-              x: currentX + offset.x,
-              y: currentY + offset.y,
-            });
+              // Try to get properties using get method first (for LiveObjects)
+              if (typeof layer.get === 'function') {
+                currentX = layer.get("x");
+                currentY = layer.get("y");
+              } else {
+                // Fall back to direct property access
+                currentX = layer.x;
+                currentY = layer.y;
+              }
+
+              // Ensure we have valid numbers
+              if (typeof currentX !== 'number' || typeof currentY !== 'number') {
+                console.warn('Invalid layer position', { currentX, currentY });
+                continue;
+              }
+
+              // Update the layer position
+              layer.update({
+                x: currentX + offset.x,
+                y: currentY + offset.y,
+              });
+            } catch (error) {
+              console.error("Error updating layer position:", error);
+            }
           }
         }
 
         // Update the current point for the next translation
-        setCanvasState({ mode: CanvasMode.Translating, current: point });
+        setCanvasState({
+          mode: CanvasMode.Translating,
+          current: point
+        });
 
         // Force a storage update to ensure changes are synchronized
         storage.set("lastUpdate", Date.now());
