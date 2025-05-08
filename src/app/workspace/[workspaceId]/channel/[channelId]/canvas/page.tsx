@@ -221,24 +221,30 @@ const CanvasPage = () => {
     // Effect to handle cleanup when the component unmounts
     useEffect(() => {
         return () => {
-            // When the component unmounts, remove the live message
-            if (liveMessageId) {
-                // We could delete the message here, but instead we'll just update it
-                // to show that the session has ended
-                updateMessage({
-                    id: liveMessageId,
-                    body: JSON.stringify({
-                        type: "canvas",
-                        canvasName: canvasName || "Untitled Canvas",
-                        roomId: roomId || "",
-                        savedCanvasId: `${channelId}-${Date.now()}`,
-                    }),
-                }).catch(error => {
-                    console.error("Error updating live message on unmount:", error);
-                });
+            // When the component unmounts, try to update the live message
+            // but don't worry if it fails - this is just cleanup
+            if (liveMessageId && currentUser) {
+                try {
+                    // Only attempt to update if we have a current user
+                    updateMessage({
+                        id: liveMessageId,
+                        body: JSON.stringify({
+                            type: "canvas",
+                            canvasName: canvasName || "Untitled Canvas",
+                            roomId: roomId || "",
+                            savedCanvasId: `${channelId}-${Date.now()}`,
+                        }),
+                    }).catch(error => {
+                        // Just log the error but don't let it crash the app
+                        console.log("Note: Could not update live message on unmount. This is normal if the user has logged out or changed workspaces.");
+                    });
+                } catch (error) {
+                    // Catch any synchronous errors
+                    console.log("Error in cleanup function:", error);
+                }
             }
         };
-    }, [liveMessageId, updateMessage, canvasName, roomId, channelId]);
+    }, [liveMessageId, updateMessage, canvasName, roomId, channelId, currentUser]);
 
     // Show the canvas creation UI if we don't have a roomId and we're not loading
     if (!roomId && !isLoading) {
@@ -310,7 +316,9 @@ const CanvasPage = () => {
                 {/* Audio Room Component */}
                 {roomId && (
                     <StreamAudioRoom
-                        roomId={channelId} // Use channelId for a stable room ID
+                        roomId={roomId} // Use the canvas roomId
+                        workspaceId={workspaceId}
+                        channelId={channelId}
                         canvasName={canvasName || 'Canvas Audio Room'}
                     />
                 )}
