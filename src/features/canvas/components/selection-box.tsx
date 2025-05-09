@@ -4,22 +4,7 @@ import { memo } from "react";
 
 import { useSelf, useStorage } from "../../../../liveblocks.config";
 import { LayerType, Side, type XYWH, combineSides } from "../../../types/canvas";
-
-// Custom hook to calculate selection bounds
-const useSelectionBounds = () => {
-  const selection = useSelf((me) => me.presence.selection);
-
-  // If no selection, return null
-  if (!selection.length) return null;
-
-  // Mock implementation that returns a fixed bounds
-  return {
-    x: 100,
-    y: 100,
-    width: 200,
-    height: 150
-  };
-};
+import { useSelectionBounds } from "../../../hooks/use-selection-bounds";
 
 interface SelectionBoxProps {
   onResizeHandlePointerDown: (corner: Side, initialBounds: XYWH) => void;
