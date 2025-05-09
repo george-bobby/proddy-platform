@@ -19,6 +19,7 @@ interface CanvasEventHandlerProps {
   startMultiSelection: (current: Point, origin: Point) => void;
   updateSelectionNet: (current: Point, origin: Point) => void;
   translateSelectedLayers: (point: Point) => void;
+  strokeWidth?: number; // Add stroke width prop
   history: any;
   children: (props: {
     onPointerMove: (e: React.PointerEvent) => void;
@@ -47,6 +48,7 @@ export const CanvasEventHandler = ({
   startMultiSelection,
   updateSelectionNet,
   translateSelectedLayers,
+  strokeWidth = 16, // Default to 16 if not provided
   history,
   children
 }: CanvasEventHandlerProps) => {
@@ -61,6 +63,7 @@ export const CanvasEventHandler = ({
       setMyPresence({
         cursor: current,
         penColor: self.presence.penColor || lastUsedColor,
+        strokeWidth: self.presence.strokeWidth || strokeWidth,
       });
 
       if (canvasState.mode === CanvasMode.Pressing) {
@@ -201,8 +204,9 @@ export const CanvasEventHandler = ({
         const layer = liveLayers.get(layerId);
         if (!layer) return;
 
-        // Check if it's a text layer
-        const isTextLayer = layer.type === LayerType.Text;
+        // Check if it's a text layer - need to access the value from the LiveObject
+        const layerData = layer.toObject();
+        const isTextLayer = layerData.type === LayerType.Text;
 
         // For text layers, we handle dragging in the component itself
         // Just select the layer and don't set the canvas state to translating
