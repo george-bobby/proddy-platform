@@ -234,7 +234,7 @@ export const getDirectMessagesForCurrentUser = query({
             messageId: message._id,
             text: messageText,
             timestamp: message._creationTime,
-            read: isRead !== null,
+            read: !!isRead, // Convert to boolean (null/undefined becomes false)
             author: {
               id: otherMember._id,
               name: otherMember.user.name || '',
