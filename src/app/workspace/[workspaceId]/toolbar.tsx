@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
@@ -113,6 +113,7 @@ export const WorkspaceToolbar = ({
 
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
+        {/* Notifications Button */}
         <Button
           variant="ghost"
           size="iconSm"
@@ -131,10 +132,13 @@ export const WorkspaceToolbar = ({
             )}
           </div>
         </Button>
+
+        {/* Notification Dialog */}
         <MentionsNotificationDialog
           open={notificationsOpen}
           onOpenChange={setNotificationsOpen}
         />
+
         <UserButton />
       </div>
     </nav>

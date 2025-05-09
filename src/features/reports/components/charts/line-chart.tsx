@@ -1,0 +1,209 @@
+'use client';
+
+import { useState } from 'react';
+import { cn } from '@/lib/utils';
+
+interface LineChartProps {
+  data: {
+    label: string;
+    value: number;
+  }[];
+  height?: number;
+  showPoints?: boolean;
+  showLabels?: boolean;
+  showGrid?: boolean;
+  className?: string;
+  lineColor?: string;
+  pointColor?: string;
+  formatValue?: (value: number) => string;
+  onPointClick?: (label: string, value: number, index: number) => void;
+}
+
+export const LineChart = ({
+  data,
+  height = 200,
+  showPoints = true,
+  showLabels = true,
+  showGrid = true,
+  className,
+  lineColor = 'stroke-primary',
+  pointColor = 'fill-primary',
+  formatValue = (value) => value.toString(),
+  onPointClick,
+}: LineChartProps) => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
+  if (!data || data.length === 0) {
+    return (
+      <div className={cn("flex items-center justify-center h-40 bg-muted/20 rounded-md", className)}>
+        <p className="text-muted-foreground">No data available</p>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...data.map(item => item.value));
+  const minValue = Math.min(...data.map(item => item.value));
+  const range = maxValue - minValue;
+  
+  // Add padding to the top and bottom
+  const paddingFactor = 0.1;
+  const adjustedMaxValue = maxValue + range * paddingFactor;
+  const adjustedMinValue = Math.max(0, minValue - range * paddingFactor);
+  const adjustedRange = adjustedMaxValue - adjustedMinValue;
+  
+  // Create points for the line
+  const points = data.map((item, index) => {
+    const x = (index / (data.length - 1)) * 100;
+    const y = 100 - ((item.value - adjustedMinValue) / adjustedRange) * 100;
+    return { x, y, ...item, index };
+  });
+  
+  // Create the path for the line
+  const linePath = points.map((point, index) => {
+    return index === 0 
+      ? `M ${point.x} ${point.y}` 
+      : `L ${point.x} ${point.y}`;
+  }).join(' ');
+  
+  // Create the path for the area under the line
+  const areaPath = `
+    ${linePath} 
+    L ${points[points.length - 1].x} 100 
+    L ${points[0].x} 100 
+    Z
+  `;
+  
+  return (
+    <div className={cn("w-full", className)}>
+      <div className="relative" style={{ height: `${height}px` }}>
+        <svg 
+          viewBox="0 0 100 100" 
+          className="w-full h-full overflow-visible"
+          preserveAspectRatio="none"
+        >
+          {/* Grid lines */}
+          {showGrid && (
+            <>
+              {/* Horizontal grid lines */}
+              {[0, 25, 50, 75, 100].map((y) => (
+                <line 
+                  key={`h-${y}`}
+                  x1="0" 
+                  y1={y} 
+                  x2="100" 
+                  y2={y} 
+                  className="stroke-muted stroke-[0.5]" 
+                />
+              ))}
+              
+              {/* Vertical grid lines */}
+              {points.map((point) => (
+                <line 
+                  key={`v-${point.index}`}
+                  x1={point.x} 
+                  y1="0" 
+                  x2={point.x} 
+                  y2="100" 
+                  className="stroke-muted stroke-[0.5]" 
+                />
+              ))}
+            </>
+          )}
+          
+          {/* Area under the line */}
+          <path 
+            d={areaPath} 
+            className="fill-primary/10" 
+          />
+          
+          {/* Line */}
+          <path 
+            d={linePath} 
+            className={cn("fill-none stroke-2", lineColor)} 
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          
+          {/* Points */}
+          {showPoints && points.map((point) => {
+            const isHovered = hoveredIndex === point.index;
+            
+            return (
+              <g 
+                key={point.index}
+                className="transition-transform duration-200"
+                style={{ transform: isHovered ? 'scale(1.5)' : 'scale(1)' }}
+                onMouseEnter={() => setHoveredIndex(point.index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                onClick={() => onPointClick?.(point.label, point.value, point.index)}
+              >
+                <circle 
+                  cx={point.x} 
+                  cy={point.y} 
+                  r="1.5" 
+                  className={cn(
+                    "stroke-white stroke-2", 
+                    pointColor,
+                    onPointClick && "cursor-pointer"
+                  )} 
+                />
+                
+                {isHovered && (
+                  <>
+                    {/* Tooltip */}
+                    <g transform={`translate(${point.x}, ${point.y - 10})`}>
+                      <rect 
+                        x="-15" 
+                        y="-20" 
+                        width="30" 
+                        height="20" 
+                        rx="4" 
+                        className="fill-background stroke-border" 
+                      />
+                      <text 
+                        x="0" 
+                        y="-7" 
+                        textAnchor="middle" 
+                        className="fill-foreground text-[5px]"
+                      >
+                        {formatValue(point.value)}
+                      </text>
+                    </g>
+                    
+                    {/* Vertical guide line */}
+                    <line 
+                      x1={point.x} 
+                      y1="0" 
+                      x2={point.x} 
+                      y2="100" 
+                      className="stroke-primary/30 stroke-[0.5] stroke-dashed" 
+                    />
+                  </>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      
+      {/* X-axis labels */}
+      {showLabels && (
+        <div className="flex justify-between mt-2">
+          {data.map((item, index) => (
+            <div 
+              key={index}
+              className={cn(
+                "text-xs text-muted-foreground px-1 text-center",
+                hoveredIndex === index && "font-medium text-foreground"
+              )}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {item.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

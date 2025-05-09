@@ -2,7 +2,7 @@ import { CheckSquare, ListTodo, MessageSquareText, Pencil, Smile, Trash } from '
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useMessageSelection } from '@/contexts/message-selection-context';
+import { useMessageSelection } from '@/features/ai/contexts/message-selection-context';
 import { useGetMessage } from '@/features/messages/api/use-get-message';
 import { AddMessageToTaskModal } from '@/features/tasks/components/add-message-to-task-modal';
 import type { Id } from '@/../convex/_generated/dataModel';

@@ -158,6 +158,64 @@ const schema = defineSchema({
     .index('by_card_id', ['cardId'])
     .index('by_workspace_id_mentioned_member_id', ['workspaceId', 'mentionedMemberId'])
     .index('by_workspace_id_mentioned_member_id_read', ['workspaceId', 'mentionedMemberId', 'read']),
+
+  // Analytics tables
+  userActivities: defineTable({
+    memberId: v.id('members'),
+    workspaceId: v.id('workspaces'),
+    channelId: v.optional(v.id('channels')),
+    activityType: v.string(), // 'page_view', 'message_sent', 'reaction_added', etc.
+    duration: v.number(), // time spent in milliseconds
+    metadata: v.object({
+      path: v.optional(v.string()),
+      referrer: v.optional(v.string()),
+      details: v.optional(v.string()),
+    }),
+    timestamp: v.number(),
+  })
+    .index('by_member_id', ['memberId'])
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_channel_id', ['channelId'])
+    .index('by_activity_type', ['activityType'])
+    .index('by_timestamp', ['timestamp']),
+
+  channelSessions: defineTable({
+    memberId: v.id('members'),
+    workspaceId: v.id('workspaces'),
+    channelId: v.id('channels'),
+    startTime: v.number(),
+    endTime: v.optional(v.number()),
+    duration: v.number(), // in milliseconds
+  })
+    .index('by_member_id', ['memberId'])
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_channel_id', ['channelId'])
+    .index('by_start_time', ['startTime']),
+
+  dailyStats: defineTable({
+    workspaceId: v.id('workspaces'),
+    channelId: v.optional(v.id('channels')),
+    memberId: v.optional(v.id('members')),
+    date: v.number(), // timestamp for the day (midnight)
+    messageCount: v.number(),
+    activeUserCount: v.number(),
+    totalSessionDuration: v.number(), // in milliseconds
+    avgSessionDuration: v.number(), // in milliseconds
+  })
+    .index('by_workspace_id', ['workspaceId'])
+    .index('by_channel_id', ['channelId'])
+    .index('by_member_id', ['memberId'])
+    .index('by_date', ['date'])
+    .index('by_workspace_id_date', ['workspaceId', 'date']),
+
+  directMessageReads: defineTable({
+    messageId: v.id('messages'),
+    memberId: v.id('members'),
+    timestamp: v.number(),
+  })
+    .index('by_message_id', ['messageId'])
+    .index('by_member_id', ['memberId'])
+    .index('by_message_id_member_id', ['messageId', 'memberId']),
 });
 
 export default schema;

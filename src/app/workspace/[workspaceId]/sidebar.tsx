@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  BarChart,
   CalendarIcon,
   ChevronDown,
   Loader,
@@ -235,13 +236,20 @@ export const WorkspaceSidebar = ({
           isActive={pathname.includes('/tasks')}
           isCollapsed={isCollapsed}
         />
-
         <SidebarItem
           label="Calendar"
           icon={CalendarIcon}
           id="calendar"
           href={`/workspace/${workspaceId}/calendar`}
           isActive={pathname.includes('/calendar')}
+          isCollapsed={isCollapsed}
+        />
+        <SidebarItem
+          label="Reports"
+          icon={BarChart}
+          id="reports"
+          href={`/workspace/${workspaceId}/reports`}
+          isActive={pathname.includes('/reports')}
           isCollapsed={isCollapsed}
         />
       </div>

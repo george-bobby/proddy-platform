@@ -33,6 +33,9 @@ import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { useGetMentionedMessages } from '@/features/messages/api/use-get-mentioned-messages';
 import { useMarkMentionAsRead } from '@/features/messages/api/use-mark-mention-as-read';
 import { useMarkAllMentionsAsRead } from '@/features/messages/api/use-mark-all-mentions-as-read';
+import { useGetDirectMessages } from '@/features/messages/api/use-get-direct-messages';
+import { useMarkDirectMessageAsRead } from '@/features/messages/api/use-mark-direct-message-as-read';
+import { useMarkAllDirectMessagesAsRead } from '@/features/messages/api/use-mark-all-direct-messages-as-read';
 import { Id } from '@/../convex/_generated/dataModel';
 import { Badge } from './ui/badge';
 
@@ -47,17 +50,45 @@ export const MentionsNotificationDialog = ({
 }: MentionsNotificationDialogProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
-  const { data: mentions, isLoading } = useGetMentionedMessages(true); // Get all mentions
+  const { data: mentions, isLoading: isLoadingMentions } = useGetMentionedMessages(true); // Get all mentions
+  const { data: directMessages, isLoading: isLoadingDirectMessages } = useGetDirectMessages(true); // Get all direct messages
   const markMentionAsRead = useMarkMentionAsRead();
-  const markAllAsReadMutation = useMarkAllMentionsAsRead();
+  const markDirectMessageAsRead = useMarkDirectMessageAsRead();
+  const markAllMentionsAsReadMutation = useMarkAllMentionsAsRead();
+  const markAllDirectMessagesAsReadMutation = useMarkAllDirectMessagesAsRead();
   const [activeTab, setActiveTab] = useState('all');
 
-  const handleToggleReadStatus = async (mentionId: Id<'mentions'>, currentStatus: boolean) => {
-    await markMentionAsRead(mentionId, !currentStatus);
+  // Combine mentions and direct messages
+  const allNotifications = [
+    ...(mentions || []).map((mention: any) => ({
+      ...mention,
+      type: 'mention'
+    })),
+    ...(directMessages || []).map((message: any) => ({
+      ...message,
+      type: 'direct'
+    }))
+  ];
+
+  // Sort by timestamp (newest first)
+  allNotifications.sort((a: any, b: any) => b.timestamp - a.timestamp);
+
+  const isLoading = isLoadingMentions || isLoadingDirectMessages;
+
+  const handleToggleReadStatus = async (notification: any) => {
+    if (notification.type === 'mention') {
+      await markMentionAsRead(notification.id as Id<'mentions'>, !notification.read);
+    } else if (notification.type === 'direct') {
+      await markDirectMessageAsRead(notification.messageId);
+    }
   };
 
   const handleMarkAllAsRead = async () => {
-    await markAllAsReadMutation();
+    // Mark all mentions as read
+    await markAllMentionsAsReadMutation();
+
+    // Mark all direct messages as read
+    await markAllDirectMessagesAsReadMutation();
   };
 
   const formatRelativeTime = (timestamp: number) => {
@@ -99,39 +130,46 @@ export const MentionsNotificationDialog = ({
     }
   };
 
-  // Debug the mentions data
-  console.log('MentionsNotificationDialog - Raw mentions data:', mentions);
+  // Filter notifications based on active tab
+  const filteredNotifications = allNotifications.filter((notification: any) => {
+    // Check if the notification has the required properties
+    if (!notification) return false;
 
-  // Filter mentions based on active tab
-  const filteredMentions = mentions.filter((mention: any) => {
-    // Check if the mention has the required properties
-    if (!mention || !mention.source) {
-      console.log('MentionsNotificationDialog - Invalid mention:', mention);
+    if (activeTab === 'all') return true;
+    if (activeTab === 'unread') return !notification.read;
+
+    if (activeTab === 'direct') {
+      // For the direct tab, show both direct messages and mentions in direct chats
+      if (notification.type === 'direct') return true;
+      if (notification.type === 'mention' && notification.source && notification.source.type === 'direct') return true;
       return false;
     }
 
-    if (activeTab === 'all') return true;
-    if (activeTab === 'unread') return !mention.read;
-    return mention.source && mention.source.type === activeTab;
+    // For other tabs, only show mentions of that type
+    return notification.type === 'mention' && notification.source && notification.source.type === activeTab;
   });
 
-  console.log('MentionsNotificationDialog - Filtered mentions:', {
-    activeTab,
-    filteredCount: filteredMentions.length
-  });
-
-  // Count unread mentions by type
+  // Count unread notifications by type
   const unreadCounts = {
-    all: mentions.filter((m: any) => !m.read).length || 0,
-    channel: mentions.filter((m: any) => !m.read && m.source && m.source.type === 'channel').length || 0,
-    direct: mentions.filter((m: any) => !m.read && m.source && m.source.type === 'direct').length || 0,
-    thread: mentions.filter((m: any) => !m.read && m.source && m.source.type === 'thread').length || 0,
-    card: mentions.filter((m: any) => !m.read && m.source && m.source.type === 'card').length || 0,
+    all: allNotifications.filter((n: any) => !n.read).length || 0,
+    channel: allNotifications.filter((n: any) =>
+      n.type === 'mention' && !n.read && n.source && n.source.type === 'channel'
+    ).length || 0,
+    direct: allNotifications.filter((n: any) =>
+      (n.type === 'direct' && !n.read) ||
+      (n.type === 'mention' && !n.read && n.source && n.source.type === 'direct')
+    ).length || 0,
+    thread: allNotifications.filter((n: any) =>
+      n.type === 'mention' && !n.read && n.source && n.source.type === 'thread'
+    ).length || 0,
+    card: allNotifications.filter((n: any) =>
+      n.type === 'mention' && !n.read && n.source && n.source.type === 'card'
+    ).length || 0,
   };
 
-  const renderMentionsList = (mentionsList: any[]) => (
+  const renderNotificationsList = (notificationsList: any[]) => (
     <div className="divide-y max-h-[450px] overflow-y-auto">
-      {mentionsList?.length === 0 ? (
+      {notificationsList?.length === 0 ? (
         <div className="flex h-[250px] w-full flex-col items-center justify-center gap-y-3 bg-gray-50">
           {activeTab === 'unread' ? (
             <>
@@ -140,17 +178,27 @@ export const MentionsNotificationDialog = ({
               </div>
               <h2 className="text-xl font-semibold">All caught up!</h2>
               <p className="text-sm text-muted-foreground">
-                You have no unread mentions
+                You have no unread notifications
               </p>
             </>
           ) : activeTab === 'all' ? (
             <>
               <div className="rounded-full bg-blue-100 p-3">
-                <AtSign className="size-10 text-blue-500" />
+                <Bell className="size-10 text-blue-500" />
               </div>
-              <h2 className="text-xl font-semibold">No mentions yet</h2>
+              <h2 className="text-xl font-semibold">No notifications yet</h2>
               <p className="text-sm text-muted-foreground">
-                When someone mentions you, it will appear here
+                When you receive notifications, they will appear here
+              </p>
+            </>
+          ) : activeTab === 'direct' ? (
+            <>
+              <div className="rounded-full bg-green-100 p-3">
+                <MessageSquare className="size-10 text-green-500" />
+              </div>
+              <h2 className="text-xl font-semibold">No direct messages</h2>
+              <p className="text-sm text-muted-foreground">
+                When someone sends you a direct message, it will appear here
               </p>
             </>
           ) : (
@@ -158,7 +206,7 @@ export const MentionsNotificationDialog = ({
               <div className="rounded-full bg-gray-100 p-3">
                 <Filter className="size-10 text-gray-500" />
               </div>
-              <h2 className="text-xl font-semibold">No {activeTab} mentions</h2>
+              <h2 className="text-xl font-semibold">No {activeTab} notifications</h2>
               <p className="text-sm text-muted-foreground">
                 Try checking other categories
               </p>
@@ -166,71 +214,85 @@ export const MentionsNotificationDialog = ({
           )}
         </div>
       ) : (
-        mentionsList?.map((mention: any) => (
-          <Link
-            key={mention.id}
-            href={getSourceLink(mention)}
-            onClick={() => onOpenChange(false)}
-            className={`block p-4 transition-colors hover:bg-gray-50 ${!mention.read ? 'bg-blue-50' : ''} relative group`}
-          >
-            <div className="flex items-start gap-3">
-              <Avatar className="h-10 w-10 border">
-                <AvatarImage src={mention.author.image} />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  {mention.author.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+        notificationsList?.map((notification: any) => {
+          // Determine if this is a direct message or a mention
+          const isDirect = notification.type === 'direct';
 
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">{mention.author.name}</span>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="size-3.5" />
-                    <span>{formatRelativeTime(mention.timestamp)}</span>
+          // Get the appropriate link
+          const link = isDirect
+            ? `/workspace/${workspaceId}/member/${notification.author.id}`
+            : getSourceLink(notification);
+
+          return (
+            <Link
+              key={notification.id}
+              href={link}
+              onClick={() => onOpenChange(false)}
+              className={`block p-4 transition-colors hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''} relative group`}
+            >
+              <div className="flex items-start gap-3">
+                <Avatar className="h-10 w-10 border">
+                  <AvatarImage src={notification.author.image} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                    {notification.author.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold">{notification.author.name}</span>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="size-3.5" />
+                      <span>{formatRelativeTime(notification.timestamp)}</span>
+                    </div>
+
+                    {/* Source badge - different for direct messages */}
+                    <div className="ml-auto flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium">
+                      {isDirect ? (
+                        <MessageSquare className="size-4 text-green-500" />
+                      ) : (
+                        getSourceIcon(notification.source.type)
+                      )}
+                      <span>{isDirect ? 'Direct Message' : notification.source.name}</span>
+                    </div>
                   </div>
-                  <div className="ml-auto flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium">
-                    {getSourceIcon(mention.source.type)}
-                    <span>{mention.source.name}</span>
+
+                  <p className="text-sm leading-relaxed mb-3">{notification.text}</p>
+
+                  {/* Read/Unread toggle button at the bottom */}
+                  <div className="flex justify-end mt-1">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent navigation
+                        e.stopPropagation(); // Prevent event bubbling
+                        handleToggleReadStatus(notification);
+                      }}
+                      className={`flex items-center gap-1.5 text-xs font-medium rounded px-2.5 py-1.5 transition-colors ${notification.read
+                        ? 'text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100'
+                        : 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
+                        }`}
+                    >
+                      {notification.read ? (
+                        <>
+                          <Eye className="size-3.5" />
+                          Mark as unread
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="size-3.5" />
+                          Mark as read
+                        </>
+                      )}
+                    </button>
                   </div>
+
+                  {/* Border separator below the button */}
+                  <div className="border-t mt-2"></div>
                 </div>
-
-                <p className="text-sm leading-relaxed mb-3">{mention.text}</p>
-
-                {/* No status indicator dot - using background color instead */}
-
-                {/* Read/Unread toggle button at the bottom */}
-                <div className="flex justify-end mt-1">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault(); // Prevent navigation
-                      e.stopPropagation(); // Prevent event bubbling
-                      handleToggleReadStatus(mention.id as Id<'mentions'>, mention.read);
-                    }}
-                    className={`flex items-center gap-1.5 text-xs font-medium rounded px-2.5 py-1.5 transition-colors ${mention.read
-                      ? 'text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100'
-                      : 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
-                      }`}
-                  >
-                    {mention.read ? (
-                      <>
-                        <Eye className="size-3.5" />
-                        Mark as unread
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="size-3.5" />
-                        Mark as read
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Border separator below the button */}
-                <div className="border-t mt-2"></div>
               </div>
-            </div>
-          </Link>
-        ))
+            </Link>
+          );
+        })
       )}
     </div>
   );
@@ -266,7 +328,7 @@ export const MentionsNotificationDialog = ({
             </div>
           )}
           <DialogDescription className="text-muted-foreground mt-1">
-            View and manage your mentions across channels, direct messages, and boards
+            View your direct messages and mentions across channels, conversations, and boards
           </DialogDescription>
         </DialogHeader>
 
@@ -344,7 +406,7 @@ export const MentionsNotificationDialog = ({
             </div>
 
             <TabsContent value={activeTab} className="p-0 focus:outline-none">
-              {renderMentionsList(filteredMentions)}
+              {renderNotificationsList(filteredNotifications)}
             </TabsContent>
           </Tabs>
         )}

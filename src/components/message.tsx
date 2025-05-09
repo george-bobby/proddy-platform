@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useMessageSelection } from '@/contexts/message-selection-context';
+import { useMessageSelection } from '@/features/ai/contexts/message-selection-context';
 import { useRemoveMessage } from '@/features/messages/api/use-remove-message';
 import { useUpdateMessage } from '@/features/messages/api/use-update-message';
 import { useToggleReaction } from '@/features/reactions/api/use-toggle-reaction';
