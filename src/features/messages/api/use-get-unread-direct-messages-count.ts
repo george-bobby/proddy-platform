@@ -7,7 +7,7 @@ export const useGetUnreadDirectMessagesCount = () => {
   const workspaceId = useWorkspaceId();
 
   const result = useQuery(
-    api.directMessages.getUnreadDirectMessageCount,
+    api.direct.getUnreadDirectMessageCount,
     workspaceId ? {
       workspaceId
     } : "skip"

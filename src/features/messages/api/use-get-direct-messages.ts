@@ -8,7 +8,7 @@ export const useGetDirectMessages = (includeRead?: boolean) => {
 
   // Use the direct query
   const result = useQuery(
-    api.directMessages.getDirectMessagesForCurrentUser,
+    api.direct.getDirectMessagesForCurrentUser,
     workspaceId ? {
       workspaceId,
       includeRead

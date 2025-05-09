@@ -208,7 +208,7 @@ const schema = defineSchema({
     .index('by_date', ['date'])
     .index('by_workspace_id_date', ['workspaceId', 'date']),
 
-  directMessageReads: defineTable({
+  directReads: defineTable({
     messageId: v.id('messages'),
     memberId: v.id('members'),
     timestamp: v.number(),

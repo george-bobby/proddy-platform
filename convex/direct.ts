@@ -84,7 +84,7 @@ const getUnreadDirectMessages = async (ctx: QueryCtx, workspaceId: Id<'workspace
       for (const message of recentMessages) {
         // Check if this message has already been read
         const isRead = await ctx.db
-          .query('directMessageReads')
+          .query('directReads')
           .withIndex('by_message_id_member_id', (q) =>
             q.eq('messageId', message._id).eq('memberId', currentMember._id)
           )
@@ -201,7 +201,7 @@ export const getDirectMessagesForCurrentUser = query({
         for (const message of recentMessages) {
           // Check if this message has already been read
           const isRead = await ctx.db
-            .query('directMessageReads')
+            .query('directReads')
             .withIndex('by_message_id_member_id', (q) =>
               q.eq('messageId', message._id).eq('memberId', currentMember._id)
             )
@@ -286,7 +286,7 @@ export const markDirectMessageAsRead = mutation({
 
       // Check if this message is already marked as read
       const existingRead = await ctx.db
-        .query('directMessageReads')
+        .query('directReads')
         .withIndex('by_message_id_member_id', (q) =>
           q.eq('messageId', args.messageId).eq('memberId', currentMember._id)
         )
@@ -298,7 +298,7 @@ export const markDirectMessageAsRead = mutation({
       }
 
       // Mark the message as read
-      await ctx.db.insert('directMessageReads', {
+      await ctx.db.insert('directReads', {
         messageId: args.messageId,
         memberId: currentMember._id,
         timestamp: Date.now(),
@@ -360,7 +360,7 @@ export const markAllDirectMessagesAsRead = mutation({
         for (const message of unreadMessages) {
           // Check if already read
           const existingRead = await ctx.db
-            .query('directMessageReads')
+            .query('directReads')
             .withIndex('by_message_id_member_id', (q) =>
               q.eq('messageId', message._id).eq('memberId', currentMember._id)
             )
@@ -368,7 +368,7 @@ export const markAllDirectMessagesAsRead = mutation({
 
           // If not already read, mark it as read
           if (!existingRead) {
-            await ctx.db.insert('directMessageReads', {
+            await ctx.db.insert('directReads', {
               messageId: message._id,
               memberId: currentMember._id,
               timestamp: Date.now(),
