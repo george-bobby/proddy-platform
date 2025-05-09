@@ -6,7 +6,7 @@ import { useRef, useEffect, useState } from "react";
 
 import { cn, colorToCSS } from "../../../lib/utils";
 import type { TextLayer } from "../../../types/canvas";
-import { useMutation, useStorage } from "../../../../liveblocks.config";
+import { useMutation, useStorage, useSelf } from "../../../../liveblocks.config";
 
 const font = Kalam({
   subsets: ["latin"],
@@ -74,14 +74,12 @@ export const Text = ({
     initialPositionRef.current = { x, y };
   }, [x, y]);
 
-  // Force update when lastUpdate changes
-  const lastUpdate = useStorage((root) => root.lastUpdate);
+  // Force update when lastUpdate changes - used for reactivity
+  useStorage((root) => root.lastUpdate);
 
-  // Get current selection state
-  const isSelected = useStorage((root) => {
-    const myPresence = root.presence?.get(root.self?.id);
-    return myPresence?.selection?.includes(id) || false;
-  });
+  // Get current selection state using useSelf
+  const self = useSelf();
+  const isSelected = self.presence.selection.includes(id);
 
   // Sync with selection state
   useEffect(() => {
@@ -130,7 +128,7 @@ export const Text = ({
     try {
       // Validate input
       if (typeof newPosition.x !== 'number' || typeof newPosition.y !== 'number' ||
-          isNaN(newPosition.x) || isNaN(newPosition.y)) {
+        isNaN(newPosition.x) || isNaN(newPosition.y)) {
         console.error("Invalid position values:", newPosition);
         return;
       }
@@ -181,8 +179,25 @@ export const Text = ({
     // Get plain text from clipboard
     const text = e.clipboardData.getData('text/plain');
 
-    // Insert at cursor position or replace selection
-    document.execCommand('insertText', false, text);
+    // Get the current selection
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      // Get the current range
+      const range = selection.getRangeAt(0);
+
+      // Delete any selected content
+      range.deleteContents();
+
+      // Insert the text at the current position
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+
+      // Move the cursor to the end of the inserted text
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
 
     // Get the updated content
     if (contentRef.current) {
@@ -245,12 +260,18 @@ export const Text = ({
       const dx = e.clientX - dragStartRef.current.x;
       const dy = e.clientY - dragStartRef.current.y;
 
-      // Only update if there's actual movement
-      if (dx === 0 && dy === 0) return;
+      // Only update if there's actual movement (with a small threshold to avoid micro-movements)
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
 
       // Calculate new position based on the initial position plus the delta
-      const newX = initialPositionRef.current.x + dx;
-      const newY = initialPositionRef.current.y + dy;
+      const newX = Math.round(initialPositionRef.current.x + dx);
+      const newY = Math.round(initialPositionRef.current.y + dy);
+
+      // Validate the new position values
+      if (isNaN(newX) || isNaN(newY) || !isFinite(newX) || !isFinite(newY)) {
+        console.warn("Invalid position values calculated:", { newX, newY });
+        return;
+      }
 
       // Update position
       updatePosition({
@@ -276,6 +297,10 @@ export const Text = ({
 
         // Reset dragging state
         setIsDragging(false);
+
+        // Force a storage update to ensure changes are synchronized
+        // This helps ensure other users see the final position
+        updatePosition({ x, y });
       }
     } catch (error) {
       console.error("Error during text pointer up:", error);
@@ -349,7 +374,12 @@ export const Text = ({
             overflow: "hidden",
             userSelect: isEditing ? "text" : "none",
             pointerEvents: isEditing ? "auto" : "none",
+            wordBreak: "break-word", // Improve text wrapping
+            lineHeight: "1.2", // Improve readability
+            padding: "4px", // Add some padding for better text display
           }}
+          aria-label={isEditing ? "Editable text" : "Text element"}
+          role={isEditing ? "textbox" : "presentation"}
         />
       </div>
     </foreignObject>
