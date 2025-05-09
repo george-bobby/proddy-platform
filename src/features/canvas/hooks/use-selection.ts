@@ -160,14 +160,22 @@ export function useSelection(
               // Get current position
               let currentX, currentY;
 
-              // Try to get properties using get method first (for LiveObjects)
-              if (typeof layer.get === 'function') {
+              // Try to get properties using toObject method first (for LiveObjects)
+              if (typeof layer.toObject === 'function') {
+                const layerData = layer.toObject();
+                currentX = layerData.x;
+                currentY = layerData.y;
+              } else if (typeof layer.get === 'function') {
+                // Alternatively, use get method
                 currentX = layer.get("x");
                 currentY = layer.get("y");
               } else {
-                // Fall back to direct property access
-                currentX = layer.x;
-                currentY = layer.y;
+                // Fall back to direct property access as a last resort
+                // This should not be needed with proper LiveObjects
+                console.warn('Using direct property access on layer - this may cause type errors');
+                const layerAny = layer as any;
+                currentX = layerAny.x;
+                currentY = layerAny.y;
               }
 
               // Ensure we have valid numbers

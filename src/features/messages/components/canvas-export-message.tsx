@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, ExternalLink, PaintBucket } from "lucide-react";
@@ -55,7 +56,7 @@ export const CanvasExportMessage = ({ data }: CanvasExportMessageProps) => {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-      } 
+      }
       else if (data.exportFormat === "json") {
         if (!data.jsonData) {
           toast.error("JSON data not found");
@@ -86,6 +87,9 @@ export const CanvasExportMessage = ({ data }: CanvasExportMessageProps) => {
     }
   };
 
+  // Check if the image data is a data URL (starts with data:)
+  const isDataUrl = data.imageData?.startsWith('data:');
+
   return (
     <Card className="w-full max-w-sm bg-white shadow-md">
       <CardHeader className="pb-2">
@@ -97,11 +101,22 @@ export const CanvasExportMessage = ({ data }: CanvasExportMessageProps) => {
       <CardContent className="pb-2">
         {data.imageData && (data.exportFormat === "png" || data.exportFormat === "svg") && (
           <div className="relative aspect-video w-full overflow-hidden rounded-md">
-            <img 
-              src={data.imageData} 
-              alt={data.canvasName} 
-              className="h-full w-full object-cover"
-            />
+            {isDataUrl ? (
+              <img
+                src={data.imageData}
+                alt={data.canvasName || "Canvas export"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image
+                src={data.imageData}
+                alt={data.canvasName || "Canvas export"}
+                fill
+                sizes="(max-width: 768px) 100vw, 400px"
+                className="object-cover"
+                priority
+              />
+            )}
           </div>
         )}
         {data.exportFormat === "json" && (
@@ -111,18 +126,18 @@ export const CanvasExportMessage = ({ data }: CanvasExportMessageProps) => {
         )}
       </CardContent>
       <CardFooter className="flex justify-between pt-1">
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           className="text-xs"
           onClick={handleOpenCanvas}
         >
           <ExternalLink className="h-3 w-3 mr-1" />
           Open Canvas
         </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           className="text-xs"
           onClick={handleDownload}
           disabled={isDownloading}
