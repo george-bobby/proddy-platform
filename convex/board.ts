@@ -2,7 +2,6 @@ import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
-import { api } from './_generated/api';
 
 // LISTS
 export const createList = mutation({
@@ -100,7 +99,7 @@ export const createCard = mutation({
 
         // Create a mention for each assignee
         for (const assigneeId of args.assignees) {
-          const mentionId = await ctx.db.insert('mentions', {
+          await ctx.db.insert('mentions', {
             mentionedMemberId: assigneeId,
             mentionerMemberId: creator._id,
             workspaceId: channel.workspaceId,
@@ -110,6 +109,7 @@ export const createCard = mutation({
             cardId: cardId, // Add the card ID to the mention
             cardTitle: args.title, // Include the card title for context
           });
+<<<<<<< HEAD
 
           // Send an email notification for the mention
           try {
@@ -150,6 +150,8 @@ export const createCard = mutation({
               // Don't throw the error, as we still want to continue processing
             }
           }
+=======
+>>>>>>> parent of b3398e4 (emails)
         }
       } catch (error) {
         console.error('Error creating mentions for card assignees:', error);
@@ -230,7 +232,7 @@ export const updateCard = mutation({
 
         // Create mentions for new assignees
         for (const assigneeId of newAssignees) {
-          const mentionId = await ctx.db.insert('mentions', {
+          await ctx.db.insert('mentions', {
             mentionedMemberId: assigneeId,
             mentionerMemberId: updater._id,
             workspaceId: channel.workspaceId,
@@ -240,6 +242,7 @@ export const updateCard = mutation({
             cardId: cardId, // Add the card ID to the mention
             cardTitle: updates.title || card.title, // Include the card title for context
           });
+<<<<<<< HEAD
 
           // Send an email notification for the mention
           try {
@@ -280,6 +283,8 @@ export const updateCard = mutation({
               // Don't throw the error, as we still want to continue processing
             }
           }
+=======
+>>>>>>> parent of b3398e4 (emails)
         }
       } catch (error) {
         console.error('Error creating mentions for card assignees:', error);

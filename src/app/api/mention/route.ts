@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { sendOneSignalEmail } from '@/lib/onesignal';
 import { renderMentionEmail } from '@/lib/server-email';
 import { NextRequest } from 'next/server';
+=======
+import { MentionTemplate } from '@/features/emails/components/mention-template';
+>>>>>>> parent of b3398e4 (emails)
 
-export async function POST(request: NextRequest) {
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function POST() {
   try {
+<<<<<<< HEAD
     const {
       recipientEmail,
       recipientName,
@@ -49,11 +58,21 @@ export async function POST(request: NextRequest) {
     if (!result.success) {
       console.error('Error sending mention email:', result.error);
       return Response.json({ error: result.error }, { status: 500 });
+=======
+    const { data, error } = await resend.emails.send({
+      from: 'Acme <onboarding@resend.dev>',
+      to: ['delivered@resend.dev'],
+      subject: 'Hello world',
+      react: MentionTemplate({ firstName: 'John' }),
+    });
+
+    if (error) {
+      return Response.json({ error }, { status: 500 });
+>>>>>>> parent of b3398e4 (emails)
     }
 
-    return Response.json({ success: true, data: result });
+    return Response.json(data);
   } catch (error) {
-    console.error('Exception in mention email API:', error);
-    return Response.json({ error: 'Failed to send mention email' }, { status: 500 });
+    return Response.json({ error }, { status: 500 });
   }
 }
