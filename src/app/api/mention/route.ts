@@ -1,7 +1,6 @@
-import { MentionTemplate } from '@/features/emails/components/mention-template';
 import { sendOneSignalEmail } from '@/lib/onesignal';
+import { renderMentionEmail } from '@/lib/server-email';
 import { NextRequest } from 'next/server';
-import { renderToString } from 'react-dom/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,8 +26,8 @@ export async function POST(request: NextRequest) {
     // Extract first name from full name
     const firstName = recipientName.split(' ')[0];
 
-    // Create the email content
-    const emailContent = MentionTemplate({
+    // Render the email template to HTML
+    const htmlContent = await renderMentionEmail({
       firstName,
       mentionerName,
       channelName,
@@ -37,9 +36,6 @@ export async function POST(request: NextRequest) {
       channelId,
       messageId
     });
-
-    // Convert React component to HTML string
-    const htmlContent = renderToString(emailContent);
 
     // Send email using OneSignal
     const result = await sendOneSignalEmail({

@@ -1,7 +1,6 @@
-import { DirectTemplate } from '@/features/emails/components/direct-template';
 import { sendOneSignalEmail } from '@/lib/onesignal';
+import { renderDirectEmail } from '@/lib/server-email';
 import { NextRequest } from 'next/server';
-import { renderToString } from 'react-dom/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,8 +25,8 @@ export async function POST(request: NextRequest) {
     // Extract first name from full name
     const firstName = recipientName.split(' ')[0];
 
-    // Create the email content
-    const emailContent = DirectTemplate({
+    // Render the email template to HTML
+    const htmlContent = await renderDirectEmail({
       firstName,
       senderName,
       messagePreview: messagePreview || 'You have a new message',
@@ -35,9 +34,6 @@ export async function POST(request: NextRequest) {
       senderId,
       messageId
     });
-
-    // Convert React component to HTML string
-    const htmlContent = renderToString(emailContent);
 
     // Send email using OneSignal
     const result = await sendOneSignalEmail({

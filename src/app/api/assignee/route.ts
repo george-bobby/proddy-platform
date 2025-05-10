@@ -1,8 +1,7 @@
-import { AssigneeTemplate } from '@/features/emails/components/assignee-template';
 import { sendOneSignalEmail } from '@/lib/onesignal';
+import { renderAssigneeEmail } from '@/lib/server-email';
 import { format } from 'date-fns';
 import { NextRequest } from 'next/server';
-import { renderToString } from 'react-dom/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,8 +32,8 @@ export async function POST(request: NextRequest) {
     // Format due date if provided
     const formattedDueDate = dueDate ? format(new Date(dueDate), 'PPP') : undefined;
 
-    // Create the email content
-    const emailContent = AssigneeTemplate({
+    // Render the email template to HTML
+    const htmlContent = await renderAssigneeEmail({
       firstName,
       assignerName,
       taskTitle,
@@ -45,9 +44,6 @@ export async function POST(request: NextRequest) {
       boardId,
       taskId
     });
-
-    // Convert React component to HTML string
-    const htmlContent = renderToString(emailContent);
 
     // Send email using OneSignal
     const result = await sendOneSignalEmail({
