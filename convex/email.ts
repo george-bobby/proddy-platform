@@ -233,9 +233,8 @@ export const sendMentionEmail = action({
       }
 
       // Send the email using the API
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy-platform.vercel.app';
-      // Ensure we have a valid URL by using the fallback if appUrl is undefined
-      const apiUrl = appUrl ? `${appUrl}/api/mention` : 'https://proddy-platform.vercel.app/api/mention';
+      // Use hardcoded URL directly instead of environment variable
+      const apiUrl = 'https://proddy-platform.vercel.app/api/mention';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -354,9 +353,8 @@ export const sendTaskAssignmentEmail = action({
       }
 
       // Send the email using the API
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy-platform.vercel.app';
-      // Ensure we have a valid URL by using the fallback if appUrl is undefined
-      const apiUrl = appUrl ? `${appUrl}/api/assignee` : 'https://proddy-platform.vercel.app/api/assignee';
+      // Use hardcoded URL directly instead of environment variable
+      const apiUrl = 'https://proddy-platform.vercel.app/api/assignee';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -471,9 +469,8 @@ export const sendDirectMessageEmail = action({
       const messagePreview = extractMessageText(message.body);
 
       // Send the email using the API
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy-platform.vercel.app';
-      // Ensure we have a valid URL by using the fallback if appUrl is undefined
-      const apiUrl = appUrl ? `${appUrl}/api/direct` : 'https://proddy-platform.vercel.app/api/direct';
+      // Use hardcoded URL directly instead of environment variable
+      const apiUrl = 'https://proddy-platform.vercel.app/api/direct';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
