@@ -1,24 +1,71 @@
 import { AssigneeTemplate } from '@/features/emails/components/assignee-template';
+import { sendOneSignalEmail } from '@/lib/onesignal';
+import { format } from 'date-fns';
+import { NextRequest } from 'next/server';
+import { renderToString } from 'react-dom/server';
 
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
-      to: ['delivered@resend.dev'],
-      subject: 'Hello world',
-      react: AssigneeTemplate({ firstName: 'John' }),
-    });
+    const {
+      recipientEmail,
+      recipientName,
+      assignerName,
+      taskTitle,
+      taskDescription,
+      dueDate,
+      priority,
+      workspaceId,
+      boardId,
+      taskId
+    } = await request.json();
 
-    if (error) {
-      return Response.json({ error }, { status: 500 });
+    // Validate required fields
+    if (!recipientEmail || !recipientName || !assignerName || !taskTitle || !workspaceId || !taskId) {
+      return Response.json(
+        { error: 'Missing required fields for task assignment email' },
+        { status: 400 }
+      );
     }
 
-    return Response.json(data);
+    // Extract first name from full name
+    const firstName = recipientName.split(' ')[0];
+
+    // Format due date if provided
+    const formattedDueDate = dueDate ? format(new Date(dueDate), 'PPP') : undefined;
+
+    // Create the email content
+    const emailContent = AssigneeTemplate({
+      firstName,
+      assignerName,
+      taskTitle,
+      taskDescription,
+      dueDate: formattedDueDate,
+      priority,
+      workspaceId,
+      boardId,
+      taskId
+    });
+
+    // Convert React component to HTML string
+    const htmlContent = renderToString(emailContent);
+
+    // Send email using OneSignal
+    const result = await sendOneSignalEmail({
+      subject: `Task Assignment: ${taskTitle}`,
+      htmlContent,
+      emailAddress: recipientEmail,
+      fromName: 'Proddy',
+      fromEmail: process.env.EMAIL_FROM || 'notifications@proddy.app'
+    });
+
+    if (!result.success) {
+      console.error('Error sending task assignment email:', result.error);
+      return Response.json({ error: result.error }, { status: 500 });
+    }
+
+    return Response.json({ success: true, data: result });
   } catch (error) {
-    return Response.json({ error }, { status: 500 });
+    console.error('Exception in task assignment email API:', error);
+    return Response.json({ error: 'Failed to send task assignment email' }, { status: 500 });
   }
 }

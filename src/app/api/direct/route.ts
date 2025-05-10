@@ -1,24 +1,61 @@
 import { DirectTemplate } from '@/features/emails/components/direct-template';
+import { sendOneSignalEmail } from '@/lib/onesignal';
+import { NextRequest } from 'next/server';
+import { renderToString } from 'react-dom/server';
 
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>',
-      to: ['delivered@resend.dev'],
-      subject: 'Hello world',
-      react: DirectTemplate({ firstName: 'John' }),
-    });
+    const {
+      recipientEmail,
+      recipientName,
+      senderName,
+      messagePreview,
+      workspaceId,
+      senderId,
+      messageId
+    } = await request.json();
 
-    if (error) {
-      return Response.json({ error }, { status: 500 });
+    // Validate required fields
+    if (!recipientEmail || !recipientName || !senderName || !workspaceId || !senderId || !messageId) {
+      return Response.json(
+        { error: 'Missing required fields for direct message email' },
+        { status: 400 }
+      );
     }
 
-    return Response.json(data);
+    // Extract first name from full name
+    const firstName = recipientName.split(' ')[0];
+
+    // Create the email content
+    const emailContent = DirectTemplate({
+      firstName,
+      senderName,
+      messagePreview: messagePreview || 'You have a new message',
+      workspaceId,
+      senderId,
+      messageId
+    });
+
+    // Convert React component to HTML string
+    const htmlContent = renderToString(emailContent);
+
+    // Send email using OneSignal
+    const result = await sendOneSignalEmail({
+      subject: `New message from ${senderName}`,
+      htmlContent,
+      emailAddress: recipientEmail,
+      fromName: 'Proddy',
+      fromEmail: process.env.EMAIL_FROM || 'notifications@proddy.app'
+    });
+
+    if (!result.success) {
+      console.error('Error sending direct message email:', result.error);
+      return Response.json({ error: result.error }, { status: 500 });
+    }
+
+    return Response.json({ success: true, data: result });
   } catch (error) {
-    return Response.json({ error }, { status: 500 });
+    console.error('Exception in direct message email API:', error);
+    return Response.json({ error: 'Failed to send direct message email' }, { status: 500 });
   }
 }

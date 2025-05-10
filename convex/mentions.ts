@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
+import { api } from './_generated/api';
 
 // Helper function to get a member by workspace and user ID
 const getMember = async (ctx: QueryCtx, workspaceId: Id<'workspaces'>, userId: Id<'users'>) => {
@@ -549,6 +550,14 @@ export const createCompleteTestMention = mutation({
         read: false,
         createdAt: Date.now(),
       });
+
+      // Send an email notification
+      try {
+        await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, { mentionId });
+      } catch (error) {
+        console.error('Failed to schedule mention email:', error);
+        // Don't throw the error, as we still want to return the mention ID
+      }
 
       return mentionId;
     } catch (error) {

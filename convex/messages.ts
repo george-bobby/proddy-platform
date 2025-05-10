@@ -4,6 +4,7 @@ import { v } from 'convex/values';
 
 import type { Doc, Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
+import { api } from './_generated/api';
 
 const populateThread = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
   const messages = await ctx.db
@@ -266,6 +267,18 @@ export const create = mutation({
       calendarEvent: args.calendarEvent,
     });
 
+    // If this is a direct message, send an email notification
+    if (_conversationId) {
+      try {
+        await ctx.scheduler.runAfter(0, api.direct.sendDirectMessageNotification, {
+          messageId,
+        });
+      } catch (error) {
+        console.error('Failed to schedule direct message notification:', error);
+        // Don't throw the error, as we still want to return the message ID
+      }
+    }
+
     // Process mentions in the message
     try {
 
@@ -346,7 +359,7 @@ export const create = mutation({
 
       // Create mention records for each mentioned member
       for (const mentionedMemberId of Array.from(mentionedMemberIds)) {
-        await ctx.db.insert('mentions', {
+        const mentionId = await ctx.db.insert('mentions', {
           messageId,
           mentionedMemberId,
           mentionerMemberId: member._id,
@@ -357,6 +370,14 @@ export const create = mutation({
           read: false,
           createdAt: Date.now(),
         });
+
+        // Send an email notification for the mention
+        try {
+          await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, { mentionId });
+        } catch (error) {
+          console.error('Failed to schedule mention email:', error);
+          // Don't throw the error, as we still want to continue processing
+        }
       }
 
     } catch (error) {

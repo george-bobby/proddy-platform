@@ -2,6 +2,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 import { mutation, query, type QueryCtx } from './_generated/server';
 import { Id } from './_generated/dataModel';
+import { api } from './_generated/api';
 
 // Helper function to get a member by workspace and user ID
 const getMember = async (ctx: QueryCtx, workspaceId: Id<'workspaces'>, userId: Id<'users'>) => {
@@ -256,6 +257,55 @@ export const getDirectMessagesForCurrentUser = query({
     } catch (error) {
       console.error('Error in getDirectMessagesForCurrentUser:', error);
       return [];
+    }
+  },
+});
+
+// Send an email notification for a direct message
+export const sendDirectMessageNotification = mutation({
+  args: {
+    messageId: v.id('messages'),
+  },
+  handler: async (ctx, args) => {
+    try {
+      // Get the message
+      const message = await ctx.db.get(args.messageId);
+      if (!message) {
+        throw new Error('Message not found');
+      }
+
+      // Skip if not a direct message (must have conversationId)
+      if (!message.conversationId) {
+        return { success: false, reason: 'Not a direct message' };
+      }
+
+      // Get the conversation
+      const conversation = await ctx.db.get(message.conversationId);
+      if (!conversation) {
+        throw new Error('Conversation not found');
+      }
+
+      // Get the sender member
+      const senderMember = await ctx.db.get(message.memberId);
+      if (!senderMember) {
+        throw new Error('Sender member not found');
+      }
+
+      // Determine the recipient member
+      const recipientMemberId = conversation.memberOneId === message.memberId
+        ? conversation.memberTwoId
+        : conversation.memberOneId;
+
+      // Schedule the email to be sent
+      await ctx.scheduler.runAfter(0, api.email.sendDirectMessageEmail, {
+        messageId: message._id,
+        recipientMemberId,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error in sendDirectMessageNotification:', error);
+      return { success: false, error: (error as Error).message };
     }
   },
 });

@@ -2,6 +2,7 @@ import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import type { MutationCtx, QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
+import { api } from './_generated/api';
 
 // LISTS
 export const createList = mutation({
@@ -99,7 +100,7 @@ export const createCard = mutation({
 
         // Create a mention for each assignee
         for (const assigneeId of args.assignees) {
-          await ctx.db.insert('mentions', {
+          const mentionId = await ctx.db.insert('mentions', {
             mentionedMemberId: assigneeId,
             mentionerMemberId: creator._id,
             workspaceId: channel.workspaceId,
@@ -109,6 +110,30 @@ export const createCard = mutation({
             cardId: cardId, // Add the card ID to the mention
             cardTitle: args.title, // Include the card title for context
           });
+
+          // Send an email notification for the mention
+          try {
+            await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, { mentionId });
+          } catch (error) {
+            console.error('Failed to schedule mention email:', error);
+            // Don't throw the error, as we still want to continue processing
+          }
+
+          // Get the assignee member to find their user ID
+          const assignee = await ctx.db.get(assigneeId);
+          if (assignee) {
+            // Send a task assignment email
+            try {
+              await ctx.scheduler.runAfter(0, api.email.sendTaskAssignmentEmail, {
+                taskId: cardId,
+                assigneeUserId: assignee.userId,
+                assignerMemberId: creator._id,
+              });
+            } catch (error) {
+              console.error('Failed to schedule task assignment email:', error);
+              // Don't throw the error, as we still want to continue processing
+            }
+          }
         }
       } catch (error) {
         console.error('Error creating mentions for card assignees:', error);
@@ -189,7 +214,7 @@ export const updateCard = mutation({
 
         // Create mentions for new assignees
         for (const assigneeId of newAssignees) {
-          await ctx.db.insert('mentions', {
+          const mentionId = await ctx.db.insert('mentions', {
             mentionedMemberId: assigneeId,
             mentionerMemberId: updater._id,
             workspaceId: channel.workspaceId,
@@ -199,6 +224,30 @@ export const updateCard = mutation({
             cardId: cardId, // Add the card ID to the mention
             cardTitle: updates.title || card.title, // Include the card title for context
           });
+
+          // Send an email notification for the mention
+          try {
+            await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, { mentionId });
+          } catch (error) {
+            console.error('Failed to schedule mention email:', error);
+            // Don't throw the error, as we still want to continue processing
+          }
+
+          // Get the assignee member to find their user ID
+          const assignee = await ctx.db.get(assigneeId);
+          if (assignee) {
+            // Send a task assignment email
+            try {
+              await ctx.scheduler.runAfter(0, api.email.sendTaskAssignmentEmail, {
+                taskId: cardId,
+                assigneeUserId: assignee.userId,
+                assignerMemberId: updater._id,
+              });
+            } catch (error) {
+              console.error('Failed to schedule task assignment email:', error);
+              // Don't throw the error, as we still want to continue processing
+            }
+          }
         }
       } catch (error) {
         console.error('Error creating mentions for card assignees:', error);
