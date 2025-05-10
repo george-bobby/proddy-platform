@@ -1,11 +1,12 @@
 'use client';
 
-import { Bell, Search, MessageSquare } from 'lucide-react';
+import { Bell, Search, MessageSquare, Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
+import { Hint } from '@/components/hint';
 import {
   CommandDialog,
   CommandEmpty,
@@ -113,25 +114,45 @@ export const WorkspaceToolbar = ({
 
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
+        {/* Status Page Button */}
+        <Hint label="System Status - View current service status" side="bottom">
+          <Button
+            variant="ghost"
+            size="iconSm"
+            className="text-white relative hover:bg-white/15 transition-colors"
+            onClick={() => {
+              // Open status page in a new tab
+              const statusPageUrl = 'https://proddy.betteruptime.com/';
+              window.open(statusPageUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <div className="relative">
+              <Activity className="size-5" />
+            </div>
+          </Button>
+        </Hint>
+
         {/* Notifications Button */}
-        <Button
-          variant="ghost"
-          size="iconSm"
-          className="text-white relative hover:bg-white/15 transition-colors"
-          onClick={() => setNotificationsOpen(true)}
-        >
-          <div className={`relative ${!isLoadingMentions && counts && counts.total > 0 ? 'animate-pulse' : ''}`}>
-            <Bell className="size-5" />
-            {!isLoadingMentions && counts && counts.total > 0 && (
-              <Badge
-                variant="default"
-                className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500 border border-white shadow-sm"
-              >
-                {counts.total}
-              </Badge>
-            )}
-          </div>
-        </Button>
+        <Hint label="Notifications" side="bottom">
+          <Button
+            variant="ghost"
+            size="iconSm"
+            className="text-white relative hover:bg-white/15 transition-colors"
+            onClick={() => setNotificationsOpen(true)}
+          >
+            <div className={`relative ${!isLoadingMentions && counts && counts.total > 0 ? 'animate-pulse' : ''}`}>
+              <Bell className="size-5" />
+              {!isLoadingMentions && counts && counts.total > 0 && (
+                <Badge
+                  variant="default"
+                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-red-500 border border-white shadow-sm"
+                >
+                  {counts.total}
+                </Badge>
+              )}
+            </div>
+          </Button>
+        </Hint>
 
         {/* Notification Dialog */}
         <MentionsNotificationDialog
