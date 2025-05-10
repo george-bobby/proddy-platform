@@ -5,454 +5,444 @@ import type { Id } from './_generated/dataModel';
 
 // LISTS
 export const createList = mutation({
-  args: { channelId: v.id('channels'), title: v.string(), order: v.number() },
-  handler: async (ctx: MutationCtx, args: { channelId: Id<'channels'>; title: string; order: number }) => {
-    return await ctx.db.insert('lists', args);
-  },
+	args: { channelId: v.id('channels'), title: v.string(), order: v.number() },
+	handler: async (
+		ctx: MutationCtx,
+		args: { channelId: Id<'channels'>; title: string; order: number }
+	) => {
+		return await ctx.db.insert('lists', args);
+	},
 });
 
 export const updateList = mutation({
-  args: { listId: v.id('lists'), title: v.optional(v.string()), order: v.optional(v.number()) },
-  handler: async (ctx: MutationCtx, { listId, ...updates }: { listId: Id<'lists'>; title?: string; order?: number }) => {
-    return await ctx.db.patch(listId, updates);
-  },
+	args: {
+		listId: v.id('lists'),
+		title: v.optional(v.string()),
+		order: v.optional(v.number()),
+	},
+	handler: async (
+		ctx: MutationCtx,
+		{
+			listId,
+			...updates
+		}: { listId: Id<'lists'>; title?: string; order?: number }
+	) => {
+		return await ctx.db.patch(listId, updates);
+	},
 });
 
 export const deleteList = mutation({
-  args: { listId: v.id('lists') },
-  handler: async (ctx: MutationCtx, { listId }: { listId: Id<'lists'> }) => {
-    // Delete all cards in the list
-    const cards = await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', listId)).collect();
-    for (const card of cards) {
-      await ctx.db.delete(card._id);
-    }
-    // Delete the list
-    return await ctx.db.delete(listId);
-  },
+	args: { listId: v.id('lists') },
+	handler: async (ctx: MutationCtx, { listId }: { listId: Id<'lists'> }) => {
+		// Delete all cards in the list
+		const cards = await ctx.db
+			.query('cards')
+			.withIndex('by_list_id', (q) => q.eq('listId', listId))
+			.collect();
+		for (const card of cards) {
+			await ctx.db.delete(card._id);
+		}
+		// Delete the list
+		return await ctx.db.delete(listId);
+	},
 });
 
 export const reorderLists = mutation({
-  args: { listOrders: v.array(v.object({ listId: v.id('lists'), order: v.number() })) },
-  handler: async (ctx: MutationCtx, { listOrders }: { listOrders: { listId: Id<'lists'>; order: number }[] }) => {
-    for (const { listId, order } of listOrders) {
-      await ctx.db.patch(listId, { order });
-    }
-    return true;
-  },
+	args: {
+		listOrders: v.array(v.object({ listId: v.id('lists'), order: v.number() })),
+	},
+	handler: async (
+		ctx: MutationCtx,
+		{ listOrders }: { listOrders: { listId: Id<'lists'>; order: number }[] }
+	) => {
+		for (const { listId, order } of listOrders) {
+			await ctx.db.patch(listId, { order });
+		}
+		return true;
+	},
 });
 
 // CARDS
 export const createCard = mutation({
-  args: {
-    listId: v.id('lists'),
-    title: v.string(),
-    description: v.optional(v.string()),
-    order: v.number(),
-    labels: v.optional(v.array(v.string())),
-    priority: v.optional(v.union(
-      v.literal('lowest'),
-      v.literal('low'),
-      v.literal('medium'),
-      v.literal('high'),
-      v.literal('highest')
-    )),
-    dueDate: v.optional(v.number()),
-    assignees: v.optional(v.array(v.id('members'))),
-  },
-  handler: async (ctx: MutationCtx, args: {
-    listId: Id<'lists'>;
-    title: string;
-    description?: string;
-    order: number;
-    labels?: string[];
-    priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
-    dueDate?: number;
-    assignees?: Id<'members'>[];
-  }) => {
-    // Get the list to find the channel and workspace
-    const list = await ctx.db.get(args.listId);
-    if (!list) throw new Error('List not found');
+	args: {
+		listId: v.id('lists'),
+		title: v.string(),
+		description: v.optional(v.string()),
+		order: v.number(),
+		labels: v.optional(v.array(v.string())),
+		priority: v.optional(
+			v.union(
+				v.literal('lowest'),
+				v.literal('low'),
+				v.literal('medium'),
+				v.literal('high'),
+				v.literal('highest')
+			)
+		),
+		dueDate: v.optional(v.number()),
+		assignees: v.optional(v.array(v.id('members'))),
+	},
+	handler: async (
+		ctx: MutationCtx,
+		args: {
+			listId: Id<'lists'>;
+			title: string;
+			description?: string;
+			order: number;
+			labels?: string[];
+			priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+			dueDate?: number;
+			assignees?: Id<'members'>[];
+		}
+	) => {
+		// Get the list to find the channel and workspace
+		const list = await ctx.db.get(args.listId);
+		if (!list) throw new Error('List not found');
 
-    const channel = await ctx.db.get(list.channelId);
-    if (!channel) throw new Error('Channel not found');
+		const channel = await ctx.db.get(list.channelId);
+		if (!channel) throw new Error('Channel not found');
 
-    // Insert the card
-    const cardId = await ctx.db.insert('cards', args);
+		// Insert the card
+		const cardId = await ctx.db.insert('cards', args);
 
-    // Create mentions for assignees if any
-    if (args.assignees && args.assignees.length > 0) {
-      try {
-        // Get the current user/member who is creating the card
-        const auth = await ctx.auth.getUserIdentity();
-        if (!auth) throw new Error('Not authenticated');
+		// Create mentions for assignees if any
+		if (args.assignees && args.assignees.length > 0) {
+			try {
+				// Get the current user/member who is creating the card
+				const auth = await ctx.auth.getUserIdentity();
+				if (!auth) throw new Error('Not authenticated');
 
-        const userId = auth.subject.split('|')[0] as Id<'users'>;
+				const userId = auth.subject.split('|')[0] as Id<'users'>;
 
-        const creator = await ctx.db
-          .query('members')
-          .withIndex('by_workspace_id_user_id', (q) =>
-            q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
-          )
-          .unique();
+				const creator = await ctx.db
+					.query('members')
+					.withIndex('by_workspace_id_user_id', (q) =>
+						q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
+					)
+					.unique();
 
-        if (!creator) throw new Error('Creator not found');
+				if (!creator) throw new Error('Creator not found');
 
-        // Create a mention for each assignee
-        for (const assigneeId of args.assignees) {
-          await ctx.db.insert('mentions', {
-            mentionedMemberId: assigneeId,
-            mentionerMemberId: creator._id,
-            workspaceId: channel.workspaceId,
-            channelId: list.channelId,
-            read: false,
-            createdAt: Date.now(),
-            cardId: cardId, // Add the card ID to the mention
-            cardTitle: args.title, // Include the card title for context
-          });
-<<<<<<< HEAD
+				// Create a mention for each assignee
+				for (const assigneeId of args.assignees) {
+					await ctx.db.insert('mentions', {
+						mentionedMemberId: assigneeId,
+						mentionerMemberId: creator._id,
+						workspaceId: channel.workspaceId,
+						channelId: list.channelId,
+						read: false,
+						createdAt: Date.now(),
+						cardId: cardId, // Add the card ID to the mention
+						cardTitle: args.title, // Include the card title for context
+					});
+				}
+			} catch (error) {
+				console.error('Error creating mentions for card assignees:', error);
+				// Don't throw the error, as we still want to return the card ID
+			}
+		}
 
-          // Send an email notification for the mention
-          try {
-            await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, { mentionId });
-          } catch (error) {
-            console.error('Failed to schedule mention email:', error);
-            // Don't throw the error, as we still want to continue processing
-          }
-
-          // Get the assignee member to find their user ID
-          const assignee = await ctx.db.get(assigneeId);
-          if (assignee) {
-            // Send a task assignment email
-            try {
-              // Create a task record for the card to use with the email system
-              const taskId = await ctx.db.insert('tasks', {
-                title: args.title,
-                description: args.description || '',
-                completed: false,
-                status: 'not_started',
-                dueDate: args.dueDate,
-                priority: args.priority === 'medium' ? 'medium' :
-                         args.priority === 'high' || args.priority === 'highest' ? 'high' : 'low',
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-                userId: assignee.userId,
-                workspaceId: channel.workspaceId,
-              });
-
-              // Now send the email with the proper task ID
-              await ctx.scheduler.runAfter(0, api.email.sendTaskAssignmentEmail, {
-                taskId,
-                assigneeUserId: assignee.userId,
-                assignerMemberId: creator._id,
-              });
-            } catch (error) {
-              console.error('Failed to schedule task assignment email:', error);
-              // Don't throw the error, as we still want to continue processing
-            }
-          }
-=======
->>>>>>> parent of b3398e4 (emails)
-        }
-      } catch (error) {
-        console.error('Error creating mentions for card assignees:', error);
-        // Don't throw the error, as we still want to return the card ID
-      }
-    }
-
-    return cardId;
-  },
+		return cardId;
+	},
 });
 
 export const updateCard = mutation({
-  args: {
-    cardId: v.id('cards'),
-    title: v.optional(v.string()),
-    description: v.optional(v.string()),
-    order: v.optional(v.number()),
-    listId: v.optional(v.id('lists')),
-    labels: v.optional(v.array(v.string())),
-    priority: v.optional(v.union(
-      v.literal('lowest'),
-      v.literal('low'),
-      v.literal('medium'),
-      v.literal('high'),
-      v.literal('highest')
-    )),
-    dueDate: v.optional(v.number()),
-    assignees: v.optional(v.array(v.id('members'))),
-  },
-  handler: async (ctx: MutationCtx, { cardId, ...updates }: {
-    cardId: Id<'cards'>;
-    title?: string;
-    description?: string;
-    order?: number;
-    listId?: Id<'lists'>;
-    labels?: string[];
-    priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
-    dueDate?: number;
-    assignees?: Id<'members'>[];
-  }) => {
-    // Get the current card to check for changes in assignees
-    const card = await ctx.db.get(cardId);
-    if (!card) throw new Error('Card not found');
+	args: {
+		cardId: v.id('cards'),
+		title: v.optional(v.string()),
+		description: v.optional(v.string()),
+		order: v.optional(v.number()),
+		listId: v.optional(v.id('lists')),
+		labels: v.optional(v.array(v.string())),
+		priority: v.optional(
+			v.union(
+				v.literal('lowest'),
+				v.literal('low'),
+				v.literal('medium'),
+				v.literal('high'),
+				v.literal('highest')
+			)
+		),
+		dueDate: v.optional(v.number()),
+		assignees: v.optional(v.array(v.id('members'))),
+	},
+	handler: async (
+		ctx: MutationCtx,
+		{
+			cardId,
+			...updates
+		}: {
+			cardId: Id<'cards'>;
+			title?: string;
+			description?: string;
+			order?: number;
+			listId?: Id<'lists'>;
+			labels?: string[];
+			priority?: 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+			dueDate?: number;
+			assignees?: Id<'members'>[];
+		}
+	) => {
+		// Get the current card to check for changes in assignees
+		const card = await ctx.db.get(cardId);
+		if (!card) throw new Error('Card not found');
 
-    // Get the list to find the channel and workspace
-    const list = await ctx.db.get(updates.listId || card.listId);
-    if (!list) throw new Error('List not found');
+		// Get the list to find the channel and workspace
+		const list = await ctx.db.get(updates.listId || card.listId);
+		if (!list) throw new Error('List not found');
 
-    const channel = await ctx.db.get(list.channelId);
-    if (!channel) throw new Error('Channel not found');
+		const channel = await ctx.db.get(list.channelId);
+		if (!channel) throw new Error('Channel not found');
 
-    // Update the card
-    await ctx.db.patch(cardId, updates);
+		// Update the card
+		await ctx.db.patch(cardId, updates);
 
-    // Check if assignees were updated
-    if (updates.assignees !== undefined) {
-      try {
-        // Get the current user/member who is updating the card
-        const auth = await ctx.auth.getUserIdentity();
-        if (!auth) throw new Error('Not authenticated');
+		// Check if assignees were updated
+		if (updates.assignees !== undefined) {
+			try {
+				// Get the current user/member who is updating the card
+				const auth = await ctx.auth.getUserIdentity();
+				if (!auth) throw new Error('Not authenticated');
 
-        const userId = auth.subject.split('|')[0] as Id<'users'>;
+				const userId = auth.subject.split('|')[0] as Id<'users'>;
 
-        const updater = await ctx.db
-          .query('members')
-          .withIndex('by_workspace_id_user_id', (q) =>
-            q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
-          )
-          .unique();
+				const updater = await ctx.db
+					.query('members')
+					.withIndex('by_workspace_id_user_id', (q) =>
+						q.eq('workspaceId', channel.workspaceId).eq('userId', userId)
+					)
+					.unique();
 
-        if (!updater) throw new Error('Updater not found');
+				if (!updater) throw new Error('Updater not found');
 
-        // Find new assignees (those in updates.assignees but not in card.assignees)
-        const currentAssignees = card.assignees || [];
-        const newAssignees = updates.assignees.filter(
-          assigneeId => !currentAssignees.includes(assigneeId)
-        );
+				// Find new assignees (those in updates.assignees but not in card.assignees)
+				const currentAssignees = card.assignees || [];
+				const newAssignees = updates.assignees.filter(
+					(assigneeId) => !currentAssignees.includes(assigneeId)
+				);
 
-        // Create mentions for new assignees
-        for (const assigneeId of newAssignees) {
-          await ctx.db.insert('mentions', {
-            mentionedMemberId: assigneeId,
-            mentionerMemberId: updater._id,
-            workspaceId: channel.workspaceId,
-            channelId: list.channelId,
-            read: false,
-            createdAt: Date.now(),
-            cardId: cardId, // Add the card ID to the mention
-            cardTitle: updates.title || card.title, // Include the card title for context
-          });
-<<<<<<< HEAD
+				// Create mentions for new assignees
+				for (const assigneeId of newAssignees) {
+					await ctx.db.insert('mentions', {
+						mentionedMemberId: assigneeId,
+						mentionerMemberId: updater._id,
+						workspaceId: channel.workspaceId,
+						channelId: list.channelId,
+						read: false,
+						createdAt: Date.now(),
+						cardId: cardId, // Add the card ID to the mention
+						cardTitle: updates.title || card.title, // Include the card title for context
+					});
+				}
+			} catch (error) {
+				console.error('Error creating mentions for card assignees:', error);
+				// Don't throw the error, as we still want to return the card ID
+			}
+		}
 
-          // Send an email notification for the mention
-          try {
-            await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, { mentionId });
-          } catch (error) {
-            console.error('Failed to schedule mention email:', error);
-            // Don't throw the error, as we still want to continue processing
-          }
-
-          // Get the assignee member to find their user ID
-          const assignee = await ctx.db.get(assigneeId);
-          if (assignee) {
-            // Send a task assignment email
-            try {
-              // Create a task record for the card to use with the email system
-              const taskId = await ctx.db.insert('tasks', {
-                title: updates.title || card.title,
-                description: updates.description || card.description || '',
-                completed: false,
-                status: 'not_started',
-                dueDate: updates.dueDate || card.dueDate,
-                priority: (updates.priority || card.priority) === 'medium' ? 'medium' :
-                         (updates.priority || card.priority) === 'high' || (updates.priority || card.priority) === 'highest' ? 'high' : 'low',
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-                userId: assignee.userId,
-                workspaceId: channel.workspaceId,
-              });
-
-              // Now send the email with the proper task ID
-              await ctx.scheduler.runAfter(0, api.email.sendTaskAssignmentEmail, {
-                taskId,
-                assigneeUserId: assignee.userId,
-                assignerMemberId: updater._id,
-              });
-            } catch (error) {
-              console.error('Failed to schedule task assignment email:', error);
-              // Don't throw the error, as we still want to continue processing
-            }
-          }
-=======
->>>>>>> parent of b3398e4 (emails)
-        }
-      } catch (error) {
-        console.error('Error creating mentions for card assignees:', error);
-        // Don't throw the error, as we still want to return the card ID
-      }
-    }
-
-    return cardId;
-  },
+		return cardId;
+	},
 });
 
 export const deleteCard = mutation({
-  args: { cardId: v.id('cards') },
-  handler: async (ctx: MutationCtx, { cardId }: { cardId: Id<'cards'> }) => {
-    return await ctx.db.delete(cardId);
-  },
+	args: { cardId: v.id('cards') },
+	handler: async (ctx: MutationCtx, { cardId }: { cardId: Id<'cards'> }) => {
+		return await ctx.db.delete(cardId);
+	},
 });
 
 export const moveCard = mutation({
-  args: { cardId: v.id('cards'), toListId: v.id('lists'), order: v.number() },
-  handler: async (ctx: MutationCtx, { cardId, toListId, order }: { cardId: Id<'cards'>; toListId: Id<'lists'>; order: number }) => {
-    return await ctx.db.patch(cardId, { listId: toListId, order });
-  },
+	args: { cardId: v.id('cards'), toListId: v.id('lists'), order: v.number() },
+	handler: async (
+		ctx: MutationCtx,
+		{
+			cardId,
+			toListId,
+			order,
+		}: { cardId: Id<'cards'>; toListId: Id<'lists'>; order: number }
+	) => {
+		return await ctx.db.patch(cardId, { listId: toListId, order });
+	},
 });
 
 export const updateCardInGantt = mutation({
-  args: {
-    cardId: v.id('cards'),
-    dueDate: v.number(),
-    listId: v.optional(v.id('lists'))
-  },
-  handler: async (ctx: MutationCtx, { cardId, dueDate, listId }: { cardId: Id<'cards'>; dueDate: number; listId?: Id<'lists'> }) => {
-    const updates: any = { dueDate };
+	args: {
+		cardId: v.id('cards'),
+		dueDate: v.number(),
+		listId: v.optional(v.id('lists')),
+	},
+	handler: async (
+		ctx: MutationCtx,
+		{
+			cardId,
+			dueDate,
+			listId,
+		}: { cardId: Id<'cards'>; dueDate: number; listId?: Id<'lists'> }
+	) => {
+		const updates: any = { dueDate };
 
-    if (listId) {
-      updates.listId = listId;
+		if (listId) {
+			updates.listId = listId;
 
-      // If we're changing the list, put the card at the end of the new list
-      const cards = await ctx.db.query('cards')
-        .withIndex('by_list_id', q => q.eq('listId', listId))
-        .collect();
+			// If we're changing the list, put the card at the end of the new list
+			const cards = await ctx.db
+				.query('cards')
+				.withIndex('by_list_id', (q) => q.eq('listId', listId))
+				.collect();
 
-      updates.order = cards.length;
-    }
+			updates.order = cards.length;
+		}
 
-    return await ctx.db.patch(cardId, updates);
-  },
+		return await ctx.db.patch(cardId, updates);
+	},
 });
 
 // QUERIES
 export const getLists = query({
-  args: { channelId: v.id('channels') },
-  handler: async (ctx: QueryCtx, { channelId }: { channelId: Id<'channels'> }) => {
-    return await ctx.db.query('lists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).order('asc').collect();
-  },
+	args: { channelId: v.id('channels') },
+	handler: async (
+		ctx: QueryCtx,
+		{ channelId }: { channelId: Id<'channels'> }
+	) => {
+		return await ctx.db
+			.query('lists')
+			.withIndex('by_channel_id', (q) => q.eq('channelId', channelId))
+			.order('asc')
+			.collect();
+	},
 });
 
 export const getCards = query({
-  args: { listId: v.id('lists') },
-  handler: async (ctx: QueryCtx, { listId }: { listId: Id<'lists'> }) => {
-    return await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', listId)).order('asc').collect();
-  },
+	args: { listId: v.id('lists') },
+	handler: async (ctx: QueryCtx, { listId }: { listId: Id<'lists'> }) => {
+		return await ctx.db
+			.query('cards')
+			.withIndex('by_list_id', (q) => q.eq('listId', listId))
+			.order('asc')
+			.collect();
+	},
 });
 
 export const getAllCardsForChannel = query({
-  args: { channelId: v.id('channels') },
-  handler: async (ctx, { channelId }) => {
-    const lists = await ctx.db.query('lists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).collect();
-    const allCards = [];
-    for (const list of lists) {
-      const cards = await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', list._id)).collect();
-      allCards.push(...cards);
-    }
-    return allCards;
-  },
+	args: { channelId: v.id('channels') },
+	handler: async (ctx, { channelId }) => {
+		const lists = await ctx.db
+			.query('lists')
+			.withIndex('by_channel_id', (q) => q.eq('channelId', channelId))
+			.collect();
+		const allCards = [];
+		for (const list of lists) {
+			const cards = await ctx.db
+				.query('cards')
+				.withIndex('by_list_id', (q) => q.eq('listId', list._id))
+				.collect();
+			allCards.push(...cards);
+		}
+		return allCards;
+	},
 });
 
 export const getUniqueLabels = query({
-  args: { channelId: v.id('channels') },
-  handler: async (ctx, { channelId }) => {
-    const lists = await ctx.db.query('lists').withIndex('by_channel_id', q => q.eq('channelId', channelId)).collect();
-    const allLabels = new Set<string>();
+	args: { channelId: v.id('channels') },
+	handler: async (ctx, { channelId }) => {
+		const lists = await ctx.db
+			.query('lists')
+			.withIndex('by_channel_id', (q) => q.eq('channelId', channelId))
+			.collect();
+		const allLabels = new Set<string>();
 
-    for (const list of lists) {
-      const cards = await ctx.db.query('cards').withIndex('by_list_id', q => q.eq('listId', list._id)).collect();
+		for (const list of lists) {
+			const cards = await ctx.db
+				.query('cards')
+				.withIndex('by_list_id', (q) => q.eq('listId', list._id))
+				.collect();
 
-      // Collect all labels
-      for (const card of cards) {
-        if (card.labels && Array.isArray(card.labels)) {
-          card.labels.forEach(label => {
-            if (label) allLabels.add(label);
-          });
-        }
-      }
-    }
+			// Collect all labels
+			for (const card of cards) {
+				if (card.labels && Array.isArray(card.labels)) {
+					card.labels.forEach((label) => {
+						if (label) allLabels.add(label);
+					});
+				}
+			}
+		}
 
-    return Array.from(allLabels);
-  },
+		return Array.from(allLabels);
+	},
 });
 
 export const getCardsWithDueDate = query({
-  args: { workspaceId: v.id('workspaces') },
-  handler: async (ctx, { workspaceId }) => {
-    // Get all channels in the workspace
-    const channels = await ctx.db.query('channels')
-      .withIndex('by_workspace_id', q => q.eq('workspaceId', workspaceId))
-      .collect();
+	args: { workspaceId: v.id('workspaces') },
+	handler: async (ctx, { workspaceId }) => {
+		// Get all channels in the workspace
+		const channels = await ctx.db
+			.query('channels')
+			.withIndex('by_workspace_id', (q) => q.eq('workspaceId', workspaceId))
+			.collect();
 
-    const cardsWithDueDate = [];
+		const cardsWithDueDate = [];
 
-    // For each channel, get all lists and cards
-    for (const channel of channels) {
-      const lists = await ctx.db.query('lists')
-        .withIndex('by_channel_id', q => q.eq('channelId', channel._id))
-        .collect();
+		// For each channel, get all lists and cards
+		for (const channel of channels) {
+			const lists = await ctx.db
+				.query('lists')
+				.withIndex('by_channel_id', (q) => q.eq('channelId', channel._id))
+				.collect();
 
-      for (const list of lists) {
-        const cards = await ctx.db.query('cards')
-          .withIndex('by_list_id', q => q.eq('listId', list._id))
-          .filter(q => q.neq(q.field('dueDate'), undefined))
-          .collect();
+			for (const list of lists) {
+				const cards = await ctx.db
+					.query('cards')
+					.withIndex('by_list_id', (q) => q.eq('listId', list._id))
+					.filter((q) => q.neq(q.field('dueDate'), undefined))
+					.collect();
 
-        // Add channel and list info to each card
-        const cardsWithContext = cards.map(card => ({
-          ...card,
-          channelId: channel._id,
-          channelName: channel.name,
-          listTitle: list.title
-        }));
+				// Add channel and list info to each card
+				const cardsWithContext = cards.map((card) => ({
+					...card,
+					channelId: channel._id,
+					channelName: channel.name,
+					listTitle: list.title,
+				}));
 
-        cardsWithDueDate.push(...cardsWithContext);
-      }
-    }
+				cardsWithDueDate.push(...cardsWithContext);
+			}
+		}
 
-    return cardsWithDueDate;
-  },
+		return cardsWithDueDate;
+	},
 });
 
 // Get members for a channel's workspace (for assignee selection)
 export const getMembersForChannel = query({
-  args: { channelId: v.id('channels') },
-  handler: async (ctx, { channelId }) => {
-    // First get the channel to find its workspace
-    const channel = await ctx.db.get(channelId);
-    if (!channel) return [];
+	args: { channelId: v.id('channels') },
+	handler: async (ctx, { channelId }) => {
+		// First get the channel to find its workspace
+		const channel = await ctx.db.get(channelId);
+		if (!channel) return [];
 
-    const workspaceId = channel.workspaceId;
+		const workspaceId = channel.workspaceId;
 
-    // Get all members in the workspace
-    const members = await ctx.db.query('members')
-      .withIndex('by_workspace_id', q => q.eq('workspaceId', workspaceId))
-      .collect();
+		// Get all members in the workspace
+		const members = await ctx.db
+			.query('members')
+			.withIndex('by_workspace_id', (q) => q.eq('workspaceId', workspaceId))
+			.collect();
 
-    // Populate user data for each member
-    const membersWithUserData = [];
-    for (const member of members) {
-      const user = await ctx.db.get(member.userId);
-      if (user) {
-        membersWithUserData.push({
-          ...member,
-          user: {
-            name: user.name,
-            image: user.image
-          }
-        });
-      }
-    }
+		// Populate user data for each member
+		const membersWithUserData = [];
+		for (const member of members) {
+			const user = await ctx.db.get(member.userId);
+			if (user) {
+				membersWithUserData.push({
+					...member,
+					user: {
+						name: user.name,
+						image: user.image,
+					},
+				});
+			}
+		}
 
-    return membersWithUserData;
-  },
+		return membersWithUserData;
+	},
 });

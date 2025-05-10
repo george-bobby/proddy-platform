@@ -2,8 +2,6 @@
 
 # Collaborate with your team in Proddy built using Next.js
 
-![Collaborate with your team in Proddy built using Next.js](/.github/images/img_main.png 'Collaborate with your team in Proddy built using Next.js')
-
 [![GitHub license](https://flat.badgen.net/github/license/george-bobby/proddy-platform?icon=github&color=black&scale=1.01)](https://github.com/george-bobby/proddy-platform/blob/main/LICENSE 'GitHub license')
 [![Maintenance](https://flat.badgen.net/static/Maintained/yes?icon=github&color=black&scale=1.01)](https://github.com/george-bobby/proddy-platform/commits/main 'Maintenance')
 [![GitHub branches](https://flat.badgen.net/github/branches/george-bobby/proddy-platform?icon=github&color=black&scale=1.01)](https://github.com/george-bobby/proddy-platform/branches 'GitHub branches')
@@ -140,16 +138,6 @@ bunx convex env set AUTH_GITHUB_SECRET your-github-client-secret
 10. Now app is fully configured 👍 and you can start using this app using either one of `npm run dev` or `yarn dev` or `bun dev`.
 
 **NOTE:** Please make sure to keep your API keys and configuration values secure and do not expose them publicly.
-
-## :camera: Screenshots
-
-![Sign in and Sign up form using Convex Auth](/.github/images/img1.png 'Sign in and Sign up form using Convex Auth')
-
-![Modern UI/UX](/.github/images/img2.png 'Modern UI/UX')
-
-![Threads and Reactions](/.github/images/img3.png 'Threads and Reactions')
-
-![Search Channels and DMs](/.github/images/img4.png 'Search Channels and DMs')
 
 ## :gear: Tech Stack
 
