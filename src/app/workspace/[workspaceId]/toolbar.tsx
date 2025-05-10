@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, MessageSquare, Activity } from 'lucide-react';
+import { Bell, Search, MessageSquare, Activity, Map } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
@@ -115,7 +115,7 @@ export const WorkspaceToolbar = ({
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
         {/* Status Page Button */}
-        <Hint label="System Status - View current service status" side="bottom">
+        <Hint label="System Status" side="bottom">
           <Button
             variant="ghost"
             size="iconSm"
@@ -128,6 +128,24 @@ export const WorkspaceToolbar = ({
           >
             <div className="relative">
               <Activity className="size-5" />
+            </div>
+          </Button>
+        </Hint>
+
+        {/* Roadmap Button */}
+        <Hint label="Roadmap" side="bottom">
+          <Button
+            variant="ghost"
+            size="iconSm"
+            className="text-white relative hover:bg-white/15 transition-colors"
+            onClick={() => {
+              // Open roadmap page in a new tab
+              const roadmapUrl = 'https://proddy.canny.io/';
+              window.open(roadmapUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <div className="relative">
+              <Map className="size-5" />
             </div>
           </Button>
         </Hint>
