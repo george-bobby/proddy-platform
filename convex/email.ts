@@ -233,7 +233,8 @@ export const sendMentionEmail = action({
       }
 
       // Send the email using the API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/mention`, {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy-platform.vercel.app';
+      const response = await fetch(`${appUrl}/api/mention`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -351,7 +352,8 @@ export const sendTaskAssignmentEmail = action({
       }
 
       // Send the email using the API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/assignee`, {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy-platform.vercel.app';
+      const response = await fetch(`${appUrl}/api/assignee`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -465,7 +467,8 @@ export const sendDirectMessageEmail = action({
       const messagePreview = extractMessageText(message.body);
 
       // Send the email using the API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/direct`, {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy-platform.vercel.app';
+      const response = await fetch(`${appUrl}/api/direct`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
