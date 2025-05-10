@@ -124,8 +124,24 @@ export const createCard = mutation({
           if (assignee) {
             // Send a task assignment email
             try {
+              // Create a task record for the card to use with the email system
+              const taskId = await ctx.db.insert('tasks', {
+                title: args.title,
+                description: args.description || '',
+                completed: false,
+                status: 'not_started',
+                dueDate: args.dueDate,
+                priority: args.priority === 'medium' ? 'medium' :
+                         args.priority === 'high' || args.priority === 'highest' ? 'high' : 'low',
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                userId: assignee.userId,
+                workspaceId: channel.workspaceId,
+              });
+
+              // Now send the email with the proper task ID
               await ctx.scheduler.runAfter(0, api.email.sendTaskAssignmentEmail, {
-                taskId: cardId,
+                taskId,
                 assigneeUserId: assignee.userId,
                 assignerMemberId: creator._id,
               });
@@ -238,8 +254,24 @@ export const updateCard = mutation({
           if (assignee) {
             // Send a task assignment email
             try {
+              // Create a task record for the card to use with the email system
+              const taskId = await ctx.db.insert('tasks', {
+                title: updates.title || card.title,
+                description: updates.description || card.description || '',
+                completed: false,
+                status: 'not_started',
+                dueDate: updates.dueDate || card.dueDate,
+                priority: (updates.priority || card.priority) === 'medium' ? 'medium' :
+                         (updates.priority || card.priority) === 'high' || (updates.priority || card.priority) === 'highest' ? 'high' : 'low',
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                userId: assignee.userId,
+                workspaceId: channel.workspaceId,
+              });
+
+              // Now send the email with the proper task ID
               await ctx.scheduler.runAfter(0, api.email.sendTaskAssignmentEmail, {
-                taskId: cardId,
+                taskId,
                 assigneeUserId: assignee.userId,
                 assignerMemberId: updater._id,
               });
