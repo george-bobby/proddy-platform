@@ -1,7 +1,14 @@
-import { AuthScreen } from '@/features/auth/components/auth-screen';
+'use client';
+
+import { useEffect } from 'react';
+import { redirect } from 'next/navigation';
 
 const AuthPage = () => {
-  return <AuthScreen />;
+  useEffect(() => {
+    redirect('/signin');
+  }, []);
+
+  return null;
 };
 
 export default AuthPage;

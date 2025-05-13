@@ -45,12 +45,6 @@ const Topbar = () => {
       href: `/workspace/${workspaceId}/channel/${channelId}/board`,
       active: pathname.includes(`/channel/${channelId}/board`),
     },
-    {
-      label: 'Meets',
-      icon: Video,
-      href: `/workspace/${workspaceId}/channel/${channelId}/meets`,
-      active: pathname.includes(`/channel/${channelId}/meets`),
-    },
   ];
 
   // Determine the current active tab value

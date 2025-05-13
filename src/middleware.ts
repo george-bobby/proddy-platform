@@ -6,7 +6,7 @@ import {
 } from '@convex-dev/auth/nextjs/server';
 
 // Define public pages that don't require authentication
-const isPublicPage = createRouteMatcher(['/auth', '/']);
+const isPublicPage = createRouteMatcher(['/auth', '/', '/signin', '/signup']);
 
 // Define authenticated-only pages
 const isAuthenticatedOnlyPage = createRouteMatcher([
@@ -18,11 +18,16 @@ const isAuthenticatedOnlyPage = createRouteMatcher([
 export default convexAuthNextjsMiddleware((req) => {
 	// If trying to access authenticated-only pages without being logged in
 	if (isAuthenticatedOnlyPage(req) && !isAuthenticatedNextjs()) {
-		return nextjsMiddlewareRedirect(req, '/auth');
+		return nextjsMiddlewareRedirect(req, '/signin');
 	}
 
-	// If trying to access auth page while already logged in
-	if (req.nextUrl.pathname === '/auth' && isAuthenticatedNextjs()) {
+	// If trying to access auth pages while already logged in
+	if (
+		(req.nextUrl.pathname === '/auth' ||
+			req.nextUrl.pathname === '/signin' ||
+			req.nextUrl.pathname === '/signup') &&
+		isAuthenticatedNextjs()
+	) {
 		return nextjsMiddlewareRedirect(req, '/workspace');
 	}
 

@@ -1,5 +1,6 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { TriangleAlert } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
@@ -12,10 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import type { SignInFlow } from '../types';
 
 interface SignUpCardProps {
-  setState: (state: SignInFlow) => void;
+  setState?: (state: SignInFlow) => void;
+  isStandalone?: boolean;
 }
 
-export const SignUpCard = ({ setState }: SignUpCardProps) => {
+export const SignUpCard = ({ setState, isStandalone = false }: SignUpCardProps) => {
   const { signIn } = useAuthActions();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -145,13 +147,22 @@ export const SignUpCard = ({ setState }: SignUpCardProps) => {
 
         <p className="text-center text-xs text-muted-foreground">
           Already have an account?{' '}
-          <button
-            disabled={pending}
-            onClick={() => setState('signIn')}
-            className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
-          >
-            Sign in
-          </button>
+          {isStandalone ? (
+            <Link
+              href="/signin"
+              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+            >
+              Sign in
+            </Link>
+          ) : (
+            <button
+              disabled={pending}
+              onClick={() => setState?.('signIn')}
+              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+            >
+              Sign in
+            </button>
+          )}
         </p>
       </CardContent>
     </Card>

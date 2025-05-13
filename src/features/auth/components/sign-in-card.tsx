@@ -1,5 +1,6 @@
 import { useAuthActions } from '@convex-dev/auth/react';
 import { TriangleAlert } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
@@ -12,10 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import type { SignInFlow } from '../types';
 
 interface SignInCardProps {
-  setState: (state: SignInFlow) => void;
+  setState?: (state: SignInFlow) => void;
+  isStandalone?: boolean;
 }
 
-export const SignInCard = ({ setState }: SignInCardProps) => {
+export const SignInCard = ({ setState, isStandalone = false }: SignInCardProps) => {
   const { signIn } = useAuthActions();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -106,13 +108,22 @@ export const SignInCard = ({ setState }: SignInCardProps) => {
 
         <p className="text-center text-xs text-muted-foreground">
           Don&apos;t have an account?{' '}
-          <button
-            disabled={pending}
-            onClick={() => setState('signUp')}
-            className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
-          >
-            Sign up
-          </button>
+          {isStandalone ? (
+            <Link
+              href="/signup"
+              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+            >
+              Sign up
+            </Link>
+          ) : (
+            <button
+              disabled={pending}
+              onClick={() => setState?.('signUp')}
+              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+            >
+              Sign up
+            </button>
+          )}
         </p>
       </CardContent>
     </Card>
