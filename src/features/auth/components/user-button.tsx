@@ -48,7 +48,7 @@ export const UserButton = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace('/auth');
+    router.replace('/'); // Redirect to homepage after logout
   };
 
   const handleDeleteAccount = async () => {
@@ -56,7 +56,7 @@ export const UserButton = () => {
       setIsDeleting(true);
       await deleteAccount();
       await signOut();
-      router.replace('/auth');
+      router.replace('/'); // Redirect to homepage after account deletion
     } catch (error) {
       console.error('Failed to delete account:', error);
       setIsDeleting(false);
