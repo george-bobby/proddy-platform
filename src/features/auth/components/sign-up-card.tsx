@@ -114,7 +114,7 @@ export const SignUpCard = ({ setState, isStandalone = false }: SignUpCardProps) 
             required
           />
 
-          <Button type="submit" className="w-full transition-all duration-300 hover:shadow-lg" size="lg" disabled={pending}>
+          <Button type="submit" className="bg-primary w-full transition-all duration-300 hover:shadow-lg hover:bg-primary/90" size="lg" disabled={pending}>
             Continue
           </Button>
         </form>
@@ -145,12 +145,12 @@ export const SignUpCard = ({ setState, isStandalone = false }: SignUpCardProps) 
           </Button>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-secondary">
           Already have an account?{' '}
           {isStandalone ? (
             <Link
               href="/signin"
-              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+              className="text-primary cursor-pointer font-medium hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
             >
               Sign in
             </Link>

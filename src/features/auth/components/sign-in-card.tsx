@@ -75,7 +75,7 @@ export const SignInCard = ({ setState, isStandalone = false }: SignInCardProps) 
             required
           />
 
-          <Button type="submit" className="w-full transition-standard hover:shadow-lg" size="lg" disabled={pending}>
+          <Button type="submit" className="bg-primary w-full transition-standard hover:shadow-lg hover:bg-primary/90" size="lg" disabled={pending}>
             Continue
           </Button>
         </form>
@@ -106,12 +106,12 @@ export const SignInCard = ({ setState, isStandalone = false }: SignInCardProps) 
           </Button>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-secondary">
           Don&apos;t have an account?{' '}
           {isStandalone ? (
             <Link
               href="/signup"
-              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+              className="cursor-pointer font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
             >
               Sign up
             </Link>
@@ -119,7 +119,7 @@ export const SignInCard = ({ setState, isStandalone = false }: SignInCardProps) 
             <button
               disabled={pending}
               onClick={() => setState?.('signUp')}
-              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+              className="cursor-pointer font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
             >
               Sign up
             </button>

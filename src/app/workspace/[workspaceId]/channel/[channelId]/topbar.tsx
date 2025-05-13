@@ -53,7 +53,7 @@ const Topbar = () => {
   return (
     <div className="flex w-full items-center justify-center border-b bg-white shadow-sm">
       <Tabs defaultValue={activeTab} className="w-full">
-        <TabsList className="grid h-12 w-full grid-cols-5 bg-white p-0 rounded-none">
+        <TabsList className="grid h-12 w-full grid-cols-4 bg-white p-0 rounded-none">
           {tabs.map((tab) => {
             const Icon = tab.icon;
 
