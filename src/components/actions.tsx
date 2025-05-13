@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRenameModal } from "../store/use-rename-modal";
+import { useRenameModal } from "../hooks/use-rename-modal";
 
 interface ActionsProps {
     children: React.ReactNode;

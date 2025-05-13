@@ -26,13 +26,13 @@ export const LineChart = ({
   showLabels = true,
   showGrid = true,
   className,
-  lineColor = 'stroke-primary',
-  pointColor = 'fill-primary',
+  lineColor = 'stroke-secondary',
+  pointColor = 'fill-secondary',
   formatValue = (value) => value.toString(),
   onPointClick,
 }: LineChartProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  
+
   if (!data || data.length === 0) {
     return (
       <div className={cn("flex items-center justify-center h-40 bg-muted/20 rounded-md", className)}>
@@ -44,27 +44,27 @@ export const LineChart = ({
   const maxValue = Math.max(...data.map(item => item.value));
   const minValue = Math.min(...data.map(item => item.value));
   const range = maxValue - minValue;
-  
+
   // Add padding to the top and bottom
   const paddingFactor = 0.1;
   const adjustedMaxValue = maxValue + range * paddingFactor;
   const adjustedMinValue = Math.max(0, minValue - range * paddingFactor);
   const adjustedRange = adjustedMaxValue - adjustedMinValue;
-  
+
   // Create points for the line
   const points = data.map((item, index) => {
     const x = (index / (data.length - 1)) * 100;
     const y = 100 - ((item.value - adjustedMinValue) / adjustedRange) * 100;
     return { x, y, ...item, index };
   });
-  
+
   // Create the path for the line
   const linePath = points.map((point, index) => {
-    return index === 0 
-      ? `M ${point.x} ${point.y}` 
+    return index === 0
+      ? `M ${point.x} ${point.y}`
       : `L ${point.x} ${point.y}`;
   }).join(' ');
-  
+
   // Create the path for the area under the line
   const areaPath = `
     ${linePath} 
@@ -72,12 +72,12 @@ export const LineChart = ({
     L ${points[0].x} 100 
     Z
   `;
-  
+
   return (
     <div className={cn("w-full", className)}>
       <div className="relative" style={{ height: `${height}px` }}>
-        <svg 
-          viewBox="0 0 100 100" 
+        <svg
+          viewBox="0 0 100 100"
           className="w-full h-full overflow-visible"
           preserveAspectRatio="none"
         >
@@ -86,50 +86,50 @@ export const LineChart = ({
             <>
               {/* Horizontal grid lines */}
               {[0, 25, 50, 75, 100].map((y) => (
-                <line 
+                <line
                   key={`h-${y}`}
-                  x1="0" 
-                  y1={y} 
-                  x2="100" 
-                  y2={y} 
-                  className="stroke-muted stroke-[0.5]" 
+                  x1="0"
+                  y1={y}
+                  x2="100"
+                  y2={y}
+                  className="stroke-muted stroke-[0.5]"
                 />
               ))}
-              
+
               {/* Vertical grid lines */}
               {points.map((point) => (
-                <line 
+                <line
                   key={`v-${point.index}`}
-                  x1={point.x} 
-                  y1="0" 
-                  x2={point.x} 
-                  y2="100" 
-                  className="stroke-muted stroke-[0.5]" 
+                  x1={point.x}
+                  y1="0"
+                  x2={point.x}
+                  y2="100"
+                  className="stroke-muted stroke-[0.5]"
                 />
               ))}
             </>
           )}
-          
+
           {/* Area under the line */}
-          <path 
-            d={areaPath} 
-            className="fill-primary/10" 
+          <path
+            d={areaPath}
+            className="fill-secondary/10"
           />
-          
+
           {/* Line */}
-          <path 
-            d={linePath} 
-            className={cn("fill-none stroke-2", lineColor)} 
+          <path
+            d={linePath}
+            className={cn("fill-none stroke-2", lineColor)}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          
+
           {/* Points */}
           {showPoints && points.map((point) => {
             const isHovered = hoveredIndex === point.index;
-            
+
             return (
-              <g 
+              <g
                 key={point.index}
                 className="transition-transform duration-200"
                 style={{ transform: isHovered ? 'scale(1.5)' : 'scale(1)' }}
@@ -137,46 +137,46 @@ export const LineChart = ({
                 onMouseLeave={() => setHoveredIndex(null)}
                 onClick={() => onPointClick?.(point.label, point.value, point.index)}
               >
-                <circle 
-                  cx={point.x} 
-                  cy={point.y} 
-                  r="1.5" 
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r="1.5"
                   className={cn(
-                    "stroke-white stroke-2", 
+                    "stroke-white stroke-2",
                     pointColor,
                     onPointClick && "cursor-pointer"
-                  )} 
+                  )}
                 />
-                
+
                 {isHovered && (
                   <>
                     {/* Tooltip */}
                     <g transform={`translate(${point.x}, ${point.y - 10})`}>
-                      <rect 
-                        x="-15" 
-                        y="-20" 
-                        width="30" 
-                        height="20" 
-                        rx="4" 
-                        className="fill-background stroke-border" 
+                      <rect
+                        x="-15"
+                        y="-20"
+                        width="30"
+                        height="20"
+                        rx="4"
+                        className="fill-background stroke-border"
                       />
-                      <text 
-                        x="0" 
-                        y="-7" 
-                        textAnchor="middle" 
+                      <text
+                        x="0"
+                        y="-7"
+                        textAnchor="middle"
                         className="fill-foreground text-[5px]"
                       >
                         {formatValue(point.value)}
                       </text>
                     </g>
-                    
+
                     {/* Vertical guide line */}
-                    <line 
-                      x1={point.x} 
-                      y1="0" 
-                      x2={point.x} 
-                      y2="100" 
-                      className="stroke-primary/30 stroke-[0.5] stroke-dashed" 
+                    <line
+                      x1={point.x}
+                      y1="0"
+                      x2={point.x}
+                      y2="100"
+                      className="stroke-secondary/30 stroke-[0.5] stroke-dashed"
                     />
                   </>
                 )}
@@ -185,12 +185,12 @@ export const LineChart = ({
           })}
         </svg>
       </div>
-      
+
       {/* X-axis labels */}
       {showLabels && (
         <div className="flex justify-between mt-2">
           {data.map((item, index) => (
-            <div 
+            <div
               key={index}
               className={cn(
                 "text-xs text-muted-foreground px-1 text-center",

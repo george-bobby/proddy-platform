@@ -179,7 +179,7 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
             />
           )}
           {activeItem?.type === 'list' && (
-            <div className="bg-gray-100 rounded-lg shadow w-72 opacity-80 border-2 border-primary">
+            <div className="bg-gray-100 rounded-lg shadow w-72 opacity-80 border-2 border-secondary">
               <div className="p-3 font-bold border-b">
                 {activeItem.item.title}
               </div>

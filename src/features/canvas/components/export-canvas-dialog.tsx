@@ -213,7 +213,7 @@ export const ExportCanvasDialog = ({
             ctx.fillStyle = "#888888";
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
-            ctx.fillText("Failed to render canvas", canvas.width/2, canvas.height/2);
+            ctx.fillText("Failed to render canvas", canvas.width / 2, canvas.height / 2);
           }
 
           // Return the canvas with the error message
@@ -236,7 +236,7 @@ export const ExportCanvasDialog = ({
             ctx.fillStyle = "#888888";
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
-            ctx.fillText("Error encoding SVG data", canvas.width/2, canvas.height/2);
+            ctx.fillText("Error encoding SVG data", canvas.width / 2, canvas.height / 2);
           }
           resolve(canvas.toDataURL("image/png"));
         }
@@ -277,9 +277,9 @@ export const ExportCanvasDialog = ({
       if (exportFormat === "png" || exportFormat === "svg") {
         let imageData = await captureCanvasImage(exportFormat);
 
-        // If primary method fails for PNG, try the direct method
+        // If secondary method fails for PNG, try the direct method
         if (!imageData && exportFormat === "png") {
-          console.log("Primary capture method failed for chat export, trying direct method");
+          console.log("secondary capture method failed for chat export, trying direct method");
           imageData = await captureCanvasDirect();
         }
 
@@ -418,7 +418,7 @@ export const ExportCanvasDialog = ({
             ctx.fillStyle = "#888888";
             ctx.font = "20px Arial";
             ctx.textAlign = "center";
-            ctx.fillText("Failed to render canvas", canvas.width/2, canvas.height/2);
+            ctx.fillText("Failed to render canvas", canvas.width / 2, canvas.height / 2);
             resolve(canvas.toDataURL("image/png"));
           };
           img.src = "data:image/svg+xml;base64," + btoa(svgData);
@@ -452,7 +452,7 @@ export const ExportCanvasDialog = ({
         ctx.fillStyle = "#888888";
         ctx.font = "20px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("Could not render canvas content", canvas.width/2, canvas.height/2);
+        ctx.fillText("Could not render canvas content", canvas.width / 2, canvas.height / 2);
         return canvas.toDataURL("image/png");
       }
     } catch (error) {
@@ -498,9 +498,9 @@ export const ExportCanvasDialog = ({
         // Export as PNG
         let pngDataUrl = await captureCanvasImage("png");
 
-        // If primary method fails, try the direct method
+        // If secondary method fails, try the direct method
         if (!pngDataUrl) {
-          console.log("Primary capture method failed, trying direct method");
+          console.log("secondary capture method failed, trying direct method");
           pngDataUrl = await captureCanvasDirect();
 
           if (!pngDataUrl) {

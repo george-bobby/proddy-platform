@@ -50,7 +50,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete, assigneeD
             case 'low':
                 return 'border-l-4 border-l-blue-400 bg-blue-50';
             case 'lowest':
-                return 'border-l-4 border-l-primary/30 bg-primary/5';
+                return 'border-l-4 border-l-secondary/30 bg-secondary/5';
             default:
                 return '';
         }
@@ -68,7 +68,7 @@ const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete, assigneeD
             case 'low':
                 return <ArrowRightCircle className="w-3 h-3 text-blue-400" />;
             case 'lowest':
-                return <CheckCircle2 className="w-3 h-3 text-primary/70" />;
+                return <CheckCircle2 className="w-3 h-3 text-secondary/70" />;
             default:
                 return null;
         }
@@ -87,9 +87,9 @@ const BoardCard: React.FC<BoardCardProps> = ({ card, onEdit, onDelete, assigneeD
             {...attributes}
             {...listeners}
             className={cn(
-                "bg-white rounded-lg shadow-sm p-3 flex flex-col gap-2 border hover:border-primary/40 cursor-pointer transition-all duration-200 hover:shadow-md",
+                "bg-white rounded-lg shadow-sm p-3 flex flex-col gap-2 border hover:border-secondary/40 cursor-pointer transition-all duration-200 hover:shadow-md",
                 getPriorityColor(),
-                isDragging && "opacity-70 border-dashed border-primary shadow-lg scale-105"
+                isDragging && "opacity-70 border-dashed border-secondary shadow-lg scale-105"
             )}
         >
             {/* Card Header */}

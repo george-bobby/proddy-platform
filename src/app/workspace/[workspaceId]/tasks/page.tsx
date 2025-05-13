@@ -186,7 +186,7 @@ const TasksPage = () => {
 
             {isLoading ? (
               <div className="flex h-40 items-center justify-center">
-                <Loader className="h-6 w-6 animate-spin text-primary" />
+                <Loader className="h-6 w-6 animate-spin text-secondary" />
               </div>
             ) : (
               <div className="space-y-6 pb-8">

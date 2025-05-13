@@ -110,7 +110,7 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
       <Button
         onClick={() => setIsExpanded(true)}
         variant="default"
-        className="w-full flex items-center justify-center gap-2 py-6 bg-primary hover:bg-primary-600 text-white shadow-md hover:shadow-lg transition-all relative overflow-hidden group"
+        className="w-full flex items-center justify-center gap-2 py-6 bg-secondary hover:bg-secondary-600 text-white shadow-md hover:shadow-lg transition-all relative overflow-hidden group"
       >
         <span className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
         <span className="absolute right-0 bottom-0 size-16 rounded-full -translate-x-5 translate-y-5 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
@@ -143,7 +143,7 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
           placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="text-base font-medium border-gray-300 focus-visible:ring-primary"
+          className="text-base font-medium border-gray-300 focus-visible:ring-secondary"
           autoFocus
           required
         />
@@ -152,7 +152,7 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
           placeholder="Description (optional)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[100px] resize-none border-gray-300 focus-visible:ring-primary text-gray-700"
+          className="min-h-[100px] resize-none border-gray-300 focus-visible:ring-secondary text-gray-700"
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -253,7 +253,7 @@ export const TaskCreateForm = ({ workspaceId, onSuccess }: TaskCreateFormProps) 
         <Button
           type="submit"
           disabled={!title.trim() || isSubmitting}
-          className="bg-primary hover:bg-primary-600"
+          className="bg-secondary hover:bg-secondary-600"
         >
           {isSubmitting ? 'Creating...' : 'Create Task'}
         </Button>

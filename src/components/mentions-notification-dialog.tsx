@@ -233,7 +233,7 @@ export const MentionsNotificationDialog = ({
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10 border">
                   <AvatarImage src={notification.author.image} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                  <AvatarFallback className="bg-secondary/10 text-secondary font-medium">
                     {notification.author.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
@@ -335,7 +335,7 @@ export const MentionsNotificationDialog = ({
         {isLoading ? (
           <div className="flex h-[300px] w-full items-center justify-center bg-gray-50">
             <div className="flex flex-col items-center gap-3">
-              <Loader className="size-8 animate-spin text-primary" />
+              <Loader className="size-8 animate-spin text-secondary" />
               <p className="text-sm text-muted-foreground">Loading your mentions...</p>
             </div>
           </div>

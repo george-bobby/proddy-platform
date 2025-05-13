@@ -277,10 +277,10 @@ const CalendarPage = () => {
                                 }
                                 key={event._id}
                                 className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
-                                    ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
-                                    : event.type === 'task'
-                                      ? 'bg-tertiary/10 hover:bg-tertiary/20 border-l-2 border-tertiary'
-                                      : 'bg-primary/10 hover:bg-primary/20 border-l-2 border-primary'
+                                  ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                  : event.type === 'task'
+                                    ? 'bg-primary/10 hover:bg-primary/20 border-l-2 border-primary'
+                                    : 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
                                   }`}
                                 title={
                                   event.type === 'board-card' && event.boardCard
@@ -340,7 +340,7 @@ const CalendarPage = () => {
                                       ? 'bg-destructive/20 text-destructive'
                                       : event.boardCard.priority === 'medium'
                                         ? 'bg-secondary/20 text-secondary'
-                                        : 'bg-primary/20 text-primary'
+                                        : 'bg-secondary/20 text-secondary'
                                       }`}>
                                       {event.boardCard.priority}
                                     </span>
@@ -350,7 +350,7 @@ const CalendarPage = () => {
                                       ? 'bg-destructive/20 text-destructive'
                                       : event.task.priority === 'medium'
                                         ? 'bg-secondary/20 text-secondary'
-                                        : 'bg-primary/20 text-primary'
+                                        : 'bg-secondary/20 text-secondary'
                                       }`}>
                                       {event.task.priority}
                                     </span>

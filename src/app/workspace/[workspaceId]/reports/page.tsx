@@ -255,7 +255,7 @@ const ReportsPage = () => {
                   <OverviewDashboard workspaceId={workspaceId} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 )}
               </TabsContent>
@@ -266,7 +266,7 @@ const ReportsPage = () => {
                   <UserActivityDashboard workspaceId={workspaceId} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 )}
               </TabsContent>
@@ -277,7 +277,7 @@ const ReportsPage = () => {
                   <ChannelActivityDashboard workspaceId={workspaceId} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 )}
               </TabsContent>
@@ -286,7 +286,7 @@ const ReportsPage = () => {
               <TabsContent value="messages">
                 {isMessageLoading ? (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 ) : messageData && messageData.totalMessages !== undefined ? (
                   <div className="space-y-6">
@@ -298,7 +298,7 @@ const ReportsPage = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-center">
-                            <MessageSquare className="h-5 w-5 text-primary mr-2" />
+                            <MessageSquare className="h-5 w-5 text-secondary mr-2" />
                             <div className="text-2xl font-bold">{messageData?.totalMessages ? messageData.totalMessages.toLocaleString() : 0}</div>
                           </div>
                           <CardDescription>
@@ -313,7 +313,7 @@ const ReportsPage = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-center">
-                            <BarChart className="h-5 w-5 text-primary mr-2" />
+                            <BarChart className="h-5 w-5 text-secondary mr-2" />
                             <div className="text-2xl font-bold">
                               {messageData.messagesByDate.length > 0
                                 ? Math.round(messageData.totalMessages / messageData.messagesByDate.length)
@@ -332,7 +332,7 @@ const ReportsPage = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-center">
-                            <Users className="h-5 w-5 text-primary mr-2" />
+                            <Users className="h-5 w-5 text-secondary mr-2" />
                             <div className="text-xl font-bold truncate">
                               {messageData.topSenders.length > 0
                                 ? messageData.topSenders[0].name
@@ -388,7 +388,7 @@ const ReportsPage = () => {
                               data={messageData.topSenders.map(sender => ({
                                 label: sender.name,
                                 value: sender.count,
-                                color: 'bg-primary'
+                                color: 'bg-secondary'
                               }))}
                               formatValue={(value) => `${value} messages`}
                             />
@@ -418,7 +418,7 @@ const ReportsPage = () => {
                   <ContentAnalysisDashboard workspaceId={workspaceId} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 )}
               </TabsContent>
@@ -429,7 +429,7 @@ const ReportsPage = () => {
                   <PerformanceMetricsDashboard workspaceId={workspaceId} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 )}
               </TabsContent>
@@ -438,7 +438,7 @@ const ReportsPage = () => {
               <TabsContent value="tasks">
                 {isTaskLoading ? (
                   <div className="flex items-center justify-center h-64">
-                    <Loader className="h-8 w-8 animate-spin text-primary" />
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
                   </div>
                 ) : taskData && taskData.totalTasks !== undefined ? (
                   <div className="space-y-6">
@@ -450,7 +450,7 @@ const ReportsPage = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-center">
-                            <CheckSquare className="h-5 w-5 text-primary mr-2" />
+                            <CheckSquare className="h-5 w-5 text-secondary mr-2" />
                             <div className="text-2xl font-bold">{taskData.totalTasks}</div>
                           </div>
                           <CardDescription>
@@ -589,7 +589,7 @@ const ReportsPage = () => {
                           <HorizontalBarChart
                             data={taskData.categoryData.map((category, index) => {
                               // Generate different colors for each category
-                              const colors = ['bg-primary', 'bg-secondary', 'bg-tertiary', 'bg-chart-1', 'bg-chart-2'];
+                              const colors = ['bg-secondary', 'bg-secondary', 'bg-primary', 'bg-chart-1', 'bg-chart-2'];
                               return {
                                 label: category.name,
                                 value: category.count,

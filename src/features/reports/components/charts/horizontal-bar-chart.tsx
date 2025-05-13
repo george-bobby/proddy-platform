@@ -27,7 +27,7 @@ export const HorizontalBarChart = ({
   onBarClick,
 }: HorizontalBarChartProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  
+
   if (!data || data.length === 0) {
     return (
       <div className={cn("flex items-center justify-center h-40 bg-muted/20 rounded-md", className)}>
@@ -37,15 +37,15 @@ export const HorizontalBarChart = ({
   }
 
   const maxValue = Math.max(...data.map(item => item.value));
-  
+
   return (
     <div className={cn("w-full space-y-4", className)}>
       {data.map((item, index) => {
         const percentage = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
         const isHovered = hoveredIndex === index;
-        
+
         return (
-          <div 
+          <div
             key={index}
             className="space-y-1"
             onMouseEnter={() => setHoveredIndex(index)}
@@ -60,17 +60,17 @@ export const HorizontalBarChart = ({
                 </span>
               )}
             </div>
-            
+
             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-              <div 
+              <div
                 className={cn(
                   "h-full rounded-full transition-all duration-500",
-                  item.color || "bg-primary",
+                  item.color || "bg-secondary",
                   isHovered ? "opacity-80" : "opacity-100",
                   animate && "animate-in slide-in-from-left",
                   onBarClick && "cursor-pointer"
                 )}
-                style={{ 
+                style={{
                   width: `${percentage}%`,
                   transitionDelay: animate ? `${index * 50}ms` : '0ms',
                 }}

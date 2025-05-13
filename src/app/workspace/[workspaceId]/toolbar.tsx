@@ -66,7 +66,7 @@ export const WorkspaceToolbar = ({
   }, [setSearchOpen]);
 
   return (
-    <nav className="flex h-16 items-center overflow-hidden border-b bg-tertiary text-primary-foreground shadow-md">
+    <nav className="flex h-16 items-center overflow-hidden border-b bg-primary text-secondary-foreground shadow-md">
       {/* Left section - Entity info (Channel/Member/etc) */}
       <div className="flex items-center px-6">
         {children}
@@ -158,7 +158,7 @@ export const WorkspaceToolbar = ({
             className="text-white relative hover:bg-white/15 transition-colors"
             onClick={() => setNotificationsOpen(true)}
           >
-            <div className={`relative ${!isLoadingMentions && counts && counts.total > 0 ? 'animate-pulse' : ''}`}>
+            <div className="relative">
               <Bell className="size-5" />
               {!isLoadingMentions && counts && counts.total > 0 && (
                 <Badge

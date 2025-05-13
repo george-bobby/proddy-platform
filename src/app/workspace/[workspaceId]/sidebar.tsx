@@ -61,7 +61,7 @@ const DroppableItem = ({
       isCollapsed ? "px-1" : "px-2 md:px-4"
     )}>
       <div
-        className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-primary-foreground/80 hover:bg-primary-foreground/10"
+        className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-secondary-foreground/80 hover:bg-secondary-foreground/10"
         onClick={toggle}
       >
         {isCollapsed ? (
@@ -93,7 +93,7 @@ const DroppableItem = ({
                   }}
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 flex-shrink-0 p-0 text-primary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-primary-foreground/10"
+                  className="h-7 w-7 flex-shrink-0 p-0 text-secondary-foreground/80 opacity-0 transition-all group-hover:opacity-100 rounded-[8px] hover:bg-secondary-foreground/10"
                 >
                   <PlusIcon className="size-4 transition-transform duration-200 hover:scale-110" />
                 </Button>
@@ -132,17 +132,17 @@ export const WorkspaceSidebar = ({
 
   if (memberLoading || workspaceLoading || channelsLoading || membersLoading) {
     return (
-      <div className="flex h-full flex-col items-center justify-center bg-tertiary">
-        <Loader className="size-6 animate-spin text-primary-foreground animate-pulse-subtle" />
+      <div className="flex h-full flex-col items-center justify-center bg-primary">
+        <Loader className="size-6 animate-spin text-secondary-foreground animate-pulse-subtle" />
       </div>
     );
   }
 
   if (!workspace || !member) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-y-3 bg-tertiary">
-        <AlertTriangle className="size-6 text-primary-foreground animate-pulse-subtle" />
-        <p className="text-sm font-medium text-primary-foreground animate-fade-in">Workspace not found.</p>
+      <div className="flex h-full flex-col items-center justify-center gap-y-3 bg-primary">
+        <AlertTriangle className="size-6 text-secondary-foreground animate-pulse-subtle" />
+        <p className="text-sm font-medium text-secondary-foreground animate-fade-in">Workspace not found.</p>
       </div>
     );
   }
@@ -150,7 +150,7 @@ export const WorkspaceSidebar = ({
   return (
     <div
       className={cn(
-        "flex h-full flex-col bg-tertiary transition-all duration-300 ease-in-out border-r-2 border-white",
+        "flex h-full flex-col bg-primary transition-all duration-300 ease-in-out border-r-2 border-white",
         isCollapsed ? "w-[70px]" : "w-[280px]"
       )}
     >
@@ -208,7 +208,7 @@ export const WorkspaceSidebar = ({
       )}
 
       {/* Divider between dynamic and static sections */}
-      <Separator className="my-4 mx-4 bg-primary-foreground/10" />
+      <Separator className="my-4 mx-4 bg-secondary-foreground/10" />
 
       {/* Static Items */}
       <div className="flex flex-col gap-2 px-4">
@@ -261,12 +261,12 @@ export const WorkspaceSidebar = ({
             onClick={() => setIsCollapsed(!isCollapsed)}
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-full p-0 flex items-center justify-center hover:bg-primary-foreground/10"
+            className="h-8 w-8 rounded-full p-0 flex items-center justify-center hover:bg-secondary-foreground/10"
           >
             {isCollapsed ? (
-              <PanelLeftOpen className="size-4 text-primary-foreground/80" />
+              <PanelLeftOpen className="size-4 text-secondary-foreground/80" />
             ) : (
-              <PanelLeftClose className="size-4 text-primary-foreground/80" />
+              <PanelLeftClose className="size-4 text-secondary-foreground/80" />
             )}
           </Button>
         </Hint>

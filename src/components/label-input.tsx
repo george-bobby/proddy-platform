@@ -11,11 +11,11 @@ interface LabelInputProps {
   placeholder?: string;
 }
 
-const LabelInput: React.FC<LabelInputProps> = ({ 
-  value, 
-  onChange, 
-  suggestions, 
-  placeholder = "Labels (comma separated)" 
+const LabelInput: React.FC<LabelInputProps> = ({
+  value,
+  onChange,
+  suggestions,
+  placeholder = "Labels (comma separated)"
 }) => {
   const [inputValue, setInputValue] = useState(value);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -34,7 +34,7 @@ const LabelInput: React.FC<LabelInputProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    
+
     // Filter suggestions based on current input
     const currentInput = newValue.split(',').pop()?.trim() || '';
     if (currentInput && currentInput.length > 0) {
@@ -52,13 +52,13 @@ const LabelInput: React.FC<LabelInputProps> = ({
   const handleSuggestionClick = (suggestion: string) => {
     const parts = inputValue.split(',');
     parts.pop(); // Remove the current input
-    
+
     // Add the selected suggestion
     const newValue = [...parts, suggestion].join(', ') + ', ';
     setInputValue(newValue);
     onChange(newValue);
     setShowSuggestions(false);
-    
+
     // Focus the input after selection
     if (inputRef.current) {
       inputRef.current.focus();
@@ -71,7 +71,7 @@ const LabelInput: React.FC<LabelInputProps> = ({
     if (suggestionsRef.current && suggestionsRef.current.contains(e.relatedTarget as Node)) {
       return;
     }
-    
+
     // Otherwise, hide suggestions
     setTimeout(() => {
       setShowSuggestions(false);
@@ -108,21 +108,21 @@ const LabelInput: React.FC<LabelInputProps> = ({
       {selectedLabels.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
           {selectedLabels.map((label, index) => (
-            <Badge 
-              key={index} 
+            <Badge
+              key={index}
               variant="secondary"
               className="flex items-center gap-1 bg-secondary/20 text-secondary-foreground"
             >
               {label}
-              <X 
-                className="h-3 w-3 cursor-pointer hover:text-destructive" 
+              <X
+                className="h-3 w-3 cursor-pointer hover:text-destructive"
                 onClick={() => removeLabel(label)}
               />
             </Badge>
           ))}
         </div>
       )}
-      
+
       {/* Input field */}
       <Input
         ref={inputRef}
@@ -142,10 +142,10 @@ const LabelInput: React.FC<LabelInputProps> = ({
         }}
         placeholder={placeholder}
       />
-      
+
       {/* Suggestions dropdown */}
       {showSuggestions && (
-        <div 
+        <div
           ref={suggestionsRef}
           className="absolute z-10 mt-1 w-full max-h-40 overflow-auto bg-white border rounded-md shadow-lg"
         >

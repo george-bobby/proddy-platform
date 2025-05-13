@@ -210,7 +210,7 @@ export default function OutboxPage() {
                 {groupedMessages.today?.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-primary/5">
+                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-secondary/5">
                         <Clock className="mr-1 h-3 w-3" />
                         Today
                       </Badge>

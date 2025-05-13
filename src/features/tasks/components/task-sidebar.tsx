@@ -109,7 +109,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.status === 'all'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ status: 'all' })}
@@ -122,7 +122,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.status === 'active'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ status: 'active' })}
@@ -136,7 +136,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.status === 'completed'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ status: 'completed' })}
@@ -172,7 +172,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.priority === 'all'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ priority: 'all' })}
@@ -249,7 +249,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.dueDate === 'all'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ dueDate: 'all' })}
@@ -347,7 +347,7 @@ export const TaskSidebar = ({
                   className={cn(
                     "w-full justify-start text-sm h-9 rounded-md",
                     filterOptions.categoryId === null
-                      ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                      ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                       : "text-gray-700 hover:bg-gray-200/50"
                   )}
                   onClick={() => onFilterChange({ categoryId: null })}
@@ -413,7 +413,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.sortBy === 'created'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ sortBy: 'created' })}
@@ -426,7 +426,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.sortBy === 'dueDate'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ sortBy: 'dueDate' })}
@@ -439,7 +439,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.sortBy === 'priority'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ sortBy: 'priority' })}
@@ -473,7 +473,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.sortDirection === 'asc'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ sortDirection: 'asc' })}
@@ -487,7 +487,7 @@ export const TaskSidebar = ({
               className={cn(
                 "w-full justify-start text-sm h-9 rounded-md",
                 filterOptions.sortDirection === 'desc'
-                  ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+                  ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
                   : "text-gray-700 hover:bg-gray-200/50"
               )}
               onClick={() => onFilterChange({ sortDirection: 'desc' })}

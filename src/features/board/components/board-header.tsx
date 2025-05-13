@@ -33,7 +33,7 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-4 border-b bg-gradient-to-r from-primary/5 to-secondary/5">
+    <div className="flex flex-col gap-3 p-4 border-b bg-gradient-to-r from-secondary/5 to-secondary/5">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
@@ -112,12 +112,12 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
               className={cn(
                 "px-3 py-1.5 flex items-center gap-2 rounded-md transition-all duration-200",
                 view === 'kanban'
-                  ? "bg-primary/15 text-primary font-medium shadow-sm border-primary/20 border"
+                  ? "bg-secondary/15 text-secondary font-medium shadow-sm border-secondary/20 border"
                   : "hover:bg-gray-100 text-gray-700"
               )}
               onClick={() => setView('kanban')}
             >
-              <LayoutGrid className={cn("w-4 h-4", view === 'kanban' ? "text-primary" : "text-gray-500")} />
+              <LayoutGrid className={cn("w-4 h-4", view === 'kanban' ? "text-secondary" : "text-gray-500")} />
               <span className="text-xs font-medium">Kanban</span>
             </Button>
 
@@ -127,12 +127,12 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
               className={cn(
                 "px-3 py-1.5 flex items-center gap-2 rounded-md transition-all duration-200",
                 view === 'table'
-                  ? "bg-primary/15 text-primary font-medium shadow-sm border-primary/20 border"
+                  ? "bg-secondary/15 text-secondary font-medium shadow-sm border-secondary/20 border"
                   : "hover:bg-gray-100 text-gray-700"
               )}
               onClick={() => setView('table')}
             >
-              <Table className={cn("w-4 h-4", view === 'table' ? "text-primary" : "text-gray-500")} />
+              <Table className={cn("w-4 h-4", view === 'table' ? "text-secondary" : "text-gray-500")} />
               <span className="text-xs font-medium">Table</span>
             </Button>
 
@@ -142,12 +142,12 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
               className={cn(
                 "px-3 py-1.5 flex items-center gap-2 rounded-md transition-all duration-200",
                 view === 'gantt'
-                  ? "bg-primary/15 text-primary font-medium shadow-sm border-primary/20 border"
+                  ? "bg-secondary/15 text-secondary font-medium shadow-sm border-secondary/20 border"
                   : "hover:bg-gray-100 text-gray-700"
               )}
               onClick={() => setView('gantt')}
             >
-              <GanttChart className={cn("w-4 h-4", view === 'gantt' ? "text-primary" : "text-gray-500")} />
+              <GanttChart className={cn("w-4 h-4", view === 'gantt' ? "text-secondary" : "text-gray-500")} />
               <span className="text-xs font-medium">Gantt</span>
             </Button>
           </div>

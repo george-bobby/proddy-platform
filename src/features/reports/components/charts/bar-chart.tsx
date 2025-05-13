@@ -29,7 +29,7 @@ export const BarChart = ({
   onBarClick,
 }: BarChartProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  
+
   if (!data || data.length === 0) {
     return (
       <div className={cn("flex items-center justify-center h-40 bg-muted/20 rounded-md", className)}>
@@ -39,38 +39,38 @@ export const BarChart = ({
   }
 
   const maxValue = Math.max(...data.map(item => item.value));
-  
+
   return (
     <div className={cn("w-full", className)}>
       <div className="flex items-end space-x-2" style={{ height: `${height}px` }}>
         {data.map((item, index) => {
           const percentage = maxValue > 0 ? (item.value / maxValue) * 100 : 0;
           const isHovered = hoveredIndex === index;
-          
+
           return (
-            <div 
+            <div
               key={index}
               className="relative flex flex-col items-center flex-1 group"
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => onBarClick?.(item.label, item.value, index)}
             >
-              <div 
+              <div
                 className={cn(
                   "w-full rounded-t-md transition-all duration-300",
-                  item.color || "bg-primary",
+                  item.color || "bg-secondary",
                   isHovered ? "opacity-80" : "opacity-100",
                   animate && "animate-in fade-in-50 slide-in-from-bottom-3",
                   onBarClick && "cursor-pointer"
                 )}
-                style={{ 
+                style={{
                   height: `${percentage}%`,
                   transitionDelay: animate ? `${index * 50}ms` : '0ms',
                 }}
               />
-              
+
               {showValues && (
-                <div 
+                <div
                   className={cn(
                     "absolute -top-6 text-xs font-medium transition-opacity duration-200",
                     isHovered ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -79,7 +79,7 @@ export const BarChart = ({
                   {formatValue(item.value)}
                 </div>
               )}
-              
+
               {showLabels && (
                 <div className="mt-1 text-xs text-muted-foreground truncate max-w-full px-1">
                   {item.label}

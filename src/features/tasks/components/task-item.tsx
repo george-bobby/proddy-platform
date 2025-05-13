@@ -117,7 +117,7 @@ export const TaskItem = ({
   const getStatusIcon = (completed: boolean) => {
     return completed
       ? <CheckCircle2 className="h-5 w-5 text-green-500" />
-      : <Circle className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" />;
+      : <Circle className="h-5 w-5 text-gray-400 group-hover:text-secondary transition-colors" />;
   };
 
   if (isEditing) {
@@ -141,7 +141,7 @@ export const TaskItem = ({
       "group p-5 rounded-xl border transition-all hover:shadow-md",
       completed
         ? "bg-gray-50 border-gray-200 opacity-80"
-        : "bg-white border-gray-200 hover:border-primary/30",
+        : "bg-white border-gray-200 hover:border-secondary/30",
       priority && !completed && `hover:border-${getPriorityTextColor(priority).replace('text-', '')}/30`
     )}>
       <div className="flex items-start gap-4">

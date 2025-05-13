@@ -292,7 +292,7 @@ const CanvasPage = () => {
     if (!roomId && !isLoading) {
         return (
             <div className="h-full flex flex-col items-center justify-center gap-y-6 bg-white">
-                <PaintBucket className="size-16 text-primary" />
+                <PaintBucket className="size-16 text-secondary" />
                 <h2 className="text-2xl font-semibold">Canvas</h2>
                 <p className="text-sm text-muted-foreground mb-2">Create a new canvas to start drawing and collaborating</p>
                 <Button

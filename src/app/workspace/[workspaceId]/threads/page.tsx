@@ -225,7 +225,7 @@ export default function ThreadsPage() {
                 {groupedThreads.today?.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-primary/5">
+                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-secondary/5">
                         <Clock className="mr-1 h-3 w-3" />
                         Today
                       </Badge>
@@ -319,7 +319,7 @@ export default function ThreadsPage() {
 
           <Link
             href={getThreadUrl(thread)}
-            className="text-xs font-medium text-primary hover:underline flex items-center"
+            className="text-xs font-medium text-secondary hover:underline flex items-center"
           >
             View <ArrowRight className="ml-1 h-3 w-3" />
           </Link>

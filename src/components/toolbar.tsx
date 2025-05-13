@@ -107,7 +107,7 @@ export const Toolbar = ({
               size="iconSm"
               disabled={isPending}
               onClick={() => setIsAddToTaskModalOpen(true)}
-              className="text-primary hover:bg-primary/10"
+              className="text-secondary hover:bg-secondary/10"
             >
               <ListTodo className="size-4" />
             </Button>

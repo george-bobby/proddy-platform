@@ -206,7 +206,7 @@ export const Message = ({
             'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-standard hover:shadow-sm rounded-[10px]',
             isEditing && 'bg-secondary/20 hover:bg-secondary/20',
             isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-standard',
-            isSelected && 'bg-primary/10 hover:bg-primary/10',
+            isSelected && 'bg-secondary/10 hover:bg-secondary/10',
           )}
         >
           <div className="flex items-start gap-2">
@@ -235,7 +235,7 @@ export const Message = ({
 
                 {updatedAt ? <span className="text-xs text-muted-foreground italic animate-fade-in">(edited)</span> : null}
                 {calendarEvent && (
-                  <div className="flex items-center gap-1 text-xs text-primary mt-1">
+                  <div className="flex items-center gap-1 text-xs text-secondary mt-1">
                     <CalendarIcon className="h-3 w-3" />
                     <span>Calendar event: {new Date(calendarEvent.date).toLocaleDateString()}{calendarEvent.time ? ` at ${calendarEvent.time}` : ''}</span>
                   </div>
@@ -281,7 +281,7 @@ export const Message = ({
           'group relative flex flex-col gap-2 p-1.5 px-5 hover:bg-gray-100/60 transition-standard hover:shadow-sm rounded-[10px]',
           isEditing && 'bg-secondary/20 hover:bg-secondary/20',
           isRemovingMessage && 'origin-bottom scale-y-0 transform bg-rose-500/50 transition-standard',
-          isSelected && 'bg-primary/10 hover:bg-primary/10',
+          isSelected && 'bg-secondary/10 hover:bg-secondary/10',
         )}
       >
         <div className="flex items-start gap-2">
@@ -308,14 +308,14 @@ export const Message = ({
           ) : (
             <div className="flex w-full flex-col overflow-hidden">
               <div className="text-sm">
-                <button onClick={() => onOpenProfile(memberId)} className="font-bold text-primary hover:underline transition-all duration-200 hover:text-primary/80">
+                <button onClick={() => onOpenProfile(memberId)} className="font-bold text-secondary hover:underline transition-all duration-200 hover:text-secondary/80">
                   {authorName}
                 </button>
 
                 <span>&nbsp;&nbsp;</span>
 
                 <Hint label={formatFullTime(new Date(createdAt))}>
-                  <button className="text-xs text-muted-foreground hover:underline transition-all duration-200 hover:text-primary/50">{format(new Date(createdAt), 'h:mm a')}</button>
+                  <button className="text-xs text-muted-foreground hover:underline transition-all duration-200 hover:text-secondary/50">{format(new Date(createdAt), 'h:mm a')}</button>
                 </Hint>
               </div>
 
@@ -324,7 +324,7 @@ export const Message = ({
 
               {updatedAt ? <span className="text-xs text-muted-foreground italic animate-fade-in">(edited)</span> : null}
               {calendarEvent && (
-                <div className="flex items-center gap-1 text-xs text-primary mt-1">
+                <div className="flex items-center gap-1 text-xs text-secondary mt-1">
                   <CalendarIcon className="h-3 w-3" />
                   <span>Calendar event: {new Date(calendarEvent.date).toLocaleDateString()}{calendarEvent.time ? ` at ${calendarEvent.time}` : ''}</span>
                 </div>

@@ -45,7 +45,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
+        <Loader className="h-8 w-8 animate-spin text-secondary" />
       </div>
     );
   }
@@ -75,7 +75,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
   const messageCountData = sortedByMessages.map(item => ({
     label: item.channel.name,
     value: item.messageCount,
-    color: 'bg-primary',
+    color: 'bg-secondary',
   }));
 
   const timeSpentData = sortedByTimeSpent.map(item => ({
@@ -87,7 +87,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
   const visitorsData = sortedByVisitors.map(item => ({
     label: item.channel.name,
     value: item.uniqueVisitors,
-    color: 'bg-tertiary',
+    color: 'bg-primary',
   }));
 
   // Prepare data for pie chart
@@ -115,21 +115,21 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
         <div className="flex rounded-md border border-input overflow-hidden">
           <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('7d')}
           >
             7 days
           </button>
           <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('30d')}
           >
             30 days
           </button>
           <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('90d')}
           >
             90 days
@@ -145,7 +145,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Hash className="h-5 w-5 text-primary mr-2" />
+              <Hash className="h-5 w-5 text-secondary mr-2" />
               <div className="text-2xl font-bold">{channelActivity.length}</div>
             </div>
             <CardDescription>
@@ -160,7 +160,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <MessageSquare className="h-5 w-5 text-primary mr-2" />
+              <MessageSquare className="h-5 w-5 text-secondary mr-2" />
               <div className="text-2xl font-bold">{totalMessages}</div>
             </div>
             <CardDescription>
@@ -175,7 +175,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Hash className="h-5 w-5 text-primary mr-2" />
+              <Hash className="h-5 w-5 text-secondary mr-2" />
               <div className="text-xl font-bold truncate">
                 {sortedByMessages[0]?.channel.name || 'None'}
               </div>
@@ -192,7 +192,7 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Clock className="h-5 w-5 text-primary mr-2" />
+              <Clock className="h-5 w-5 text-secondary mr-2" />
               <div className="text-2xl font-bold">{formatDuration(totalTimeSpent, 'short')}</div>
             </div>
             <CardDescription>

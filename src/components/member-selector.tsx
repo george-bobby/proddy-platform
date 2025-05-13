@@ -35,12 +35,12 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
   const [open, setOpen] = useState(false);
 
   // Filter members based on search term
-  const filteredMembers = members.filter(member => 
+  const filteredMembers = members.filter(member =>
     member.user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Get selected members data
-  const selectedMembers = members.filter(member => 
+  const selectedMembers = members.filter(member =>
     selectedMemberIds.includes(member._id)
   );
 
@@ -104,7 +104,7 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
               />
             </div>
           </div>
-          
+
           {/* Member list */}
           <ScrollArea className="h-[200px]">
             <div className="p-2">
@@ -129,14 +129,14 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
                       <span className="text-sm">{member.user.name}</span>
                     </div>
                     {selectedMemberIds.includes(member._id) ? (
-                      <Check className="h-4 w-4 text-primary" />
+                      <Check className="h-4 w-4 text-secondary" />
                     ) : null}
                   </div>
                 ))
               )}
             </div>
           </ScrollArea>
-          
+
           {/* Selected members */}
           {selectedMembers.length > 0 && (
             <div className="p-2 border-t">
@@ -153,8 +153,8 @@ const MemberSelector: React.FC<MemberSelectorProps> = ({
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-xs truncate max-w-[100px]">{member.user.name}</span>
-                    <X 
-                      className="h-3 w-3 text-muted-foreground hover:text-foreground cursor-pointer" 
+                    <X
+                      className="h-3 w-3 text-muted-foreground hover:text-foreground cursor-pointer"
                       onClick={(e) => removeMember(e, member._id)}
                     />
                   </Badge>

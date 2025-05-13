@@ -14,7 +14,7 @@ const HomePage = () => {
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-gray-50">
         <div className="container px-4 md:px-6 mx-auto flex flex-col items-center text-center">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6">
-            Team Collaboration <span className="text-primary">Reimagined</span>
+            Team Collaboration <span className="text-secondary">Reimagined</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-[800px]">
             A vibrant team collaboration platform with real-time messaging, rich text editing, and everything your team needs to stay productive.
@@ -59,8 +59,8 @@ const HomePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="flex flex-col items-start p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-2 rounded-full bg-primary/10 mb-4">
-                <MessageSquare className="size-6 text-primary" />
+              <div className="p-2 rounded-full bg-secondary/10 mb-4">
+                <MessageSquare className="size-6 text-secondary" />
               </div>
               <h3 className="text-xl font-bold mb-2">Real-time Messaging</h3>
               <p className="text-gray-600 mb-4">
@@ -109,8 +109,8 @@ const HomePage = () => {
 
             {/* Feature 3 */}
             <div className="flex flex-col items-start p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="p-2 rounded-full bg-tertiary/10 mb-4">
-                <Calendar className="size-6 text-tertiary" />
+              <div className="p-2 rounded-full bg-primary/10 mb-4">
+                <Calendar className="size-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">Calendar & Tasks</h3>
               <p className="text-gray-600 mb-4">
@@ -136,7 +136,7 @@ const HomePage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 md:py-24 bg-primary text-white">
+      <section className="w-full py-12 md:py-24 bg-secondary text-white">
         <div className="container px-4 md:px-6 mx-auto text-center">
           <h2 className="text-3xl font-bold tracking-tight mb-4">
             Ready to transform how your team works?
@@ -161,16 +161,16 @@ const HomePage = () => {
               <span className="text-lg font-bold text-gray-900">Proddy</span>
             </div>
             <div className="flex flex-wrap gap-4 md:gap-8 justify-center">
-              <Link href="/#features" className="text-sm text-gray-600 hover:text-primary">
+              <Link href="/#features" className="text-sm text-gray-600 hover:text-secondary">
                 Features
               </Link>
-              <Link href="/#pricing" className="text-sm text-gray-600 hover:text-primary">
+              <Link href="/#pricing" className="text-sm text-gray-600 hover:text-secondary">
                 Pricing
               </Link>
-              <Link href="https://proddy.canny.io/" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-primary">
+              <Link href="https://proddy.canny.io/" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-secondary">
                 Roadmap
               </Link>
-              <Link href="https://proddy.betteruptime.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-primary">
+              <Link href="https://proddy.betteruptime.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-secondary">
                 Status
               </Link>
             </div>

@@ -561,7 +561,7 @@ const Editor = ({
                     onClick={navigateToCanvas}
                   >
                     {isCreatingCanvas ? (
-                      <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                      <div className="animate-spin h-4 w-4 border-2 border-secondary border-t-transparent rounded-full" />
                     ) : (
                       <PaintBucket className="size-4" />
                     )}
@@ -589,7 +589,7 @@ const Editor = ({
                   });
                 }}
                 size="sm"
-                className="bg-tertiary text-white hover:bg-tertiary/80"
+                className="bg-primary text-white hover:bg-primary/80"
               >
                 Save
               </Button>
@@ -613,7 +613,7 @@ const Editor = ({
                 'ml-auto',
                 isEmpty
                   ? 'bg-white text-muted-foreground hover:bg-white/80'
-                  : 'bg-tertiary text-white hover:bg-tertiary/80'
+                  : 'bg-primary text-white hover:bg-primary/80'
               )}
               size="iconSm"
             >

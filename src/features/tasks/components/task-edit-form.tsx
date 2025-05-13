@@ -71,7 +71,7 @@ export const TaskEditForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 rounded-lg border border-primary/30 shadow-md bg-white">
+    <form onSubmit={handleSubmit} className="p-4 rounded-lg border border-secondary/30 shadow-md bg-white">
       <div className="space-y-3">
         <Input
           placeholder="Task title"

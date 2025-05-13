@@ -54,10 +54,10 @@ export const CanvasLiveMessage = ({ data }: CanvasLiveMessageProps) => {
   };
 
   return (
-    <Card className="w-full max-w-sm bg-white shadow-md border-l-4 border-l-primary">
+    <Card className="w-full max-w-sm bg-white shadow-md border-l-4 border-l-secondary">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center">
-          <PaintBucket className="h-4 w-4 mr-2 text-primary" />
+          <PaintBucket className="h-4 w-4 mr-2 text-secondary" />
           Live Canvas Session
         </CardTitle>
       </CardHeader>

@@ -5,15 +5,15 @@ import { useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
 import { format, subDays, startOfMonth, endOfMonth, differenceInDays } from 'date-fns';
-import { 
-  Loader, 
-  Users, 
-  MessageSquare, 
-  Hash, 
-  CheckSquare, 
-  Clock, 
-  FileText, 
-  TrendingUp, 
+import {
+  Loader,
+  Users,
+  MessageSquare,
+  Hash,
+  CheckSquare,
+  Clock,
+  FileText,
+  TrendingUp,
   TrendingDown,
   Activity,
   BarChart as BarChartIcon
@@ -52,7 +52,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
 
   // Fetch current period data
   const overviewData = useQuery(
-    api.analytics.getWorkspaceOverview, 
+    api.analytics.getWorkspaceOverview,
     workspaceId ? {
       workspaceId,
       startDate,
@@ -62,7 +62,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
 
   // Fetch previous period data for comparison
   const previousOverviewData = useQuery(
-    api.analytics.getWorkspaceOverview, 
+    api.analytics.getWorkspaceOverview,
     workspaceId ? {
       workspaceId,
       startDate: previousStartDate,
@@ -112,7 +112,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
   // Prepare data for activity trend chart
   const activityTrendData = useMemo(() => {
     if (!messageData) return [];
-    
+
     return messageData.messagesByDate.map(item => ({
       label: format(new Date(item.date), 'MMM dd'),
       value: item.count
@@ -122,11 +122,11 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
   // Prepare data for task completion rate chart
   const taskCompletionData = useMemo(() => {
     if (!taskData) return [];
-    
-    const completionRate = taskData.totalTasks > 0 
-      ? Math.round((taskData.completedTasks / taskData.totalTasks) * 100) 
+
+    const completionRate = taskData.totalTasks > 0
+      ? Math.round((taskData.completedTasks / taskData.totalTasks) * 100)
       : 0;
-    
+
     return [
       { label: 'Completed', value: completionRate, color: 'bg-green-500' },
       { label: 'Remaining', value: 100 - completionRate, color: 'bg-gray-300' }
@@ -136,7 +136,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
+        <Loader className="h-8 w-8 animate-spin text-secondary" />
       </div>
     );
   }
@@ -158,23 +158,23 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Workspace Overview</h2>
         <div className="flex rounded-md border border-input overflow-hidden">
-          <button 
+          <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('7d')}
           >
             7 days
           </button>
-          <button 
+          <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('30d')}
           >
             30 days
           </button>
-          <button 
+          <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('90d')}
           >
             90 days
@@ -191,7 +191,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <Users className="h-5 w-5 text-primary mr-2" />
+                <Users className="h-5 w-5 text-secondary mr-2" />
                 <div className="text-2xl font-bold">{overviewData.activeUserCount}</div>
               </div>
               {trends && (
@@ -206,7 +206,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
             </CardDescription>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Messages</CardTitle>
@@ -214,7 +214,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <MessageSquare className="h-5 w-5 text-primary mr-2" />
+                <MessageSquare className="h-5 w-5 text-secondary mr-2" />
                 <div className="text-2xl font-bold">{overviewData.totalMessages ? overviewData.totalMessages.toLocaleString() : 0}</div>
               </div>
               {trends && (
@@ -225,13 +225,13 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
               )}
             </div>
             <CardDescription>
-              {overviewData.activeUserCount > 0 
-                ? Math.round(overviewData.totalMessages / overviewData.activeUserCount) 
+              {overviewData.activeUserCount > 0
+                ? Math.round(overviewData.totalMessages / overviewData.activeUserCount)
                 : 0} per user
             </CardDescription>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Tasks Created</CardTitle>
@@ -239,7 +239,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <CheckSquare className="h-5 w-5 text-primary mr-2" />
+                <CheckSquare className="h-5 w-5 text-secondary mr-2" />
                 <div className="text-2xl font-bold">{overviewData.totalTasks}</div>
               </div>
               {trends && (
@@ -250,20 +250,20 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
               )}
             </div>
             <CardDescription>
-              {taskData && taskData.completedTasks > 0 
-                ? `${Math.round((taskData.completedTasks / taskData.totalTasks) * 100)}% completion rate` 
+              {taskData && taskData.completedTasks > 0
+                ? `${Math.round((taskData.completedTasks / taskData.totalTasks) * 100)}% completion rate`
                 : '0% completion rate'}
             </CardDescription>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Channels</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Hash className="h-5 w-5 text-primary mr-2" />
+              <Hash className="h-5 w-5 text-secondary mr-2" />
               <div className="text-2xl font-bold">{overviewData.totalChannels}</div>
             </div>
             <CardDescription>
@@ -298,7 +298,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
             )}
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Task Completion</CardTitle>

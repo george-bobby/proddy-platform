@@ -158,14 +158,14 @@ export const Suggestions = ({
     <div className="mb-2 flex flex-col space-y-2 rounded-md border border-border/30 bg-muted/20 p-2">
       <div className="flex items-center">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Sparkles className="size-3 text-tertiary" />
+          <Sparkles className="size-3 text-primary" />
           <span>{getContextLabel()}</span>
         </div>
         <div className="ml-auto">
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-xs text-muted-foreground hover:bg-tertiary/10 hover:text-tertiary"
+            className="h-6 px-2 text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary"
             onClick={refreshSuggestions}
             disabled={isLoading}
           >
@@ -185,7 +185,7 @@ export const Suggestions = ({
               key={index}
               variant="outline"
               size="sm"
-              className="h-auto rounded-full border-tertiary/20 bg-tertiary/5 px-3 py-1 text-xs text-muted-foreground hover:bg-tertiary/10 hover:border-tertiary/30 hover:text-foreground"
+              className="h-auto rounded-full border-primary/20 bg-primary/5 px-3 py-1 text-xs text-muted-foreground hover:bg-primary/10 hover:border-primary/30 hover:text-foreground"
               onClick={() => onSelectSuggestion(suggestion)}
             >
               {suggestion}

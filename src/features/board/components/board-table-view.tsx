@@ -107,7 +107,7 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
       case 'low':
         return <ArrowRightCircle className="w-3 h-3 text-blue-400" />;
       case 'lowest':
-        return <CheckCircle2 className="w-3 h-3 text-primary/70" />;
+        return <CheckCircle2 className="w-3 h-3 text-secondary/70" />;
       default:
         return null;
     }
@@ -146,7 +146,7 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
             <tr className="border-b">
               <th className="p-3 text-left font-medium text-sm">
                 <button
-                  className="flex items-center gap-1 hover:text-primary transition-colors"
+                  className="flex items-center gap-1 hover:text-secondary transition-colors"
                   onClick={() => handleSort('title')}
                 >
                   Title
@@ -161,7 +161,7 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
               <th className="p-3 text-left font-medium text-sm">Description</th>
               <th className="p-3 text-left font-medium text-sm">
                 <button
-                  className="flex items-center gap-1 hover:text-primary transition-colors"
+                  className="flex items-center gap-1 hover:text-secondary transition-colors"
                   onClick={() => handleSort('list')}
                 >
                   List
@@ -175,7 +175,7 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
               </th>
               <th className="p-3 text-left font-medium text-sm">
                 <button
-                  className="flex items-center gap-1 hover:text-primary transition-colors"
+                  className="flex items-center gap-1 hover:text-secondary transition-colors"
                   onClick={() => handleSort('priority')}
                 >
                   Priority
@@ -235,7 +235,7 @@ const BoardTableView: React.FC<BoardTableViewProps> = ({ lists, allCards, onEdit
                           "text-xs px-2 py-0.5",
                           card.priority === 'high' && "bg-orange-500 hover:bg-orange-500/90",
                           card.priority === 'low' && "border-blue-400 text-blue-400",
-                          card.priority === 'lowest' && "border-primary/30 text-primary/70"
+                          card.priority === 'lowest' && "border-secondary/30 text-secondary/70"
                         )}>
                           {card.priority.charAt(0).toUpperCase() + card.priority.slice(1)}
                         </Badge>

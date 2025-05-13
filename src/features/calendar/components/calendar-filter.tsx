@@ -65,7 +65,7 @@ export const CalendarFilter = ({
             className={cn(
               "flex items-center gap-1.5 border rounded-md transition-all",
               filterOptions.eventTypes.length > 0 && filterOptions.eventTypes.length < 3
-                ? "bg-primary/10 text-primary border-primary/20"
+                ? "bg-secondary/10 text-secondary border-secondary/20"
                 : "bg-white"
             )}
           >
@@ -97,7 +97,7 @@ export const CalendarFilter = ({
           <div className="p-2 space-y-3">
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
+                <MessageSquare className="h-4 w-4 text-secondary" />
                 <Label htmlFor="message-events" className="cursor-pointer">Message Events</Label>
               </div>
               <Switch
@@ -121,7 +121,7 @@ export const CalendarFilter = ({
 
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
-                <CheckSquare className="h-4 w-4 text-tertiary" />
+                <CheckSquare className="h-4 w-4 text-primary" />
                 <Label htmlFor="task-events" className="cursor-pointer">My Tasks</Label>
               </div>
               <Switch

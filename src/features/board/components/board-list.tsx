@@ -71,7 +71,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
             {...attributes}
             className={cn(
                 "bg-gradient-to-b from-gray-50 to-gray-100 rounded-lg shadow-md w-80 flex flex-col border border-gray-200",
-                isDragging && "opacity-70 border-2 border-dashed border-primary shadow-lg"
+                isDragging && "opacity-70 border-2 border-dashed border-secondary shadow-lg"
             )}
         >
             {/* List Header */}
@@ -136,7 +136,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                             </Badge>
                         )}
                         {priorityCounts.lowest > 0 && (
-                            <Badge className="text-[9px] px-1 py-0 h-4 bg-primary/30 text-primary-foreground">
+                            <Badge className="text-[9px] px-1 py-0 h-4 bg-secondary/30 text-secondary-foreground">
                                 {priorityCounts.lowest} low-
                             </Badge>
                         )}
@@ -149,7 +149,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                 ref={setDroppableRef}
                 className={cn(
                     "flex-1 min-h-[100px] transition-colors duration-200 overflow-y-auto max-h-[calc(100vh-300px)]",
-                    isOver ? "bg-primary/10 ring-2 ring-primary/40" : "bg-transparent"
+                    isOver ? "bg-secondary/10 ring-2 ring-secondary/40" : "bg-transparent"
                 )}
             >
                 <SortableContext items={cards.map(c => c._id)} strategy={verticalListSortingStrategy}>
@@ -157,7 +157,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                         {cards.length === 0 && (
                             <div className={cn(
                                 "h-20 border-2 border-dashed rounded-md flex items-center justify-center text-muted-foreground text-sm",
-                                isOver ? "border-primary/40 bg-primary/5" : "border-gray-200"
+                                isOver ? "border-secondary/40 bg-secondary/5" : "border-gray-200"
                             )}>
                                 {isOver ? "Drop card here" : "No cards yet"}
                             </div>
@@ -172,7 +172,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                             />
                         ))}
                         {cards.length > 0 && isOver && (
-                            <div className="h-16 border-2 border-dashed border-primary/40 rounded-md flex items-center justify-center text-primary/60 mt-2 bg-primary/5">
+                            <div className="h-16 border-2 border-dashed border-secondary/40 rounded-md flex items-center justify-center text-secondary/60 mt-2 bg-secondary/5">
                                 Drop card here
                             </div>
                         )}
@@ -185,7 +185,7 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
                 <Button
                     size="sm"
                     variant="outline"
-                    className="w-full bg-white hover:bg-primary/5 transition-colors"
+                    className="w-full bg-white hover:bg-secondary/5 transition-colors"
                     onClick={onAddCard}
                 >
                     <Plus className="w-4 h-4 mr-1" /> Add Card

@@ -140,7 +140,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
       case 'low':
         return 'bg-blue-400';
       case 'lowest':
-        return 'bg-primary/50';
+        return 'bg-secondary/50';
       default:
         return 'bg-gray-300';
     }
@@ -157,7 +157,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
       case 'low':
         return 'text-blue-400';
       case 'lowest':
-        return 'text-primary';
+        return 'text-secondary';
       default:
         return 'text-gray-500';
     }
@@ -360,7 +360,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
   return (
     <div className="h-full flex flex-col bg-white">
       {/* Gantt Chart Controls */}
-      <div className="p-3 border-b flex items-center justify-between bg-gradient-to-r from-primary/5 to-secondary/5">
+      <div className="p-3 border-b flex items-center justify-between bg-gradient-to-r from-secondary/5 to-secondary/5">
         <div className="text-sm font-medium text-muted-foreground">
           Showing {tasks.length} tasks with due dates across {lists.length} lists
         </div>
@@ -443,7 +443,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
                 style={{ minWidth: '60px' }}
               >
                 <div className="text-muted-foreground">{format(date, 'EEE')}</div>
-                <div className={`${isSameDay(date, new Date()) ? 'bg-primary/10 text-primary rounded-full px-2 py-0.5 inline-block' : ''}`}>
+                <div className={`${isSameDay(date, new Date()) ? 'bg-secondary/10 text-secondary rounded-full px-2 py-0.5 inline-block' : ''}`}>
                   {format(date, 'd')}
                 </div>
               </div>
@@ -472,7 +472,7 @@ const BoardGanttView: React.FC<BoardGanttViewProps> = ({
                     {timelineDates.map((date, index) => (
                       <div
                         key={index}
-                        className={`flex-1 border-r last:border-r-0 ${isSameDay(date, new Date()) ? 'bg-primary/5' : index % 2 === 0 ? 'bg-gray-50' : ''}`}
+                        className={`flex-1 border-r last:border-r-0 ${isSameDay(date, new Date()) ? 'bg-secondary/5' : index % 2 === 0 ? 'bg-gray-50' : ''}`}
                         style={{ minWidth: '60px' }}
                       ></div>
                     ))}

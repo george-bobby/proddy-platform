@@ -30,12 +30,12 @@ export const TaskToggleView = ({
   showEmpty = true,
 }: TaskToggleViewProps) => {
   const [activeView, setActiveView] = useState<'active' | 'completed'>('active');
-  
+
   const activeTasks = tasks.filter(task => !task.completed);
   const completedTasks = tasks.filter(task => task.completed);
 
-  const isEmpty = activeView === 'active' 
-    ? activeTasks.length === 0 
+  const isEmpty = activeView === 'active'
+    ? activeTasks.length === 0
     : completedTasks.length === 0;
 
   return (
@@ -46,25 +46,25 @@ export const TaskToggleView = ({
           variant="ghost"
           className={cn(
             "flex-1 rounded-none border-0 py-2 px-4 flex items-center justify-center gap-2",
-            activeView === 'active' 
-              ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+            activeView === 'active'
+              ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
               : "bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           )}
           onClick={() => setActiveView('active')}
         >
           <Circle className="h-4 w-4" />
           <span>Active</span>
-          <span className="ml-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+          <span className="ml-1 px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-xs font-medium">
             {activeTasks.length}
           </span>
         </Button>
-        
+
         <Button
           variant="ghost"
           className={cn(
             "flex-1 rounded-none border-0 py-2 px-4 flex items-center justify-center gap-2",
             activeView === 'completed'
-              ? "bg-primary/10 text-primary font-medium hover:bg-primary/15"
+              ? "bg-secondary/10 text-secondary font-medium hover:bg-secondary/15"
               : "bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900"
           )}
           onClick={() => setActiveView('completed')}
@@ -82,8 +82,8 @@ export const TaskToggleView = ({
         {isEmpty && showEmpty ? (
           <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
             <div className="text-gray-400">
-              {activeView === 'active' 
-                ? "No active tasks" 
+              {activeView === 'active'
+                ? "No active tasks"
                 : "No completed tasks"}
             </div>
           </div>

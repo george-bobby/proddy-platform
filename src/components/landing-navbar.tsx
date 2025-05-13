@@ -22,22 +22,22 @@ export const LandingNavbar = () => {
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.svg" alt="Proddy Logo" width={40} height={40} />
-            <span className="text-xl font-bold text-primary hidden md:inline-block">Proddy</span>
+            <span className="text-xl font-bold text-secondary hidden md:inline-block">Proddy</span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/#features" className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">
+          <Link href="/#features" className="text-sm font-medium text-gray-600 hover:text-secondary transition-colors">
             Features
           </Link>
-          <Link href="/#pricing" className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">
+          <Link href="/#pricing" className="text-sm font-medium text-gray-600 hover:text-secondary transition-colors">
             Pricing
           </Link>
-          <Link href="https://proddy.canny.io/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">
+          <Link href="https://proddy.canny.io/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-secondary transition-colors">
             Roadmap
           </Link>
-          <Link href="https://proddy.betteruptime.com/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-primary transition-colors">
+          <Link href="https://proddy.betteruptime.com/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-secondary transition-colors">
             Status
           </Link>
         </div>
@@ -57,8 +57,8 @@ export const LandingNavbar = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100"
+        <button
+          className="md:hidden p-2 rounded-md text-gray-600 hover:text-secondary hover:bg-gray-100"
           onClick={toggleMenu}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -71,39 +71,39 @@ export const LandingNavbar = () => {
         isMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <div className="flex flex-col gap-6">
-          <Link 
-            href="/#features" 
-            className="text-lg font-medium text-gray-600 hover:text-primary transition-colors py-2 border-b border-gray-100"
+          <Link
+            href="/#features"
+            className="text-lg font-medium text-gray-600 hover:text-secondary transition-colors py-2 border-b border-gray-100"
             onClick={() => setIsMenuOpen(false)}
           >
             Features
           </Link>
-          <Link 
-            href="/#pricing" 
-            className="text-lg font-medium text-gray-600 hover:text-primary transition-colors py-2 border-b border-gray-100"
+          <Link
+            href="/#pricing"
+            className="text-lg font-medium text-gray-600 hover:text-secondary transition-colors py-2 border-b border-gray-100"
             onClick={() => setIsMenuOpen(false)}
           >
             Pricing
           </Link>
-          <Link 
-            href="https://proddy.canny.io/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-lg font-medium text-gray-600 hover:text-primary transition-colors py-2 border-b border-gray-100"
+          <Link
+            href="https://proddy.canny.io/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg font-medium text-gray-600 hover:text-secondary transition-colors py-2 border-b border-gray-100"
             onClick={() => setIsMenuOpen(false)}
           >
             Roadmap
           </Link>
-          <Link 
-            href="https://proddy.betteruptime.com/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-lg font-medium text-gray-600 hover:text-primary transition-colors py-2 border-b border-gray-100"
+          <Link
+            href="https://proddy.betteruptime.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg font-medium text-gray-600 hover:text-secondary transition-colors py-2 border-b border-gray-100"
             onClick={() => setIsMenuOpen(false)}
           >
             Status
           </Link>
-          
+
           <div className="flex flex-col gap-4 mt-4">
             <Link href="/auth" onClick={() => setIsMenuOpen(false)}>
               <Button variant="outline" className="w-full">

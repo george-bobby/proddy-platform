@@ -39,8 +39,8 @@ export const SidebarItem = ({
       className={cn(
         'group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2 md:py-2.5 text-sm font-medium transition-standard',
         isActive
-          ? 'bg-primary-foreground/20 text-primary-foreground shadow-sm hover:bg-primary-foreground/30'
-          : 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1',
+          ? 'bg-secondary-foreground/20 text-secondary-foreground shadow-sm hover:bg-secondary-foreground/30'
+          : 'text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:translate-x-1',
         isCollapsed && 'justify-center px-1 md:px-2'
       )}
     >
@@ -103,8 +103,8 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
       className={cn(
         "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 font-medium h-9 md:h-10 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
         isActive
-          ? "text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm"
-          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1",
+          ? "text-secondary-foreground bg-secondary-foreground/20 hover:bg-secondary-foreground/30 shadow-sm"
+          : "text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:translate-x-1",
         isCollapsed ? "justify-center px-1 md:px-2" : "justify-start px-2 md:px-4"
       )}
       size="sm"
@@ -116,7 +116,7 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
               <div className="relative">
                 <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
                   <AvatarImage alt={label} src={image} />
-                  <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+                  <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
                 </Avatar>
                 {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
               </div>
@@ -127,7 +127,7 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
             <div className="relative mr-2 md:mr-3 flex-shrink-0">
               <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
                 <AvatarImage alt={label} src={image} />
-                <AvatarFallback className="text-xs font-medium bg-primary/20 text-primary-foreground">{avatarFallback}</AvatarFallback>
+                <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
               </Avatar>
               {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
             </div>
@@ -158,8 +158,8 @@ export const ChannelItem = ({ id, label, icon, isActive = false, isCollapsed = f
       className={cn(
         "group py-2 md:py-2.5 flex items-center gap-2 md:gap-3 font-medium h-9 md:h-10 text-sm overflow-hidden rounded-[10px] transition-standard w-full",
         isActive
-          ? "text-primary-foreground bg-primary-foreground/20 hover:bg-primary-foreground/30 shadow-sm"
-          : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:translate-x-1",
+          ? "text-secondary-foreground bg-secondary-foreground/20 hover:bg-secondary-foreground/30 shadow-sm"
+          : "text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:translate-x-1",
         isCollapsed ? "justify-center px-1 md:px-2" : "justify-start px-2 md:px-4"
       )}
       size="sm"

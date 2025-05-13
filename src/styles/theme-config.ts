@@ -5,31 +5,20 @@
  */
 
 export const themeConfig = {
-	// Primary brand color: Pink (#ec108c)
+	// Colors
 	primary: {
-		main: 'hsl(326, 86%, 50%)', // #ec108c
-		light: 'hsl(326, 86%, 60%)', // #f03da3
-		dark: 'hsl(326, 86%, 40%)', // #c00975
-		hover: 'hsl(326, 86%, 45%)', // #d60980
-		foreground: 'hsl(0, 0%, 100%)', // #ffffff
+		main: 'hsl(280, 77%, 25%)', // Slightly lighter for visibility: #541075
+		light: 'hsl(280, 77%, 35%)', // #7118a2
+		dark: 'hsl(280, 77%, 20%)', // #3f0c5c
+		hover: 'hsl(280, 77%, 28%)', // #5b1281
+		foreground: 'hsl(0, 0%, 100%)', // White
 	},
-
-	// Secondary brand color: Coral (#f9865a)
 	secondary: {
-		main: 'hsl(17, 93%, 66%)', // #f9865a
-		light: 'hsl(17, 93%, 76%)', // #fba683
-		dark: 'hsl(17, 93%, 56%)', // #f76631
-		hover: 'hsl(17, 93%, 61%)', // #f87545
-		foreground: 'hsl(0, 0%, 100%)', // #ffffff
-	},
-
-	// Tertiary brand color: Deep Purple (#4a0d67)
-	tertiary: {
-		main: 'hsl(280, 77%, 23%)', // #4a0d67
-		light: 'hsl(280, 77%, 33%)', // #6b1395
-		dark: 'hsl(280, 77%, 18%)', // #390a50
-		hover: 'hsl(280, 77%, 20%)', // #410b5b
-		foreground: 'hsl(0, 0%, 100%)', // #ffffff
+		main: 'hsl(326, 86%, 52%)', // Slightly lighter base: #ee2d96
+		light: 'hsl(326, 86%, 62%)', // More usable light tone: #f359a9
+		dark: 'hsl(326, 86%, 42%)', // Better contrast dark: #c81a7c
+		hover: 'hsl(326, 86%, 47%)', // Hover state between base & dark: #db1387
+		foreground: 'hsl(0, 0%, 100%)', // White
 	},
 
 	// Border radius

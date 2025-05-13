@@ -78,7 +78,7 @@ export const DirectMessagesNotificationDialog = ({
 
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            <div className="animate-spin h-8 w-8 border-4 border-secondary border-t-transparent rounded-full"></div>
           </div>
         ) : (
           <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
@@ -146,7 +146,7 @@ export const DirectMessagesNotificationDialog = ({
                       <div className="flex items-start gap-3">
                         <Avatar className="h-10 w-10 border">
                           <AvatarImage src={message.author.image} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                          <AvatarFallback className="bg-secondary/10 text-secondary font-medium">
                             {message.author.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>

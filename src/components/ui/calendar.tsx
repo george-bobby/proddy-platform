@@ -159,7 +159,7 @@ function Calendar({
                       onClick={() => handleDayClick(day)}
                       className={cn(
                         "h-8 w-8 p-0 font-normal text-sm",
-                        isDaySelected(day) && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                        isDaySelected(day) && "bg-secondary text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground",
                         isDayToday(day) && !isDaySelected(day) && "bg-accent text-accent-foreground"
                       )}
                       disabled={

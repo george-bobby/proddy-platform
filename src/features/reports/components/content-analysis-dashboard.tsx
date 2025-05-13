@@ -5,11 +5,11 @@ import { useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
 import { format, subDays } from 'date-fns';
-import { 
-  Loader, 
-  MessageSquare, 
-  Clock, 
-  FileText, 
+import {
+  Loader,
+  MessageSquare,
+  Clock,
+  FileText,
   Image as ImageIcon,
   File,
   Link as LinkIcon,
@@ -108,7 +108,7 @@ export const ContentAnalysisDashboard = ({ workspaceId }: ContentAnalysisDashboa
   // Prepare data for message activity by day
   const messagesByDayData = useMemo(() => {
     if (!messageData) return [];
-    
+
     return messageData.messagesByDate.map(item => ({
       label: format(new Date(item.date), 'MMM dd'),
       value: item.count
@@ -118,7 +118,7 @@ export const ContentAnalysisDashboard = ({ workspaceId }: ContentAnalysisDashboa
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
+        <Loader className="h-8 w-8 animate-spin text-secondary" />
       </div>
     );
   }
@@ -128,23 +128,23 @@ export const ContentAnalysisDashboard = ({ workspaceId }: ContentAnalysisDashboa
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Content Analysis</h2>
         <div className="flex rounded-md border border-input overflow-hidden">
-          <button 
+          <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('7d')}
           >
             7 days
           </button>
-          <button 
+          <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('30d')}
           >
             30 days
           </button>
-          <button 
+          <button
             type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-primary text-white' : 'bg-transparent hover:bg-muted'}`}
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('90d')}
           >
             90 days
@@ -256,7 +256,7 @@ export const ContentAnalysisDashboard = ({ workspaceId }: ContentAnalysisDashboa
                   data={messageData.topSenders.map(sender => ({
                     label: sender.name,
                     value: sender.count,
-                    color: 'bg-primary'
+                    color: 'bg-secondary'
                   }))}
                   formatValue={(value) => `${value} messages`}
                 />

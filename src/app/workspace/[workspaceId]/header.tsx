@@ -62,7 +62,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
       />
 
       <div className={cn(
-        "flex h-14 md:h-16 items-center justify-between gap-1 border-b border-tertiary/20",
+        "flex h-14 md:h-16 items-center justify-between gap-1 border-b border-primary/20",
         isCollapsed ? "px-1 md:px-2" : "px-2 md:px-6"
       )}>
         <div className="flex items-center gap-1">
@@ -72,10 +72,10 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                 <Hint label={workspace.name} side="right" align="center">
                   <Button
                     variant="ghost"
-                    className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center justify-center p-1 md:p-1.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                    className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center justify-center p-1 md:p-1.5 text-secondary-foreground hover:bg-secondary-foreground/10 transition-standard"
                     size="icon"
                   >
-                    <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
+                    <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-secondary text-secondary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
                       {workspace.name.charAt(0).toUpperCase()}
                     </div>
                   </Button>
@@ -83,15 +83,15 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
               ) : (
                 <Button
                   variant="ghost"
-                  className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center gap-2 md:gap-4 overflow-hidden p-1.5 md:p-2.5 text-primary-foreground hover:bg-primary-foreground/10 transition-standard"
+                  className="mt-3 md:mt-5 h-12 md:h-14 group flex items-center gap-2 md:gap-4 overflow-hidden p-1.5 md:p-2.5 text-secondary-foreground hover:bg-secondary-foreground/10 transition-standard"
                   size="lg"
                 >
-                  <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
+                  <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-[10px] bg-secondary text-secondary-foreground shadow-md transition-standard group-hover:shadow-lg flex-shrink-0">
                     {workspace.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex flex-col items-start min-w-0">
                     <span className="text-sm md:text-base font-semibold tracking-tight truncate max-w-[100px] md:max-w-full">{workspace.name}</span>
-                    <span className="text-xs text-primary-foreground/70 hidden md:inline-block">Active Workspace</span>
+                    <span className="text-xs text-secondary-foreground/70 hidden md:inline-block">Active Workspace</span>
                   </div>
                   <ChevronDown className="ml-0.5 size-3.5 shrink-0 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
                 </Button>
@@ -100,7 +100,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
 
             <DropdownMenuContent side="bottom" align="start" className="w-64 p-2">
               <DropdownMenuItem className="cursor-pointer capitalize rounded-[8px] p-3 mb-1 hover:bg-accent/20">
-                <div className="relative mr-3 flex size-10 items-center justify-center overflow-hidden rounded-[10px] bg-primary text-xl font-semibold text-primary-foreground shadow-md">
+                <div className="relative mr-3 flex size-10 items-center justify-center overflow-hidden rounded-[10px] bg-secondary text-xl font-semibold text-secondary-foreground shadow-md">
                   {workspace.name.charAt(0).toUpperCase()}
                 </div>
 
@@ -118,8 +118,8 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                     className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
                     onClick={() => setInviteOpen(true)}
                   >
-                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
-                      <Plus className="size-3.5 text-primary transition-transform duration-200 group-hover:scale-125" />
+                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-secondary/10 transition-standard group-hover:bg-secondary/20">
+                      <Plus className="size-3.5 text-secondary transition-transform duration-200 group-hover:scale-125" />
                     </div>
                     <span className="font-medium">Invite to {workspace.name}</span>
                   </DropdownMenuItem>
@@ -130,8 +130,8 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                     className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
                     onClick={() => setPreferencesOpen(true)}
                   >
-                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
-                      <SquarePen className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-12" />
+                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-secondary/10 transition-standard group-hover:bg-secondary/20">
+                      <SquarePen className="size-3.5 text-secondary transition-transform duration-200 group-hover:rotate-12" />
                     </div>
                     <span className="font-medium">Preferences</span>
                   </DropdownMenuItem>
@@ -143,8 +143,8 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                 className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
                 onClick={() => setSwitchOpen(true)} // updated here
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary/10 transition-standard group-hover:bg-primary/20">
-                  <RefreshCw className="size-3.5 text-primary transition-transform duration-200 group-hover:rotate-45" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-secondary/10 transition-standard group-hover:bg-secondary/20">
+                  <RefreshCw className="size-3.5 text-secondary transition-transform duration-200 group-hover:rotate-45" />
                 </div>
                 <span className="font-medium">Switch Workspace</span>
               </DropdownMenuItem>
@@ -167,7 +167,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                     onClick={() => onWorkspaceClick(item._id)}
                     className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border bg-card px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-secondary text-secondary-foreground shadow-md transition-standard group-hover:shadow-lg">
                       {item.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex flex-col items-start">
@@ -177,7 +177,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                       )}
                     </div>
                     {item._id === workspace._id && (
-                      <div className="ml-auto rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary shadow-sm">
+                      <div className="ml-auto rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary shadow-sm">
                         Active
                       </div>
                     )}
@@ -191,7 +191,7 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                   }}
                   className="flex w-full cursor-pointer items-center gap-x-4 rounded-[10px] border border-dashed bg-card/50 px-4 py-3 hover:bg-accent/10 transition-standard hover:translate-x-1 group mt-2"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-md transition-standard group-hover:shadow-lg">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-secondary text-secondary-foreground shadow-md transition-standard group-hover:shadow-lg">
                     <Plus className="size-5 transition-transform duration-200 group-hover:scale-125" />
                   </div>
                   <p className="text-sm font-semibold tracking-tight">Create New Workspace</p>

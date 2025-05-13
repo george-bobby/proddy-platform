@@ -103,38 +103,38 @@ export const CalendarHeader = ({
       {/* Event counts display */}
       <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
         <span>
-          {filterOptions.eventTypes.length === 0 
-            ? 'No filters applied' 
-            : filterOptions.eventTypes.length === 3 
-              ? 'Showing all events' 
+          {filterOptions.eventTypes.length === 0
+            ? 'No filters applied'
+            : filterOptions.eventTypes.length === 3
+              ? 'Showing all events'
               : 'Showing:'}
         </span>
-        
+
         {filterOptions.eventTypes.length > 0 && (
           <div className="flex items-center gap-2">
             {filterOptions.eventTypes.includes('message') && (
-              <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
+              <div className="flex items-center gap-1 bg-secondary/10 text-secondary px-2 py-0.5 rounded-full text-xs">
                 <span>{eventCounts.message}</span>
                 <span>Messages</span>
               </div>
             )}
-            
+
             {filterOptions.eventTypes.includes('board-card') && (
               <div className="flex items-center gap-1 bg-secondary/10 text-secondary px-2 py-0.5 rounded-full text-xs">
                 <span>{eventCounts.boardCard}</span>
                 <span>Board Cards</span>
               </div>
             )}
-            
+
             {filterOptions.eventTypes.includes('task') && (
-              <div className="flex items-center gap-1 bg-tertiary/10 text-tertiary px-2 py-0.5 rounded-full text-xs">
+              <div className="flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
                 <span>{eventCounts.task}</span>
                 <span>Tasks</span>
               </div>
             )}
           </div>
         )}
-        
+
         {filterOptions.eventTypes.length > 0 && (
           <span className="text-xs text-muted-foreground ml-1">
             (Total: {eventCounts.total})

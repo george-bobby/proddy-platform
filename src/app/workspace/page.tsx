@@ -25,7 +25,7 @@ const WorkspacePage = () => {
   }, [data, isLoading, open, setOpen, router]);
 
   return (
-    <div className="flex h-full flex-1 flex-col items-center justify-center gap-2 bg-primary text-white">
+    <div className="flex h-full flex-1 flex-col items-center justify-center gap-2 bg-secondary text-white">
       <Loader className="size-5 animate-spin" />
       <p className="text-sm">Loading your workspace...</p>
     </div>

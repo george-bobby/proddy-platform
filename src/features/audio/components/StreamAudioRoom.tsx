@@ -52,7 +52,7 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
           className="bg-white hover:bg-gray-100 flex items-center gap-2"
           disabled
         >
-          <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" />
+          <div className="animate-spin h-3 w-3 border-2 border-secondary border-t-transparent rounded-full" />
           Connecting to audio...
         </Button>
       </div>
@@ -121,7 +121,7 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 bg-white hover:bg-gray-100 text-primary flex items-center justify-center"
+            className="flex-1 bg-white hover:bg-gray-100 text-secondary flex items-center justify-center"
             onClick={handleRetry}
           >
             Retry

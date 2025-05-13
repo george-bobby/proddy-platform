@@ -69,7 +69,7 @@ const Topbar = () => {
                 value={tab.href.split('/').pop() || ''}
                 className={cn(
                   "flex h-full items-center justify-center gap-x-2 rounded-none border-b-2 border-transparent px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-muted/30 hover:text-foreground",
-                  tab.active && "border-primary text-primary hover:bg-primary/5"
+                  tab.active && "border-secondary text-secondary hover:bg-secondary/5"
                 )}
                 asChild
               >

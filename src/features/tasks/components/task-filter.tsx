@@ -89,7 +89,7 @@ export const TaskFilter = ({
               <Filter className="h-4 w-4" />
               <span>Filter</span>
               {activeFiltersCount > 0 && (
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground">
                   {activeFiltersCount}
                 </span>
               )}
