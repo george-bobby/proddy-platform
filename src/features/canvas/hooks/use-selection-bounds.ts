@@ -1,5 +1,5 @@
-import { useSelf, useStorage } from '../../liveblocks.config';
-import { type XYWH } from '../features/canvas/types/canvas';
+import { useSelf, useStorage } from '../../../../liveblocks.config';
+import { type XYWH } from '../types/canvas';
 
 /**
  * Custom hook to calculate the bounding box of the current selection

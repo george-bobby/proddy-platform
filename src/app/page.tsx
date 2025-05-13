@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, CheckCircle, MessageSquare, Users, Calendar, BarChart } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { LandingNavbar } from '@/components/landing-navbar';
+import { LandingNavbar } from '@/features/landing/components/landing-navbar';
 
 const HomePage = () => {
   return (

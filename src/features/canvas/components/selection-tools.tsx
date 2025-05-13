@@ -5,8 +5,8 @@ import { memo } from "react";
 
 import { Button } from "../../../components/ui/button";
 import { Hint } from "../../../components/hint";
-import { useDeleteLayers } from "../../../hooks/use-delete-layers";
-import { useSelectionBounds } from "../../../hooks/use-selection-bounds";
+import { useDeleteLayers } from "../hooks/use-delete-layers";
+import { useSelectionBounds } from "../hooks/use-selection-bounds";
 import { useMutation, useSelf } from "../../../../liveblocks.config";
 import type { Camera, Color } from "../types/canvas";
 

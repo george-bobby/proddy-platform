@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useEffect } from "react";
-import { useDisableScrollBounce } from "../../../hooks/use-disable-scroll-bounce";
-import { useDeleteLayers } from "../../../hooks/use-delete-layers";
+import { useDisableScrollBounce } from "../hooks/use-disable-scroll-bounce";
+import { useDeleteLayers } from "../hooks/use-delete-layers";
 import {
   colorToCSS,
   connectionIdToColor,
