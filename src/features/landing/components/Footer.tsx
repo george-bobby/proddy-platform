@@ -27,6 +27,9 @@ export const Footer = () => {
               The AI-powered modular productivity suite designed for modern teams.
               Streamline your workflow with integrated tools enhanced by artificial intelligence.
             </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Made with ❤️ in Bengaluru, India
+            </p>
             <div className="flex space-x-5">
               <a
                 href="https://twitter.com"
@@ -65,17 +68,12 @@ export const Footer = () => {
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/home#features" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                <Link href="/features" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/home#modules" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Modules
-                </Link>
-              </li>
-              <li>
-                <Link href="/home#pricing" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                <Link href="/pricing" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Pricing
                 </Link>
               </li>
@@ -114,19 +112,22 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/careers" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Blog
+                <Link href="/solutions" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  Solutions
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Contact
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="mailto:support@proddy.freshdesk.com"
+                  className="text-sm text-gray-500 hover:text-primary transition-colors"
+                >
+                  Support
+                </a>
               </li>
             </ul>
           </div>
@@ -138,23 +139,33 @@ export const Footer = () => {
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/docs" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Documentation
+                <Link
+                  href="https://proddy.betteruptime.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                >
+                  Status <ExternalLink className="size-3" />
                 </Link>
               </li>
               <li>
-                <Link href="/guides" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Guides
+                <Link
+                  href="https://proddy.canny.io/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                >
+                  Roadmap <ExternalLink className="size-3" />
                 </Link>
               </li>
               <li>
-                <Link href="/api" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  API
+                <Link href="/privacy" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/support" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Support
+                <Link href="/terms" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  Terms of Service
                 </Link>
               </li>
             </ul>
@@ -202,12 +213,12 @@ export const Footer = () => {
               <Link href="/terms" className="text-sm text-gray-500 hover:text-primary transition-colors">
                 Terms of Service
               </Link>
-              <Link href="/cookies" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                Cookie Policy
-              </Link>
-              <Link href="/accessibility" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                Accessibility
-              </Link>
+              <a
+                href="mailto:support@proddy.freshdesk.com"
+                className="text-sm text-gray-500 hover:text-primary transition-colors"
+              >
+                Contact Support
+              </a>
             </div>
           </div>
         </div>

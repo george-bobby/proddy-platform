@@ -1,0 +1,267 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { ArrowRight, Check, AlertCircle, HelpCircle } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Header } from '@/features/landing/components/Header';
+import { Footer } from '@/features/landing/components/Footer';
+
+const PricingPage = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary mb-4"
+            >
+              BETA PRICING
+            </motion.div>
+            <motion.h1 
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              Free During <span className="text-primary">Beta</span>
+            </motion.h1>
+            <motion.p 
+              className="text-xl text-gray-600 max-w-3xl mx-auto mb-10"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Proddy is currently in beta and completely free to use. We're working hard to make it the best productivity suite for teams of all sizes.
+            </motion.p>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Free Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white rounded-xl shadow-sm p-8 border border-gray-100 relative"
+            >
+              <Badge variant="outline" className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200">
+                Current
+              </Badge>
+              <h3 className="text-lg font-semibold mb-2">Free Beta</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">$0</span>
+                <span className="text-gray-500 ml-2">/month</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Full access to all features during our beta period. No credit card required.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Unlimited workspaces</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Unlimited members</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">All modules included</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">AI-powered features</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Community support</span>
+                </li>
+              </ul>
+              <Link href="/signup">
+                <Button className="w-full">
+                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </motion.div>
+
+            {/* Future Basic Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="bg-white rounded-xl shadow-sm p-8 border border-gray-100 relative"
+            >
+              <Badge variant="outline" className="absolute top-4 right-4 bg-gray-50 text-gray-500 border-gray-200">
+                Coming Soon
+              </Badge>
+              <h3 className="text-lg font-semibold mb-2">Basic</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">$8</span>
+                <span className="text-gray-500 ml-2">/user/month</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Essential tools for small teams to collaborate effectively.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Up to 3 workspaces</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Up to 10 members per workspace</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Core modules included</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Basic AI features</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Email support</span>
+                </li>
+              </ul>
+              <Button disabled variant="outline" className="w-full">
+                Coming Soon
+              </Button>
+            </motion.div>
+
+            {/* Future Pro Plan */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="bg-white rounded-xl shadow-sm p-8 border border-primary/20 relative ring-1 ring-primary/20"
+            >
+              <Badge className="absolute top-4 right-4">
+                Coming Soon
+              </Badge>
+              <h3 className="text-lg font-semibold mb-2">Pro</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">$15</span>
+                <span className="text-gray-500 ml-2">/user/month</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Advanced features for growing teams with complex needs.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Unlimited workspaces</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Unlimited members</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">All modules included</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Advanced AI capabilities</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Priority support</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Advanced analytics</span>
+                </li>
+                <li className="flex items-start">
+                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Custom integrations</span>
+                </li>
+              </ul>
+              <Button disabled variant="outline" className="w-full">
+                Coming Soon
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-lg text-gray-600">
+              Have questions about our pricing? We've got answers.
+            </p>
+          </div>
+
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-xl font-semibold mb-2">How long will Proddy be free?</h3>
+              <p className="text-gray-600">
+                Proddy will remain completely free during our beta period. We'll provide at least 30 days notice before introducing paid plans.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold mb-2">Will my data be migrated when paid plans launch?</h3>
+              <p className="text-gray-600">
+                Yes, all your data will be automatically migrated when we introduce paid plans. You'll have the option to choose which plan works best for your team.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold mb-2">Are there any limitations during the beta?</h3>
+              <p className="text-gray-600">
+                While we're in beta, you have access to all features without limitations. However, some modules and features may still be under development.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold mb-2">Will there be a free plan after beta?</h3>
+              <p className="text-gray-600">
+                Yes, we plan to offer a free tier with core functionality even after we launch paid plans. Beta users will receive special benefits when transitioning.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-primary/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to get started?</h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+            Join Proddy today and experience the future of team productivity, completely free during our beta.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button size="lg" className="px-8">Sign Up for Free</Button>
+            </Link>
+            <Link href="/contact">
+              <Button size="lg" variant="outline" className="px-8">Contact Sales</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default PricingPage;

@@ -141,21 +141,21 @@ export const SolutionsSection = () => {
   const activeSolution = solutions.find(s => s.id === activeTab) || solutions[0];
 
   return (
-    <section id="modules" className="py-20 md:py-32 bg-gray-50 relative overflow-hidden">
+    <section id="modules" className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute bottom-[20%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
       </div>
 
-      <div className="container px-4 md:px-6 mx-auto relative z-10">
-        <div className="text-center mb-16">
+      <div className="w-full px-6 md:px-8 relative z-10">
+        <div className="text-center mb-10 max-w-7xl mx-auto">
           <motion.div
             ref={ref}
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary mb-4"
+            className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-primary/10 text-primary mb-4"
           >
             MODULAR PLATFORM
           </motion.div>
@@ -171,27 +171,27 @@ export const SolutionsSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-gray-600 max-w-[800px] mx-auto"
+            className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
           >
             Proddy's modular design lets you use exactly what you need. Each module works perfectly on its own or as part of the integrated ecosystem.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="lg:col-span-1 bg-white rounded-2xl shadow-md p-6"
+            className="lg:col-span-1 bg-white rounded-xl shadow-md p-6"
           >
-            <h3 className="text-xl font-bold mb-4 text-gray-900">Modules</h3>
+            <h3 className="text-lg font-bold mb-4 text-gray-900">Modules</h3>
             <div className="space-y-2">
               {solutions.map((solution) => (
                 <button
                   key={solution.id}
                   onClick={() => setActiveTab(solution.id)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200",
+                    "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200",
                     activeTab === solution.id
                       ? "bg-primary/5 text-primary"
                       : "hover:bg-gray-50 text-gray-700"
@@ -213,17 +213,17 @@ export const SolutionsSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="lg:col-span-2 bg-white rounded-2xl shadow-md overflow-hidden"
+            className="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden"
           >
             <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="p-8">
+              <div className="p-6">
                 <div className={cn(
-                  "p-3 rounded-xl text-white w-fit mb-4",
+                  "p-3 rounded-lg text-white w-fit mb-4",
                   activeSolution.color
                 )}>
                   {activeSolution.icon}
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-gray-900">{activeSolution.name}</h3>
+                <h3 className="text-xl font-bold mb-3 text-gray-900">{activeSolution.name}</h3>
                 <p className="text-gray-600 mb-6">{activeSolution.description}</p>
 
                 <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Key Features</h4>
@@ -237,12 +237,12 @@ export const SolutionsSection = () => {
                 </ul>
 
                 <Link href="/signin">
-                  <Button className="gap-2">
+                  <Button className="gap-2 px-6 py-2 rounded-lg">
                     Try {activeSolution.name} <ArrowRight className="size-4" />
                   </Button>
                 </Link>
               </div>
-              <div className="relative h-[300px] md:h-auto bg-gray-100">
+              <div className="relative h-[280px] md:h-auto bg-gray-100">
                 <Image
                   src="/dashboard-preview.svg"
                   alt={`${activeSolution.name} module preview`}

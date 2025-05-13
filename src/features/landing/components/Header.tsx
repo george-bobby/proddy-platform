@@ -23,49 +23,49 @@ const modules: Module[] = [
     name: 'Messaging',
     description: 'Real-time team communication',
     icon: '💬',
-    href: '/signin',
+    href: '/features#messaging',
   },
   {
     name: 'Tasks',
     description: 'Organize and track work',
     icon: '✅',
-    href: '/signin',
+    href: '/features#tasks',
   },
   {
     name: 'Calendar',
     description: 'Schedule and manage events',
     icon: '📅',
-    href: '/signin',
+    href: '/features#calendar',
   },
   {
     name: 'Boards',
     description: 'Visual project management',
     icon: '📋',
-    href: '/signin',
+    href: '/features#boards',
   },
   {
     name: 'Canvas',
     description: 'Collaborative whiteboarding',
     icon: '🎨',
-    href: '/signin',
+    href: '/features#canvas',
   },
   {
     name: 'Notes',
     description: 'Document and share knowledge',
     icon: '📝',
-    href: '/signin',
+    href: '/features#notes',
   },
   {
     name: 'Reports',
     description: 'Analytics and insights',
     icon: '📊',
-    href: '/signin',
+    href: '/features#reports',
   },
   {
     name: 'AI Assistant',
     description: 'Intelligent productivity tools',
     icon: '🤖',
-    href: '/signin',
+    href: '/features#ai',
   },
 ];
 
@@ -171,13 +171,13 @@ export const Header = () => {
             </div>
 
             <Link
-              href="/home#modules"
+              href="/features"
               className={cn(
                 "text-sm font-medium transition-colors duration-200",
                 isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
               )}
             >
-              Modules
+              Features
             </Link>
 
             <Link
@@ -190,31 +190,27 @@ export const Header = () => {
               Why Proddy?
             </Link>
 
-            <div className="flex items-center gap-4">
-              <Link
-                href="https://proddy.betteruptime.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  "text-sm font-medium transition-colors duration-200 flex items-center gap-1",
-                  isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
-                )}
-              >
-                Status <ExternalLink className="size-3" />
-              </Link>
+            <Link
+              href="/pricing"
+              className={cn(
+                "text-sm font-medium transition-colors duration-200",
+                isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
+              )}
+            >
+              Pricing
+            </Link>
 
-              <Link
-                href="https://proddy.canny.io/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  "text-sm font-medium transition-colors duration-200 flex items-center gap-1",
-                  isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
-                )}
-              >
-                Roadmap <ExternalLink className="size-3" />
-              </Link>
-            </div>
+            <Link
+              href="https://proddy.canny.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "text-sm font-medium transition-colors duration-200 flex items-center gap-1",
+                isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
+              )}
+            >
+              Roadmap <ExternalLink className="size-3" />
+            </Link>
           </nav>
 
           {/* CTA Button */}
@@ -283,18 +279,18 @@ export const Header = () => {
             <div className="px-4 py-6 space-y-6">
               <div className="space-y-4">
                 <Link
-                  href="/home#solutions"
+                  href="/solutions"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Solutions
                 </Link>
                 <Link
-                  href="/home#modules"
+                  href="/features"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Modules
+                  Features
                 </Link>
                 <Link
                   href="/home#why-proddy"
@@ -304,14 +300,13 @@ export const Header = () => {
                   Why Proddy?
                 </Link>
                 <Link
-                  href="https://proddy.betteruptime.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-base font-medium text-gray-700 hover:text-primary transition-colors"
+                  href="/pricing"
+                  className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Status <ExternalLink className="size-3" />
+                  Pricing
                 </Link>
+
                 <Link
                   href="https://proddy.canny.io/"
                   target="_blank"

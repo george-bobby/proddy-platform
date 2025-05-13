@@ -73,22 +73,22 @@ export const WhyProddySection = () => {
   ];
 
   return (
-    <section id="why-proddy" className="py-20 md:py-32 bg-white relative overflow-hidden">
+    <section id="why-proddy" className="py-12 md:py-16 bg-white relative overflow-hidden w-full">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[30%] -left-[5%] w-[25%] h-[25%] rounded-full bg-secondary/5 blur-3xl" />
         <div className="absolute bottom-[20%] -right-[10%] w-[35%] h-[35%] rounded-full bg-primary/5 blur-3xl" />
       </div>
 
-      <div className="container px-4 md:px-6 mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="w-full px-6 md:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto">
           <div>
             <motion.div
               ref={ref}
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-secondary/10 text-secondary mb-4"
+              className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-secondary/10 text-secondary mb-3"
             >
               WHY PRODDY?
             </motion.div>
@@ -96,7 +96,7 @@ export const WhyProddySection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-6"
+              className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-3"
             >
               The Problem with Traditional Productivity Tools
             </motion.h2>
@@ -104,20 +104,20 @@ export const WhyProddySection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg text-gray-600 mb-8"
+              className="text-lg text-gray-600 mb-6"
             >
-              Today's teams struggle with fragmented workflows across multiple tools, leading to context switching, 
-              information silos, and reduced productivity. Proddy solves these challenges with an integrated, 
+              Today's teams struggle with fragmented workflows across multiple tools, leading to context switching,
+              information silos, and reduced productivity. Proddy solves these challenges with an integrated,
               AI-powered approach.
             </motion.p>
 
-            <div className="bg-gray-50 rounded-2xl p-6 mb-8">
-              <div className="grid grid-cols-3 gap-4 mb-4 text-sm font-semibold">
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <div className="grid grid-cols-3 gap-3 mb-3 text-sm font-semibold">
                 <div className="text-gray-500">Feature</div>
                 <div className="text-gray-500">Traditional Tools</div>
                 <div className="text-gray-500">Proddy</div>
               </div>
-              
+
               {comparisonItems.map((item, index) => (
                 <ComparisonItem
                   key={index}
@@ -134,7 +134,7 @@ export const WhyProddySection = () => {
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.8 }}
             >
-              <Button size="lg" className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300">
+              <Button size="lg" className="gap-2 rounded-full shadow-sm hover:shadow transition-all duration-300 px-5 py-2">
                 Get Started <ArrowRight className="size-4" />
               </Button>
             </motion.div>
@@ -154,13 +154,13 @@ export const WhyProddySection = () => {
                 height={700}
                 className="w-full h-auto"
               />
-              
+
               {/* Decorative elements */}
               <div className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg">
                 <Check className="size-5 text-green-500" />
               </div>
             </div>
-            
+
             {/* Floating elements */}
             <div className="absolute -left-8 top-1/4 hidden lg:block">
               <div className="bg-white rounded-lg shadow-lg p-4 max-w-[200px]">
@@ -170,7 +170,7 @@ export const WhyProddySection = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="absolute -right-8 bottom-1/4 hidden lg:block">
               <div className="bg-white rounded-lg shadow-lg p-4 max-w-[200px]">
                 <div className="flex items-center gap-1 mb-2">

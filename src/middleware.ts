@@ -12,6 +12,13 @@ const isPublicPage = createRouteMatcher([
 	'/home',
 	'/signin',
 	'/signup',
+	'/solutions',
+	'/about',
+	'/contact',
+	'/privacy',
+	'/terms',
+	'/features',
+	'/pricing',
 ]);
 
 // Define authenticated-only pages

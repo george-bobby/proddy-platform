@@ -53,39 +53,39 @@ export const HeroSection = () => {
   };
 
   return (
-    <section className="relative w-full pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-gray-50">
+    <section className="relative w-full pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden bg-gradient-to-b from-white via-gray-50/50 to-gray-50">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-[30%] -right-[10%] w-[60%] h-[60%] rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-secondary/5 blur-3xl" />
       </div>
 
-      <div className="container px-4 md:px-6 mx-auto relative z-10">
+      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl">
         <motion.div
           className="flex flex-col items-center text-center"
           initial="hidden"
           animate={isVisible ? "visible" : "hidden"}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} className="mb-3">
-            <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
+          <motion.div variants={itemVariants} className="mb-4">
+            <span className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-primary/10 text-primary">
               AI-Powered Productivity Suite
             </span>
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6 max-w-4xl"
+            className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4 max-w-4xl"
           >
             Modular Productivity <span className="text-primary relative">
               Reimagined
-              <span className="absolute bottom-1 left-0 w-full h-2 bg-secondary/20 -z-10 rounded-full"></span>
+              <span className="absolute bottom-1 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
             </span>
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-lg md:text-xl text-gray-600 mb-8 max-w-[800px]"
+            className="text-lg md:text-xl text-gray-600 mb-6 max-w-[800px]"
           >
             An intelligent platform that adapts to your workflow with modular tools for messaging,
             tasks, boards, and more — all enhanced by AI to boost your team's productivity.
@@ -93,15 +93,15 @@ export const HeroSection = () => {
 
           <motion.div
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 mb-12"
+            className="flex flex-col sm:flex-row gap-4 mb-8"
           >
             <Link href="/signup">
-              <Button size="lg" className="gap-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90">
+              <Button size="lg" className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-primary hover:bg-primary/90 px-6 py-3 text-base">
                 Get Started <ArrowRight className="size-4" />
               </Button>
             </Link>
             <Link href="/home#modules">
-              <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50">
+              <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-6 py-3 text-base">
                 Explore Modules
               </Button>
             </Link>
@@ -111,7 +111,7 @@ export const HeroSection = () => {
             variants={imageVariants}
             className="relative w-full max-w-5xl"
           >
-            <div className="rounded-2xl overflow-hidden shadow-2xl bg-white p-1">
+            <div className="rounded-2xl overflow-hidden shadow-xl bg-white p-2">
               <div className="relative rounded-xl overflow-hidden">
                 <Image
                   src="/dashboard-preview.svg"
