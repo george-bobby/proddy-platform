@@ -102,11 +102,17 @@ export const CanvasExportMessage = ({ data }: CanvasExportMessageProps) => {
         {data.imageData && (data.exportFormat === "png" || data.exportFormat === "svg") && (
           <div className="relative aspect-video w-full overflow-hidden rounded-md">
             {isDataUrl ? (
-              <img
-                src={data.imageData}
-                alt={data.canvasName || "Canvas export"}
-                className="h-full w-full object-cover"
-              />
+              <div className="relative h-full w-full">
+                <Image
+                  src={data.imageData}
+                  alt={data.canvasName || "Canvas export"}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  className="object-cover"
+                  priority
+                  unoptimized={true} // Required for data URLs
+                />
+              </div>
             ) : (
               <Image
                 src={data.imageData}
