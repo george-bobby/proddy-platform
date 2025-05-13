@@ -1,6 +1,6 @@
 import { ConvexAuthNextjsServerProvider } from '@convex-dev/auth/nextjs/server';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import { PropsWithChildren } from 'react';
 
 import { ConvexClientProvider } from '@/config/convex-client-provider';
@@ -11,8 +11,9 @@ import { siteConfig } from '@/config';
 
 import './globals.css';
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = siteConfig;
@@ -21,7 +22,7 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
-        <body className={`${inter.className} antialiased`}>
+        <body className={`${poppins.className} antialiased`}>
           <ConvexClientProvider>
             <JotaiProvider>
               <Toaster theme="light" richColors closeButton />
