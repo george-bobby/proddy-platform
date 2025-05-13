@@ -57,7 +57,7 @@ export const CTASection = () => {
                 Get Started for Free <ArrowRight className="size-4" />
               </Button>
             </Link>
-            <Link href="/#modules">
+            <Link href="/home#modules">
               <Button
                 size="lg"
                 variant="outline"

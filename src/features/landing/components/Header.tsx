@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ChevronDown, ExternalLink } from 'lucide-react';
+import { Menu, X, ChevronDown, ExternalLink, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useCurrentUser } from '@/features/auth/api/use-current-user';
 
 // Define module types for the mega menu
 interface Module {
@@ -72,6 +73,7 @@ export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModulesOpen, setIsModulesOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { data: currentUser, isLoading: isUserLoading } = useCurrentUser();
 
   // Handle scroll effect for sticky header
   useEffect(() => {
@@ -97,7 +99,7 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/home" className="flex items-center gap-2 group">
             <div className="relative w-10 h-10 overflow-hidden">
               <Image
                 src="/logo.png"
@@ -169,7 +171,7 @@ export const Header = () => {
             </div>
 
             <Link
-              href="/#modules"
+              href="/home#modules"
               className={cn(
                 "text-sm font-medium transition-colors duration-200",
                 isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
@@ -179,7 +181,7 @@ export const Header = () => {
             </Link>
 
             <Link
-              href="/#why-proddy"
+              href="/home#why-proddy"
               className={cn(
                 "text-sm font-medium transition-colors duration-200",
                 isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
@@ -217,26 +219,44 @@ export const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/signin">
-              <Button
-                variant="outline"
-                className="rounded-full border-gray-300 hover:border-primary/50 hover:text-primary"
-              >
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button
-                className={cn(
-                  "rounded-full transition-all duration-300",
-                  isScrolled
-                    ? "bg-primary hover:bg-primary/90 text-white shadow-sm"
-                    : "bg-primary hover:bg-primary/90 text-white shadow-md"
-                )}
-              >
-                Get Started
-              </Button>
-            </Link>
+            {currentUser ? (
+              <Link href="/workspace">
+                <Button
+                  className={cn(
+                    "rounded-full transition-all duration-300 flex items-center gap-2",
+                    isScrolled
+                      ? "bg-primary hover:bg-primary/90 text-white shadow-sm"
+                      : "bg-primary hover:bg-primary/90 text-white shadow-md"
+                  )}
+                >
+                  <LayoutDashboard className="size-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/signin">
+                  <Button
+                    variant="outline"
+                    className="rounded-full border-gray-300 hover:border-primary/50 hover:text-primary"
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button
+                    className={cn(
+                      "rounded-full transition-all duration-300",
+                      isScrolled
+                        ? "bg-primary hover:bg-primary/90 text-white shadow-sm"
+                        : "bg-primary hover:bg-primary/90 text-white shadow-md"
+                    )}
+                  >
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -263,21 +283,21 @@ export const Header = () => {
             <div className="px-4 py-6 space-y-6">
               <div className="space-y-4">
                 <Link
-                  href="/#solutions"
+                  href="/home#solutions"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Solutions
                 </Link>
                 <Link
-                  href="/#modules"
+                  href="/home#modules"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Modules
                 </Link>
                 <Link
-                  href="/#why-proddy"
+                  href="/home#why-proddy"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -303,16 +323,27 @@ export const Header = () => {
                 </Link>
               </div>
               <div className="pt-4 border-t border-gray-200 space-y-3">
-                <Link href="/signin" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full rounded-full">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full rounded-full">
-                    Get Started
-                  </Button>
-                </Link>
+                {currentUser ? (
+                  <Link href="/workspace" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full rounded-full flex items-center justify-center gap-2">
+                      <LayoutDashboard className="size-4" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/signin" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" className="w-full rounded-full">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full rounded-full">
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

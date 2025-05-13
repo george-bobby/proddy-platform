@@ -100,7 +100,7 @@ export const HeroSection = () => {
                 Get Started <ArrowRight className="size-4" />
               </Button>
             </Link>
-            <Link href="/#modules">
+            <Link href="/home#modules">
               <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50">
                 Explore Modules
               </Button>

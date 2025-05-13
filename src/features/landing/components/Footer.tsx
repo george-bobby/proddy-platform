@@ -12,7 +12,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
           {/* Logo and description */}
           <div className="md:col-span-4">
-            <Link href="/" className="flex items-center gap-2 mb-4 group">
+            <Link href="/home" className="flex items-center gap-2 mb-4 group">
               <div className="relative w-8 h-8 overflow-hidden transition-transform duration-300 group-hover:scale-110">
                 <Image
                   src="/logo.png"
@@ -65,17 +65,17 @@ export const Footer = () => {
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/#features" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                <Link href="/home#features" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/#modules" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                <Link href="/home#modules" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Modules
                 </Link>
               </li>
               <li>
-                <Link href="/#pricing" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                <Link href="/home#pricing" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Pricing
                 </Link>
               </li>

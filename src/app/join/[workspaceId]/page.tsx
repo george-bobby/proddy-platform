@@ -82,7 +82,7 @@ const JoinWorkspaceIdPage = () => {
 
       <div className="flex gap-x-4">
         <Button size="lg" variant="outline" asChild>
-          <Link href="/">
+          <Link href="/home">
             <Undo2 className="mr-2 size-4" /> Back to home
           </Link>
         </Button>
