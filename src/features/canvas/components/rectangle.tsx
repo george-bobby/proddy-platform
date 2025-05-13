@@ -1,7 +1,7 @@
 import React from "react";
 
 import { colorToCSS } from "@/lib/utils";
-import type { RectangleLayer } from "@/types/canvas";
+import type { RectangleLayer } from "@/features/canvas/types/canvas";
 
 type RectangleProps = {
   id: string;

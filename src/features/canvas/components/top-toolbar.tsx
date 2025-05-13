@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect, RefObject } from "react";
 import { useMyPresence } from "../../../../liveblocks.config";
-import { CanvasMode, LayerType, type CanvasState, type Color } from "../../../types/canvas";
+import { CanvasMode, LayerType, type CanvasState, type Color } from "../types/canvas";
 import { ColorPicker } from "./color-picker";
 import { Slider } from "@/components/ui/slider";
 import { ToolButton } from "./tool-button";

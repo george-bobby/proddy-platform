@@ -8,7 +8,7 @@ import { Hint } from "../../../components/hint";
 import { useDeleteLayers } from "../../../hooks/use-delete-layers";
 import { useSelectionBounds } from "../../../hooks/use-selection-bounds";
 import { useMutation, useSelf } from "../../../../liveblocks.config";
-import type { Camera, Color } from "../../../types/canvas";
+import type { Camera, Color } from "../types/canvas";
 
 import { ColorPicker } from "./color-picker";
 

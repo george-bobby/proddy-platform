@@ -21,7 +21,7 @@ import {
 import {
   CanvasMode,
   LayerType,
-} from "../../../types/canvas";
+} from "../types/canvas";
 
 // Import refactored hooks
 import {
@@ -421,25 +421,25 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
 
           {/* Show empty canvas message only if no layers, no active drawing, and not in an active tool mode */}
           {Array.isArray(layerIds) &&
-           layerIds.length === 0 &&
-           (!pencilDraft || pencilDraft.length === 0) &&
-           canvasState.mode !== CanvasMode.Inserting &&
-           canvasState.mode !== CanvasMode.Pencil &&
-           canvasState.mode !== CanvasMode.Eraser && (
-            <g>
-              {/* Empty canvas state */}
-              <text
-                x="50%"
-                y="50%"
-                textAnchor="middle"
-                fill="#888"
-                fontSize="14"
-                fontFamily="sans-serif"
-              >
-                Canvas is empty. Start drawing or add shapes.
-              </text>
-            </g>
-          )}
+            layerIds.length === 0 &&
+            (!pencilDraft || pencilDraft.length === 0) &&
+            canvasState.mode !== CanvasMode.Inserting &&
+            canvasState.mode !== CanvasMode.Pencil &&
+            canvasState.mode !== CanvasMode.Eraser && (
+              <g>
+                {/* Empty canvas state */}
+                <text
+                  x="50%"
+                  y="50%"
+                  textAnchor="middle"
+                  fill="#888"
+                  fontSize="14"
+                  fontFamily="sans-serif"
+                >
+                  Canvas is empty. Start drawing or add shapes.
+                </text>
+              </g>
+            )}
           <SelectionBox onResizeHandlePointerDown={onResizeHandlePointerDown} />
           {canvasState.mode === CanvasMode.SelectionNet &&
             canvasState.current != null && (

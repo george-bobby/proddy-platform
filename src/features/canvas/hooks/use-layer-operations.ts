@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { nanoid } from "nanoid";
-import { useMutation } from "../../../../liveblocks.config";
-import { Camera, Color, LayerType, Point } from "../../../types/canvas";
-import { LiveMap, LiveList, LiveObject } from "@liveblocks/client";
-import { penPointsToPathLayer } from "../../../lib/utils";
+import { nanoid } from 'nanoid';
+import { useMutation } from '../../../../liveblocks.config';
+import { Camera, Color, LayerType, Point } from '../types/canvas';
+import { LiveMap, LiveList, LiveObject } from '@liveblocks/client';
+import { penPointsToPathLayer } from '../../../lib/utils';
 
 const MAX_LAYERS = 100;
 
@@ -15,186 +15,184 @@ const MAX_LAYERS = 100;
  * @returns Object with layer operation functions
  */
 export function useLayerOperations(lastUsedColor: Color) {
-  // Insert a new shape layer
-  const insertLayer = useMutation(
-    (
-      { storage, setMyPresence },
-      layerType: LayerType.Ellipse | LayerType.Rectangle | LayerType.Text | LayerType.Note,
-      position: Point,
-    ) => {
-      try {
+	// Insert a new shape layer
+	const insertLayer = useMutation(
+		(
+			{ storage, setMyPresence },
+			layerType:
+				| LayerType.Ellipse
+				| LayerType.Rectangle
+				| LayerType.Text
+				| LayerType.Note,
+			position: Point
+		) => {
+			try {
+				// Get the storage objects
+				let liveLayers = storage.get('layers');
+				let liveLayerIds = storage.get('layerIds');
 
+				// Initialize storage if needed
+				if (!liveLayers || typeof liveLayers.set !== 'function') {
+					liveLayers = new LiveMap<string, LiveObject<any>>();
+					storage.set('layers', liveLayers);
+				}
 
-        // Get the storage objects
-        let liveLayers = storage.get("layers");
-        let liveLayerIds = storage.get("layerIds");
+				if (!liveLayerIds || typeof liveLayerIds.push !== 'function') {
+					liveLayerIds = new LiveList<string>([]);
+					storage.set('layerIds', liveLayerIds);
+				}
 
-        // Initialize storage if needed
-        if (!liveLayers || typeof liveLayers.set !== 'function') {
-          liveLayers = new LiveMap<string, LiveObject<any>>();
-          storage.set("layers", liveLayers);
-        }
+				// Check if we've reached the maximum number of layers
+				if (liveLayers.size >= MAX_LAYERS) return;
 
-        if (!liveLayerIds || typeof liveLayerIds.push !== 'function') {
-          liveLayerIds = new LiveList<string>([]);
-          storage.set("layerIds", liveLayerIds);
-        }
+				const layerId = nanoid();
 
-        // Check if we've reached the maximum number of layers
-        if (liveLayers.size >= MAX_LAYERS) return;
+				// Center the shape around the clicked position
+				const centerX = position.x - 50; // Half of width (100)
+				const centerY = position.y - 50; // Half of height (100)
 
-        const layerId = nanoid();
+				// Create the appropriate layer data
+				let layerData;
+				if (layerType === LayerType.Text) {
+					// For text layers, use dimensions that will auto-resize based on content
+					layerData = {
+						type: layerType,
+						x: position.x - 50, // Center at cursor
+						y: position.y - 25, // Center at cursor
+						height: 50, // Initial height
+						width: 100, // Initial width
+						fill: lastUsedColor,
+						value: '',
+					};
+				} else if (layerType === LayerType.Note) {
+					layerData = {
+						type: layerType,
+						x: centerX,
+						y: centerY,
+						height: 100,
+						width: 200, // Notes are wider by default
+						fill: lastUsedColor,
+						value: '',
+					};
+				} else {
+					layerData = {
+						type: layerType,
+						x: centerX,
+						y: centerY,
+						height: 100,
+						width: 100,
+						fill: lastUsedColor,
+					};
+				}
 
-        // Center the shape around the clicked position
-        const centerX = position.x - 50; // Half of width (100)
-        const centerY = position.y - 50; // Half of height (100)
+				// Create a LiveObject and set it in the map
+				const liveObject = new LiveObject(layerData);
+				liveLayers.set(layerId, liveObject);
+				liveLayerIds.push(layerId);
 
-        // Create the appropriate layer data
-        let layerData;
-        if (layerType === LayerType.Text) {
-          // For text layers, use dimensions that will auto-resize based on content
-          layerData = {
-            type: layerType,
-            x: position.x - 50, // Center at cursor
-            y: position.y - 25, // Center at cursor
-            height: 50,         // Initial height
-            width: 100,         // Initial width
-            fill: lastUsedColor,
-            value: "",
-          };
-        } else if (layerType === LayerType.Note) {
-          layerData = {
-            type: layerType,
-            x: centerX,
-            y: centerY,
-            height: 100,
-            width: 200,         // Notes are wider by default
-            fill: lastUsedColor,
-            value: "",
-          };
-        } else {
-          layerData = {
-            type: layerType,
-            x: centerX,
-            y: centerY,
-            height: 100,
-            width: 100,
-            fill: lastUsedColor,
-          };
-        }
+				// Force a storage update to ensure changes are synchronized
+				storage.set('lastUpdate', Date.now());
 
-        // Create a LiveObject and set it in the map
-        const liveObject = new LiveObject(layerData);
-        liveLayers.set(layerId, liveObject);
-        liveLayerIds.push(layerId);
+				setMyPresence({ selection: [layerId] }, { addToHistory: true });
+			} catch (error) {}
+		},
+		[lastUsedColor]
+	);
 
-        // Force a storage update to ensure changes are synchronized
-        storage.set("lastUpdate", Date.now());
+	// Insert a path (drawing)
+	const insertPath = useMutation(
+		({ storage, self, setMyPresence }) => {
+			const { pencilDraft, strokeWidth } = self.presence;
 
-        setMyPresence({ selection: [layerId] }, { addToHistory: true });
-      } catch (error) {
+			if (pencilDraft == null || pencilDraft.length < 2) {
+				setMyPresence({ pencilDraft: null });
+				return;
+			}
 
-      }
-    },
-    [lastUsedColor],
-  );
+			try {
+				// Get the storage objects
+				let liveLayers = storage.get('layers');
+				let liveLayerIds = storage.get('layerIds');
 
-  // Insert a path (drawing)
-  const insertPath = useMutation(
-    ({ storage, self, setMyPresence }) => {
-      const { pencilDraft, strokeWidth } = self.presence;
+				// Initialize storage if needed
+				if (!liveLayers || typeof liveLayers.set !== 'function') {
+					liveLayers = new LiveMap<string, LiveObject<any>>();
+					storage.set('layers', liveLayers);
+				}
 
-      if (pencilDraft == null || pencilDraft.length < 2) {
-        setMyPresence({ pencilDraft: null });
-        return;
-      }
+				if (!liveLayerIds || typeof liveLayerIds.push !== 'function') {
+					liveLayerIds = new LiveList<string>([]);
+					storage.set('layerIds', liveLayerIds);
+				}
 
-      try {
-        // Get the storage objects
-        let liveLayers = storage.get("layers");
-        let liveLayerIds = storage.get("layerIds");
+				// Check if we've reached the maximum number of layers
+				if (liveLayers.size >= MAX_LAYERS) {
+					setMyPresence({ pencilDraft: null });
+					return;
+				}
 
-        // Initialize storage if needed
-        if (!liveLayers || typeof liveLayers.set !== 'function') {
-          liveLayers = new LiveMap<string, LiveObject<any>>();
-          storage.set("layers", liveLayers);
-        }
+				const id = nanoid();
 
-        if (!liveLayerIds || typeof liveLayerIds.push !== 'function') {
-          liveLayerIds = new LiveList<string>([]);
-          storage.set("layerIds", liveLayerIds);
-        }
+				// Create the path layer
+				const pathLayer = penPointsToPathLayer(
+					pencilDraft,
+					lastUsedColor,
+					strokeWidth
+				);
 
-        // Check if we've reached the maximum number of layers
-        if (liveLayers.size >= MAX_LAYERS) {
-          setMyPresence({ pencilDraft: null });
-          return;
-        }
+				// Create a LiveObject and set it in the map
+				const liveObject = new LiveObject(pathLayer);
+				liveLayerIds.push(id);
+				liveLayers.set(id, liveObject);
 
-        const id = nanoid();
+				// Force a storage update to ensure changes are synchronized
+				storage.set('lastUpdate', Date.now());
 
-        // Create the path layer
-        const pathLayer = penPointsToPathLayer(pencilDraft, lastUsedColor, strokeWidth);
+				// Clear the pencil draft after successfully adding the path
+				setMyPresence({ pencilDraft: null });
+			} catch (error) {
+				setMyPresence({ pencilDraft: null });
+			}
+		},
+		[lastUsedColor]
+	);
 
-        // Create a LiveObject and set it in the map
-        const liveObject = new LiveObject(pathLayer);
-        liveLayerIds.push(id);
-        liveLayers.set(id, liveObject);
+	// Erase a layer by ID
+	const eraseLayerById = useMutation(({ storage }, layerId: string) => {
+		if (!layerId) return;
 
-        // Force a storage update to ensure changes are synchronized
-        storage.set("lastUpdate", Date.now());
+		try {
+			// Get the storage objects
+			const liveLayers = storage.get('layers');
+			const liveLayerIds = storage.get('layerIds');
 
-        // Clear the pencil draft after successfully adding the path
-        setMyPresence({ pencilDraft: null });
-      } catch (error) {
+			// Check if we have valid LiveMap and LiveList objects
+			if (!liveLayers || typeof liveLayers.delete !== 'function') return;
+			if (!liveLayerIds) return;
 
-        setMyPresence({ pencilDraft: null });
-      }
-    },
-    [lastUsedColor],
-  );
+			// Check if the layer exists before trying to delete it
+			const layerExists = liveLayers.has(layerId);
+			if (!layerExists) return;
 
-  // Erase a layer by ID
-  const eraseLayerById = useMutation(
-    ({ storage }, layerId: string) => {
-      if (!layerId) return;
+			// Delete the layer from the LiveMap
+			liveLayers.delete(layerId);
 
-      try {
-        // Get the storage objects
-        const liveLayers = storage.get("layers");
-        const liveLayerIds = storage.get("layerIds");
+			// Find and remove the layer ID from the LiveList
+			const layerIdsArray = Array.from(liveLayerIds);
+			const index = layerIdsArray.indexOf(layerId);
 
-        // Check if we have valid LiveMap and LiveList objects
-        if (!liveLayers || typeof liveLayers.delete !== 'function') return;
-        if (!liveLayerIds) return;
+			if (index !== -1 && typeof liveLayerIds.delete === 'function') {
+				liveLayerIds.delete(index);
+			}
 
-        // Check if the layer exists before trying to delete it
-        const layerExists = liveLayers.has(layerId);
-        if (!layerExists) return;
+			// Force a storage update to ensure changes are synchronized
+			storage.set('lastUpdate', Date.now());
+		} catch (error) {}
+	}, []);
 
-        // Delete the layer from the LiveMap
-        liveLayers.delete(layerId);
-
-        // Find and remove the layer ID from the LiveList
-        const layerIdsArray = Array.from(liveLayerIds);
-        const index = layerIdsArray.indexOf(layerId);
-
-        if (index !== -1 && typeof liveLayerIds.delete === 'function') {
-          liveLayerIds.delete(index);
-        }
-
-        // Force a storage update to ensure changes are synchronized
-        storage.set("lastUpdate", Date.now());
-      } catch (error) {
-
-      }
-    },
-    []
-  );
-
-  return {
-    insertLayer,
-    insertPath,
-    eraseLayerById
-  };
+	return {
+		insertLayer,
+		insertPath,
+		eraseLayerById,
+	};
 }

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { type Color } from "../../../types/canvas";
+import { type Color } from "../types/canvas";
 import { ColorPicker } from "./color-picker";
 import { useMutation } from "../../../../liveblocks.config";
 import { LiveList } from "@liveblocks/client";

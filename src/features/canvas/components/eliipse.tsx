@@ -1,7 +1,7 @@
 import React from "react";
 
 import { colorToCSS } from "@/lib/utils";
-import type { EllipseLayer } from "@/types/canvas";
+import type { EllipseLayer } from "@/features/canvas/types/canvas";
 
 type EllipseProps = {
   id: string;

@@ -5,7 +5,7 @@ import ContentEditable, {
 import { useRef, useEffect, useState } from "react";
 
 import { cn, colorToCSS } from "../../../lib/utils";
-import type { TextLayer } from "../../../types/canvas";
+import type { TextLayer } from "../types/canvas";
 import { useMutation, useStorage, useSelf } from "../../../../liveblocks.config";
 
 const font = Kalam({

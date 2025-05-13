@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "../../../../liveblocks.config";
-import { Camera, CanvasMode, CanvasState, Color, LayerType, Point } from "../../../types/canvas";
+import { Camera, CanvasMode, CanvasState, Color, LayerType, Point } from "../types/canvas";
 import { findLayerAtPoint, pointerEventToCanvasPoint } from "../../../lib/utils";
 
 interface CanvasEventHandlerProps {

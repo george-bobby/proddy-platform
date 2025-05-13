@@ -3,7 +3,7 @@
 import { memo } from "react";
 
 import { useSelf, useStorage } from "../../../../liveblocks.config";
-import { LayerType, Side, type XYWH, combineSides } from "../../../types/canvas";
+import { LayerType, Side, type XYWH, combineSides } from "../types/canvas";
 import { useSelectionBounds } from "../../../hooks/use-selection-bounds";
 
 interface SelectionBoxProps {
