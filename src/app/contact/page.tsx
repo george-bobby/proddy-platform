@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Mail, MapPin, Phone, Send, CheckCircle } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, CheckCircle, ExternalLink } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

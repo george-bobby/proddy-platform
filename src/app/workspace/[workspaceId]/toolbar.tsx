@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, MessageSquare, Activity, Map } from 'lucide-react';
+import { Bell, Search, MessageSquare, Activity, Map, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
@@ -133,7 +133,7 @@ export const WorkspaceToolbar = ({
         </Hint>
 
         {/* Roadmap Button */}
-        <Hint label="Roadmap" side="bottom">
+        <Hint label="Roadmap & Feedback" side="bottom">
           <Button
             variant="ghost"
             size="iconSm"
@@ -146,6 +146,24 @@ export const WorkspaceToolbar = ({
           >
             <div className="relative">
               <Map className="size-5" />
+            </div>
+          </Button>
+        </Hint>
+
+        {/* Support Button */}
+        <Hint label="Need Help?" side="bottom">
+          <Button
+            variant="ghost"
+            size="iconSm"
+            className="text-white relative hover:bg-white/15 transition-colors"
+            onClick={() => {
+              // Open support portal in a new tab
+              const supportUrl = 'https://proddy.freshdesk.com/support/home';
+              window.open(supportUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <div className="relative">
+              <HelpCircle className="size-5" />
             </div>
           </Button>
         </Hint>
