@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { useTrackActivity } from '@/features/reports/hooks/use-track-activity';
 import { WorkspaceToolbar } from '../toolbar';
@@ -27,6 +28,9 @@ import {
   PerformanceMetricsDashboard
 } from '@/features/reports/components';
 const ReportsPage = () => {
+  // Set document title
+  useDocumentTitle('Reports');
+
   const workspaceId = useWorkspaceId();
   const [searchQuery, setSearchQuery] = useState('');
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');

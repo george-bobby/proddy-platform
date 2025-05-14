@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetThreadMessages } from '@/features/messages/api/use-get-thread-messages';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
 
@@ -52,6 +53,9 @@ interface ThreadMessage {
 }
 
 export default function ThreadsPage() {
+  // Set document title
+  useDocumentTitle('Threads');
+
   const workspaceId = useWorkspaceId();
   const threads = useGetThreadMessages() as ThreadMessage[] | undefined;
   const [searchQuery, setSearchQuery] = useState('');

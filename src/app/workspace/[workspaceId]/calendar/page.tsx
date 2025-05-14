@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
 import { CalendarFilterOptions, EventType } from '@/features/calendar/components/calendar-filter';
 import { CalendarHeader } from '@/features/calendar/components/calendar-header';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
 import { Id } from '@/../convex/_generated/dataModel';
@@ -83,6 +84,9 @@ interface CalendarDay {
 }
 
 const CalendarPage = () => {
+  // Set document title
+  useDocumentTitle('Calendar');
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const workspaceId = useWorkspaceId();
   const { data: events, isLoading } = useGetCalendarEvents({
@@ -247,17 +251,17 @@ const CalendarPage = () => {
                   <div
                     key={index}
                     className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
-                      } ${dayObj.day &&
-                        new Date().getDate() === dayObj.day &&
-                        new Date().getMonth() === currentDate.getMonth() &&
-                        new Date().getFullYear() === currentDate.getFullYear()
-                        ? 'bg-accent'
-                        : ''
                       }`}
                   >
                     {dayObj.day && (
                       <>
-                        <div className="absolute right-1 top-1 text-xs">
+                        <div className={`absolute right-1 top-1 text-xs ${dayObj.day &&
+                          new Date().getDate() === dayObj.day &&
+                          new Date().getMonth() === currentDate.getMonth() &&
+                          new Date().getFullYear() === currentDate.getFullYear()
+                          ? 'h-5 w-5 flex items-center justify-center rounded-full bg-primary text-white -mt-0.5 -mr-0.5'
+                          : ''
+                          }`}>
                           {dayObj.day}
                         </div>
                         {dayObj.events && dayObj.events.length > 0 && (

@@ -7,6 +7,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
 
@@ -18,6 +19,9 @@ import { TaskSidebar } from '@/features/tasks/components/task-sidebar';
 import { TaskToggleView } from '@/features/tasks/components/task-toggle-view';
 
 const TasksPage = () => {
+  // Set document title
+  useDocumentTitle('Tasks');
+
   const workspaceId = useWorkspaceId();
   const { data: tasks, isLoading } = useGetTasks({ workspaceId });
   const { data: categories, isLoading: categoriesLoading } = useGetTaskCategories({ workspaceId });

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGetUserMessages } from '@/features/messages/api/use-get-user-messages';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { WorkspaceToolbar } from '../toolbar';
 
@@ -38,6 +39,9 @@ interface Message {
 }
 
 export default function OutboxPage() {
+  // Set document title
+  useDocumentTitle('Outbox');
+
   const workspaceId = useWorkspaceId();
   const messages = useGetUserMessages() as Message[] | undefined;
   const [searchQuery, setSearchQuery] = useState('');
