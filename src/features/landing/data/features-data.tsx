@@ -1,4 +1,4 @@
-import { MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBucket, FileText, BarChart, Bot } from 'lucide-react';
+import { MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBucket, FileText, BarChart, Bot, Mic, AtSign, UserRound } from 'lucide-react';
 import { ReactNode } from 'react';
 
 export interface Feature {
@@ -9,7 +9,6 @@ export interface Feature {
   icon: ReactNode;
   color: string;
   features: string[];
-  benefits: string[];
   useCases: string[];
   imageSrc: string;
 }
@@ -18,7 +17,7 @@ export const featureGroups = [
   {
     title: "Communication & Collaboration",
     description: "Tools that help your team communicate and work together effectively",
-    features: ["messaging", "notes", "canvas"]
+    features: ["messaging", "canvas"]
   },
   {
     title: "Task & Project Management",
@@ -28,7 +27,7 @@ export const featureGroups = [
   {
     title: "Planning & Organization",
     description: "Tools to help your team plan and stay organized",
-    features: ["calendar"]
+    features: ["notes", "calendar"]
   },
   {
     title: "Analytics & Intelligence",
@@ -50,17 +49,11 @@ export const features: Feature[] = [
       'Threaded conversations for organized discussions',
       'AI-powered message summarization',
       'Searchable message history',
-      'Direct messaging and group chats',
       'File sharing and previews',
       'Message pinning and bookmarks',
+      'Calendar event sharing',
     ],
-    benefits: [
-      'Reduce email overload by centralizing team communication',
-      'Keep conversations organized and easy to follow',
-      'Save time with AI-powered summaries of long discussions',
-      'Ensure important information is never lost with powerful search',
-      'Build team culture with emoji reactions and casual interactions',
-    ],
+
     useCases: [
       'Daily team standups and check-ins',
       'Project-specific discussions and updates',
@@ -83,23 +76,20 @@ export const features: Feature[] = [
       'Priority levels and labels',
       'Progress tracking',
       'Calendar integration',
-      'Recurring tasks',
       'Subtasks and dependencies',
       'Custom fields and statuses',
+      'Advanced filtering options',
+      'Multiple view options',
+      'Task categories and tags',
     ],
-    benefits: [
-      'Keep everyone accountable with clear ownership and deadlines',
-      'Never miss important deadlines with automated reminders',
-      'Adapt to any workflow with customizable statuses and fields',
-      'Track progress at both individual and team levels',
-      'Reduce meeting time by providing visibility into task status',
-    ],
+
     useCases: [
       'Sprint planning and agile development',
       'Marketing campaign management',
       'Customer onboarding processes',
       'Product roadmap execution',
       'Personal task management',
+      'Team workload management',
     ],
     imageSrc: '/tasks.png',
   },
@@ -120,13 +110,7 @@ export const features: Feature[] = [
       'Meeting agenda templates',
       'AI-powered scheduling suggestions',
     ],
-    benefits: [
-      'Eliminate scheduling conflicts with team-wide visibility',
-      'Reduce back-and-forth emails when scheduling meetings',
-      'Keep everyone informed of important dates and deadlines',
-      'Integrate with existing calendar systems for seamless adoption',
-      'Save time with intelligent scheduling recommendations',
-    ],
+
     useCases: [
       'Team meetings and one-on-ones',
       'Project milestone tracking',
@@ -147,25 +131,22 @@ export const features: Feature[] = [
       'Kanban, table, and Gantt views',
       'Customizable workflows',
       'Card assignments and due dates',
-      'File attachments',
       'Progress tracking',
       'Automated workflows',
       'Integration with Tasks and Calendar',
       'Custom fields and labels',
+      'Drag-and-drop card management',
+      'Filtering by labels and assignees',
+      'Board activity tracking',
     ],
-    benefits: [
-      'Visualize project progress and identify bottlenecks',
-      'Adapt boards to match your exact workflow needs',
-      'Keep all project-related information in one place',
-      'Improve team collaboration with shared visibility',
-      'Automate routine tasks to save time',
-    ],
+
     useCases: [
       'Agile development sprints',
       'Editorial calendars',
       'Sales pipeline management',
       'Hiring and recruitment processes',
       'Product development lifecycle',
+      'Cross-functional project coordination',
     ],
     imageSrc: '/boards.png',
   },
@@ -180,25 +161,21 @@ export const features: Feature[] = [
       'Real-time collaborative drawing',
       'Shapes, text, and connectors',
       'Image uploads',
-      'Infinite canvas',
       'Presentation mode',
       'Templates for common diagrams',
       'Sticky notes and comments',
-      'Export to various formats',
+      'Integrated audio rooms',
+      'Active participants list',
+      'Real-time cursor tracking',
     ],
-    benefits: [
-      'Facilitate better brainstorming sessions with visual tools',
-      'Collaborate in real-time regardless of location',
-      'Capture and organize ideas visually',
-      'Create professional diagrams without specialized skills',
-      'Present ideas directly from your canvas',
-    ],
+
     useCases: [
       'Brainstorming sessions',
       'User journey mapping',
       'System architecture diagrams',
       'Mind mapping',
       'Project planning and roadmapping',
+      'Remote design workshops',
     ],
     imageSrc: '/canvas.png',
   },
@@ -219,13 +196,7 @@ export const features: Feature[] = [
       'Search and tagging',
       'Embedding of media and files',
     ],
-    benefits: [
-      'Create a centralized knowledge base for your team',
-      'Reduce information silos and duplicate documentation',
-      'Ensure everyone has access to the latest information',
-      'Track changes with comprehensive version history',
-      'Save time with AI-assisted content creation',
-    ],
+
     useCases: [
       'Internal documentation and wikis',
       'Meeting notes and summaries',
@@ -243,28 +214,25 @@ export const features: Feature[] = [
     icon: <BarChart className="size-6" />,
     color: 'bg-cyan-500',
     features: [
-      'Customizable dashboards',
-      'Project and team analytics',
-      'Time tracking and reporting',
       'Export and sharing options',
       'Predictive analytics with AI',
       'Custom report creation',
       'Automated reporting schedules',
       'Integration with all Proddy modules',
+      'User activity dashboard',
+      'Channel activity dashboard',
+      'Overview dashboard',
+      'Content analysis dashboard',
     ],
-    benefits: [
-      'Gain visibility into team performance and productivity',
-      'Identify trends and patterns in your work',
-      'Make data-driven decisions about resource allocation',
-      'Track progress toward goals and KPIs',
-      'Share insights with stakeholders through professional reports',
-    ],
+
     useCases: [
       'Team performance reviews',
       'Project status reporting',
       'Resource utilization analysis',
       'Productivity tracking',
       'Executive dashboards',
+      'Communication pattern analysis',
+      'Content engagement metrics',
     ],
     imageSrc: '/reports.png',
   },
@@ -284,14 +252,9 @@ export const features: Feature[] = [
       'Predictive analytics',
       'Natural language processing',
       'Personalized recommendations',
+      'Daily conversation recaps',
     ],
-    benefits: [
-      'Save time on routine tasks with intelligent automation',
-      'Get quick summaries of long discussions and documents',
-      'Receive contextual suggestions based on your work patterns',
-      'Improve decision-making with AI-powered insights',
-      'Continuously learn and adapt to your team\'s unique needs',
-    ],
+
     useCases: [
       'Meeting summarization and follow-up',
       'Email and message drafting',
@@ -300,5 +263,5 @@ export const features: Feature[] = [
       'Personal productivity enhancement',
     ],
     imageSrc: '/assistant.png',
-  },
+  }
 ];
