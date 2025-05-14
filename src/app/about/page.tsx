@@ -8,17 +8,18 @@ import { ArrowRight, Users, Lightbulb, Target, Clock, Zap, Heart } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
+import { CTASection } from '@/features/landing/components/CTASection';
 
 const AboutPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <motion.h1 
+            <motion.h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -26,7 +27,7 @@ const AboutPage = () => {
             >
               Our <span className="text-primary">Mission</span> & Story
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-xl text-gray-600 max-w-3xl mx-auto mb-10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -71,9 +72,9 @@ const AboutPage = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Image 
-                src="/about-team.jpg" 
-                alt="Proddy Team" 
+              <Image
+                src="/about-team.jpg"
+                alt="Proddy Team"
                 fill
                 className="object-cover"
               />
@@ -91,10 +92,10 @@ const AboutPage = () => {
               The principles that guide everything we do at Proddy.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Value 1 */}
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-xl p-8 border border-gray-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -111,7 +112,7 @@ const AboutPage = () => {
             </motion.div>
 
             {/* Value 2 */}
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-xl p-8 border border-gray-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -128,7 +129,7 @@ const AboutPage = () => {
             </motion.div>
 
             {/* Value 3 */}
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-xl p-8 border border-gray-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -145,7 +146,7 @@ const AboutPage = () => {
             </motion.div>
 
             {/* Value 4 */}
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-xl p-8 border border-gray-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -162,7 +163,7 @@ const AboutPage = () => {
             </motion.div>
 
             {/* Value 5 */}
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-xl p-8 border border-gray-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -179,7 +180,7 @@ const AboutPage = () => {
             </motion.div>
 
             {/* Value 6 */}
-            <motion.div 
+            <motion.div
               className="bg-gray-50 rounded-xl p-8 border border-gray-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -199,22 +200,7 @@ const AboutPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6">Join us on our mission</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-            Experience the future of team productivity with Proddy.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="px-8">Get Started for Free</Button>
-            </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" className="px-8">Contact Us</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <CTASection />
 
       <Footer />
     </div>

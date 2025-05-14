@@ -1,23 +1,20 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
 import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
+import { CTASection } from '@/features/landing/components/CTASection';
 
 const PrivacyPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="py-16 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <motion.h1 
+            <motion.h1
               className="text-4xl md:text-5xl font-bold text-gray-900 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -25,7 +22,7 @@ const PrivacyPage = () => {
             >
               Privacy Policy
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-lg text-gray-600"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -128,19 +125,7 @@ const PrivacyPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold mb-6">Have questions about our privacy practices?</h2>
-          <p className="text-lg text-gray-600 mb-8">
-            We're here to help. Contact our support team for more information.
-          </p>
-          <Link href="/contact">
-            <Button size="lg">
-              Contact Us <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </section>
+      <CTASection />
 
       <Footer />
     </div>

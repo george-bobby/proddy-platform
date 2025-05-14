@@ -73,6 +73,11 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/why-proddy" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  Why Proddy?
+                </Link>
+              </li>
+              <li>
                 <Link href="/pricing" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Pricing
                 </Link>
@@ -111,11 +116,7 @@ export const Footer = () => {
                   About Us
                 </Link>
               </li>
-              <li>
-                <Link href="/solutions" className="text-sm text-gray-500 hover:text-primary transition-colors">
-                  Solutions
-                </Link>
-              </li>
+
               <li>
                 <Link href="/contact" className="text-sm text-gray-500 hover:text-primary transition-colors">
                   Contact

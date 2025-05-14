@@ -172,7 +172,7 @@ export const Header = () => {
             </div>
 
             <Link
-              href="/home#why-proddy"
+              href="/why-proddy"
               className={cn(
                 "text-sm font-medium transition-colors duration-200",
                 isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
@@ -308,7 +308,7 @@ export const Header = () => {
                   </div>
                 </div>
                 <Link
-                  href="/home#why-proddy"
+                  href="/why-proddy"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >

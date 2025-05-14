@@ -3,12 +3,14 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
+import { CTASection } from '@/features/landing/components/CTASection';
 import { features, featureGroups } from '@/features/landing/data/features-data';
 
 const FeaturesPage = () => {
@@ -50,56 +52,109 @@ const FeaturesPage = () => {
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-[30%] -right-[10%] w-[60%] h-[60%] rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-secondary/5 blur-3xl" />
+          <div className="absolute top-[20%] left-[30%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-3xl" />
+          <div className="absolute bottom-[10%] right-[20%] w-[30%] h-[30%] rounded-full bg-green-500/5 blur-3xl" />
         </div>
 
         <div className="max-w-7xl mx-auto px-6 md:px-10 relative z-10">
-          <div className="text-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="text-left lg:pr-8">
+              <motion.div
+                className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full bg-primary/10 text-primary mb-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                MODULAR PRODUCTIVITY SUITE
+              </motion.div>
+
+              <motion.h1
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                Powerful <span className="text-primary relative">
+                  Features
+                  <span className="absolute bottom-2 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
+                </span> for Every Need
+              </motion.h1>
+
+              <motion.p
+                className="text-xl md:text-2xl text-gray-600 mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                Proddy's modular design lets you use exactly what you need. Each feature works perfectly on its own or as part of the integrated ecosystem.
+              </motion.p>
+
+              <motion.div
+                className="flex flex-wrap gap-4 mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <Link href="#communication">
+                  <Button size="lg" className="gap-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90 px-8 py-6 text-base">
+                    Explore Features <ArrowRight className="size-5" />
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-8 py-6 text-base">
+                    Get Started
+                  </Button>
+                </Link>
+              </motion.div>
+            </div>
+
             <motion.div
-              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full bg-primary/10 text-primary mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-gray-100"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.4 }}
             >
-              MODULAR PRODUCTIVITY SUITE
-            </motion.div>
-
-            <motion.h1
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Powerful <span className="text-primary relative">
-                Features
-                <span className="absolute bottom-2 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
-              </span> for Every Need
-            </motion.h1>
-
-            <motion.p
-              className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              Proddy's modular design lets you use exactly what you need. Each feature works perfectly on its own or as part of the integrated ecosystem.
-            </motion.p>
-
-            <motion.div
-              className="flex flex-wrap justify-center gap-4 mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Link href="#communication">
-                <Button size="lg" className="gap-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90 px-8 py-6 text-base">
-                  Explore Features <ArrowRight className="size-5" />
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-8 py-6 text-base">
-                  Get Started
-                </Button>
-              </Link>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-transparent z-10"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="grid grid-cols-2 gap-4 p-6 w-full h-full">
+                  <div className="flex flex-col gap-4">
+                    <div className="bg-blue-50 rounded-xl h-1/2 overflow-hidden relative shadow-lg">
+                      <Image
+                        src="/messages.png"
+                        alt="Messaging feature"
+                        fill
+                        className="object-cover object-center hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                    <div className="bg-green-50 rounded-xl h-1/2 overflow-hidden relative shadow-lg">
+                      <Image
+                        src="/tasks.png"
+                        alt="Tasks feature"
+                        fill
+                        className="object-cover object-center hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <div className="bg-purple-50 rounded-xl h-1/2 overflow-hidden relative shadow-lg">
+                      <Image
+                        src="/calender.png"
+                        alt="Calendar feature"
+                        fill
+                        className="object-cover object-center hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                    <div className="bg-indigo-50 rounded-xl h-1/2 overflow-hidden relative shadow-lg">
+                      <Image
+                        src="/reports.png"
+                        alt="Reports feature"
+                        fill
+                        className="object-cover object-center hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -135,63 +190,223 @@ const FeaturesPage = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:border-blue-100"
               >
-                <div className="p-10">
-                  <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
-                    <div className={cn("p-4 rounded-xl text-white", feature.color)}>
-                      {feature.icon}
+                {feature.id === 'messaging' ? (
+                  // Full-width image layout for the first feature
+                  <div className="flex flex-col">
+                    <div className="relative h-[300px] md:h-[400px] w-full bg-gradient-to-r from-blue-50 to-blue-100 overflow-hidden">
+                      <Image
+                        src={feature.imageSrc}
+                        alt={`${feature.name} preview`}
+                        fill
+                        className="object-contain p-4 md:p-8 hover:scale-105 transition-transform duration-500"
+                        priority
+                      />
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      {feature.name}
-                    </h3>
+
+                    <div className="p-8 md:p-10">
+                      <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                        <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                          {feature.icon}
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">
+                          {feature.name}
+                        </h3>
+                      </div>
+
+                      <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                        {feature.detailedDescription}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                          <ul className="space-y-4">
+                            {feature.features.map((featureItem, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{featureItem}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                          <ul className="space-y-4">
+                            {feature.benefits.map((benefit, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mb-10">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {feature.useCases.map((useCase, idx) => (
+                            <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                              {useCase}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link href="/signup">
+                        <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                          Try {feature.name} <ArrowRight className="size-5" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
+                ) : (
+                  // Left/right alternating layout for other features
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {index % 2 === 1 ? (
+                      // Image on the left for odd-indexed features
+                      <>
+                        <div className="relative h-[400px] lg:h-auto bg-gradient-to-r from-blue-50 to-blue-100 rounded-l-2xl overflow-hidden flex items-center justify-center">
+                          <Image
+                            src={feature.imageSrc}
+                            alt={`${feature.name} preview`}
+                            fill
+                            className="object-contain p-8 hover:scale-105 transition-transform duration-500"
+                            priority
+                          />
+                        </div>
+                        <div className="p-10">
+                          <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                            <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                              {feature.icon}
+                            </div>
+                            <h3 className="text-3xl font-bold text-gray-900">
+                              {feature.name}
+                            </h3>
+                          </div>
 
-                  <p className="text-gray-700 mb-10 text-lg leading-relaxed">
-                    {feature.detailedDescription}
-                  </p>
+                          <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                            {feature.detailedDescription}
+                          </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
-                      <ul className="space-y-4">
-                        {feature.features.map((featureItem, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{featureItem}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                            <div className="bg-gray-50 p-6 rounded-xl">
+                              <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                              <ul className="space-y-4">
+                                {feature.features.map((featureItem, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
+                                    <span className="text-gray-700">{featureItem}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
 
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
-                      <ul className="space-y-4">
-                        {feature.benefits.map((benefit, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                            <div className="bg-gray-50 p-6 rounded-xl">
+                              <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                              <ul className="space-y-4">
+                                {feature.benefits.map((benefit, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
+                                    <span className="text-gray-700">{benefit}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          <div className="mb-10">
+                            <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                            <div className="flex flex-wrap gap-3">
+                              {feature.useCases.map((useCase, idx) => (
+                                <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                  {useCase}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <Link href="/signup">
+                            <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                              Try {feature.name} <ArrowRight className="size-5" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </>
+                    ) : (
+                      // Image on the right for even-indexed features (default)
+                      <>
+                        <div className="p-10">
+                          <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                            <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                              {feature.icon}
+                            </div>
+                            <h3 className="text-3xl font-bold text-gray-900">
+                              {feature.name}
+                            </h3>
+                          </div>
+
+                          <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                            {feature.detailedDescription}
+                          </p>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                            <div className="bg-gray-50 p-6 rounded-xl">
+                              <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                              <ul className="space-y-4">
+                                {feature.features.map((featureItem, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
+                                    <span className="text-gray-700">{featureItem}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="bg-gray-50 p-6 rounded-xl">
+                              <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                              <ul className="space-y-4">
+                                {feature.benefits.map((benefit, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <ArrowRight className="size-5 text-blue-500 mt-1 flex-shrink-0" />
+                                    <span className="text-gray-700">{benefit}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          <div className="mb-10">
+                            <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                            <div className="flex flex-wrap gap-3">
+                              {feature.useCases.map((useCase, idx) => (
+                                <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                                  {useCase}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          <Link href="/signup">
+                            <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                              Try {feature.name} <ArrowRight className="size-5" />
+                            </Button>
+                          </Link>
+                        </div>
+                        <div className="relative h-[400px] lg:h-auto bg-gradient-to-r from-blue-50 to-blue-100 rounded-r-2xl overflow-hidden flex items-center justify-center">
+                          <Image
+                            src={feature.imageSrc}
+                            alt={`${feature.name} preview`}
+                            fill
+                            className="object-contain p-8 hover:scale-105 transition-transform duration-500"
+                            priority
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
-
-                  <div className="mb-10">
-                    <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {feature.useCases.map((useCase, idx) => (
-                        <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-                          {useCase}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Link href="/signup">
-                    <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-                      Try {feature.name} <ArrowRight className="size-5" />
-                    </Button>
-                  </Link>
-                </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -228,63 +443,148 @@ const FeaturesPage = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:border-green-100"
               >
-                <div className="p-10">
-                  <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
-                    <div className={cn("p-4 rounded-xl text-white", feature.color)}>
-                      {feature.icon}
+                {feature.id === 'boards' ? (
+                  // Full-width image layout for boards feature
+                  <div className="flex flex-col">
+                    <div className="relative h-[300px] md:h-[400px] w-full bg-gradient-to-r from-green-50 to-green-100 overflow-hidden">
+                      <Image
+                        src={feature.imageSrc}
+                        alt={`${feature.name} preview`}
+                        fill
+                        className="object-contain p-4 md:p-8 hover:scale-105 transition-transform duration-500"
+                        priority
+                      />
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      {feature.name}
-                    </h3>
+
+                    <div className="p-8 md:p-10">
+                      <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                        <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                          {feature.icon}
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">
+                          {feature.name}
+                        </h3>
+                      </div>
+
+                      <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                        {feature.detailedDescription}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                          <ul className="space-y-4">
+                            {feature.features.map((featureItem, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-green-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{featureItem}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                          <ul className="space-y-4">
+                            {feature.benefits.map((benefit, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-green-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mb-10">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {feature.useCases.map((useCase, idx) => (
+                            <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors">
+                              {useCase}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link href="/signup">
+                        <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                          Try {feature.name} <ArrowRight className="size-5" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-
-                  <p className="text-gray-700 mb-10 text-lg leading-relaxed">
-                    {feature.detailedDescription}
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
-                      <ul className="space-y-4">
-                        {feature.features.map((featureItem, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-green-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{featureItem}</span>
-                          </li>
-                        ))}
-                      </ul>
+                ) : (
+                  // Left image layout for tasks feature
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="relative h-[400px] lg:h-auto bg-gradient-to-r from-green-50 to-green-100 rounded-l-2xl overflow-hidden flex items-center justify-center">
+                      <Image
+                        src={feature.imageSrc}
+                        alt={`${feature.name} preview`}
+                        fill
+                        className="object-contain p-8 hover:scale-105 transition-transform duration-500"
+                        priority
+                      />
                     </div>
+                    <div className="p-10">
+                      <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                        <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                          {feature.icon}
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">
+                          {feature.name}
+                        </h3>
+                      </div>
 
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
-                      <ul className="space-y-4">
-                        {feature.benefits.map((benefit, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-green-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                        {feature.detailedDescription}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                          <ul className="space-y-4">
+                            {feature.features.map((featureItem, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-green-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{featureItem}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                          <ul className="space-y-4">
+                            {feature.benefits.map((benefit, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-green-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mb-10">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {feature.useCases.map((useCase, idx) => (
+                            <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors">
+                              {useCase}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link href="/signup">
+                        <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                          Try {feature.name} <ArrowRight className="size-5" />
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="mb-10">
-                    <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {feature.useCases.map((useCase, idx) => (
-                        <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors">
-                          {useCase}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Link href="/signup">
-                    <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-                      Try {feature.name} <ArrowRight className="size-5" />
-                    </Button>
-                  </Link>
-                </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -321,62 +621,76 @@ const FeaturesPage = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:border-purple-100"
               >
-                <div className="p-10">
-                  <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
-                    <div className={cn("p-4 rounded-xl text-white", feature.color)}>
-                      {feature.icon}
+                {/* Right image layout for calendar feature */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="p-10">
+                    <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                      <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-3xl font-bold text-gray-900">
+                        {feature.name}
+                      </h3>
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      {feature.name}
-                    </h3>
-                  </div>
 
-                  <p className="text-gray-700 mb-10 text-lg leading-relaxed">
-                    {feature.detailedDescription}
-                  </p>
+                    <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                      {feature.detailedDescription}
+                    </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
-                      <ul className="space-y-4">
-                        {feature.features.map((featureItem, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-purple-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{featureItem}</span>
-                          </li>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                      <div className="bg-gray-50 p-6 rounded-xl">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                        <ul className="space-y-4">
+                          {feature.features.map((featureItem, idx) => (
+                            <li key={idx} className="flex items-start gap-3">
+                              <ArrowRight className="size-5 text-purple-500 mt-1 flex-shrink-0" />
+                              <span className="text-gray-700">{featureItem}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="bg-gray-50 p-6 rounded-xl">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                        <ul className="space-y-4">
+                          {feature.benefits.map((benefit, idx) => (
+                            <li key={idx} className="flex items-start gap-3">
+                              <ArrowRight className="size-5 text-purple-500 mt-1 flex-shrink-0" />
+                              <span className="text-gray-700">{benefit}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="mb-10">
+                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                      <div className="flex flex-wrap gap-3">
+                        {feature.useCases.map((useCase, idx) => (
+                          <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
+                            {useCase}
+                          </span>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
-                      <ul className="space-y-4">
-                        {feature.benefits.map((benefit, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-purple-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <Link href="/signup">
+                      <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                        Try {feature.name} <ArrowRight className="size-5" />
+                      </Button>
+                    </Link>
                   </div>
 
-                  <div className="mb-10">
-                    <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {feature.useCases.map((useCase, idx) => (
-                        <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors">
-                          {useCase}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="relative h-[400px] lg:h-auto bg-gradient-to-r from-purple-50 to-purple-100 rounded-r-2xl overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0)_0%,rgba(255,255,255,0.8)_70%)]"></div>
+                    <Image
+                      src={feature.imageSrc}
+                      alt={`${feature.name} preview`}
+                      fill
+                      className="object-contain p-8 hover:scale-105 transition-transform duration-500"
+                      priority
+                    />
                   </div>
-
-                  <Link href="/signup">
-                    <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-                      Try {feature.name} <ArrowRight className="size-5" />
-                    </Button>
-                  </Link>
                 </div>
               </motion.div>
             ))}
@@ -414,63 +728,149 @@ const FeaturesPage = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 hover:border-indigo-100"
               >
-                <div className="p-10">
-                  <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
-                    <div className={cn("p-4 rounded-xl text-white", feature.color)}>
-                      {feature.icon}
+                {feature.id === 'reports' ? (
+                  // Full-width image layout for reports feature
+                  <div className="flex flex-col">
+                    <div className="p-8 md:p-10">
+                      <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                        <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                          {feature.icon}
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">
+                          {feature.name}
+                        </h3>
+                      </div>
+
+                      <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                        {feature.detailedDescription}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                          <ul className="space-y-4">
+                            {feature.features.map((featureItem, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-indigo-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{featureItem}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                          <ul className="space-y-4">
+                            {feature.benefits.map((benefit, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-indigo-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mb-10">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {feature.useCases.map((useCase, idx) => (
+                            <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                              {useCase}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link href="/signup">
+                        <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                          Try {feature.name} <ArrowRight className="size-5" />
+                        </Button>
+                      </Link>
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      {feature.name}
-                    </h3>
+
+                    <div className="relative h-[300px] md:h-[400px] w-full bg-gradient-to-r from-indigo-50 to-indigo-100 overflow-hidden">
+                      <Image
+                        src={feature.imageSrc}
+                        alt={`${feature.name} preview`}
+                        fill
+                        className="object-contain p-4 md:p-8 hover:scale-105 transition-transform duration-500"
+                        priority
+                      />
+                    </div>
                   </div>
-
-                  <p className="text-gray-700 mb-10 text-lg leading-relaxed">
-                    {feature.detailedDescription}
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
-                      <ul className="space-y-4">
-                        {feature.features.map((featureItem, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-indigo-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{featureItem}</span>
-                          </li>
-                        ))}
-                      </ul>
+                ) : (
+                  // Left image layout for AI feature
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="relative h-[400px] lg:h-auto bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-l-2xl overflow-hidden flex items-center justify-center">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0)_0%,rgba(255,255,255,0.8)_70%)]"></div>
+                      <Image
+                        src={feature.imageSrc}
+                        alt={`${feature.name} preview`}
+                        fill
+                        className="object-contain p-8 hover:scale-105 transition-transform duration-500"
+                        priority
+                      />
                     </div>
+                    <div className="p-10">
+                      <div className="flex flex-col md:flex-row md:items-center mb-8 gap-4">
+                        <div className={cn("p-4 rounded-xl text-white", feature.color)}>
+                          {feature.icon}
+                        </div>
+                        <h3 className="text-3xl font-bold text-gray-900">
+                          {feature.name}
+                        </h3>
+                      </div>
 
-                    <div className="bg-gray-50 p-6 rounded-xl">
-                      <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
-                      <ul className="space-y-4">
-                        {feature.benefits.map((benefit, idx) => (
-                          <li key={idx} className="flex items-start gap-3">
-                            <ArrowRight className="size-5 text-indigo-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700">{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <p className="text-gray-700 mb-10 text-lg leading-relaxed">
+                        {feature.detailedDescription}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+                          <ul className="space-y-4">
+                            {feature.features.map((featureItem, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-indigo-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{featureItem}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-xl">
+                          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Benefits</h4>
+                          <ul className="space-y-4">
+                            {feature.benefits.map((benefit, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <ArrowRight className="size-5 text-indigo-500 mt-1 flex-shrink-0" />
+                                <span className="text-gray-700">{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mb-10">
+                        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {feature.useCases.map((useCase, idx) => (
+                            <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                              {useCase}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link href="/signup">
+                        <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                          Try {feature.name} <ArrowRight className="size-5" />
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="mb-10">
-                    <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Use Cases</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {feature.useCases.map((useCase, idx) => (
-                        <span key={idx} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-                          {useCase}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Link href="/signup">
-                    <Button size="lg" className="gap-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
-                      Try {feature.name} <ArrowRight className="size-5" />
-                    </Button>
-                  </Link>
-                </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -478,42 +878,7 @@ const FeaturesPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute bottom-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-3xl" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 md:px-10 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true, margin: "-100px 0px" }}
-            className="max-w-4xl mx-auto"
-          >
-            <span className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-primary/10 text-primary mb-6">
-              GET STARTED TODAY
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-gray-900">Ready to transform your team's productivity?</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-              Join thousands of teams already using Proddy to streamline their workflows and boost collaboration.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/signup">
-                <Button size="lg" className="gap-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90 px-8 py-6 text-base">
-                  Get Started for Free <ArrowRight className="size-5" />
-                </Button>
-              </Link>
-              <Link href="/pricing">
-                <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-8 py-6 text-base">
-                  View Pricing
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <CTASection />
 
       <Footer />
     </div>

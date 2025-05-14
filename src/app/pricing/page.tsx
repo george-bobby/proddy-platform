@@ -9,12 +9,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
+import { CTASection } from '@/features/landing/components/CTASection';
 
 const PricingPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +28,7 @@ const PricingPage = () => {
             >
               BETA PRICING
             </motion.div>
-            <motion.h1 
+            <motion.h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -35,7 +36,7 @@ const PricingPage = () => {
             >
               Free During <span className="text-primary">Beta</span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-xl text-gray-600 max-w-3xl mx-auto mb-10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -242,22 +243,7 @@ const PricingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to get started?</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-            Join Proddy today and experience the future of team productivity, completely free during our beta.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="px-8">Sign Up for Free</Button>
-            </Link>
-            <Link href="/contact">
-              <Button size="lg" variant="outline" className="px-8">Contact Sales</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <CTASection />
 
       <Footer />
     </div>

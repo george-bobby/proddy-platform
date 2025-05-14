@@ -4,141 +4,18 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBucket, FileText, BarChart, Bot } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-interface Feature {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
-  features: string[];
-}
+import { features } from '@/features/landing/data/features-data';
 
 export const FeatureSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
   const [activeTab, setActiveTab] = useState('messaging');
 
-  const features: Feature[] = [
-    {
-      id: 'messaging',
-      name: 'Messaging',
-      description: 'Real-time team communication with rich text formatting, threads, and AI-powered features.',
-      icon: <MessageSquare className="size-6" />,
-      color: 'bg-blue-500',
-      features: [
-        'Rich text formatting and emoji reactions',
-        'Threaded conversations for organized discussions',
-        'AI-powered message summarization',
-        'Searchable message history',
-        'Direct messaging and group chats',
-      ],
-    },
-    {
-      id: 'tasks',
-      name: 'Tasks',
-      description: 'Organize and track work with customizable task lists, assignments, and due dates.',
-      icon: <CheckSquare className="size-6" />,
-      color: 'bg-green-500',
-      features: [
-        'Task assignments and due dates',
-        'Custom task statuses and priorities',
-        'Subtasks and dependencies',
-        'Progress tracking and reporting',
-        'AI-suggested task organization',
-      ],
-    },
-    {
-      id: 'calendar',
-      name: 'Calendar',
-      description: 'Schedule and manage events with team availability, reminders, and smart scheduling.',
-      icon: <Calendar className="size-6" />,
-      color: 'bg-purple-500',
-      features: [
-        'Team availability view',
-        'Meeting scheduling and reminders',
-        'Calendar integrations',
-        'Recurring events',
-        'AI-powered optimal meeting time suggestions',
-      ],
-    },
-    {
-      id: 'boards',
-      name: 'Boards',
-      description: 'Visual project management with customizable boards, cards, and workflows.',
-      icon: <LayoutGrid className="size-6" />,
-      color: 'bg-orange-500',
-      features: [
-        'Kanban, list, and calendar views',
-        'Custom fields and labels',
-        'Drag-and-drop interface',
-        'Automated workflows',
-        'Progress and burndown charts',
-      ],
-    },
-    {
-      id: 'canvas',
-      name: 'Canvas',
-      description: 'Collaborative whiteboarding for brainstorming, diagramming, and visual collaboration.',
-      icon: <PaintBucket className="size-6" />,
-      color: 'bg-pink-500',
-      features: [
-        'Real-time collaborative editing',
-        'Templates for common diagrams',
-        'Drawing tools and shapes',
-        'Image and document embedding',
-        'Presentation mode',
-      ],
-    },
-    {
-      id: 'notes',
-      name: 'Notes',
-      description: 'Document and share knowledge with rich text notes, wikis, and documentation.',
-      icon: <FileText className="size-6" />,
-      color: 'bg-yellow-500',
-      features: [
-        'Rich text editing with formatting',
-        'Hierarchical organization',
-        'Version history',
-        'Collaborative editing',
-        'AI-powered content suggestions',
-      ],
-    },
-    {
-      id: 'reports',
-      name: 'Reports',
-      description: 'Analytics and insights to track team performance, project progress, and more.',
-      icon: <BarChart className="size-6" />,
-      color: 'bg-cyan-500',
-      features: [
-        'Customizable dashboards',
-        'Project and team analytics',
-        'Time tracking and reporting',
-        'Export and sharing options',
-        'Predictive analytics with AI',
-      ],
-    },
-    {
-      id: 'ai',
-      name: 'AI Assistant',
-      description: 'Intelligent productivity tools that help you work smarter and faster.',
-      icon: <Bot className="size-6" />,
-      color: 'bg-indigo-500',
-      features: [
-        'Smart content generation',
-        'Automated summarization',
-        'Contextual suggestions',
-        'Natural language processing',
-        'Workflow automation',
-      ],
-    },
-  ];
-
-  const activeSolution = features.find(s => s.id === activeTab) || features[0];
+  const activeFeature = features.find(s => s.id === activeTab) || features[0];
 
   return (
     <section id="modules" className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full">
@@ -177,15 +54,15 @@ export const FeatureSection = () => {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto h-full">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="lg:col-span-1 bg-white rounded-xl shadow-md p-6"
+            className="lg:col-span-1 bg-white rounded-xl shadow-md p-6 h-full flex flex-col"
           >
             <h3 className="text-lg font-bold mb-4 text-gray-900">Modules</h3>
-            <div className="space-y-2">
+            <div className="space-y-2 flex-grow">
               {features.map((feature) => (
                 <button
                   key={feature.id}
@@ -213,41 +90,46 @@ export const FeatureSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden"
+            className="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden h-full"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="p-6">
-                <div className={cn(
-                  "p-3 rounded-lg text-white w-fit mb-4",
-                  activeSolution.color
-                )}>
-                  {activeSolution.icon}
+            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+              <div className="p-6 flex flex-col justify-between">
+                <div>
+                  <div className={cn(
+                    "p-3 rounded-lg text-white w-fit mb-4",
+                    activeFeature.color
+                  )}>
+                    {activeFeature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">{activeFeature.name}</h3>
+                  <p className="text-gray-600 mb-6">{activeFeature.description}</p>
+
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Key Features</h4>
+                  <ul className="space-y-3 mb-6">
+                    {activeFeature.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <ArrowRight className="size-4 text-primary mt-1 flex-shrink-0" />
+                        <span className="text-gray-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-gray-900">{activeSolution.name}</h3>
-                <p className="text-gray-600 mb-6">{activeSolution.description}</p>
 
-                <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Key Features</h4>
-                <ul className="space-y-3 mb-6">
-                  {activeSolution.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <ArrowRight className="size-4 text-primary mt-1 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link href="/signin">
-                  <Button className="gap-2 px-6 py-2 rounded-lg">
-                    Try {activeSolution.name} <ArrowRight className="size-4" />
-                  </Button>
-                </Link>
+                <div className="mt-auto">
+                  <Link href="/signin">
+                    <Button className="gap-2 px-6 py-2 rounded-lg">
+                      Try {activeFeature.name} <ArrowRight className="size-4" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
-              <div className="relative h-[280px] md:h-auto bg-gray-100">
+              <div className="relative bg-gray-100 h-full overflow-hidden">
                 <Image
-                  src="/dashboard-preview.svg"
-                  alt={`${activeSolution.name} module preview`}
+                  src={activeFeature.imageSrc}
+                  alt={`${activeFeature.name} module preview`}
                   fill
-                  className="object-cover"
+                  className="object-cover object-right p-4"
+                  priority
                 />
               </div>
             </div>

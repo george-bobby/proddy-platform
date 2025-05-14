@@ -56,16 +56,6 @@ export const WhyProddySection = () => {
       proddy: "Seamless workflow with everything in one place",
     },
     {
-      title: "AI Integration",
-      traditional: "Basic or bolted-on AI features",
-      proddy: "AI deeply integrated into every aspect of the platform",
-    },
-    {
-      title: "Customization",
-      traditional: "One-size-fits-all approach with limited flexibility",
-      proddy: "Modular design that adapts to your team's unique needs",
-    },
-    {
       title: "Learning Curve",
       traditional: "Multiple interfaces to learn and manage",
       proddy: "Consistent, intuitive interface across all modules",

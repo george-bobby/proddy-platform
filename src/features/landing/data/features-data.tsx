@@ -11,6 +11,7 @@ export interface Feature {
   features: string[];
   benefits: string[];
   useCases: string[];
+  imageSrc: string;
 }
 
 export const featureGroups = [
@@ -67,6 +68,7 @@ export const features: Feature[] = [
       'Remote team communication',
       'Quick decision-making and feedback gathering',
     ],
+    imageSrc: '/messages.png',
   },
   {
     id: 'tasks',
@@ -99,6 +101,7 @@ export const features: Feature[] = [
       'Product roadmap execution',
       'Personal task management',
     ],
+    imageSrc: '/tasks.png',
   },
   {
     id: 'calendar',
@@ -131,6 +134,7 @@ export const features: Feature[] = [
       'Client meeting scheduling',
       'Company-wide announcements and events',
     ],
+    imageSrc: '/calender.png',
   },
   {
     id: 'boards',
@@ -163,6 +167,7 @@ export const features: Feature[] = [
       'Hiring and recruitment processes',
       'Product development lifecycle',
     ],
+    imageSrc: '/boards.png',
   },
   {
     id: 'canvas',
@@ -195,6 +200,7 @@ export const features: Feature[] = [
       'Mind mapping',
       'Project planning and roadmapping',
     ],
+    imageSrc: '/canvas.png',
   },
   {
     id: 'notes',
@@ -227,6 +233,7 @@ export const features: Feature[] = [
       'Onboarding materials',
       'Process documentation',
     ],
+    imageSrc: '/notes.png',
   },
   {
     id: 'reports',
@@ -259,6 +266,7 @@ export const features: Feature[] = [
       'Productivity tracking',
       'Executive dashboards',
     ],
+    imageSrc: '/reports.png',
   },
   {
     id: 'ai',
@@ -291,5 +299,6 @@ export const features: Feature[] = [
       'Data analysis and pattern recognition',
       'Personal productivity enhancement',
     ],
+    imageSrc: '/assistant.png',
   },
 ];

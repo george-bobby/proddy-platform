@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Mail, Bell, Star, Gift, CheckCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -12,46 +12,53 @@ export const CTASection = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
   return (
-    <section className="py-16 md:py-24 bg-primary relative overflow-hidden">
-      {/* Background decorative elements */}
+    <section className="py-16 md:py-24 bg-slate-50 relative overflow-hidden">
+      {/* Background decorative elements - more subtle */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-[10%] -right-[5%] w-[30%] h-[30%] rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute bottom-[10%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/10 blur-3xl" />
+        <div className="absolute top-[10%] -right-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
+        <div className="absolute bottom-[10%] -left-[5%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-3xl" />
       </div>
 
       <div
         ref={ref}
         className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl"
       >
-        {/* Newsletter - Moved to top of CTA */}
+        {/* Newsletter - with improved styling */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.5 }}
-          className="mb-12 pb-8 border-b border-white/10"
+          className="mb-12 pb-8 border-b border-slate-200"
         >
           <div className="max-w-xl mx-auto text-center">
-            <h3 className="text-sm font-semibold text-white tracking-wider uppercase mb-4">
-              Stay Updated
-            </h3>
-            <p className="text-sm text-white/80 mb-4">
+            <div className="flex items-center justify-center mb-4">
+              <Bell className="text-secondary mr-2 size-4" />
+              <h3 className="text-sm font-semibold text-slate-800 tracking-wider uppercase">
+                Stay Updated
+              </h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
               Subscribe to our newsletter for product updates and news.
             </p>
             <form className="max-w-md mx-auto">
               <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full px-3 py-2 text-sm rounded-l-lg border border-white/20 bg-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30"
-                />
+                <div className="relative flex-grow">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full pl-10 pr-3 py-2 text-sm rounded-l-lg border border-slate-300 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
+                  />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 size-4" />
+                </div>
                 <button
                   type="submit"
-                  className="bg-white text-primary px-4 py-2 text-sm font-medium rounded-r-lg hover:bg-white/90 transition-colors"
+                  className="bg-secondary text-white px-4 py-2 text-sm font-medium rounded-r-lg hover:bg-secondary/90 transition-colors"
                 >
                   Subscribe
                 </button>
               </div>
-              <p className="text-xs text-white/60 mt-2">
+              <p className="text-xs text-slate-500 mt-2 flex items-center justify-center">
+                <CheckCircle className="size-3 mr-1" />
                 We respect your privacy. Unsubscribe at any time.
               </p>
             </form>
@@ -63,19 +70,10 @@ export const CTASection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4"
+            className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4"
           >
             Ready to transform how your team works?
           </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-lg text-white/80 mb-6 max-w-[800px] mx-auto"
-          >
-            Join thousands of teams already using Proddy to collaborate more effectively and boost productivity.
-          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -86,8 +84,7 @@ export const CTASection = () => {
             <Link href="/signup">
               <Button
                 size="lg"
-                variant="glass"
-                className="gap-2 rounded-full text-white border-white/30 hover:bg-white/20 px-5 py-2"
+                className="gap-2 rounded-full text-white bg-primary hover:bg-primary/90 px-6 py-2 shadow-md"
               >
                 Get Started for Free <ArrowRight className="size-4" />
               </Button>
@@ -96,35 +93,11 @@ export const CTASection = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="gap-2 rounded-full bg-transparent border-white/30 text-white hover:bg-white/10 px-5 py-2"
+                className="gap-2 rounded-full bg-white border-slate-300 text-slate-700 hover:bg-slate-100 px-6 py-2"
               >
                 Explore Features
               </Button>
             </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mt-8 flex flex-wrap justify-center gap-6 text-white/60"
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-xl md:text-2xl font-bold text-white mb-1">1000+</span>
-              <span className="text-sm">Teams</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-xl md:text-2xl font-bold text-white mb-1">50,000+</span>
-              <span className="text-sm">Users</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-xl md:text-2xl font-bold text-white mb-1">99.9%</span>
-              <span className="text-sm">Uptime</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-xl md:text-2xl font-bold text-white mb-1">4.9/5</span>
-              <span className="text-sm">Rating</span>
-            </div>
           </motion.div>
         </div>
       </div>
