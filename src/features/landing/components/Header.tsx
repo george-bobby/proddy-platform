@@ -18,54 +18,66 @@ interface Module {
   href: string;
 }
 
+// Map feature IDs to tab IDs
+const featureToTabMap: Record<string, string> = {
+  'messaging': 'communication',
+  'canvas': 'communication',
+  'tasks': 'taskManagement',
+  'boards': 'taskManagement',
+  'calendar': 'planning',
+  'notes': 'planning',
+  'reports': 'analytics',
+  'ai': 'analytics',
+};
+
 const modules: Module[] = [
   {
     name: 'Messaging',
     description: 'Real-time team communication',
     icon: '💬',
-    href: '/features#messaging',
+    href: `/features?tab=${featureToTabMap['messaging']}&feature=messaging`,
   },
   {
     name: 'Tasks',
     description: 'Organize and track work',
     icon: '✅',
-    href: '/features#tasks',
+    href: `/features?tab=${featureToTabMap['tasks']}&feature=tasks`,
   },
   {
     name: 'Calendar',
     description: 'Schedule and manage events',
     icon: '📅',
-    href: '/features#calendar',
+    href: `/features?tab=${featureToTabMap['calendar']}&feature=calendar`,
   },
   {
     name: 'Boards',
     description: 'Visual project management',
     icon: '📋',
-    href: '/features#boards',
+    href: `/features?tab=${featureToTabMap['boards']}&feature=boards`,
   },
   {
     name: 'Canvas',
     description: 'Collaborative whiteboarding',
     icon: '🎨',
-    href: '/features#canvas',
+    href: `/features?tab=${featureToTabMap['canvas']}&feature=canvas`,
   },
   {
     name: 'Notes',
     description: 'Document and share knowledge',
     icon: '📝',
-    href: '/features#notes',
+    href: `/features?tab=${featureToTabMap['notes']}&feature=notes`,
   },
   {
     name: 'Reports',
     description: 'Analytics and insights',
     icon: '📊',
-    href: '/features#reports',
+    href: `/features?tab=${featureToTabMap['reports']}&feature=reports`,
   },
   {
     name: 'AI Assistant',
     description: 'Intelligent productivity tools',
     icon: '🤖',
-    href: '/features#ai',
+    href: `/features?tab=${featureToTabMap['ai']}&feature=ai`,
   },
 ];
 

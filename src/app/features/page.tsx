@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, MessageSquare, CheckSquare, Calendar, BarChart } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const FeaturesPage = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState('communication');
+  const [activeFeature, setActiveFeature] = useState<string | null>(null);
+
+  // Handle URL query parameters for tab selection
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    const featureParam = searchParams.get('feature');
+
+    if (tabParam && ['communication', 'taskManagement', 'planning', 'analytics'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+
+    if (featureParam) {
+      setActiveFeature(featureParam);
+
+      // Scroll to the feature if it exists
+      setTimeout(() => {
+        const featureElement = document.getElementById(featureParam);
+        if (featureElement) {
+          featureElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+    }
+  }, [searchParams]);
 
   // Helper function to get features by group
   const getFeaturesByGroup = (groupId: string) => {
@@ -302,7 +328,7 @@ const FeaturesPage = () => {
       {/* Features Tabs Section */}
       <section id="features-tabs" className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <Tabs defaultValue="communication" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="mb-16 text-center">
               <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">Explore Our Features</h2>
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
