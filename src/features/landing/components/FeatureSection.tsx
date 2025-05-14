@@ -9,7 +9,7 @@ import { ArrowRight, MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBuck
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-interface Solution {
+interface Feature {
   id: string;
   name: string;
   description: string;
@@ -18,12 +18,12 @@ interface Solution {
   features: string[];
 }
 
-export const SolutionsSection = () => {
+export const FeatureSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
   const [activeTab, setActiveTab] = useState('messaging');
 
-  const solutions: Solution[] = [
+  const features: Feature[] = [
     {
       id: 'messaging',
       name: 'Messaging',
@@ -138,7 +138,7 @@ export const SolutionsSection = () => {
     },
   ];
 
-  const activeSolution = solutions.find(s => s.id === activeTab) || solutions[0];
+  const activeSolution = features.find(s => s.id === activeTab) || features[0];
 
   return (
     <section id="modules" className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full">
@@ -186,24 +186,24 @@ export const SolutionsSection = () => {
           >
             <h3 className="text-lg font-bold mb-4 text-gray-900">Modules</h3>
             <div className="space-y-2">
-              {solutions.map((solution) => (
+              {features.map((feature) => (
                 <button
-                  key={solution.id}
-                  onClick={() => setActiveTab(solution.id)}
+                  key={feature.id}
+                  onClick={() => setActiveTab(feature.id)}
                   className={cn(
                     "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200",
-                    activeTab === solution.id
+                    activeTab === feature.id
                       ? "bg-primary/5 text-primary"
                       : "hover:bg-gray-50 text-gray-700"
                   )}
                 >
                   <div className={cn(
                     "p-2 rounded-lg text-white",
-                    solution.color
+                    feature.color
                   )}>
-                    {solution.icon}
+                    {feature.icon}
                   </div>
-                  <span className="font-medium">{solution.name}</span>
+                  <span className="font-medium">{feature.name}</span>
                 </button>
               ))}
             </div>

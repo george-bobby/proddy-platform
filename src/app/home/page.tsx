@@ -2,10 +2,10 @@
 
 import { Header } from '@/features/landing/components/Header';
 import { HeroSection } from '@/features/landing/components/HeroSection';
-import { FeaturesSection } from '@/features/landing/components/FeaturesSection';
+import { CapabilitysSection } from '@/features/landing/components/CapabilitySection';
 import { BenefitsSection } from '@/features/landing/components/BenefitsSection';
 import { WhyProddySection } from '@/features/landing/components/WhyProddySection';
-import { SolutionsSection } from '@/features/landing/components/SolutionsSection';
+import { FeatureSection } from '@/features/landing/components/FeatureSection';
 import { CTASection } from '@/features/landing/components/CTASection';
 import { Footer } from '@/features/landing/components/Footer';
 import { useDocumentTitle } from '@/hooks/use-document-title';
@@ -18,10 +18,10 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <HeroSection />
-      <FeaturesSection />
+      <CapabilitysSection />
       <BenefitsSection />
       <WhyProddySection />
-      <SolutionsSection />
+      <FeatureSection />
       <CTASection />
       <Footer />
     </div>

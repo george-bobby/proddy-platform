@@ -6,7 +6,7 @@ import { Sparkles, Zap, Brain, Bot, MessageSquare, Lightbulb } from 'lucide-reac
 
 import { cn } from '@/lib/utils';
 
-interface FeatureCardProps {
+interface CapabilityCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
@@ -14,7 +14,7 @@ interface FeatureCardProps {
   className?: string;
 }
 
-const FeatureCard = ({ title, description, icon, delay, className }: FeatureCardProps) => {
+const CapabilityCard = ({ title, description, icon, delay, className }: CapabilityCardProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
@@ -39,12 +39,12 @@ const FeatureCard = ({ title, description, icon, delay, className }: FeatureCard
   );
 };
 
-export const FeaturesSection = () => {
+export const CapabilitysSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
   return (
-    <section id="features" className="py-16 md:py-24 bg-white relative overflow-hidden">
+    <section id="Capabilitys" className="py-16 md:py-24 bg-white relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[20%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
@@ -68,7 +68,7 @@ export const FeaturesSection = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
           >
-            Intelligent Features That <span className="text-primary">Adapt</span> To You
+            Intelligent Capabilitys That <span className="text-primary">Adapt</span> To You
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -81,42 +81,42 @@ export const FeaturesSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          <FeatureCard
+          <CapabilityCard
             title="Smart Summarization"
             description="Instantly summarize long conversations, documents, and meetings to extract key points and action items."
             icon={<Sparkles className="size-6 text-primary" />}
             delay={1}
           />
 
-          <FeatureCard
+          <CapabilityCard
             title="Auto Replies"
             description="Let AI draft contextual responses to messages based on your communication style and previous interactions."
             icon={<MessageSquare className="size-6 text-primary" />}
             delay={2}
           />
 
-          <FeatureCard
+          <CapabilityCard
             title="Intelligent Scheduling"
             description="AI analyzes your calendar and suggests optimal meeting times based on your work patterns and preferences."
             icon={<Zap className="size-6 text-primary" />}
             delay={3}
           />
 
-          <FeatureCard
+          <CapabilityCard
             title="Content Generation"
             description="Create drafts, outlines, and content with AI assistance that understands your team's context and goals."
             icon={<Lightbulb className="size-6 text-primary" />}
             delay={4}
           />
 
-          <FeatureCard
+          <CapabilityCard
             title="Contextual Assistant"
             description="Get personalized help with an AI assistant that learns from your workspace and provides relevant suggestions."
             icon={<Bot className="size-6 text-primary" />}
             delay={5}
           />
 
-          <FeatureCard
+          <CapabilityCard
             title="Predictive Insights"
             description="Receive intelligent predictions about project timelines, resource allocation, and potential bottlenecks."
             icon={<Brain className="size-6 text-primary" />}
