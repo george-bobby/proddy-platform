@@ -61,82 +61,95 @@ const FeaturesPage = () => {
   );
 
   // Feature image component
-  const FeatureImage = ({ feature, color }: { feature: Feature, color: string }) => (
-    <div className={`relative h-[300px] bg-gradient-to-r from-${color}-50 to-${color}-100 overflow-hidden rounded-lg`}>
-      <div className="absolute inset-0 flex items-center justify-center p-6">
-        <div className="relative w-[90%] h-[220px]">
-          <Image
-            src={feature.imageSrc}
-            alt={`${feature.name} preview`}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain hover:scale-105 transition-transform duration-700 ease-in-out"
-            style={{ objectPosition: 'center' }}
-          />
+  const FeatureImage = ({ feature, color }: { feature: Feature, color: string }) => {
+    const gradientClass = `bg-gradient-to-r from-${color}-50 to-${color}-100`;
+    const accentClass = `bg-${color}-400`;
+
+    return (
+      <div className={`relative h-[300px] ${gradientClass} overflow-hidden rounded-lg`}>
+        <div className="absolute inset-0 flex items-center justify-center p-6">
+          <div className="relative w-[90%] h-[220px]">
+            <Image
+              src={feature.imageSrc}
+              alt={`${feature.name} preview`}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain hover:scale-105 transition-transform duration-700 ease-in-out"
+              style={{ objectPosition: 'center' }}
+            />
+          </div>
         </div>
+        <div className={`absolute bottom-0 left-0 w-full h-1 ${accentClass}`}></div>
       </div>
-      <div className={`absolute bottom-0 left-0 w-full h-1 bg-${color}-400`}></div>
-    </div>
-  );
+    );
+  };
 
   // Feature content component
-  const FeatureContent = ({ feature, color }: { feature: Feature, color: string }) => (
-    <div className="p-7 md:p-10 flex flex-col h-full">
-      <div className="flex items-center mb-5 gap-3">
-        <div className={cn(`p-3 rounded-lg text-white shadow-sm ${feature.color}`)}>
-          {feature.icon}
+  const FeatureContent = ({ feature, color }: { feature: Feature, color: string }) => {
+    const arrowColorClass = `text-${color}-500`;
+
+    return (
+      <div className="p-7 md:p-10 flex flex-col h-full">
+        <div className="flex items-center mb-5 gap-3">
+          <div className={cn("p-3 rounded-lg text-white shadow-sm", feature.color)}>
+            {feature.icon}
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900">
+            {feature.name}
+          </h3>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900">
-          {feature.name}
-        </h3>
-      </div>
 
-      <p className="text-gray-700 mb-7 text-base leading-relaxed">
-        {feature.detailedDescription.length > 180
-          ? `${feature.detailedDescription.substring(0, 180)}...`
-          : feature.detailedDescription}
-      </p>
+        <p className="text-gray-700 mb-7 text-base leading-relaxed">
+          {feature.detailedDescription.length > 180
+            ? `${feature.detailedDescription.substring(0, 180)}...`
+            : feature.detailedDescription}
+        </p>
 
-      <div className="mb-4 flex-grow">
-        <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {feature.features.slice(0, 6).map((featureItem, idx) => (
-            <li key={idx} className="flex items-start gap-2.5">
-              <ArrowRight className={`size-4 text-${color}-500 mt-1 flex-shrink-0`} />
-              <span className="text-sm text-gray-700">{featureItem}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="mb-4 flex-grow">
+          <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {feature.features.slice(0, 6).map((featureItem, idx) => (
+              <li key={idx} className="flex items-start gap-2.5">
+                <ArrowRight className={`size-4 ${arrowColorClass} mt-1 flex-shrink-0`} />
+                <span className="text-sm text-gray-700">{featureItem}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Feature card component
-  const FeatureCard = ({ feature, index, color }: { feature: Feature, index: number, color: string }) => (
-    <motion.div
-      key={feature.id}
-      id={feature.id}
-      {...fadeInAnimation}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl hover:border-${color}-200 transition-all duration-300`}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-        {index % 2 === 0 ? (
-          // Content on left, image on right for even indexes
-          <>
-            <FeatureContent feature={feature} color={color} />
-            <FeatureImage feature={feature} color={color} />
-          </>
-        ) : (
-          // Image on left, content on right for odd indexes
-          <>
-            <FeatureImage feature={feature} color={color} />
-            <FeatureContent feature={feature} color={color} />
-          </>
-        )}
-      </div>
-    </motion.div>
-  );
+  const FeatureCard = ({ feature, index, color }: { feature: Feature, index: number, color: string }) => {
+    const hoverBorderClass = `hover:border-${color}-200`;
+
+    return (
+      <motion.div
+        key={feature.id}
+        id={feature.id}
+        {...fadeInAnimation}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+        className={`bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl ${hoverBorderClass} transition-all duration-300`}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          {index % 2 === 0 ? (
+            // Content on left, image on right for even indexes
+            <>
+              <FeatureContent feature={feature} color={color} />
+              <FeatureImage feature={feature} color={color} />
+            </>
+          ) : (
+            // Image on left, content on right for odd indexes
+            <>
+              <FeatureImage feature={feature} color={color} />
+              <FeatureContent feature={feature} color={color} />
+            </>
+          )}
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -229,25 +242,27 @@ const FeaturesPage = () => {
               <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                 Discover the powerful tools that make Proddy the ultimate productivity platform for modern teams.
               </p>
-              <div className="sticky top-20 z-30 rounded-xl border border-gray-100 bg-white p-6 shadow-md backdrop-blur-sm">
-                <TabsList className="mx-auto grid w-full max-w-4xl grid-cols-2 gap-3 rounded-lg bg-gray-50/80 p-2 md:grid-cols-4">
-                  {tabConfig.map((tab) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className={`rounded-lg px-4 py-3 text-base font-medium text-gray-700 transition-all duration-200 
-          hover:bg-${tab.color}-50 hover:text-${tab.color}-600
-          data-[state=active]:bg-${tab.color}-100 data-[state=active]:text-${tab.color}-700 
-          data-[state=active]:font-semibold data-[state=active]:shadow-md`}
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        {tab.icon}
-                        <span className="hidden sm:inline">{tab.label}</span>
-                      </span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full h-20 max-w-4xl mx-auto bg-white p-2.5 rounded-xl shadow-sm border border-primary/60">
+                {tabConfig.map(tab => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className={`relative py-4 px-5 text-base font-medium text-gray-700 rounded-lg ring-1 ring-gray-400
+      hover:bg-${tab.color}-50 hover:text-${tab.color}-600 hover:ring-${tab.color}-200
+      data-[state=active]:bg-${tab.color}-100 data-[state=active]:text-${tab.color}-700 
+      data-[state=active]:ring-${tab.color}-300 data-[state=active]:shadow-md 
+      data-[state=active]:font-semibold transition-all duration-200`}
+                  >
+                    <span className="flex items-center justify-center gap-3">
+                      {tab.icon}
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </span>
+                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-0 
+        bg-${tab.color}-500 data-[state=active]:w-1/2 transition-all duration-300`}
+                    />
+                  </TabsTrigger>
+                ))}
+              </TabsList>
             </div>
             {tabConfig.map(tab => (
               <TabsContent key={tab.id} value={tab.id} className="mt-8 animate-in fade-in-50 duration-300">
