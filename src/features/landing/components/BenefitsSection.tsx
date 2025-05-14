@@ -119,43 +119,50 @@ export const BenefitsSection = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">Proven Results</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">AI-Powered Features</h3>
               <p className="text-gray-600 mb-6">
-                Teams using Proddy report significant improvements in productivity and collaboration:
+                Proddy integrates cutting-edge AI capabilities throughout the platform to enhance your workflow:
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="size-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">30% reduction</span> in time spent switching between tools
+                    <span className="font-semibold">Reply Suggestions</span> - AI generates contextual response options to help you reply faster
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="size-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">25% increase</span> in team collaboration
+                    <span className="font-semibold">Daily Recap</span> - AI summarizes your day's activities and highlights important updates
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="size-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">40% faster</span> project completion times
+                    <span className="font-semibold">AI Notes</span> - Intelligent note-taking that organizes and enhances your meeting notes
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle className="size-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">20% reduction</span> in meeting time with AI summaries
+                    <span className="font-semibold">Text to Diagram</span> - Convert text descriptions into visual diagrams and flowcharts
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">
+                    <span className="font-semibold">Summarize Messages</span> - Get instant summaries of long conversation threads and discussions
                   </span>
                 </li>
               </ul>
             </div>
             <div className="relative h-[300px] rounded-xl overflow-hidden shadow-lg">
               <Image
-                src="/dashboard-preview.svg"
-                alt="Proddy Dashboard"
+                src="/assistant.png"
+                alt="Proddy AI Assistant"
                 fill
                 className="object-cover"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
               />
             </div>
           </div>

@@ -30,12 +30,60 @@ const FeaturesPage = () => {
     return group ? features.filter(feature => group.features.includes(feature.id)) : [];
   };
 
-  // Tab configuration with colors
+  // Tab configuration with colors and predefined classes
   const tabConfig = [
-    { id: 'communication', icon: <MessageSquare className="size-5 flex-shrink-0" />, label: 'Communication', color: 'blue' },
-    { id: 'taskManagement', icon: <CheckSquare className="size-5 flex-shrink-0" />, label: 'Task Management', color: 'green' },
-    { id: 'planning', icon: <Calendar className="size-5 flex-shrink-0" />, label: 'Planning', color: 'purple' },
-    { id: 'analytics', icon: <BarChart className="size-5 flex-shrink-0" />, label: 'Analytics', color: 'indigo' }
+    {
+      id: 'communication',
+      icon: <MessageSquare className="size-5 flex-shrink-0" />,
+      label: 'Communication',
+      color: 'blue',
+      hoverBg: 'hover:bg-blue-50',
+      hoverText: 'hover:text-blue-600',
+      hoverRing: 'hover:ring-blue-200',
+      activeBg: 'data-[state=active]:bg-blue-100',
+      activeText: 'data-[state=active]:text-blue-700',
+      activeRing: 'data-[state=active]:ring-blue-300',
+      indicatorBg: 'bg-blue-500'
+    },
+    {
+      id: 'taskManagement',
+      icon: <CheckSquare className="size-5 flex-shrink-0" />,
+      label: 'Task Management',
+      color: 'green',
+      hoverBg: 'hover:bg-green-50',
+      hoverText: 'hover:text-green-600',
+      hoverRing: 'hover:ring-green-200',
+      activeBg: 'data-[state=active]:bg-green-100',
+      activeText: 'data-[state=active]:text-green-700',
+      activeRing: 'data-[state=active]:ring-green-300',
+      indicatorBg: 'bg-green-500'
+    },
+    {
+      id: 'planning',
+      icon: <Calendar className="size-5 flex-shrink-0" />,
+      label: 'Planning',
+      color: 'purple',
+      hoverBg: 'hover:bg-purple-50',
+      hoverText: 'hover:text-purple-600',
+      hoverRing: 'hover:ring-purple-200',
+      activeBg: 'data-[state=active]:bg-purple-100',
+      activeText: 'data-[state=active]:text-purple-700',
+      activeRing: 'data-[state=active]:ring-purple-300',
+      indicatorBg: 'bg-purple-500'
+    },
+    {
+      id: 'analytics',
+      icon: <BarChart className="size-5 flex-shrink-0" />,
+      label: 'Analytics',
+      color: 'indigo',
+      hoverBg: 'hover:bg-indigo-50',
+      hoverText: 'hover:text-indigo-600',
+      hoverRing: 'hover:ring-indigo-200',
+      activeBg: 'data-[state=active]:bg-indigo-100',
+      activeText: 'data-[state=active]:text-indigo-700',
+      activeRing: 'data-[state=active]:ring-indigo-300',
+      indicatorBg: 'bg-indigo-500'
+    }
   ];
 
   const fadeInAnimation = {
@@ -265,18 +313,22 @@ const FeaturesPage = () => {
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className={`relative py-4 px-5 text-base font-medium text-gray-700 rounded-lg ring-1 ring-gray-400
-      hover:bg-${tab.color}-50 hover:text-${tab.color}-600 hover:ring-${tab.color}-200
-      data-[state=active]:bg-${tab.color}-100 data-[state=active]:text-${tab.color}-700
-      data-[state=active]:ring-${tab.color}-300 data-[state=active]:shadow-md
-      data-[state=active]:font-semibold transition-all duration-200`}
+                    className={cn(
+                      "relative py-4 px-5 text-base font-medium text-gray-700 rounded-lg ring-1 ring-gray-400",
+                      tab.hoverBg, tab.hoverText, tab.hoverRing,
+                      tab.activeBg, tab.activeText, tab.activeRing,
+                      "data-[state=active]:shadow-md data-[state=active]:font-semibold transition-all duration-200"
+                    )}
                   >
                     <span className="flex items-center justify-center gap-3">
                       {tab.icon}
                       <span className="hidden sm:inline">{tab.label}</span>
                     </span>
-                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-0
-        bg-${tab.color}-500 data-[state=active]:w-1/2 transition-all duration-300`}
+                    <span className={cn(
+                      "absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-0",
+                      tab.indicatorBg,
+                      "data-[state=active]:w-1/2 transition-all duration-300"
+                    )}
                     />
                   </TabsTrigger>
                 ))}
