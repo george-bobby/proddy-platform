@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
-import { Layers, Zap, Puzzle, CheckCircle } from 'lucide-react';
+import { CheckCircle, Bot } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -39,29 +39,6 @@ export const BenefitsSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
-  const benefits = [
-    {
-      title: "All-in-One Ecosystem",
-      description: "Replace multiple tools with a single platform that handles all your productivity needs.",
-      icon: <Layers className="size-8 text-primary" />,
-    },
-    {
-      title: "Integrated AI",
-      description: "AI capabilities woven throughout the platform to enhance every aspect of your workflow.",
-      icon: <Zap className="size-8 text-primary" />,
-    },
-    {
-      title: "Modular by Design",
-      description: "Use only the modules you need and customize your workspace to fit your team's workflow.",
-      icon: <Puzzle className="size-8 text-primary" />,
-    },
-    {
-      title: "Lightning-Fast & Real-Time",
-      description: "Built for speed with real-time updates that keep everyone in sync without delays.",
-      icon: <Zap className="size-8 text-primary" />,
-    },
-  ];
-
   return (
     <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
       {/* Background decorative elements */}
@@ -79,7 +56,7 @@ export const BenefitsSection = () => {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-primary/10 text-primary mb-4"
           >
-            WHY CHOOSE PRODDY
+            AI-POWERED PRODUCTIVITY
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -87,7 +64,7 @@ export const BenefitsSection = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
           >
-            Benefits That <span className="text-primary">Transform</span> Your Workflow
+            Intelligent Features That <span className="text-primary">Enhance</span> Your Work
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -95,20 +72,8 @@ export const BenefitsSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
           >
-            Experience a new level of productivity with features designed to streamline collaboration and boost efficiency.
+            Proddy's AI capabilities are seamlessly integrated throughout the platform, helping you work smarter and accomplish more with less effort.
           </motion.p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {benefits.map((benefit, index) => (
-            <Benefit
-              key={index}
-              title={benefit.title}
-              description={benefit.description}
-              icon={benefit.icon}
-              delay={index + 1}
-            />
-          ))}
         </div>
 
         <motion.div
