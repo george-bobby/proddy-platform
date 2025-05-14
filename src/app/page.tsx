@@ -1,11 +1,4 @@
 import { Loader } from 'lucide-react';
-
-/**
- * This page serves as a redirect page.
- * The middleware will redirect users to:
- * - /home if not authenticated
- * - /workspace if authenticated
- */
 const IndexPage = () => {
   return (
     <div className="flex h-screen w-full items-center justify-center bg-primary">

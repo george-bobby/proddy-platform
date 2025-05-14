@@ -211,6 +211,18 @@ export const Header = () => {
             >
               Roadmap <ExternalLink className="size-3" />
             </Link>
+
+            <Link
+              href="https://proddy.freshdesk.com/support/home"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "text-sm font-medium transition-colors duration-200 flex items-center gap-1",
+                isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
+              )}
+            >
+              Support <ExternalLink className="size-3" />
+            </Link>
           </nav>
 
           {/* CTA Button */}
@@ -315,6 +327,16 @@ export const Header = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Roadmap <ExternalLink className="size-3" />
+                </Link>
+
+                <Link
+                  href="https://proddy.freshdesk.com/support/home"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-base font-medium text-gray-700 hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Support <ExternalLink className="size-3" />
                 </Link>
               </div>
               <div className="pt-4 border-t border-gray-200 space-y-3">

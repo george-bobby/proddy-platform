@@ -9,9 +9,9 @@ export const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-100 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10 justify-between">
           {/* Logo and description */}
-          <div className="md:col-span-4">
+          <div className="md:col-span-1">
             <Link href="/home" className="flex items-center gap-2 mb-4 group">
               <div className="relative w-8 h-8 overflow-hidden transition-transform duration-300 group-hover:scale-110">
                 <Image
@@ -62,7 +62,7 @@ export const Footer = () => {
           </div>
 
           {/* Product links */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
               Product
             </h3>
@@ -101,7 +101,7 @@ export const Footer = () => {
           </div>
 
           {/* Company links */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
               Company
             </h3>
@@ -123,17 +123,27 @@ export const Footer = () => {
               </li>
               <li>
                 <a
+                  href="https://proddy.freshdesk.com/support/home"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                >
+                  Help Center <ExternalLink className="size-3" />
+                </a>
+              </li>
+              <li>
+                <a
                   href="mailto:support@proddy.freshdesk.com"
                   className="text-sm text-gray-500 hover:text-primary transition-colors"
                 >
-                  Support
+                  Email Support
                 </a>
               </li>
             </ul>
           </div>
 
           {/* Resources links */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-1">
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
               Resources
             </h3>
@@ -168,35 +178,17 @@ export const Footer = () => {
                   Terms of Service
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">
-              Stay Updated
-            </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Subscribe to our newsletter for product updates and news.
-            </p>
-            <form className="space-y-2">
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full px-3 py-2 text-sm rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
-                <button
-                  type="submit"
-                  className="bg-primary text-white px-4 py-2 text-sm rounded-r-lg hover:bg-primary/90 transition-colors"
+              <li>
+                <a
+                  href="https://proddy.freshdesk.com/support/home"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
                 >
-                  Subscribe
-                </button>
-              </div>
-              <p className="text-xs text-gray-400">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
-            </form>
+                  Support Portal <ExternalLink className="size-3" />
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -214,10 +206,18 @@ export const Footer = () => {
                 Terms of Service
               </Link>
               <a
+                href="https://proddy.freshdesk.com/support/home"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+              >
+                Support <ExternalLink className="size-3" />
+              </a>
+              <a
                 href="mailto:support@proddy.freshdesk.com"
                 className="text-sm text-gray-500 hover:text-primary transition-colors"
               >
-                Contact Support
+                support@proddy.freshdesk.com
               </a>
             </div>
           </div>

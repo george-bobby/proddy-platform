@@ -35,7 +35,7 @@ const ContactPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
     setTimeout(() => {
       setIsSubmitting(false);
@@ -53,12 +53,12 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <motion.h1 
+            <motion.h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -66,7 +66,7 @@ const ContactPage = () => {
             >
               Get in <span className="text-primary">Touch</span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-xl text-gray-600 max-w-3xl mx-auto mb-10"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -91,7 +91,7 @@ const ContactPage = () => {
               className="bg-white p-8 rounded-xl shadow-sm"
             >
               <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start">
                   <div className="bg-primary/10 p-3 rounded-full mr-4">
@@ -99,12 +99,15 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Email</h3>
-                    <a href="mailto:support@proddy.freshdesk.com" className="text-primary hover:underline">
+                    <a href="mailto:support@proddy.freshdesk.com" className="text-primary hover:underline block mb-1">
                       support@proddy.freshdesk.com
+                    </a>
+                    <a href="https://proddy.freshdesk.com/support/home" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm">
+                      Visit our Support Portal <ExternalLink className="size-3" />
                     </a>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start">
                   <div className="bg-primary/10 p-3 rounded-full mr-4">
                     <MapPin className="text-primary h-5 w-5" />
@@ -114,7 +117,7 @@ const ContactPage = () => {
                     <p className="text-gray-600">Bengaluru, India</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start">
                   <div className="bg-primary/10 p-3 rounded-full mr-4">
                     <Phone className="text-primary h-5 w-5" />
@@ -125,7 +128,7 @@ const ContactPage = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-12">
                 <h3 className="text-xl font-semibold mb-4">Follow Us</h3>
                 <div className="flex space-x-4">
@@ -152,7 +155,7 @@ const ContactPage = () => {
                 </div>
               </div>
             </motion.div>
-            
+
             {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -170,7 +173,7 @@ const ContactPage = () => {
                   <p className="text-gray-600 mb-6">
                     Your message has been sent successfully. We'll get back to you as soon as possible.
                   </p>
-                  <Button 
+                  <Button
                     onClick={() => setIsSubmitted(false)}
                     variant="outline"
                   >
@@ -180,7 +183,7 @@ const ContactPage = () => {
               ) : (
                 <>
                   <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
-                  
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -211,7 +214,7 @@ const ContactPage = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
                         Company (Optional)
@@ -224,7 +227,7 @@ const ContactPage = () => {
                         placeholder="Your Company"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
                         Subject
@@ -235,14 +238,14 @@ const ContactPage = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="general">General Inquiry</SelectItem>
-                          <SelectItem value="support">Technical Support</SelectItem>
+                          <SelectItem value="support">Technical Support (support@proddy.freshdesk.com)</SelectItem>
                           <SelectItem value="sales">Sales Question</SelectItem>
                           <SelectItem value="feedback">Feedback</SelectItem>
                           <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                         Message
@@ -257,9 +260,9 @@ const ContactPage = () => {
                         required
                       />
                     </div>
-                    
-                    <Button 
-                      type="submit" 
+
+                    <Button
+                      type="submit"
                       className="w-full"
                       disabled={isSubmitting}
                     >
