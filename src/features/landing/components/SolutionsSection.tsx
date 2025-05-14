@@ -4,141 +4,18 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBucket, FileText, BarChart, Bot } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-interface Solution {
-  id: string;
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
-  features: string[];
-}
+import { features } from '@/features/landing/data/features-data';
 
 export const SolutionsSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
   const [activeTab, setActiveTab] = useState('messaging');
 
-  const solutions: Solution[] = [
-    {
-      id: 'messaging',
-      name: 'Messaging',
-      description: 'Real-time team communication with rich text formatting, threads, and AI-powered features.',
-      icon: <MessageSquare className="size-6" />,
-      color: 'bg-blue-500',
-      features: [
-        'Rich text formatting and emoji reactions',
-        'Threaded conversations for organized discussions',
-        'AI-powered message summarization',
-        'Searchable message history',
-        'Direct messaging and group chats',
-      ],
-    },
-    {
-      id: 'tasks',
-      name: 'Tasks',
-      description: 'Organize and track work with customizable task lists, assignments, and due dates.',
-      icon: <CheckSquare className="size-6" />,
-      color: 'bg-green-500',
-      features: [
-        'Task assignments and due dates',
-        'Custom task statuses and priorities',
-        'Subtasks and dependencies',
-        'Progress tracking and reporting',
-        'AI-suggested task organization',
-      ],
-    },
-    {
-      id: 'calendar',
-      name: 'Calendar',
-      description: 'Schedule and manage events with team availability, reminders, and smart scheduling.',
-      icon: <Calendar className="size-6" />,
-      color: 'bg-purple-500',
-      features: [
-        'Team availability view',
-        'Meeting scheduling and reminders',
-        'Calendar integrations',
-        'Recurring events',
-        'AI-powered optimal meeting time suggestions',
-      ],
-    },
-    {
-      id: 'boards',
-      name: 'Boards',
-      description: 'Visual project management with customizable boards, cards, and workflows.',
-      icon: <LayoutGrid className="size-6" />,
-      color: 'bg-orange-500',
-      features: [
-        'Kanban, list, and calendar views',
-        'Custom fields and labels',
-        'Drag-and-drop interface',
-        'Automated workflows',
-        'Progress and burndown charts',
-      ],
-    },
-    {
-      id: 'canvas',
-      name: 'Canvas',
-      description: 'Collaborative whiteboarding for brainstorming, diagramming, and visual collaboration.',
-      icon: <PaintBucket className="size-6" />,
-      color: 'bg-pink-500',
-      features: [
-        'Real-time collaborative editing',
-        'Templates for common diagrams',
-        'Drawing tools and shapes',
-        'Image and document embedding',
-        'Presentation mode',
-      ],
-    },
-    {
-      id: 'notes',
-      name: 'Notes',
-      description: 'Document and share knowledge with rich text notes, wikis, and documentation.',
-      icon: <FileText className="size-6" />,
-      color: 'bg-yellow-500',
-      features: [
-        'Rich text editing with formatting',
-        'Hierarchical organization',
-        'Version history',
-        'Collaborative editing',
-        'AI-powered content suggestions',
-      ],
-    },
-    {
-      id: 'reports',
-      name: 'Reports',
-      description: 'Analytics and insights to track team performance, project progress, and more.',
-      icon: <BarChart className="size-6" />,
-      color: 'bg-cyan-500',
-      features: [
-        'Customizable dashboards',
-        'Project and team analytics',
-        'Time tracking and reporting',
-        'Export and sharing options',
-        'Predictive analytics with AI',
-      ],
-    },
-    {
-      id: 'ai',
-      name: 'AI Assistant',
-      description: 'Intelligent productivity tools that help you work smarter and faster.',
-      icon: <Bot className="size-6" />,
-      color: 'bg-indigo-500',
-      features: [
-        'Smart content generation',
-        'Automated summarization',
-        'Contextual suggestions',
-        'Natural language processing',
-        'Workflow automation',
-      ],
-    },
-  ];
-
-  const activeSolution = solutions.find(s => s.id === activeTab) || solutions[0];
+  const activeSolution = features.find(feature => feature.id === activeTab) || features[0];
 
   return (
     <section id="modules" className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full">
@@ -186,24 +63,24 @@ export const SolutionsSection = () => {
           >
             <h3 className="text-lg font-bold mb-4 text-gray-900">Modules</h3>
             <div className="space-y-2">
-              {solutions.map((solution) => (
+              {features.map((feature) => (
                 <button
-                  key={solution.id}
-                  onClick={() => setActiveTab(solution.id)}
+                  key={feature.id}
+                  onClick={() => setActiveTab(feature.id)}
                   className={cn(
                     "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200",
-                    activeTab === solution.id
+                    activeTab === feature.id
                       ? "bg-primary/5 text-primary"
                       : "hover:bg-gray-50 text-gray-700"
                   )}
                 >
                   <div className={cn(
                     "p-2 rounded-lg text-white",
-                    solution.color
+                    feature.color
                   )}>
-                    {solution.icon}
+                    {feature.icon}
                   </div>
-                  <span className="font-medium">{solution.name}</span>
+                  <span className="font-medium">{feature.name}</span>
                 </button>
               ))}
             </div>
@@ -228,7 +105,7 @@ export const SolutionsSection = () => {
 
                 <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Key Features</h4>
                 <ul className="space-y-3 mb-6">
-                  {activeSolution.features.map((feature, index) => (
+                  {activeSolution.features.slice(0, 5).map((feature, index) => (
                     <li key={index} className="flex items-start gap-2">
                       <ArrowRight className="size-4 text-primary mt-1 flex-shrink-0" />
                       <span className="text-gray-700">{feature}</span>

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
-import { features, featureGroups } from '@/features/features/data/features-data';
+import { features, featureGroups } from '@/features/landing/data/features-data';
 
 const FeaturesPage = () => {
   const refs = {

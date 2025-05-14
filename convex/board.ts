@@ -307,7 +307,7 @@ export const getLists = query({
 		return await ctx.db
 			.query('lists')
 			.withIndex('by_channel_id', (q) => q.eq('channelId', channelId))
-			.order('asc')
+			.order('asc', 'order')
 			.collect();
 	},
 });

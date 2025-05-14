@@ -167,12 +167,27 @@ const BoardPage = () => {
             const oldIndex = lists.findIndex(l => l._id === active.id);
             const newIndex = lists.findIndex(l => l._id === over.id);
 
-            if (oldIndex !== -1 && newIndex !== -1) {
-                const newOrder = arrayMove(lists, oldIndex, newIndex).map((l, idx) => ({
-                    listId: l._id,
+            if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+                console.log(`Moving list from position ${oldIndex} to ${newIndex}`);
+
+                // Create a new array with the reordered lists
+                const reorderedLists = arrayMove([...lists], oldIndex, newIndex);
+
+                // Update the order property for each list
+                const newOrder = reorderedLists.map((list, idx) => ({
+                    listId: list._id,
                     order: idx
                 }));
-                await reorderLists({ listOrders: newOrder });
+
+                console.log('New list order:', newOrder);
+
+                // Call the mutation to update the database
+                try {
+                    await reorderLists({ listOrders: newOrder });
+                    console.log('Lists reordered successfully');
+                } catch (error) {
+                    console.error('Error reordering lists:', error);
+                }
             }
             return;
         }

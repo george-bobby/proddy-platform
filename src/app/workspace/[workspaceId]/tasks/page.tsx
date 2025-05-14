@@ -172,7 +172,7 @@ const TasksPage = () => {
           <div className="max-w-3xl mx-auto px-6 py-8">
             {/* Header with search */}
             <div className="mb-8 space-y-4">
-              <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
+              {/* <h1 className="text-2xl font-bold text-gray-900">Tasks</h1> */}
               <div className="relative">
                 <Input
                   placeholder="Search tasks..."

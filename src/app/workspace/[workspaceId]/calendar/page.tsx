@@ -277,10 +277,10 @@ const CalendarPage = () => {
                                 }
                                 key={event._id}
                                 className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
-                                  ? 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                  ? 'bg-purple-100 hover:bg-purple-200 border-l-2 border-purple-500'
                                   : event.type === 'task'
-                                    ? 'bg-primary/10 hover:bg-primary/20 border-l-2 border-primary'
-                                    : 'bg-secondary/10 hover:bg-secondary/20 border-l-2 border-secondary'
+                                    ? 'bg-green-100 hover:bg-green-200 border-l-2 border-green-500'
+                                    : 'bg-blue-100 hover:bg-blue-200 border-l-2 border-blue-500'
                                   }`}
                                 title={
                                   event.type === 'board-card' && event.boardCard
@@ -337,26 +337,26 @@ const CalendarPage = () => {
                                   </span>
                                   {event.type === 'board-card' && event.boardCard?.priority && (
                                     <span className={`text-[8px] px-1 rounded ${event.boardCard.priority === 'high'
-                                      ? 'bg-destructive/20 text-destructive'
+                                      ? 'bg-purple-200 text-purple-700'
                                       : event.boardCard.priority === 'medium'
-                                        ? 'bg-secondary/20 text-secondary'
-                                        : 'bg-secondary/20 text-secondary'
+                                        ? 'bg-purple-100 text-purple-600'
+                                        : 'bg-purple-50 text-purple-500'
                                       }`}>
                                       {event.boardCard.priority}
                                     </span>
                                   )}
                                   {event.type === 'task' && event.task?.priority && (
                                     <span className={`text-[8px] px-1 rounded ${event.task.priority === 'high'
-                                      ? 'bg-destructive/20 text-destructive'
+                                      ? 'bg-green-200 text-green-700'
                                       : event.task.priority === 'medium'
-                                        ? 'bg-secondary/20 text-secondary'
-                                        : 'bg-secondary/20 text-secondary'
+                                        ? 'bg-green-100 text-green-600'
+                                        : 'bg-green-50 text-green-500'
                                       }`}>
                                       {event.task.priority}
                                     </span>
                                   )}
                                   {event.type === 'task' && event.task?.completed && (
-                                    <span className="text-[8px] px-1 rounded bg-green-100 text-green-600">
+                                    <span className="text-[8px] px-1 rounded bg-green-200 text-green-700 font-medium">
                                       Completed
                                     </span>
                                   )}

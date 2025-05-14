@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, MessageSquare, Activity, Map, HelpCircle } from 'lucide-react';
+import { Bell, Search, Activity, Map, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 

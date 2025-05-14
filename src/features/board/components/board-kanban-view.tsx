@@ -135,8 +135,25 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
     handleDragEnd(event);
   };
 
+  // Determine container class based on list count
+  const getContainerClass = () => {
+    const listCount = lists.length;
+
+    // If more than 4 lists, enable horizontal scrolling
+    if (listCount > 4) {
+      return "flex flex-1 overflow-x-auto scrollbar-hide gap-4 p-4 bg-white";
+    }
+
+    // If 3 or fewer lists, use grid with appropriate columns
+    return "grid flex-1 gap-4 p-4 bg-white " +
+      (listCount === 1 ? "grid-cols-1" :
+        listCount === 2 ? "grid-cols-2" :
+          listCount === 3 ? "grid-cols-3" :
+            "grid-cols-4");
+  };
+
   return (
-    <div className="flex flex-1 overflow-x-auto scrollbar-hide gap-4 p-4 bg-white" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+    <div className={getContainerClass()} style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
       <style jsx>{`
         ::-webkit-scrollbar {
           width: 0px;
@@ -164,6 +181,7 @@ const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({
               onEditCard={onEditCard}
               onDeleteCard={onDeleteCard}
               assigneeData={memberDataMap}
+              listCount={lists.length}
             />
           ))}
         </SortableContext>

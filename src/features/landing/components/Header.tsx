@@ -96,8 +96,8 @@ export const Header = () => {
         ? "bg-white/95 backdrop-blur-md shadow-sm py-3"
         : "bg-transparent py-5"
     )}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-full">
           {/* Logo */}
           <Link href="/home" className="flex items-center gap-2 group">
             <div className="relative w-10 h-10 overflow-hidden">
@@ -118,25 +118,26 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {/* Solutions dropdown */}
+            {/* Features dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setIsModulesOpen(true)}
               onMouseLeave={() => setIsModulesOpen(false)}
             >
-              <button
+              <Link
+                href="/features"
                 className={cn(
                   "flex items-center gap-1 text-sm font-medium transition-colors duration-200",
                   isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary",
                   isModulesOpen && "text-primary"
                 )}
               >
-                <span>Solutions</span>
+                <span>Features</span>
                 <ChevronDown className={cn(
                   "w-4 h-4 transition-transform duration-200",
                   isModulesOpen && "rotate-180"
                 )} />
-              </button>
+              </Link>
 
               {/* Mega menu dropdown */}
               <AnimatePresence>
@@ -171,16 +172,6 @@ export const Header = () => {
             </div>
 
             <Link
-              href="/features"
-              className={cn(
-                "text-sm font-medium transition-colors duration-200",
-                isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
-              )}
-            >
-              Features
-            </Link>
-
-            <Link
               href="/home#why-proddy"
               className={cn(
                 "text-sm font-medium transition-colors duration-200",
@@ -197,7 +188,7 @@ export const Header = () => {
                 isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
               )}
             >
-              Pricing
+              Pricing/-
             </Link>
 
             <Link
@@ -288,22 +279,34 @@ export const Header = () => {
             transition={{ duration: 0.3 }}
             className="md:hidden bg-white border-t border-gray-100 shadow-lg"
           >
-            <div className="px-4 py-6 space-y-6">
+            <div className="px-5 py-6 space-y-6">
               <div className="space-y-4">
-                <Link
-                  href="/solutions"
-                  className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Solutions
-                </Link>
-                <Link
-                  href="/features"
-                  className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Features
-                </Link>
+                {/* Features with submenu */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href="/features"
+                      className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Features
+                    </Link>
+                  </div>
+
+                  <div className="pl-4 grid grid-cols-2 gap-3">
+                    {modules.map((module) => (
+                      <Link
+                        key={module.name}
+                        href={module.href}
+                        className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="text-lg">{module.icon}</span>
+                        <span>{module.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
                 <Link
                   href="/home#why-proddy"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
@@ -316,7 +319,7 @@ export const Header = () => {
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Pricing
+                  Pricing/-
                 </Link>
 
                 <Link

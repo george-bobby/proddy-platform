@@ -20,9 +20,10 @@ interface BoardListProps {
     onEditCard: (card: any) => void;
     onDeleteCard: (cardId: Id<'cards'>) => void;
     assigneeData?: Record<Id<'members'>, { name: string; image?: string }>;
+    listCount?: number;
 }
 
-const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDeleteList, onAddCard, onEditCard, onDeleteCard, assigneeData = {} }) => {
+const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDeleteList, onAddCard, onEditCard, onDeleteCard, assigneeData = {}, listCount = 0 }) => {
     // Make the list sortable
     const {
         attributes,
@@ -64,13 +65,25 @@ const BoardList: React.FC<BoardListProps> = ({ list, cards, onEditList, onDelete
         lowest: cards.filter(c => c.priority === 'lowest').length,
     };
 
+    // Determine width class based on list count
+    const getWidthClass = () => {
+        // If more than 4 lists, use fixed width
+        if (listCount > 4) {
+            return "w-80";
+        }
+
+        // For 4 or fewer lists, use full width
+        return "w-full";
+    };
+
     return (
         <div
             ref={setNodeRef}
             style={style}
             {...attributes}
             className={cn(
-                "bg-gradient-to-b from-gray-50 to-gray-100 rounded-lg shadow-md w-80 flex flex-col border border-gray-200",
+                "bg-gradient-to-b from-gray-50 to-gray-100 rounded-lg shadow-md flex flex-col border border-gray-200",
+                getWidthClass(),
                 isDragging && "opacity-70 border-2 border-dashed border-secondary shadow-lg"
             )}
         >

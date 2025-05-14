@@ -1,19 +1,16 @@
 'use client';
 
-import { CheckSquare, Filter, MessageSquare, Trello, CalendarIcon } from 'lucide-react';
+import { CheckSquare, Filter, MessageSquare, LayoutGrid } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -65,16 +62,24 @@ export const CalendarFilter = ({
             className={cn(
               "flex items-center gap-1.5 border rounded-md transition-all",
               filterOptions.eventTypes.length > 0 && filterOptions.eventTypes.length < 3
-                ? "bg-secondary/10 text-secondary border-secondary/20"
+                ? "bg-gray-100 border-gray-300"
                 : "bg-white"
             )}
           >
             <Filter className="h-4 w-4" />
             <span>Filter</span>
             {filterOptions.eventTypes.length > 0 && filterOptions.eventTypes.length < 3 && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 py-0">
-                {filterOptions.eventTypes.length}
-              </Badge>
+              <div className="flex ml-1 gap-1">
+                {filterOptions.eventTypes.includes('message') && (
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                )}
+                {filterOptions.eventTypes.includes('board-card') && (
+                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                )}
+                {filterOptions.eventTypes.includes('task') && (
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                )}
+              </div>
             )}
           </Button>
         </DropdownMenuTrigger>
@@ -97,37 +102,40 @@ export const CalendarFilter = ({
           <div className="p-2 space-y-3">
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
-                <MessageSquare className="h-4 w-4 text-secondary" />
-                <Label htmlFor="message-events" className="cursor-pointer">Message Events</Label>
+                <MessageSquare className="h-4 w-4 text-blue-500" />
+                <Label htmlFor="message-events" className="cursor-pointer text-blue-700">Message Events</Label>
               </div>
               <Switch
                 id="message-events"
                 checked={isEventTypeSelected('message')}
                 onCheckedChange={() => toggleEventType('message')}
+                className="data-[state=checked]:bg-blue-500"
               />
             </div>
 
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
-                <Trello className="h-4 w-4 text-secondary" />
-                <Label htmlFor="board-card-events" className="cursor-pointer">Board Card Events</Label>
+                <LayoutGrid className="h-4 w-4 text-purple-500" />
+                <Label htmlFor="board-card-events" className="cursor-pointer text-purple-700">Board Card Events</Label>
               </div>
               <Switch
                 id="board-card-events"
                 checked={isEventTypeSelected('board-card')}
                 onCheckedChange={() => toggleEventType('board-card')}
+                className="data-[state=checked]:bg-purple-500"
               />
             </div>
 
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
-                <CheckSquare className="h-4 w-4 text-primary" />
-                <Label htmlFor="task-events" className="cursor-pointer">My Tasks</Label>
+                <CheckSquare className="h-4 w-4 text-green-500" />
+                <Label htmlFor="task-events" className="cursor-pointer text-green-700">My Tasks</Label>
               </div>
               <Switch
                 id="task-events"
                 checked={isEventTypeSelected('task')}
                 onCheckedChange={() => toggleEventType('task')}
+                className="data-[state=checked]:bg-green-500"
               />
             </div>
           </div>

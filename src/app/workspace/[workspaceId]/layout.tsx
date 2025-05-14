@@ -21,8 +21,32 @@ import { WorkspaceSidebar } from './sidebar';
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const showPanel = !!parentMessageId || !!profileMemberId;
+
+  // Check if mobile on initial load and when window resizes
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Check on initial load
+    checkIfMobile();
+
+    // Set up event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+
+    // Clean up event listener
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
+  // Collapse sidebar by default on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(true);
+    }
+  }, [isMobile]);
 
   // Set up global mention handler
   useEffect(() => {
