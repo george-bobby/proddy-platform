@@ -1,19 +1,16 @@
 'use client';
 
 import { Loader, TriangleAlert } from 'lucide-react';
-
-import type { Id } from '@/../convex/_generated/dataModel';
 import { MessageList } from '@/components/message-list';
 import { ChatInput } from '@/components/chat-input';
 import { useGetChannel } from '@/features/channels/api/use-get-channel';
 import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useChannelId } from '@/hooks/use-channel-id';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 
 const ChannelChatPage = () => {
     // Always call hooks at the top level, never conditionally
     const channelId = useChannelId();
-    console.log('ChannelChatPage - channelId from useChannelId:', channelId);
-    console.log('ChannelChatPage - URL params:', window.location.pathname);
 
     // Pass the channelId to useGetMessages - the hook will handle undefined values
     const { results, status, loadMore } = useGetMessages({
@@ -25,7 +22,8 @@ const ChannelChatPage = () => {
         id: channelId
     });
 
-    console.log('ChannelChatPage - channel data:', channel);
+    // Set document title based on channel name
+    useDocumentTitle(channel ? `#${channel.name}` : 'Channel');
 
     if (channelLoading || status == 'LoadingFirstPage') {
         return (
@@ -43,12 +41,6 @@ const ChannelChatPage = () => {
             </div>
         );
     }
-
-    // Log the exact values being passed to ChatInput
-    console.log('ChannelChatPage - Passing to ChatInput:', {
-        channelId,
-        channelName: channel.name
-    });
 
     return (
         <div className="flex h-full flex-col">

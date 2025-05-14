@@ -16,6 +16,7 @@ import {
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { CanvasParticipantsTracker } from '@/features/canvas/components/participants-tracker';
 import { Button } from '@/components/ui/button';
 import { StreamAudioRoom } from '@/features/audio';
@@ -46,6 +47,9 @@ const CanvasPage = () => {
 
     // Get current user
     const { data: currentUser } = useCurrentUser();
+
+    // Set document title based on canvas name
+    useDocumentTitle(canvasName ? `Canvas: ${canvasName}` : 'Canvas');
 
     // Function to toggle full screen
     const toggleFullScreen = useCallback(() => {
@@ -276,8 +280,8 @@ const CanvasPage = () => {
                             roomId: roomId || "",
                             savedCanvasId: `${channelId}-${Date.now()}`,
                         }),
-                    }).catch(error => {
-                        // Just log the error but don't let it crash the app
+                    }).catch(() => {
+                        // Just log a message but don't let it crash the app
                         console.log("Note: Could not update live message on unmount. This is normal if the user has logged out or changed workspaces.");
                     });
                 } catch (error) {

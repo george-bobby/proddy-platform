@@ -1,5 +1,5 @@
 import { ConvexAuthNextjsServerProvider } from '@convex-dev/auth/nextjs/server';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
 import { PropsWithChildren } from 'react';
 
@@ -16,7 +16,15 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
 });
 
-export const metadata: Metadata = siteConfig;
+// Create a metadata object without themeColor
+const { themeColor, ...metadataWithoutThemeColor } = siteConfig;
+
+export const metadata: Metadata = metadataWithoutThemeColor;
+
+// Add viewport export with themeColor
+export const viewport: Viewport = {
+  themeColor: themeColor,
+};
 
 const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
   return (

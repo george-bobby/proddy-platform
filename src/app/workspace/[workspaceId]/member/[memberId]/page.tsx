@@ -16,6 +16,7 @@ import { useCreateOrGetConversation } from '@/features/conversations/api/use-cre
 import { useMemberId } from '@/hooks/use-member-id';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { usePanel } from '@/hooks/use-panel';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 import { WorkspaceToolbar } from '../../toolbar';
 
 const MemberIdPage = () => {
@@ -35,6 +36,9 @@ const MemberIdPage = () => {
 
   // Define a loading state for when we don't have a conversation yet
   const isMessagesLoading = !conversationId || status === 'LoadingFirstPage';
+
+  // Set document title based on member name
+  useDocumentTitle(member?.user.name || 'Direct Message');
 
   useEffect(() => {
     mutate(
