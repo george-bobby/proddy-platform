@@ -46,15 +46,16 @@ const FeaturesPage = () => {
 
   // Feature image for hero section
   const HeroFeatureImage = ({ src, alt, bgColor }: { src: string, alt: string, bgColor: string }) => (
-    <div className={`${bgColor} rounded-xl h-1/2 overflow-hidden relative shadow-md`}>
-      <div className="absolute inset-0 flex items-center justify-center">
+    <div className={`${bgColor} rounded-xl h-full overflow-hidden relative shadow-md`}>
+      <div className="absolute inset-0">
         <Image
           src={src}
           alt={alt}
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover object-center hover:scale-105 transition-transform duration-700"
-          style={{ objectPosition: 'center' }}
+          className="object-cover hover:scale-105 transition-transform duration-700"
+          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          priority
         />
       </div>
     </div>
@@ -66,18 +67,17 @@ const FeaturesPage = () => {
     const accentClass = `bg-${color}-400`;
 
     return (
-      <div className={`relative h-[300px] ${gradientClass} overflow-hidden rounded-lg`}>
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          <div className="relative w-[90%] h-[220px]">
-            <Image
-              src={feature.imageSrc}
-              alt={`${feature.name} preview`}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain hover:scale-105 transition-transform duration-700 ease-in-out"
-              style={{ objectPosition: 'center' }}
-            />
-          </div>
+      <div className={`relative h-full ${gradientClass} overflow-hidden`}>
+        <div className="absolute inset-0">
+          <Image
+            src={feature.imageSrc}
+            alt={`${feature.name} preview`}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            priority
+          />
         </div>
         <div className={`absolute bottom-0 left-0 w-full h-1 ${accentClass}`}></div>
       </div>
@@ -89,23 +89,25 @@ const FeaturesPage = () => {
     const arrowColorClass = `text-${color}-500`;
 
     return (
-      <div className="p-7 md:p-10 flex flex-col h-full">
-        <div className="flex items-center mb-5 gap-3">
-          <div className={cn("p-3 rounded-lg text-white shadow-sm", feature.color)}>
-            {feature.icon}
+      <div className="p-7 md:p-10 flex flex-col h-full justify-between">
+        <div>
+          <div className="flex items-center mb-5 gap-3">
+            <div className={cn("p-3 rounded-lg text-white shadow-sm", feature.color)}>
+              {feature.icon}
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900">
+              {feature.name}
+            </h3>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">
-            {feature.name}
-          </h3>
+
+          <p className="text-gray-700 mb-7 text-base leading-relaxed">
+            {feature.detailedDescription.length > 180
+              ? `${feature.detailedDescription.substring(0, 180)}...`
+              : feature.detailedDescription}
+          </p>
         </div>
 
-        <p className="text-gray-700 mb-7 text-base leading-relaxed">
-          {feature.detailedDescription.length > 180
-            ? `${feature.detailedDescription.substring(0, 180)}...`
-            : feature.detailedDescription}
-        </p>
-
-        <div className="mb-4 flex-grow">
+        <div className="mt-auto">
           <h4 className="text-sm font-semibold text-gray-500 uppercase mb-4">Key Features</h4>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {feature.features.slice(0, 6).map((featureItem, idx) => (
@@ -132,18 +134,26 @@ const FeaturesPage = () => {
         transition={{ duration: 0.5, delay: index * 0.1 }}
         className={`bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl ${hoverBorderClass} transition-all duration-300`}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
           {index % 2 === 0 ? (
             // Content on left, image on right for even indexes
             <>
-              <FeatureContent feature={feature} color={color} />
-              <FeatureImage feature={feature} color={color} />
+              <div className="h-full">
+                <FeatureContent feature={feature} color={color} />
+              </div>
+              <div className="h-full">
+                <FeatureImage feature={feature} color={color} />
+              </div>
             </>
           ) : (
             // Image on left, content on right for odd indexes
             <>
-              <FeatureImage feature={feature} color={color} />
-              <FeatureContent feature={feature} color={color} />
+              <div className="h-full">
+                <FeatureImage feature={feature} color={color} />
+              </div>
+              <div className="h-full">
+                <FeatureContent feature={feature} color={color} />
+              </div>
             </>
           )}
         </div>
@@ -216,15 +226,23 @@ const FeaturesPage = () => {
               transition={{ duration: 0.7, delay: 0.4 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-transparent z-10"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0">
                 <div className="grid grid-cols-2 gap-3 p-4 w-full h-full">
-                  <div className="flex flex-col gap-3">
-                    <HeroFeatureImage src="/messages.png" alt="Messaging feature" bgColor="bg-blue-50" />
-                    <HeroFeatureImage src="/tasks.png" alt="Tasks feature" bgColor="bg-green-50" />
+                  <div className="flex flex-col gap-3 h-full">
+                    <div className="h-1/2">
+                      <HeroFeatureImage src="/messages.png" alt="Messaging feature" bgColor="bg-blue-50" />
+                    </div>
+                    <div className="h-1/2">
+                      <HeroFeatureImage src="/tasks.png" alt="Tasks feature" bgColor="bg-green-50" />
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-3">
-                    <HeroFeatureImage src="/calender.png" alt="Calendar feature" bgColor="bg-purple-50" />
-                    <HeroFeatureImage src="/reports.png" alt="Reports feature" bgColor="bg-indigo-50" />
+                  <div className="flex flex-col gap-3 h-full">
+                    <div className="h-1/2">
+                      <HeroFeatureImage src="/calender.png" alt="Calendar feature" bgColor="bg-purple-50" />
+                    </div>
+                    <div className="h-1/2">
+                      <HeroFeatureImage src="/reports.png" alt="Reports feature" bgColor="bg-indigo-50" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -249,15 +267,15 @@ const FeaturesPage = () => {
                     value={tab.id}
                     className={`relative py-4 px-5 text-base font-medium text-gray-700 rounded-lg ring-1 ring-gray-400
       hover:bg-${tab.color}-50 hover:text-${tab.color}-600 hover:ring-${tab.color}-200
-      data-[state=active]:bg-${tab.color}-100 data-[state=active]:text-${tab.color}-700 
-      data-[state=active]:ring-${tab.color}-300 data-[state=active]:shadow-md 
+      data-[state=active]:bg-${tab.color}-100 data-[state=active]:text-${tab.color}-700
+      data-[state=active]:ring-${tab.color}-300 data-[state=active]:shadow-md
       data-[state=active]:font-semibold transition-all duration-200`}
                   >
                     <span className="flex items-center justify-center gap-3">
                       {tab.icon}
                       <span className="hidden sm:inline">{tab.label}</span>
                     </span>
-                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-0 
+                    <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-0
         bg-${tab.color}-500 data-[state=active]:w-1/2 transition-all duration-300`}
                     />
                   </TabsTrigger>
