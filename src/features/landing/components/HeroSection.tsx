@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight, ChevronDown, MousePointer, Shield, Users } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ChevronDown,
+  MousePointer,
+  Shield,
+  Users,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
 
 export const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -77,7 +82,8 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4 max-w-4xl"
           >
-            Your Team's <span className="text-primary relative">
+            Your Team's{" "}
+            <span className="text-primary relative">
               Second Brain
               <span className="absolute bottom-1 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
             </span>
@@ -87,8 +93,8 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-lg md:text-xl text-gray-600 mb-6 max-w-[800px]"
           >
-            An intelligent platform that adapts to your workflow with modular tools for messaging,
-            tasks, boards, and more — all enhanced by AI.
+            An intelligent platform that adapts to your workflow with modular
+            tools for messaging, tasks, boards, and more — all enhanced by AI.
           </motion.p>
 
           <motion.div
@@ -96,12 +102,19 @@ export const HeroSection = () => {
             className="flex flex-col sm:flex-row gap-4 mb-8"
           >
             <Link href="/signup">
-              <Button size="lg" className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-primary hover:bg-primary/90 px-6 py-3 text-base">
+              <Button
+                size="lg"
+                className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-primary hover:bg-primary/90 px-6 py-3 text-base"
+              >
                 Get Started <ArrowRight className="size-4" />
               </Button>
             </Link>
             <Link href="/home#modules">
-              <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-6 py-3 text-base">
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-6 py-3 text-base"
+              >
                 Explore Features
               </Button>
             </Link>
@@ -128,7 +141,7 @@ export const HeroSection = () => {
             {/* Floating badges - repositioned with borders */}
             {/* AI-Powered - bottom left */}
             <motion.div
-              className="absolute left-[15%] bottom-[15%] hidden md:block"
+              className="absolute left-[-10%] bottom-[50%] hidden md:block"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1, duration: 0.5 }}
@@ -140,7 +153,7 @@ export const HeroSection = () => {
                   duration: 3,
                   repeat: Infinity,
                   repeatType: "reverse",
-                  ease: "easeInOut"
+                  ease: "easeInOut",
                 }}
               >
                 <span className="text-xl">🤖</span>
@@ -150,7 +163,7 @@ export const HeroSection = () => {
 
             {/* Real-time - top right */}
             <motion.div
-              className="absolute right-[20%] top-[10%] hidden md:block"
+              className="absolute right-[-5%] top-[55%] hidden md:block"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
@@ -163,7 +176,7 @@ export const HeroSection = () => {
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "easeInOut",
-                  delay: 0.5
+                  delay: 0.5,
                 }}
               >
                 <span className="text-xl">⚡</span>
@@ -173,7 +186,7 @@ export const HeroSection = () => {
 
             {/* Live Presence (Cursor) - top left */}
             <motion.div
-              className="absolute left-[10%] top-[20%] hidden md:block"
+              className="absolute left-1/2 -translate-x-1/2 top-[25%] hidden md:block"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.3, duration: 0.5 }}
@@ -186,7 +199,7 @@ export const HeroSection = () => {
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "easeInOut",
-                  delay: 1
+                  delay: 1,
                 }}
               >
                 <span className="text-xl flex items-center justify-center">
@@ -198,7 +211,7 @@ export const HeroSection = () => {
 
             {/* Secure - bottom right */}
             <motion.div
-              className="absolute right-[15%] bottom-[20%] hidden md:block"
+              className="absolute right-[5%] bottom-[80%] hidden md:block"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.4, duration: 0.5 }}
@@ -211,7 +224,7 @@ export const HeroSection = () => {
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "easeInOut",
-                  delay: 1.5
+                  delay: 1.5,
                 }}
               >
                 <span className="text-xl flex items-center justify-center">
@@ -223,7 +236,7 @@ export const HeroSection = () => {
 
             {/* Collaborative - center middle */}
             <motion.div
-              className="absolute left-1/2 -translate-x-1/2 top-[30%] hidden md:block"
+              className="absolute left-[15%] top-[15%] hidden md:block"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.5, duration: 0.5 }}
@@ -236,7 +249,7 @@ export const HeroSection = () => {
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "easeInOut",
-                  delay: 2
+                  delay: 2,
                 }}
               >
                 <span className="text-xl flex items-center justify-center">

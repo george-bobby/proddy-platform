@@ -1,5 +1,5 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import Image from "next/image";
 import {
   SiNotion,
@@ -54,7 +54,7 @@ const AnimatedArrow: React.FC<AnimatedArrowProps> = ({
         <g key={i}>
           <circle
             r={3}
-            fill="var(--color-primary)"
+            fill="var(--primary)"
             filter="drop-shadow(0 0 2px rgba(99, 102, 241, 0.6))"
           >
             <animateMotion
@@ -71,14 +71,19 @@ const AnimatedArrow: React.FC<AnimatedArrowProps> = ({
         points={`${endX - 5},${endY - 5} ${endX},${endY} ${endX - 5},${endY + 5}`}
         fill="rgba(209, 213, 219, 0.7)"
         transform={`rotate(${Math.atan2(endY - (startY + curveOffsetY), endX - midX) * (180 / Math.PI)}, ${endX}, ${endY})`}
+        rx="1"
+        ry="1"
       />
     </svg>
   );
 };
 
 const Replacement = () => {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const toolRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px 0px" });
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const toolRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
   const [toolPositions, setToolPositions] = React.useState<
     { x: number; y: number }[]
@@ -113,14 +118,32 @@ const Replacement = () => {
   }, [dimensions]);
 
   return (
-    <div className="w-full py-16 px-4 md:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-          Replace Multiple Tools with Proddy
-        </h2>
+    <section
+      ref={sectionRef}
+      className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full"
+    >
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-[20%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
+      </div>
 
-        <div
+      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-7xl">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-900"
+        >
+          Replace Multiple Tools with{" "}
+          <span className="text-primary">Proddy</span>
+        </motion.h2>
+
+        <motion.div
           ref={containerRef}
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
           className="relative h-[400px] md:h-[500px] w-full"
         >
           {/* Left: Tools */}
@@ -131,16 +154,20 @@ const Replacement = () => {
                 ref={(el) => {
                   toolRefs.current[index] = el;
                 }}
-                className="flex items-center p-3 rounded-lg shadow-md bg-white dark:bg-gray-800"
+                className="flex items-center p-3 rounded-lg shadow-md bg-white border border-gray-100 hover:border-primary/20"
                 initial={{ x: -50, opacity: 0 }}
-                animate={{
-                  x: 0,
-                  opacity: 1,
-                  scale: 1,
-                }}
+                animate={
+                  isInView
+                    ? {
+                        x: 0,
+                        opacity: 1,
+                        scale: 1,
+                      }
+                    : { x: -50, opacity: 0 }
+                }
                 transition={{
                   duration: 0.5,
-                  delay: index * 0.1,
+                  delay: 0.4 + index * 0.1,
                 }}
                 whileHover={{
                   scale: 1.05,
@@ -150,9 +177,7 @@ const Replacement = () => {
                 <motion.div>
                   <tool.icon size={24} color={tool.color} className="mr-2" />
                 </motion.div>
-                <span className="font-medium text-gray-800 dark:text-gray-200">
-                  {tool.name}
-                </span>
+                <span className="font-medium text-gray-800">{tool.name}</span>
               </motion.div>
             ))}
           </div>
@@ -180,7 +205,7 @@ const Replacement = () => {
           <motion.div
             className="absolute right-[5%] top-[35%] w-[30%] flex justify-center z-30"
             initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            animate={isInView ? { x: 0, opacity: 1 } : { x: 50, opacity: 0 }}
             transition={{ duration: 0.7, delay: 0.5 }}
           >
             <div className="bg-primary text-white p-6 md:p-8 rounded-2xl shadow-lg flex flex-col items-center justify-center">
@@ -197,16 +222,9 @@ const Replacement = () => {
               </div>
             </div>
           </motion.div>
-        </div>
-
-        <div className="text-center mt-8">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Simplify your workflow by replacing multiple tools with a single
-            powerful platform
-          </p>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
 
