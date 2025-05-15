@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight, ChevronDown } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ChevronDown,
+  MousePointer,
+  Shield,
+  Users,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from "@/components/ui/button";
 
 export const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -77,8 +82,9 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4 max-w-4xl"
           >
-            Modular Productivity <span className="text-primary relative">
-              Reimagined
+            Your Team's{" "}
+            <span className="text-primary relative">
+              Second Brain
               <span className="absolute bottom-1 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
             </span>
           </motion.h1>
@@ -87,8 +93,8 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-lg md:text-xl text-gray-600 mb-6 max-w-[800px]"
           >
-            An intelligent platform that adapts to your workflow with modular tools for messaging,
-            tasks, boards, and more — all enhanced by AI to boost your team's productivity.
+            An intelligent platform that adapts to your workflow with modular
+            tools for messaging, tasks, boards, and more — all enhanced by AI.
           </motion.p>
 
           <motion.div
@@ -96,13 +102,20 @@ export const HeroSection = () => {
             className="flex flex-col sm:flex-row gap-4 mb-8"
           >
             <Link href="/signup">
-              <Button size="lg" className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-primary hover:bg-primary/90 px-6 py-3 text-base">
+              <Button
+                size="lg"
+                className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-primary hover:bg-primary/90 px-6 py-3 text-base"
+              >
                 Get Started <ArrowRight className="size-4" />
               </Button>
             </Link>
             <Link href="/home#modules">
-              <Button size="lg" variant="outline" className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-6 py-3 text-base">
-                Explore Modules
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-6 py-3 text-base"
+              >
+                Explore Features
               </Button>
             </Link>
           </motion.div>
@@ -125,29 +138,125 @@ export const HeroSection = () => {
               </div>
             </div>
 
-            {/* Floating badges */}
+            {/* Floating badges - repositioned with borders */}
+            {/* AI-Powered - bottom left */}
             <motion.div
-              className="absolute -left-6 top-1/4 hidden md:block"
+              className="absolute left-[-10%] bottom-[50%] hidden md:block"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1, duration: 0.5 }}
             >
-              <div className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2">
+              <motion.div
+                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-primary/20"
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                }}
+              >
                 <span className="text-xl">🤖</span>
                 <span className="font-medium text-sm">AI-Powered</span>
-              </div>
+              </motion.div>
             </motion.div>
 
+            {/* Real-time - top right */}
             <motion.div
-              className="absolute -right-6 top-1/3 hidden md:block"
+              className="absolute right-[-5%] top-[55%] hidden md:block"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.2, duration: 0.5 }}
             >
-              <div className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2">
+              <motion.div
+                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-secondary/20"
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                  delay: 0.5,
+                }}
+              >
                 <span className="text-xl">⚡</span>
                 <span className="font-medium text-sm">Real-time</span>
-              </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Live Presence (Cursor) - top left */}
+            <motion.div
+              className="absolute left-1/2 -translate-x-1/2 top-[25%] hidden md:block"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.3, duration: 0.5 }}
+            >
+              <motion.div
+                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-primary/30"
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                  delay: 1,
+                }}
+              >
+                <span className="text-xl flex items-center justify-center">
+                  <MousePointer className="h-5 w-5 text-primary" />
+                </span>
+                <span className="font-medium text-sm">Live Presence</span>
+              </motion.div>
+            </motion.div>
+
+            {/* Secure - bottom right */}
+            <motion.div
+              className="absolute right-[5%] bottom-[80%] hidden md:block"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.4, duration: 0.5 }}
+            >
+              <motion.div
+                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-green-200"
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                  delay: 1.5,
+                }}
+              >
+                <span className="text-xl flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-green-600" />
+                </span>
+                <span className="font-medium text-sm">Secure</span>
+              </motion.div>
+            </motion.div>
+
+            {/* Collaborative - center middle */}
+            <motion.div
+              className="absolute left-[15%] top-[15%] hidden md:block"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.5, duration: 0.5 }}
+            >
+              <motion.div
+                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-blue-200"
+                animate={{ y: [0, -10, 0] }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                  delay: 2,
+                }}
+              >
+                <span className="text-xl flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-500" />
+                </span>
+                <span className="font-medium text-sm">Collaborative</span>
+              </motion.div>
             </motion.div>
           </motion.div>
 

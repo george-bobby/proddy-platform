@@ -23,47 +23,6 @@ export const CTASection = () => {
         ref={ref}
         className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl"
       >
-        {/* Newsletter - with improved styling */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className="mb-12 pb-8 border-b border-slate-200"
-        >
-          <div className="max-w-xl mx-auto text-center">
-            <div className="flex items-center justify-center mb-4">
-              <Bell className="text-secondary mr-2 size-4" />
-              <h3 className="text-sm font-semibold text-slate-800 tracking-wider uppercase">
-                Stay Updated
-              </h3>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              Subscribe to our newsletter for product updates and news.
-            </p>
-            <form className="max-w-md mx-auto">
-              <div className="flex">
-                <div className="relative flex-grow">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full pl-10 pr-3 py-2 text-sm rounded-l-lg border border-slate-300 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
-                  />
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 size-4" />
-                </div>
-                <button
-                  type="submit"
-                  className="bg-secondary text-white px-4 py-2 text-sm font-medium rounded-r-lg hover:bg-secondary/90 transition-colors"
-                >
-                  Subscribe
-                </button>
-              </div>
-              <p className="text-xs text-slate-500 mt-2 flex items-center justify-center">
-                <CheckCircle className="size-3 mr-1" />
-                We respect your privacy. Unsubscribe at any time.
-              </p>
-            </form>
-          </div>
-        </motion.div>
 
         <div className="max-w-4xl mx-auto text-center">
           <motion.h2

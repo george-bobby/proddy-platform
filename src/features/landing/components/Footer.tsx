@@ -1,9 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { Github, Linkedin, Twitter, ExternalLink } from 'lucide-react';
-import { motion } from 'framer-motion';
+import Link from "next/link";
+import Image from "next/image";
+import { Github, Linkedin, Twitter, ExternalLink } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -15,7 +14,7 @@ export const Footer = () => {
             <Link href="/home" className="flex items-center gap-2 mb-4 group">
               <div className="relative w-8 h-8 overflow-hidden transition-transform duration-300 group-hover:scale-110">
                 <Image
-                  src="/logo.png"
+                  src="/logo-nobg.png"
                   alt="Proddy Logo"
                   fill
                   className="object-contain"
@@ -24,8 +23,9 @@ export const Footer = () => {
               <span className="text-xl font-bold text-gray-900">Proddy</span>
             </Link>
             <p className="text-sm text-gray-500 mb-6 max-w-md">
-              The AI-powered modular productivity suite designed for modern teams.
-              Streamline your workflow with integrated tools enhanced by artificial intelligence.
+              The AI-powered modular productivity suite designed for modern
+              teams. Streamline your workflow with integrated tools enhanced by
+              artificial intelligence.
             </p>
             <p className="text-sm text-gray-500 mb-6">
               Made with ❤️ in Bengaluru, India
@@ -69,17 +69,26 @@ export const Footer = () => {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/features" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/features"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="/why-proddy" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/why-proddy"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     Why Proddy?
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/pricing"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     Pricing
                   </Link>
                 </li>
@@ -113,12 +122,18 @@ export const Footer = () => {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/about" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/about"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/contact"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     Contact
                   </Link>
                 </li>
@@ -129,7 +144,17 @@ export const Footer = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
-                    Help Center <ExternalLink className="size-3" />
+                    Documentation <ExternalLink className="size-3" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://proddy.freshdesk.com/support/tickets/new"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                  >
+                    New Ticket <ExternalLink className="size-3" />
                   </a>
                 </li>
                 <li>
@@ -170,12 +195,18 @@ export const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/privacy"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="text-sm text-gray-500 hover:text-primary transition-colors">
+                  <Link
+                    href="/terms"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
+                  >
                     Terms of Service
                   </Link>
                 </li>
@@ -186,7 +217,7 @@ export const Footer = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
-                    Support Portal <ExternalLink className="size-3" />
+                    Support <ExternalLink className="size-3" />
                   </a>
                 </li>
               </ul>
@@ -201,20 +232,18 @@ export const Footer = () => {
               © {new Date().getFullYear()} Proddy. All rights reserved.
             </p>
             <div className="flex flex-wrap gap-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-sm text-gray-500 hover:text-primary transition-colors">
+              <Link
+                href="/privacy"
+                className="text-sm text-gray-500 hover:text-primary transition-colors"
+              >
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-sm text-gray-500 hover:text-primary transition-colors">
+              <Link
+                href="/terms"
+                className="text-sm text-gray-500 hover:text-primary transition-colors"
+              >
                 Terms of Service
               </Link>
-              <a
-                href="https://proddy.freshdesk.com/support/home"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
-              >
-                Support <ExternalLink className="size-3" />
-              </a>
               <a
                 href="mailto:support@proddy.freshdesk.com"
                 className="text-sm text-gray-500 hover:text-primary transition-colors"

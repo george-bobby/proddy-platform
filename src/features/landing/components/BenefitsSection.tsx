@@ -1,39 +1,9 @@
-'use client';
+"use client";
 
-import { useRef } from 'react';
-import Image from 'next/image';
-import { motion, useInView } from 'framer-motion';
-import { CheckCircle, Bot } from 'lucide-react';
-
-import { cn } from '@/lib/utils';
-
-interface BenefitProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  delay: number;
-}
-
-const Benefit = ({ title, description, icon, delay }: BenefitProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, delay: delay * 0.1 }}
-      className="flex flex-col items-center text-center"
-    >
-      <div className="p-3 rounded-xl bg-white shadow-md mb-4 w-14 h-14 flex items-center justify-center">
-        {icon}
-      </div>
-      <h3 className="text-lg font-bold mb-3 text-gray-900">{title}</h3>
-      <p className="text-gray-600 leading-relaxed max-w-xs text-base">{description}</p>
-    </motion.div>
-  );
-};
+import { useRef } from "react";
+import Image from "next/image";
+import { motion, useInView } from "framer-motion";
+import { CheckCircle, Bot } from "lucide-react";
 
 export const BenefitsSection = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -41,7 +11,6 @@ export const BenefitsSection = () => {
 
   return (
     <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
-      {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-[10%] -right-[5%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -bottom-[10%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
@@ -64,7 +33,8 @@ export const BenefitsSection = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
           >
-            Intelligent Features That <span className="text-primary">Enhance</span> Your Work
+            Intelligent Features That{" "}
+            <span className="text-primary">Enhance</span> Your Work
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -72,7 +42,9 @@ export const BenefitsSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
           >
-            Proddy's AI capabilities are seamlessly integrated throughout the platform, helping you work smarter and accomplish more with less effort.
+            Proddy's AI capabilities are seamlessly integrated throughout the
+            platform, helping you work smarter and accomplish more with less
+            effort.
           </motion.p>
         </div>
 
@@ -84,39 +56,52 @@ export const BenefitsSection = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900">AI-Powered Features</h3>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">
+                AI-Powered Features
+              </h3>
               <p className="text-gray-600 mb-6">
-                Proddy integrates cutting-edge AI capabilities throughout the platform to enhance your workflow:
+                Proddy integrates cutting-edge AI capabilities throughout the
+                platform to enhance your workflow:
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">Reply Suggestions</span> - AI generates contextual response options to help you reply faster
+                    <span className="font-semibold">Reply Suggestions</span> -
+                    AI generates contextual response options to help you reply
+                    faster
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">Daily Recap</span> - AI summarizes your day's activities and highlights important updates
+                    <span className="font-semibold">Daily Recap</span> - AI
+                    summarizes your day's activities and highlights important
+                    updates
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">AI Notes</span> - Intelligent note-taking that organizes and enhances your meeting notes
+                    <span className="font-semibold">AI Notes</span> -
+                    Intelligent note-taking that organizes and enhances your
+                    meeting notes
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">Text to Diagram</span> - Convert text descriptions into visual diagrams and flowcharts
+                    <span className="font-semibold">Text to Diagram</span> -
+                    Convert text descriptions into visual diagrams and
+                    flowcharts
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle className="size-5 text-primary mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700">
-                    <span className="font-semibold">Summarize Messages</span> - Get instant summaries of long conversation threads and discussions
+                    <span className="font-semibold">Summarize Messages</span> -
+                    Get instant summaries of long conversation threads and
+                    discussions
                   </span>
                 </li>
               </ul>
@@ -127,7 +112,7 @@ export const BenefitsSection = () => {
                 alt="Proddy AI Assistant"
                 fill
                 className="object-cover"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                style={{ objectFit: "cover", objectPosition: "center" }}
               />
             </div>
           </div>
