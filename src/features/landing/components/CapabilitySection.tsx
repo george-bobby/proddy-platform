@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Sparkles, Zap, Brain, Bot, MessageSquare, Lightbulb } from 'lucide-react';
+import { MessageSquare, PaintBucket, CheckSquare, LayoutGrid, FileText, Calendar } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -25,15 +25,15 @@ const CapabilityCard = ({ title, description, icon, delay, className }: Capabili
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ duration: 0.5, delay: delay * 0.1 }}
       className={cn(
-        "flex flex-col p-6 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300",
+        "flex flex-col p-7 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300",
         "hover:border-primary/20 hover:-translate-y-1",
         className
       )}
     >
-      <div className="p-3 rounded-xl bg-primary/5 w-fit mb-4">
+      <div className="p-4 rounded-xl bg-primary/5 w-fit mb-5">
         {icon}
       </div>
-      <h3 className="text-lg font-bold mb-3 text-gray-900">{title}</h3>
+      <h3 className="text-xl font-bold mb-3 text-gray-900">{title}</h3>
       <p className="text-gray-600 leading-relaxed text-base">{description}</p>
     </motion.div>
   );
@@ -44,14 +44,14 @@ export const CapabilitysSection = () => {
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
   return (
-    <section id="Capabilitys" className="py-16 md:py-24 bg-white relative overflow-hidden">
+    <section id="Tools" className="py-16 md:py-24 bg-white relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[20%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute bottom-[10%] -right-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
       </div>
 
-      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl">
+      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-7xl">
         <div className="text-center mb-10">
           <motion.div
             ref={ref}
@@ -60,7 +60,7 @@ export const CapabilitysSection = () => {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-secondary/10 text-secondary mb-4"
           >
-            AI CAPABILITIES
+            TOOLS
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -68,7 +68,7 @@ export const CapabilitysSection = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
           >
-            Intelligent Capabilitys That <span className="text-primary">Adapt</span> To You
+            Powerful Tools For <span className="text-primary">Seamless</span> Collaboration
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -76,50 +76,50 @@ export const CapabilitysSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
           >
-            Proddy's AI capabilities enhance every aspect of your workflow, from communication to task management.
+            Proddy's integrated tools work together to create your team's second brain, enhancing productivity and collaboration.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
           <CapabilityCard
-            title="Smart Summarization"
-            description="Instantly summarize long conversations, documents, and meetings to extract key points and action items."
-            icon={<Sparkles className="size-6 text-primary" />}
+            title="Messaging"
+            description="Real-time team communication with rich text formatting, threads, and emoji reactions for seamless collaboration."
+            icon={<MessageSquare className="size-6 text-primary" />}
             delay={1}
           />
 
           <CapabilityCard
-            title="Auto Replies"
-            description="Let AI draft contextual responses to messages based on your communication style and previous interactions."
-            icon={<MessageSquare className="size-6 text-primary" />}
+            title="Canvas"
+            description="Collaborative whiteboarding for brainstorming, planning, and visual collaboration with your team."
+            icon={<PaintBucket className="size-6 text-primary" />}
             delay={2}
           />
 
           <CapabilityCard
-            title="Intelligent Scheduling"
-            description="AI analyzes your calendar and suggests optimal meeting times based on your work patterns and preferences."
-            icon={<Zap className="size-6 text-primary" />}
+            title="Tasks"
+            description="Organize and track work with customizable task lists, assignments, and due dates to stay on schedule."
+            icon={<CheckSquare className="size-6 text-primary" />}
             delay={3}
           />
 
           <CapabilityCard
-            title="Content Generation"
-            description="Create drafts, outlines, and content with AI assistance that understands your team's context and goals."
-            icon={<Lightbulb className="size-6 text-primary" />}
+            title="Boards"
+            description="Visual project management with customizable boards to track progress and manage workflows efficiently."
+            icon={<LayoutGrid className="size-6 text-primary" />}
             delay={4}
           />
 
           <CapabilityCard
-            title="Contextual Assistant"
-            description="Get personalized help with an AI assistant that learns from your workspace and provides relevant suggestions."
-            icon={<Bot className="size-6 text-primary" />}
+            title="Notes"
+            description="Create and share rich text documents with your team for documentation, meeting notes, and knowledge sharing."
+            icon={<FileText className="size-6 text-primary" />}
             delay={5}
           />
 
           <CapabilityCard
-            title="Predictive Insights"
-            description="Receive intelligent predictions about project timelines, resource allocation, and potential bottlenecks."
-            icon={<Brain className="size-6 text-primary" />}
+            title="Calendar"
+            description="Schedule and manage events, deadlines, and meetings with team-wide visibility and coordination."
+            icon={<Calendar className="size-6 text-primary" />}
             delay={6}
           />
         </div>

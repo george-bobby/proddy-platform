@@ -27,22 +27,13 @@ export const FeatureSection = () => {
 
       <div className="w-full px-6 md:px-8 relative z-10">
         <div className="text-center mb-10 max-w-7xl mx-auto">
-          <motion.div
-            ref={ref}
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-primary/10 text-primary mb-4"
-          >
-            MODULAR PLATFORM
-          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
           >
-            Powerful <span className="text-primary">Modules</span> for Every Need
+            Powerful <span className="text-primary">Tools</span> for Every Need
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -50,7 +41,7 @@ export const FeatureSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
           >
-            Proddy's modular design lets you use exactly what you need. Each module works perfectly on its own or as part of the integrated ecosystem.
+          Each tool works perfectly on its own or as part of the integrated ecosystem.
           </motion.p>
         </div>
 

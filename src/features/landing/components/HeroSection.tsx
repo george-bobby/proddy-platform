@@ -77,8 +77,8 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4 max-w-4xl"
           >
-            Modular Productivity <span className="text-primary relative">
-              Reimagined
+            Your Team's <span className="text-primary relative">
+              Second Brain
               <span className="absolute bottom-1 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
             </span>
           </motion.h1>
@@ -88,7 +88,7 @@ export const HeroSection = () => {
             className="text-lg md:text-xl text-gray-600 mb-6 max-w-[800px]"
           >
             An intelligent platform that adapts to your workflow with modular tools for messaging,
-            tasks, boards, and more — all enhanced by AI to boost your team's productivity.
+            tasks, boards, and more — all enhanced by AI.
           </motion.p>
 
           <motion.div

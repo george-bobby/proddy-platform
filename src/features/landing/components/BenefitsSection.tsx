@@ -5,43 +5,12 @@ import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
 import { CheckCircle, Bot } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
-
-interface BenefitProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  delay: number;
-}
-
-const Benefit = ({ title, description, icon, delay }: BenefitProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, delay: delay * 0.1 }}
-      className="flex flex-col items-center text-center"
-    >
-      <div className="p-3 rounded-xl bg-white shadow-md mb-4 w-14 h-14 flex items-center justify-center">
-        {icon}
-      </div>
-      <h3 className="text-lg font-bold mb-3 text-gray-900">{title}</h3>
-      <p className="text-gray-600 leading-relaxed max-w-xs text-base">{description}</p>
-    </motion.div>
-  );
-};
-
 export const BenefitsSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
 
   return (
     <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
-      {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-[10%] -right-[5%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute -bottom-[10%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
