@@ -1,24 +1,28 @@
-'use client';
+"use client";
 
-import { useRef, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion, useInView } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, useInView } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { features } from '@/features/landing/data/features-data';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { features } from "@/features/landing/data/features-data";
 
 export const FeatureSection = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
-  const [activeTab, setActiveTab] = useState('messaging');
+  const [activeTab, setActiveTab] = useState("messaging");
 
-  const activeFeature = features.find(s => s.id === activeTab) || features[0];
+  const activeFeature = features.find((s) => s.id === activeTab) || features[0];
 
   return (
-    <section id="modules" className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full">
+    <section
+      ref={ref}
+      id="modules"
+      className="py-16 md:py-24 bg-gray-50 relative overflow-hidden w-full"
+    >
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-3xl" />
@@ -41,7 +45,8 @@ export const FeatureSection = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
           >
-          Each tool works perfectly on its own or as part of the integrated ecosystem.
+            Each tool works perfectly on its own or as part of the integrated
+            ecosystem.
           </motion.p>
         </div>
 
@@ -65,10 +70,9 @@ export const FeatureSection = () => {
                       : "hover:bg-gray-50 text-gray-700"
                   )}
                 >
-                  <div className={cn(
-                    "p-2 rounded-lg text-white",
-                    feature.color
-                  )}>
+                  <div
+                    className={cn("p-2 rounded-lg text-white", feature.color)}
+                  >
                     {feature.icon}
                   </div>
                   <span className="font-medium">{feature.name}</span>
@@ -86,16 +90,24 @@ export const FeatureSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 h-full">
               <div className="p-6 flex flex-col justify-between">
                 <div>
-                  <div className={cn(
-                    "p-3 rounded-lg text-white w-fit mb-4",
-                    activeFeature.color
-                  )}>
+                  <div
+                    className={cn(
+                      "p-3 rounded-lg text-white w-fit mb-4",
+                      activeFeature.color
+                    )}
+                  >
                     {activeFeature.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900">{activeFeature.name}</h3>
-                  <p className="text-gray-600 mb-6">{activeFeature.description}</p>
+                  <h3 className="text-xl font-bold mb-3 text-gray-900">
+                    {activeFeature.name}
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {activeFeature.description}
+                  </p>
 
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Key Features</h4>
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">
+                    Key Features
+                  </h4>
                   <ul className="space-y-3 mb-6">
                     {activeFeature.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2">
