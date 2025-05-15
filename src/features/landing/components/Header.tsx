@@ -114,7 +114,7 @@ export const Header = () => {
           <Link href="/home" className="flex items-center gap-2 group">
             <div className="relative w-10 h-10 overflow-hidden">
               <Image
-                src="/logo.png"
+                src="/logo-nobg.png"
                 alt="Proddy Logo"
                 fill
                 className="object-contain transition-transform duration-300 group-hover:scale-110"
