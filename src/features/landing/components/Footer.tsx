@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Github, Linkedin, Twitter, ExternalLink } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 export const Footer = () => {
   return (
@@ -129,7 +128,17 @@ export const Footer = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
-                    Help Center <ExternalLink className="size-3" />
+                    Documentation <ExternalLink className="size-3" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://proddy.freshdesk.com/support/tickets/new"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                  >
+                    New Ticket <ExternalLink className="size-3" />
                   </a>
                 </li>
                 <li>
@@ -186,7 +195,7 @@ export const Footer = () => {
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
-                    Support Portal <ExternalLink className="size-3" />
+                    Support <ExternalLink className="size-3" />
                   </a>
                 </li>
               </ul>
@@ -207,14 +216,6 @@ export const Footer = () => {
               <Link href="/terms" className="text-sm text-gray-500 hover:text-primary transition-colors">
                 Terms of Service
               </Link>
-              <a
-                href="https://proddy.freshdesk.com/support/home"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
-              >
-                Support <ExternalLink className="size-3" />
-              </a>
               <a
                 href="mailto:support@proddy.freshdesk.com"
                 className="text-sm text-gray-500 hover:text-primary transition-colors"
