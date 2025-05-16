@@ -1,4 +1,4 @@
-import { CalendarIcon, ImageIcon, PaintBucket, Smile, XIcon } from 'lucide-react';
+import { CalendarIcon, FileText, ImageIcon, PaintBucket, Smile, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import Quill, { type QuillOptions } from 'quill';
 import type { Delta, Op } from 'quill/core';
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { createMentionElement } from '@/lib/mention-handler';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { useChannelId } from '@/hooks/use-channel-id';
+import { useCreateNote } from '@/features/notes/api/use-create-note';
 
 import { CalendarPicker } from './calendar-picker';
 import { EmojiPopover } from './emoji-popover';
@@ -40,6 +41,7 @@ interface EditorProps {
   disabled?: boolean;
   innerRef?: MutableRefObject<Quill | null>;
   variant?: 'create' | 'update';
+  disableMentions?: boolean;
 }
 
 const Editor = ({
@@ -50,6 +52,7 @@ const Editor = ({
   disabled = false,
   innerRef,
   variant = 'create',
+  disableMentions = false,
 }: EditorProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
@@ -179,16 +182,16 @@ const Editor = ({
         setLastKeyWasExclamation(false);
       }
 
-      // Check if the last character is "@" to trigger mention picker
+      // Check if the last character is "@" to trigger mention picker (only if mentions are enabled)
       const lastChar = newText.slice(-1);
       console.log('Last character typed:', lastChar, 'Text:', newText);
 
-      if (newText.trim().endsWith('@') && !lastKeyWasAt) {
+      if (!disableMentions && newText.trim().endsWith('@') && !lastKeyWasAt) {
         console.log('@ character detected, opening mention picker');
         setLastKeyWasAt(true);
         setMentionPickerOpen(true);
         setMentionSearchQuery('');
-      } else if (lastKeyWasAt) {
+      } else if (!disableMentions && lastKeyWasAt) {
         // If we're already in mention mode, check if we're still typing a mention
         const atIndex = newText.lastIndexOf('@');
         if (atIndex >= 0) {
@@ -383,8 +386,12 @@ const Editor = ({
   // Create message mutation
   const createMessage = useMutation(api.messages.create);
 
-  // State to track if we're creating a canvas
+  // Create note mutation
+  const { mutate: createNote } = useCreateNote();
+
+  // State to track if we're creating a canvas or note
   const [isCreatingCanvas, setIsCreatingCanvas] = useState(false);
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
 
   // Function to create a new canvas with a live message
   const navigateToCanvas = async () => {
@@ -420,6 +427,56 @@ const Editor = ({
       console.error("Error creating canvas:", error);
       toast.error("Failed to create canvas");
       setIsCreatingCanvas(false);
+    }
+  };
+
+  // Function to create a new note
+  const createNewNote = async () => {
+    if (!workspaceId || !channelId || !currentUser) {
+      console.error('Cannot create note: missing required data');
+      return;
+    }
+
+    try {
+      // Show loading state
+      setIsCreatingNote(true);
+
+      // Create a new note with default values
+      const defaultTitle = 'Untitled';
+      const defaultContent = JSON.stringify({ ops: [{ insert: '\n' }] });
+
+      // Create the note in the database
+      const newNoteId = await createNote({
+        title: defaultTitle,
+        content: defaultContent,
+        workspaceId,
+        channelId,
+      });
+
+      if (newNoteId) {
+        // Create a message in the channel with the new note information
+        await createMessage({
+          workspaceId,
+          channelId,
+          body: JSON.stringify({
+            type: 'note',
+            noteId: newNoteId,
+            noteTitle: defaultTitle,
+            previewContent: 'New note created',
+          }),
+        });
+
+        // Navigate to the notes page
+        const url = `/workspace/${workspaceId}/channel/${channelId}/notes?noteId=${newNoteId}`;
+        router.push(url);
+
+        toast.success('Note created and shared in channel');
+      }
+    } catch (error) {
+      console.error("Error creating note:", error);
+      toast.error("Failed to create note");
+    } finally {
+      setIsCreatingNote(false);
     }
   };
 
@@ -523,50 +580,68 @@ const Editor = ({
                   <CalendarIcon className="size-4" />
                 </Button>
               </Hint>
-              <Hint label="Mention User">
-                <Button
-                  disabled={disabled}
-                  size="iconSm"
-                  variant="ghost"
-                  data-mention-button="true"
-                  onClick={() => {
-                    console.log('Mention button clicked');
-                    // Just open the mention picker directly
-                    setLastKeyWasAt(true);
-                    setMentionPickerOpen(true);
-                    setMentionSearchQuery('');
-
-                    // Insert @ symbol at cursor position
-                    const quill = quillRef.current;
-                    if (quill) {
-                      const position = quill.getSelection()?.index || quill.getText().length;
-                      console.log('Inserting @ at position:', position);
-                      quill.insertText(position, '@');
-                      quill.focus();
-                    }
-                  }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
-                  </svg>
-                </Button>
-              </Hint>
-              {channelId && (
-                <Hint label="New Canvas">
+              {!disableMentions && (
+                <Hint label="Mention User">
                   <Button
-                    disabled={disabled || isCreatingCanvas}
+                    disabled={disabled}
                     size="iconSm"
                     variant="ghost"
-                    onClick={navigateToCanvas}
+                    data-mention-button="true"
+                    onClick={() => {
+                      console.log('Mention button clicked');
+                      // Just open the mention picker directly
+                      setLastKeyWasAt(true);
+                      setMentionPickerOpen(true);
+                      setMentionSearchQuery('');
+
+                      // Insert @ symbol at cursor position
+                      const quill = quillRef.current;
+                      if (quill) {
+                        const position = quill.getSelection()?.index || quill.getText().length;
+                        console.log('Inserting @ at position:', position);
+                        quill.insertText(position, '@');
+                        quill.focus();
+                      }
+                    }}
                   >
-                    {isCreatingCanvas ? (
-                      <div className="animate-spin h-4 w-4 border-2 border-secondary border-t-transparent rounded-full" />
-                    ) : (
-                      <PaintBucket className="size-4" />
-                    )}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                    </svg>
                   </Button>
                 </Hint>
+              )}
+              {channelId && (
+                <>
+                  <Hint label="New Canvas">
+                    <Button
+                      disabled={disabled || isCreatingCanvas}
+                      size="iconSm"
+                      variant="ghost"
+                      onClick={navigateToCanvas}
+                    >
+                      {isCreatingCanvas ? (
+                        <div className="animate-spin h-4 w-4 border-2 border-secondary border-t-transparent rounded-full" />
+                      ) : (
+                        <PaintBucket className="size-4" />
+                      )}
+                    </Button>
+                  </Hint>
+                  <Hint label="New Note">
+                    <Button
+                      disabled={disabled || isCreatingNote}
+                      size="iconSm"
+                      variant="ghost"
+                      onClick={createNewNote}
+                    >
+                      {isCreatingNote ? (
+                        <div className="animate-spin h-4 w-4 border-2 border-secondary border-t-transparent rounded-full" />
+                      ) : (
+                        <FileText className="size-4" />
+                      )}
+                    </Button>
+                  </Hint>
+                </>
               )}
             </>
           )}

@@ -6,6 +6,7 @@ import { useGetMembers } from '@/features/members/api/use-get-members';
 import { CanvasMessage } from '@/features/messages/components/canvas-message';
 import { CanvasLiveMessage } from '@/features/messages/components/canvas-live-message';
 import { CanvasExportMessage } from '@/features/messages/components/canvas-export-message';
+import { NoteMessage } from '@/features/messages/components/note-message';
 
 interface RendererProps {
   value: string;
@@ -51,9 +52,19 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     }
   };
 
+  // Check if this is a note message
+  const isNoteMessage = () => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed.type === 'note';
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
-    // If this is a canvas message, live canvas message, or canvas export message, don't process with Quill
-    if (isCanvasMessage() || isCanvasLiveMessage() || isCanvasExportMessage()) {
+    // If this is a canvas message, live canvas message, canvas export message, or note message, don't process with Quill
+    if (isCanvasMessage() || isCanvasLiveMessage() || isCanvasExportMessage() || isNoteMessage()) {
       setIsEmpty(false);
       return;
     }
@@ -188,6 +199,17 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     } catch (e) {
       console.error("Error parsing canvas export data:", e);
       return <div>Error displaying canvas export</div>;
+    }
+  }
+
+  // If this is a note message, render the NoteMessage component
+  if (isNoteMessage()) {
+    try {
+      const noteData = JSON.parse(value);
+      return <NoteMessage data={noteData} />;
+    } catch (e) {
+      console.error("Error parsing note data:", e);
+      return <div>Error displaying note</div>;
     }
   }
 
