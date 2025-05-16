@@ -31,7 +31,7 @@ interface CommandMenuProps {
   onImageClick: () => void;
 }
 
-export const CommandMenu = memo(({
+const CommandMenuComponent = ({
   isOpen,
   onClose,
   position,
@@ -400,4 +400,7 @@ export const CommandMenu = memo(({
       </div>
     </div>
   );
-});
+};
+
+export const CommandMenu = memo(CommandMenuComponent);
+CommandMenu.displayName = 'CommandMenu';
