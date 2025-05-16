@@ -9,7 +9,7 @@ import { NoteItem } from './note-item';
 import { DraggableNote } from './draggable-note';
 import { DraggableFolder } from './draggable-folder';
 import { FolderDialog } from './folder-dialog';
-import type { Note, NoteFolder } from '../types';
+import type { Note, NoteFolder, FolderTreeItem } from '../types';
 import {
   DropdownMenu,
   DropdownMenuContent,

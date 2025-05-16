@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect } from 'react';
 
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
-import type { Note } from '../types';
+import type { Note } from '../types/index';
 
 export const useGetNote = (noteId?: Id<'notes'>) => {
 	// Check if the noteId is a temporary ID (starts with "temp-")
