@@ -81,20 +81,17 @@ export const NotesRoom = ({ children, noteId, fallback }: NotesRoomProps) => {
                 id={normalizedRoomId}
                 initialPresence={{
                     cursor: null,
-                    selection: null,
+                    selection: [],
+                    pencilDraft: null,
+                    penColor: null,
+                    strokeWidth: 1,
                     isEditing: false,
                     lastActivity: Date.now()
                 }}
                 initialStorage={{
-                    activeUsers: new LiveList([]),
+                    layers: new LiveMap(),
+                    layerIds: new LiveList([]),
                     lastUpdate: Date.now()
-                }}
-                // Pass the auth parameters to the Liveblocks client
-                // This is crucial for proper user identification
-                userInfo={{
-                    id: currentUser._id,
-                    name: currentUser.name || "Unknown User",
-                    picture: currentUser.image || `https://avatar.vercel.sh/${currentUser._id}`
                 }}
             >
                 <ClientSideSuspense fallback={fallback || <div className="flex h-full w-full items-center justify-center">
