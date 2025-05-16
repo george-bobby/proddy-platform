@@ -89,9 +89,14 @@ const NotesPage = () => {
         setIsFolderDialogOpen(true);
     };
 
-    // Handle note selection
-    const handleNoteSelect = (noteId: Id<'notes'>) => {
-        setActiveNoteId(noteId);
+    // Wrapper functions for DraggableFolder component
+    const handleNoteSelectWrapper = (noteId: string) => {
+        setActiveNoteId(noteId as Id<'notes'>);
+    };
+
+    // Wrapper for handleDeleteNote to match the expected prop type
+    const handleDeleteNoteWrapper = (noteId: string) => {
+        handleDeleteNote(noteId as Id<'notes'>);
     };
 
     // Handle note creation
@@ -177,7 +182,7 @@ const NotesPage = () => {
     };
 
     // Handle content change
-    const handleContentChange = (newContent: string, pageIndex?: number) => {
+    const handleContentChange = (newContent: string) => {
         // Only update if content has changed
         if (newContent !== content) {
             // Update content state directly
@@ -212,7 +217,7 @@ const NotesPage = () => {
     };
 
     // Handle note deletion
-    const handleDeleteNote = async (noteId: string) => {
+    const handleDeleteNote = async (noteId: Id<'notes'>) => {
         try {
             console.log('Deleting note with ID:', noteId);
 
@@ -227,8 +232,8 @@ const NotesPage = () => {
                 setContent('');
             }
 
-            // Delete the note from the database - make sure we're passing an object with an id property
-            await deleteNote({ id: noteId as Id<'notes'> });
+            // Delete the note from the database
+            await deleteNote({ id: noteId });
             console.log('Note deleted from database:', noteId);
 
             // Remove the note from local state if it exists there
@@ -336,7 +341,7 @@ const NotesPage = () => {
     );
 
     // Handle drag end from DndContext
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (!over) return;
@@ -347,8 +352,19 @@ const NotesPage = () => {
             const folderId = over.id as Id<'noteFolders'>;
 
             console.log(`Moving note ${noteId} to folder ${folderId}`);
-            // Stub for move note functionality
-            toast.success('Note moved to folder');
+
+            try {
+                // Update the note in the database with the new folder ID
+                await updateNote({
+                    id: noteId,
+                    folderId: folderId,
+                });
+
+                toast.success('Note moved to folder');
+            } catch (error) {
+                console.error('Failed to move note to folder:', error);
+                toast.error('Failed to move note to folder');
+            }
         }
     };
 
@@ -363,7 +379,7 @@ const NotesPage = () => {
     };
 
     // Toggle note selection
-    const toggleNoteSelection = (noteId: Id<'notes'>, event: React.MouseEvent) => {
+    const toggleNoteSelection = (noteId: Id<'notes'>, event: React.MouseEvent<Element, MouseEvent>) => {
         event.stopPropagation();
 
         setSelectedNotes(prev => {
@@ -376,7 +392,7 @@ const NotesPage = () => {
     };
 
     // Toggle folder selection
-    const toggleFolderSelection = (folderId: Id<'noteFolders'>, event: React.MouseEvent) => {
+    const toggleFolderSelection = (folderId: Id<'noteFolders'>, event: React.MouseEvent<Element, MouseEvent>) => {
         event.stopPropagation();
 
         setSelectedFolders(prev => {
@@ -529,8 +545,8 @@ const NotesPage = () => {
                                                 ...localNotes.filter(note => note.folderId === folder._id)
                                             ]}
                                             activeNoteId={activeNoteId}
-                                            onNoteSelect={handleNoteSelect}
-                                            onDeleteNote={handleDeleteNote}
+                                            onNoteSelect={handleNoteSelectWrapper}
+                                            onDeleteNote={handleDeleteNoteWrapper}
                                             onCreateNote={(folderId) => handleCreateNote(folderId)}
                                             onDeleteFolder={() => handleDeleteFolder(folder._id)}
                                             onRenameFolder={(folderId, name) => handleRenameFolder(folderId, name)}
@@ -554,8 +570,8 @@ const NotesPage = () => {
                                                 folder={folder}
                                                 notes={localNotes.filter(note => note.folderId === folder._id)}
                                                 activeNoteId={activeNoteId}
-                                                onNoteSelect={handleNoteSelect}
-                                                onDeleteNote={handleDeleteNote}
+                                                onNoteSelect={handleNoteSelectWrapper}
+                                                onDeleteNote={handleDeleteNoteWrapper}
                                                 onCreateNote={(folderId) => handleCreateNote(folderId)}
                                                 onDeleteFolder={() => handleDeleteFolder(folder._id)}
                                                 onRenameFolder={(folderId, name) => handleRenameFolder(folderId, name)}
@@ -611,8 +627,8 @@ const NotesPage = () => {
                                             key={note._id}
                                             note={note}
                                             isActive={activeNoteId === note._id}
-                                            onClick={() => handleNoteSelect(note._id)}
-                                            onDelete={() => handleDeleteNote(note._id)}
+                                            onClick={() => handleNoteSelectWrapper(note._id)}
+                                            onDelete={() => handleDeleteNoteWrapper(note._id)}
                                             isSelectionMode={isSelectionMode}
                                             isSelected={selectedNotes.includes(note._id)}
                                             onToggleSelect={toggleNoteSelection}
