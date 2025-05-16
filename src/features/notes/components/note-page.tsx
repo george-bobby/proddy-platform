@@ -143,11 +143,13 @@ export const NotePage = ({
           // Get the bounds of the cursor
           const bounds = editor.getBounds(selection.index);
 
-          // Set the position for the command menu
-          setCommandMenuPosition({
-            top: bounds.top,
-            left: bounds.left
-          });
+          // Set the position for the command menu if bounds are available
+          if (bounds) {
+            setCommandMenuPosition({
+              top: bounds.top,
+              left: bounds.left
+            });
+          }
 
           // Open the command menu
           setIsCommandMenuOpen(true);
@@ -166,11 +168,13 @@ export const NotePage = ({
         // Get the bounds of the cursor
         const bounds = editor.getBounds(range.index);
 
-        // Set the position for the command menu
-        setCommandMenuPosition({
-          top: bounds.top,
-          left: bounds.left
-        });
+        // Set the position for the command menu if bounds are available
+        if (bounds) {
+          setCommandMenuPosition({
+            top: bounds.top,
+            left: bounds.left
+          });
+        }
 
         // Open the command menu
         setIsCommandMenuOpen(true);
@@ -193,11 +197,13 @@ export const NotePage = ({
           // Get the bounds of the cursor
           const bounds = editor.getBounds(selection.index);
 
-          // Set the position for the command menu
-          setCommandMenuPosition({
-            top: bounds.top,
-            left: bounds.left
-          });
+          // Set the position for the command menu if bounds are available
+          if (bounds) {
+            setCommandMenuPosition({
+              top: bounds.top,
+              left: bounds.left
+            });
+          }
 
           // Open the command menu
           setIsCommandMenuOpen(true);
@@ -284,11 +290,13 @@ export const NotePage = ({
       // Get the bounds of the cursor
       const bounds = quillRef.current.getBounds(selection.index);
 
-      // Set the position for the command menu
-      setCommandMenuPosition({
-        top: bounds.top,
-        left: bounds.left
-      });
+      // Set the position for the command menu if bounds are available
+      if (bounds) {
+        setCommandMenuPosition({
+          top: bounds.top,
+          left: bounds.left
+        });
+      }
 
       // Open the command menu
       setIsCommandMenuOpen(true);
