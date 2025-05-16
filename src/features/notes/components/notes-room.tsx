@@ -1,0 +1,108 @@
+"use client";
+
+import { ReactNode, useEffect } from "react";
+import { ClientSideSuspense } from "@liveblocks/react";
+import { LiveList, LiveMap } from "@liveblocks/client";
+import { useQuery } from "convex/react";
+
+import { api } from "@/../convex/_generated/api";
+import { RoomProvider } from "@/../liveblocks.config";
+import { Loader } from "lucide-react";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
+import { Id } from "@/../convex/_generated/dataModel";
+
+interface NotesRoomProps {
+    children: ReactNode;
+    noteId: Id<'notes'>;
+    fallback?: ReactNode;
+}
+
+export const NotesRoom = ({ children, noteId, fallback }: NotesRoomProps) => {
+    // Create a room ID based on the note ID
+    const roomId = `note-${noteId}`;
+
+    // Ensure roomId is a string and normalize it
+    const normalizedRoomId = String(roomId).trim();
+
+    // Add a key to force remount when roomId changes
+    const key = `note-room-${normalizedRoomId}`;
+
+    // Get the workspace ID from params
+    const workspaceId = useWorkspaceId();
+
+    console.log("NotesRoom component rendering with normalized roomId:", normalizedRoomId);
+
+    // Get the current user from Convex
+    const currentUser = useQuery(api.users.current);
+
+    // Get current member info to pass to Liveblocks
+    const currentMember = useQuery(
+        api.members.current,
+        workspaceId ? { workspaceId } : "skip"
+    );
+
+    // Log authentication info for debugging
+    useEffect(() => {
+        if (currentUser && currentMember) {
+            console.log("Authentication info for Liveblocks Notes Room:", {
+                userId: currentUser._id,
+                memberId: currentMember._id,
+                name: currentUser.name || "Unknown User"
+            });
+        }
+    }, [currentUser, currentMember]);
+
+    // If user data is still loading, show a loading indicator
+    if (!currentUser) {
+        return <div className="flex items-center justify-center h-full">Loading note...</div>;
+    }
+
+    // Verify we have a valid room ID
+    if (!normalizedRoomId) {
+        console.error("Invalid room ID provided to NotesRoom component");
+        return <div className="flex items-center justify-center h-full">Error: Invalid room ID</div>;
+    }
+
+    // Set up query parameters with user and member IDs
+    // These will be passed to the liveblocks-auth endpoint
+    const authParams = new URLSearchParams();
+    if (currentUser?._id) authParams.set("userId", currentUser._id);
+    if (currentMember?._id) authParams.set("memberId", currentMember._id);
+    if (currentUser?.name) authParams.set("userName", currentUser.name);
+    if (currentUser?.image) authParams.set("userAvatar", currentUser.image);
+
+    // Log the auth parameters for debugging
+    console.log("Auth parameters for Liveblocks:", Object.fromEntries(authParams));
+
+    return (
+        // Use the key to force remount when roomId changes
+        <div key={key} className="h-full">
+            <RoomProvider
+                id={normalizedRoomId}
+                initialPresence={{
+                    cursor: null,
+                    selection: null,
+                    isEditing: false,
+                    lastActivity: Date.now()
+                }}
+                initialStorage={{
+                    activeUsers: new LiveList([]),
+                    lastUpdate: Date.now()
+                }}
+                // Pass the auth parameters to the Liveblocks client
+                // This is crucial for proper user identification
+                userInfo={{
+                    id: currentUser._id,
+                    name: currentUser.name || "Unknown User",
+                    picture: currentUser.image || `https://avatar.vercel.sh/${currentUser._id}`
+                }}
+            >
+                <ClientSideSuspense fallback={fallback || <div className="flex h-full w-full items-center justify-center">
+                    <Loader className="size-5 animate-spin" />
+                </div>}>
+                    {() => children}
+                </ClientSideSuspense>
+            </RoomProvider>
+        </div>
+    );
+}

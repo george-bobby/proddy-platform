@@ -175,6 +175,7 @@ export const ChatInput = ({
         onSubmit={handleSubmit}
         disabled={isPending}
         innerRef={innerRef}
+        disableMentions={!!conversationId} // Disable mentions for direct messages (when conversationId is present)
       />
     </div>
   );
