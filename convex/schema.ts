@@ -233,6 +233,19 @@ const schema = defineSchema({
     .index("by_message_id", ["messageId"])
     .index("by_member_id", ["memberId"])
     .index("by_message_id_member_id", ["messageId", "memberId"]),
+
+  userPreferences: defineTable({
+    userId: v.id("users"),
+    lastActiveWorkspaceId: v.optional(v.id("workspaces")),
+    lastActiveTimestamp: v.optional(v.number()),
+    settings: v.optional(
+      v.object({
+        theme: v.optional(v.string()),
+        notifications: v.optional(v.boolean()),
+        // Add more user preferences as needed
+      })
+    ),
+  }).index("by_user_id", ["userId"]),
 });
 
 export default schema;

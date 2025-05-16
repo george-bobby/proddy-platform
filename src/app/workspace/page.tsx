@@ -1,28 +1,46 @@
-'use client';
+"use client";
 
-import { Loader } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import { useGetWorkspaces } from '@/features/workspaces/api/use-get-workspaces';
-import { useCreateWorkspaceModal } from '@/features/workspaces/store/use-create-workspace-modal';
+import { useGetLastActiveWorkspace } from "@/features/workspaces/api/use-get-last-active-workspace";
+import { useGetWorkspaces } from "@/features/workspaces/api/use-get-workspaces";
+import { useCreateWorkspaceModal } from "@/features/workspaces/store/use-create-workspace-modal";
 
 const WorkspacePage = () => {
   const router = useRouter();
   const [open, setOpen] = useCreateWorkspaceModal();
-  const { data, isLoading } = useGetWorkspaces();
+  const { data: workspaces, isLoading: isLoadingWorkspaces } =
+    useGetWorkspaces();
+  const { data: lastActiveWorkspaceId, isLoading: isLoadingLastActive } =
+    useGetLastActiveWorkspace();
 
   useEffect(() => {
-    if (isLoading) return;
+    // Wait until both queries have completed
+    if (isLoadingWorkspaces || isLoadingLastActive) return;
 
-    if (data?.length) {
-      // If user has workspaces, redirect to the first one
-      router.replace(`/workspace/${data[0]._id}`);
+    if (workspaces?.length) {
+      if (lastActiveWorkspaceId) {
+        // If user has a last active workspace, redirect to it
+        router.replace(`/workspace/${lastActiveWorkspaceId}`);
+      } else {
+        // If no last active workspace, redirect to the first one
+        router.replace(`/workspace/${workspaces[0]._id}`);
+      }
     } else if (!open) {
       // If user has no workspaces, open the create workspace modal
       setOpen(true);
     }
-  }, [data, isLoading, open, setOpen, router]);
+  }, [
+    workspaces,
+    isLoadingWorkspaces,
+    lastActiveWorkspaceId,
+    isLoadingLastActive,
+    open,
+    setOpen,
+    router,
+  ]);
 
   return (
     <div className="bg-primary flex h-full flex-1 flex-col items-center justify-center gap-2 text-white">
