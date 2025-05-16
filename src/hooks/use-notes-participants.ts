@@ -140,11 +140,13 @@ export const useNotesParticipants = () => {
 						// DIRECT DATABASE APPROACH: Always get the current user's name from the database
 						name:
 							members?.find((m) => m._id === currentMember._id)?.user?.name ||
-							currentMember?.user?.name ||
+							members?.find((m) => m.userId === currentMember.userId)?.user
+								?.name ||
 							'You',
 						picture:
 							members?.find((m) => m._id === currentMember._id)?.user?.image ||
-							currentMember?.user?.image ||
+							members?.find((m) => m.userId === currentMember.userId)?.user
+								?.image ||
 							`https://via.placeholder.com/40/4f46e5/ffffff?text=Y`,
 					},
 				}
