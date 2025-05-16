@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   AlertTriangle,
@@ -14,26 +14,27 @@ import {
   Hash,
   PanelLeftClose,
   PanelLeftOpen,
-  CheckSquare
-} from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { useToggle } from 'react-use';
+  CheckSquare,
+  Settings,
+} from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useToggle } from "react-use";
 
-import { Button } from '@/components/ui/button';
-import { Hint } from '@/components/hint';
-import { useGetChannels } from '@/features/channels/api/use-get-channels';
-import { useCreateChannelModal } from '@/features/channels/store/use-create-channel-modal';
-import { useCurrentMember } from '@/features/members/api/use-current-member';
-import { useGetMembers } from '@/features/members/api/use-get-members';
-import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
-import { useChannelId } from '@/hooks/use-channel-id';
-import { useMemberId } from '@/hooks/use-member-id';
-import { useWorkspaceId } from '@/hooks/use-workspace-id';
-import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
+import { Button } from "@/components/ui/button";
+import { Hint } from "@/components/hint";
+import { useGetChannels } from "@/features/channels/api/use-get-channels";
+import { useCreateChannelModal } from "@/features/channels/store/use-create-channel-modal";
+import { useCurrentMember } from "@/features/members/api/use-current-member";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useGetWorkspace } from "@/features/workspaces/api/use-get-workspace";
+import { useChannelId } from "@/hooks/use-channel-id";
+import { useMemberId } from "@/hooks/use-member-id";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
+import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
-import { WorkspaceHeader } from './header';
-import { SidebarItem, MemberItem, ChannelItem } from './options';
+import { WorkspaceHeader } from "./header";
+import { SidebarItem, MemberItem, ChannelItem } from "./options";
 
 // DroppableItem Component
 interface DroppableItemProps {
@@ -56,10 +57,12 @@ const DroppableItem = ({
   const [on, toggle] = useToggle(true);
 
   return (
-    <div className={cn(
-      "flex flex-col w-full",
-      isCollapsed ? "px-1" : "px-2 md:px-4"
-    )}>
+    <div
+      className={cn(
+        "flex flex-col w-full",
+        isCollapsed ? "px-1" : "px-2 md:px-4"
+      )}
+    >
       <div
         className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-secondary-foreground/80 hover:bg-secondary-foreground/10"
         onClick={toggle}
@@ -79,8 +82,8 @@ const DroppableItem = ({
             <span className="truncate min-w-0">{label}</span>
             <ChevronDown
               className={cn(
-                'ml-auto size-4 flex-shrink-0 transition-transform duration-200',
-                !on && '-rotate-90'
+                "ml-auto size-4 flex-shrink-0 transition-transform duration-200",
+                !on && "-rotate-90"
               )}
             />
 
@@ -108,15 +111,13 @@ const DroppableItem = ({
   );
 };
 
-
-
 // WorkspaceSidebar Component
 export const WorkspaceSidebar = ({
   isCollapsed,
-  setIsCollapsed
+  setIsCollapsed,
 }: {
   isCollapsed: boolean;
-  setIsCollapsed: (value: boolean) => void
+  setIsCollapsed: (value: boolean) => void;
 }) => {
   const workspaceId = useWorkspaceId();
   const channelId = useChannelId();
@@ -125,10 +126,18 @@ export const WorkspaceSidebar = ({
 
   const [_open, setOpen] = useCreateChannelModal();
 
-  const { data: member, isLoading: memberLoading } = useCurrentMember({ workspaceId });
-  const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({ id: workspaceId });
-  const { data: channels, isLoading: channelsLoading } = useGetChannels({ workspaceId });
-  const { data: members, isLoading: membersLoading } = useGetMembers({ workspaceId });
+  const { data: member, isLoading: memberLoading } = useCurrentMember({
+    workspaceId,
+  });
+  const { data: workspace, isLoading: workspaceLoading } = useGetWorkspace({
+    id: workspaceId,
+  });
+  const { data: channels, isLoading: channelsLoading } = useGetChannels({
+    workspaceId,
+  });
+  const { data: members, isLoading: membersLoading } = useGetMembers({
+    workspaceId,
+  });
 
   if (memberLoading || workspaceLoading || channelsLoading || membersLoading) {
     return (
@@ -142,7 +151,9 @@ export const WorkspaceSidebar = ({
     return (
       <div className="flex h-full flex-col items-center justify-center gap-y-3 bg-primary">
         <AlertTriangle className="size-6 text-secondary-foreground animate-pulse-subtle" />
-        <p className="text-sm font-medium text-secondary-foreground animate-fade-in">Workspace not found.</p>
+        <p className="text-sm font-medium text-secondary-foreground animate-fade-in">
+          Workspace not found.
+        </p>
       </div>
     );
   }
@@ -156,7 +167,11 @@ export const WorkspaceSidebar = ({
     >
       {/* Workspace Header */}
       <div className="flex-shrink-0">
-        <WorkspaceHeader workspace={workspace} isAdmin={member.role === 'admin'} isCollapsed={isCollapsed} />
+        <WorkspaceHeader
+          workspace={workspace}
+          isAdmin={member.role === "admin"}
+          isCollapsed={isCollapsed}
+        />
       </div>
 
       {/* Channels Section */}
@@ -166,7 +181,11 @@ export const WorkspaceSidebar = ({
             label="Channels"
             hint="New Channel"
             icon={Hash}
-            onNew={member.role === 'admin' ? () => setOpen(true) : undefined}
+            onNew={
+              member.role === "admin" || member.role === "owner"
+                ? () => setOpen(true)
+                : undefined
+            }
             isCollapsed={isCollapsed}
           >
             {channels.map((item) => (
@@ -190,7 +209,11 @@ export const WorkspaceSidebar = ({
             label="Members"
             hint="New Direct Message"
             icon={Users}
-            onNew={member.role === 'admin' ? () => { } : undefined}
+            onNew={
+              member.role === "admin" || member.role === "owner"
+                ? () => {}
+                : undefined
+            }
             isCollapsed={isCollapsed}
           >
             {members.map((item) => (
@@ -217,7 +240,7 @@ export const WorkspaceSidebar = ({
           icon={SendHorizonal}
           id="outbox"
           href={`/workspace/${workspaceId}/outbox`}
-          isActive={pathname.includes('/outbox')}
+          isActive={pathname.includes("/outbox")}
           isCollapsed={isCollapsed}
         />
         <SidebarItem
@@ -225,7 +248,7 @@ export const WorkspaceSidebar = ({
           icon={MessageSquareText}
           id="threads"
           href={`/workspace/${workspaceId}/threads`}
-          isActive={pathname.includes('/threads')}
+          isActive={pathname.includes("/threads")}
           isCollapsed={isCollapsed}
         />
         <SidebarItem
@@ -233,7 +256,7 @@ export const WorkspaceSidebar = ({
           icon={CheckSquare}
           id="tasks"
           href={`/workspace/${workspaceId}/tasks`}
-          isActive={pathname.includes('/tasks')}
+          isActive={pathname.includes("/tasks")}
           isCollapsed={isCollapsed}
         />
         <SidebarItem
@@ -241,7 +264,7 @@ export const WorkspaceSidebar = ({
           icon={CalendarIcon}
           id="calendar"
           href={`/workspace/${workspaceId}/calendar`}
-          isActive={pathname.includes('/calendar')}
+          isActive={pathname.includes("/calendar")}
           isCollapsed={isCollapsed}
         />
         <SidebarItem
@@ -249,14 +272,28 @@ export const WorkspaceSidebar = ({
           icon={BarChart}
           id="reports"
           href={`/workspace/${workspaceId}/reports`}
-          isActive={pathname.includes('/reports')}
+          isActive={pathname.includes("/reports")}
           isCollapsed={isCollapsed}
         />
+        {/* Only show Manage link for admins and owners */}
+        {(member.role === "admin" || member.role === "owner") && (
+          <SidebarItem
+            label="Manage"
+            icon={Settings}
+            id="manage"
+            href={`/workspace/${workspaceId}/manage`}
+            isActive={pathname.includes("/manage")}
+            isCollapsed={isCollapsed}
+          />
+        )}
       </div>
 
       {/* Collapse/Expand Button */}
       <div className="mt-auto mb-4 flex justify-center">
-        <Hint label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
+        <Hint
+          label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          side="right"
+        >
           <Button
             onClick={() => setIsCollapsed(!isCollapsed)}
             variant="ghost"

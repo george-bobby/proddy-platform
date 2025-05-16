@@ -1,27 +1,31 @@
-'use client';
+"use client";
 
-import { Loader } from 'lucide-react';
-import type { PropsWithChildren } from 'react';
-import { useEffect, useState } from 'react';
+import { Loader } from "lucide-react";
+import type { PropsWithChildren } from "react";
+import { useEffect, useState } from "react";
 
-import type { Id } from '@/../convex/_generated/dataModel';
-import { SummarizeButton } from '@/features/ai/components/summarize-button';
+import type { Id } from "@/../convex/_generated/dataModel";
+import { SummarizeButton } from "@/features/ai/components/summarize-button";
 
-import { MessageSelectionProvider } from '@/features/ai/contexts/message-selection-context';
-import { Profile } from '@/features/members/components/profile';
-import { Thread } from '@/features/messages/components/thread';
-import { StatusTracker } from '@/features/status/components/status-tracker';
-import { usePanel } from '@/hooks/use-panel';
-import { setupGlobalMentionHandler } from '@/lib/mention-handler';
+import { MessageSelectionProvider } from "@/features/ai/contexts/message-selection-context";
+import { Profile } from "@/features/members/components/profile";
+import { Thread } from "@/features/messages/components/thread";
+import { StatusTracker } from "@/features/status/components/status-tracker";
+import { useUpdateLastActiveWorkspace } from "@/features/workspaces/api/use-update-last-active-workspace";
+import { usePanel } from "@/hooks/use-panel";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
+import { setupGlobalMentionHandler } from "@/lib/mention-handler";
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
-import { WorkspaceSidebar } from './sidebar';
+import { WorkspaceSidebar } from "./sidebar";
 
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const workspaceId = useWorkspaceId();
+  const updateLastActiveWorkspace = useUpdateLastActiveWorkspace();
 
   const showPanel = !!parentMessageId || !!profileMemberId;
 
@@ -35,10 +39,10 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
     checkIfMobile();
 
     // Set up event listener for window resize
-    window.addEventListener('resize', checkIfMobile);
+    window.addEventListener("resize", checkIfMobile);
 
     // Clean up event listener
-    return () => window.removeEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
   // Collapse sidebar by default on mobile
@@ -53,6 +57,13 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
     setupGlobalMentionHandler();
   }, []);
 
+  // Update last active workspace when the user visits a workspace
+  useEffect(() => {
+    if (workspaceId) {
+      updateLastActiveWorkspace({ workspaceId });
+    }
+  }, [workspaceId, updateLastActiveWorkspace]);
+
   return (
     <MessageSelectionProvider>
       <StatusTracker />
@@ -66,21 +77,28 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
               isCollapsed ? "w-[70px]" : "w-[280px]"
             )}
           >
-            <WorkspaceSidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+            <WorkspaceSidebar
+              isCollapsed={isCollapsed}
+              setIsCollapsed={setIsCollapsed}
+            />
           </div>
 
           {/* Main content area */}
-          <div className="flex-1 h-full overflow-auto">
-            {children}
-          </div>
+          <div className="flex-1 h-full overflow-auto">{children}</div>
 
           {/* Right panel for threads and profiles */}
           {showPanel && (
             <div className="w-[350px] h-full overflow-auto border-l border-border/30 flex-shrink-0 transition-all duration-300 ease-in-out">
               {parentMessageId ? (
-                <Thread messageId={parentMessageId as Id<'messages'>} onClose={onClose} />
+                <Thread
+                  messageId={parentMessageId as Id<"messages">}
+                  onClose={onClose}
+                />
               ) : profileMemberId ? (
-                <Profile memberId={profileMemberId as Id<'members'>} onClose={onClose} />
+                <Profile
+                  memberId={profileMemberId as Id<"members">}
+                  onClose={onClose}
+                />
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <Loader className="size-5 animate-spin text-muted-foreground" />

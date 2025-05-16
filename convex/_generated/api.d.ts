@@ -28,6 +28,7 @@ import type * as reactions from "../reactions.js";
 import type * as status from "../status.js";
 import type * as tasks from "../tasks.js";
 import type * as upload from "../upload.js";
+import type * as userPreferences from "../userPreferences.js";
 import type * as users from "../users.js";
 import type * as utils from "../utils.js";
 import type * as workspaces from "../workspaces.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   status: typeof status;
   tasks: typeof tasks;
   upload: typeof upload;
+  userPreferences: typeof userPreferences;
   users: typeof users;
   utils: typeof utils;
   workspaces: typeof workspaces;
