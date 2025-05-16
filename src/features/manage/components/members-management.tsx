@@ -1,0 +1,269 @@
+"use client";
+
+import { useState } from "react";
+import { toast } from "sonner";
+import { RefreshCw, Shield, Trash2, UserCog } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useUpdateMember } from "@/features/members/api/use-update-member";
+import { useRemoveMember } from "@/features/members/api/use-remove-member";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import type { Id, Doc } from "@/../convex/_generated/dataModel";
+
+interface MembersManagementProps {
+  workspaceId: Id<"workspaces">;
+  currentMember: Doc<"members">;
+}
+
+export const MembersManagement = ({
+  workspaceId,
+  currentMember,
+}: MembersManagementProps) => {
+  const { data: members, isLoading } = useGetMembers({ workspaceId });
+  const [selectedMemberId, setSelectedMemberId] =
+    useState<Id<"members"> | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+
+  const updateMember = useUpdateMember();
+  const removeMember = useRemoveMember();
+
+  const isOwner = currentMember.role === "owner";
+  const isAdmin = currentMember.role === "admin";
+
+  const handleUpdateRole = async (
+    memberId: Id<"members">,
+    role: "owner" | "admin" | "member"
+  ) => {
+    setIsUpdating(true);
+
+    try {
+      await updateMember.mutate({
+        id: memberId,
+        role,
+      });
+
+      toast.success(`User role updated to ${role}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update user role");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const openRemoveDialog = (memberId: Id<"members">) => {
+    setSelectedMemberId(memberId);
+    setRemoveDialogOpen(true);
+  };
+
+  const handleRemoveMember = async () => {
+    if (!selectedMemberId) return;
+
+    setIsRemoving(true);
+
+    try {
+      await removeMember.mutate({
+        id: selectedMemberId,
+      });
+
+      toast.success("Member removed from workspace");
+      setRemoveDialogOpen(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to remove member");
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case "owner":
+        return "bg-purple-100 text-purple-800 hover:bg-purple-200";
+      case "admin":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      default:
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Members</h3>
+        <p className="text-sm text-muted-foreground">
+          Manage the members in your workspace and their roles
+        </p>
+      </div>
+
+      <Separator />
+
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : !members || members.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium">No members</h3>
+          <p className="text-sm text-muted-foreground">
+            Invite members to your workspace
+          </p>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="w-[200px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {members.map((member) => (
+              <TableRow key={member._id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={member.user.image}
+                        alt={member.user.name}
+                      />
+                      <AvatarFallback>
+                        {member.user.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{member.user.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {member.user.email}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge className={getRoleBadgeColor(member.role)}>
+                    {member.role}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {/* Role Management Dropdown */}
+                    {(isOwner || (isAdmin && member.role === "member")) && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isUpdating}
+                          >
+                            <UserCog className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {isOwner && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleUpdateRole(member._id, "owner")
+                                }
+                                disabled={member.role === "owner"}
+                              >
+                                Make Owner
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleUpdateRole(member._id, "admin")
+                                }
+                                disabled={member.role === "admin"}
+                              >
+                                Make Admin
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          {(isOwner || isAdmin) && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleUpdateRole(member._id, "member")
+                              }
+                              disabled={member.role === "member"}
+                            >
+                              Make Member
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+
+                    {/* Remove Member Button */}
+                    {((isOwner && member.role !== "owner") ||
+                      (isAdmin && member.role === "member")) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => openRemoveDialog(member._id)}
+                        disabled={member._id === currentMember._id}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      {/* Remove Member Dialog */}
+      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will remove the member from
+              your workspace and delete all of their messages and reactions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveMember}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isRemoving}
+            >
+              {isRemoving ? "Removing..." : "Remove Member"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
