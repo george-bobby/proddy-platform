@@ -3,11 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Copy, RefreshCw, Save, Trash2 } from "lucide-react";
+import {
+  Copy,
+  RefreshCw,
+  Save,
+  Trash2,
+  Eye,
+  EyeOff,
+  UserPlus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { InviteModal } from "@/app/workspace/[workspaceId]/invitation";
 import { useUpdateWorkspace } from "@/features/workspaces/api/use-update-workspace";
 import { useRemoveWorkspace } from "@/features/workspaces/api/use-remove-workspace";
 import { useNewJoinCode } from "@/features/workspaces/api/use-new-join-code";
@@ -38,6 +47,8 @@ export const WorkspaceManagement = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+  const [showJoinCode, setShowJoinCode] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const updateWorkspace = useUpdateWorkspace();
   const removeWorkspace = useRemoveWorkspace();
@@ -84,8 +95,9 @@ export const WorkspaceManagement = ({
   };
 
   const handleCopyJoinCode = () => {
-    navigator.clipboard.writeText(workspace.joinCode);
-    toast.success("Join code copied to clipboard");
+    const joinLink = `${window.location.origin}/join/${workspace._id}?code=${workspace.joinCode}`;
+    navigator.clipboard.writeText(joinLink);
+    toast.success("Join link copied to clipboard");
   };
 
   const handleDeleteWorkspace = async () => {
@@ -105,113 +117,92 @@ export const WorkspaceManagement = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Workspace Settings</h3>
-        <p className="text-sm text-muted-foreground">
-          Manage your workspace name and other settings
-        </p>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-4">
-        <div className="grid gap-2">
-          <Label htmlFor="name">Workspace Name</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleUpdateName} disabled={isUpdating}>
-              {isUpdating ? (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="joinCode">Join Code</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="joinCode"
-              value={workspace.joinCode}
-              readOnly
-              className="flex-1"
-            />
-            <Button variant="outline" onClick={handleCopyJoinCode}>
-              <Copy className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleGenerateNewCode}
-              disabled={isGeneratingCode}
-            >
-              {isGeneratingCode ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Share this code with others to invite them to your workspace
-          </p>
-        </div>
-      </div>
-
-      <Separator />
-
-      {isOwner && (
+    <>
+      <InviteModal
+        open={inviteOpen}
+        setOpen={setInviteOpen}
+        name={workspace.name}
+        joinCode={workspace.joinCode}
+      />
+      <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium text-destructive">Danger Zone</h3>
+          <h3 className="text-lg font-medium">Workspace Settings</h3>
           <p className="text-sm text-muted-foreground">
-            Permanently delete this workspace and all of its data
+            Manage your workspace name and other settings
           </p>
-
-          <div className="mt-4">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Workspace
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    your workspace and remove all associated data including
-                    messages, channels, and member information.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteWorkspace}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
         </div>
-      )}
-    </div>
+
+        <Separator />
+
+        <div className="flex justify-between items-start">
+          {/* Left side - Edit name */}
+          <div className="grid gap-2 w-1/2 pr-4">
+            <Label htmlFor="name">Workspace Name</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="flex-1"
+              />
+              <Button onClick={handleUpdateName} disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Right side - Delete option */}
+          {isOwner && (
+            <div className="w-1/2 pl-4">
+              <div className="grid gap-2">
+                <Label className="text-destructive">Delete Workspace</Label>
+                <div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete Workspace
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your workspace and remove all associated data
+                          including messages, channels, and member information.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteWorkspace}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
