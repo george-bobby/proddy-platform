@@ -35,6 +35,8 @@ type Presence = {
 	pencilDraft: [x: number, y: number, pressure: number][] | null;
 	penColor: Color | null;
 	strokeWidth?: number;
+	isEditing?: boolean;
+	lastActivity?: number;
 };
 
 // Optionally, Storage represents the shared document that persists in the

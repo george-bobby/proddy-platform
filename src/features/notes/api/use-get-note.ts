@@ -3,11 +3,19 @@ import { useMemo, useState, useEffect } from 'react';
 
 import { api } from '@/../convex/_generated/api';
 import type { Id } from '@/../convex/_generated/dataModel';
-import type { Note } from '../types/index';
+import type { Note } from '../types';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { useChannelId } from '@/hooks/use-channel-id';
 
 export const useGetNote = (noteId?: Id<'notes'>) => {
 	// Check if the noteId is a temporary ID (starts with "temp-")
 	const isTempId = noteId ? noteId.toString().startsWith('temp-') : false;
+	const workspaceId = useWorkspaceId();
+	const channelId = useChannelId();
+	const member = useQuery(
+		api.members.current,
+		workspaceId ? { workspaceId } : 'skip'
+	);
 
 	// Only query Convex if we have a valid (non-temporary) ID
 	const note = useQuery(
@@ -20,25 +28,30 @@ export const useGetNote = (noteId?: Id<'notes'>) => {
 
 	// When the noteId changes and it's a temporary ID, create a placeholder note
 	useEffect(() => {
-		if (noteId && isTempId) {
+		if (noteId && isTempId && workspaceId && channelId && member) {
 			// Create a placeholder note for the UI
+			const now = Date.now();
 			setTempNote({
 				_id: noteId,
+				_creationTime: now,
 				title: 'Untitled',
 				content: JSON.stringify({ ops: [{ insert: '\n' }] }),
-				workspaceId: undefined,
-				channelId: undefined,
+				memberId: member._id,
+				workspaceId: workspaceId as Id<'workspaces'>,
+				channelId: channelId as Id<'channels'>,
 				folderId: undefined,
-				createdAt: Date.now(),
-				updatedAt: Date.now(),
-			} as Note);
+				coverImage: undefined,
+				icon: undefined,
+				createdAt: now,
+				updatedAt: now,
+			});
 
 			console.log('Created temporary note in useGetNote:', noteId);
-		} else {
+		} else if (!isTempId) {
 			// Clear the temp note when we switch to a real note
 			setTempNote(undefined);
 		}
-	}, [noteId, isTempId]);
+	}, [noteId, isTempId, workspaceId, channelId, member]);
 
 	// Use either the real note from Convex or our temporary note
 	const data = useMemo(() => {

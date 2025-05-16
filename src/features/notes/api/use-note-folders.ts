@@ -2,17 +2,22 @@ import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
 import { toast } from 'sonner';
-import { NoteFolder } from '../types';
+import { NoteFolder, Note } from '../types';
 
 // Hook to get all folders for a channel
 export const useGetNoteFolders = (
 	workspaceId?: Id<'workspaces'>,
 	channelId?: Id<'channels'>
 ): { data: NoteFolder[] | undefined; isLoading: boolean } => {
-	return useQuery(
+	const result = useQuery(
 		api.noteFolders.list,
 		workspaceId && channelId ? { workspaceId, channelId } : 'skip'
 	);
+
+	return {
+		data: result,
+		isLoading: result === undefined,
+	};
 };
 
 // Hook to create a new folder
@@ -123,8 +128,18 @@ export const useDeleteNoteFolder = () => {
 };
 
 // Hook to get notes by folder
-export const useGetNotesByFolder = (folderId?: Id<'noteFolders'>) => {
-	return useQuery(api.notes.getByFolder, folderId ? { folderId } : 'skip');
+export const useGetNotesByFolder = (
+	folderId?: Id<'noteFolders'>
+): { data: Note[] | undefined; isLoading: boolean } => {
+	const result = useQuery(
+		api.notes.getByFolder,
+		folderId ? { folderId } : 'skip'
+	);
+
+	return {
+		data: result,
+		isLoading: result === undefined,
+	};
 };
 
 // Hook to move a note to a folder
