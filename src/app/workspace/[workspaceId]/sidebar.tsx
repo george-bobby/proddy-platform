@@ -181,7 +181,11 @@ export const WorkspaceSidebar = ({
             label="Channels"
             hint="New Channel"
             icon={Hash}
-            onNew={member.role === "admin" ? () => setOpen(true) : undefined}
+            onNew={
+              member.role === "admin" || member.role === "owner"
+                ? () => setOpen(true)
+                : undefined
+            }
             isCollapsed={isCollapsed}
           >
             {channels.map((item) => (
@@ -205,7 +209,11 @@ export const WorkspaceSidebar = ({
             label="Members"
             hint="New Direct Message"
             icon={Users}
-            onNew={member.role === "admin" ? () => {} : undefined}
+            onNew={
+              member.role === "admin" || member.role === "owner"
+                ? () => {}
+                : undefined
+            }
             isCollapsed={isCollapsed}
           >
             {members.map((item) => (
