@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-interface MentionTemplateProps {
+interface AssigneeTemplateProps {
     firstName: string;
 }
 
-export const MentionTemplate: React.FC<Readonly<MentionTemplateProps>> = ({
+export const AssigneeTemplate: React.FC<Readonly<AssigneeTemplateProps>> = ({
     firstName,
 }) => (
     <div>
