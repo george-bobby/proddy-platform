@@ -98,9 +98,9 @@ export const Profile = ({ memberId, onClose }: ProfileProps) => {
       { id: memberId, role },
       {
         onSuccess: () => {
-          toast.success('Role changed.');
+          toast.success(`Role changed to ${role}.`);
         },
-        onError: () => toast.error('Failed to change role.'),
+        onError: (error) => toast.error(error.message || 'Failed to change role.'),
       }
     );
   };

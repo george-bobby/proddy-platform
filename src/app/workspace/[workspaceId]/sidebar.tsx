@@ -211,7 +211,7 @@ export const WorkspaceSidebar = ({
             icon={Users}
             onNew={
               member.role === "admin" || member.role === "owner"
-                ? () => {}
+                ? () => { }
                 : undefined
             }
             isCollapsed={isCollapsed}
@@ -267,15 +267,16 @@ export const WorkspaceSidebar = ({
           isActive={pathname.includes("/calendar")}
           isCollapsed={isCollapsed}
         />
-        <SidebarItem
-          label="Reports"
-          icon={BarChart}
-          id="reports"
-          href={`/workspace/${workspaceId}/reports`}
-          isActive={pathname.includes("/reports")}
-          isCollapsed={isCollapsed}
-        />
-        {/* Only show Manage link for admins and owners */}
+        {(member.role === "admin" || member.role === "owner") && (
+          <SidebarItem
+            label="Reports"
+            icon={BarChart}
+            id="reports"
+            href={`/workspace/${workspaceId}/reports`}
+            isActive={pathname.includes("/reports")}
+            isCollapsed={isCollapsed}
+          />
+        )}
         {(member.role === "admin" || member.role === "owner") && (
           <SidebarItem
             label="Manage"

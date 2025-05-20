@@ -116,18 +116,6 @@ export const WorkspaceHeader = ({ workspace, isAdmin, isCollapsed = false }: Wor
                     </div>
                     <span className="font-medium">Invite to {workspace.name}</span>
                   </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem
-                    className="cursor-pointer py-2.5 flex items-center gap-3 group rounded-[8px] hover:bg-accent/20"
-                    onClick={() => router.push(`/workspace/${workspace._id}/manage`)}
-                  >
-                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-secondary/10 transition-standard group-hover:bg-secondary/20">
-                      <Settings className="size-3.5 text-secondary transition-transform duration-200 group-hover:rotate-12" />
-                    </div>
-                    <span className="font-medium">Manage Workspace</span>
-                  </DropdownMenuItem>
                 </>
               )}
 

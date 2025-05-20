@@ -299,24 +299,24 @@ export const MembersManagement = ({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {isOwner && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleUpdateRole(member._id, "owner")
-                                  }
-                                  disabled={member.role === "owner"}
-                                >
-                                  Make Owner
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleUpdateRole(member._id, "admin")
-                                  }
-                                  disabled={member.role === "admin"}
-                                >
-                                  Make Admin
-                                </DropdownMenuItem>
-                              </>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleUpdateRole(member._id, "owner")
+                                }
+                                disabled={member.role === "owner"}
+                              >
+                                Make Owner
+                              </DropdownMenuItem>
+                            )}
+                            {(isOwner || isAdmin) && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleUpdateRole(member._id, "admin")
+                                }
+                                disabled={member.role === "admin"}
+                              >
+                                Make Admin
+                              </DropdownMenuItem>
                             )}
                             {(isOwner || isAdmin) && (
                               <DropdownMenuItem
@@ -335,16 +335,16 @@ export const MembersManagement = ({
                       {/* Remove Member Button */}
                       {((isOwner && member.role !== "owner") ||
                         (isAdmin && member.role === "member")) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10"
-                          onClick={() => openRemoveDialog(member._id)}
-                          disabled={member._id === currentMember._id}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive/10"
+                            onClick={() => openRemoveDialog(member._id)}
+                            disabled={member._id === currentMember._id}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                     </div>
                   </TableCell>
                 </TableRow>
