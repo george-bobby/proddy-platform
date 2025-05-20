@@ -45,8 +45,8 @@ interface DroppableItemProps {
   onNew?: () => void;
   children: React.ReactNode;
   isCollapsed?: boolean;
-  defaultExpanded?: boolean;
-  onToggle?: (label: string) => void;
+  isExpanded: boolean;
+  onToggle: (label: string) => void;
 }
 
 const DroppableItem = ({
@@ -56,16 +56,11 @@ const DroppableItem = ({
   icon: Icon,
   onNew,
   isCollapsed = false,
-  defaultExpanded = true,
+  isExpanded,
   onToggle,
 }: DroppableItemProps) => {
-  const [on, toggle] = useToggle(defaultExpanded);
-
   const handleToggle = () => {
-    toggle();
-    if (onToggle) {
-      onToggle(label);
-    }
+    onToggle(label);
   };
 
   return (
@@ -95,7 +90,7 @@ const DroppableItem = ({
             <ChevronDown
               className={cn(
                 "ml-auto size-4 flex-shrink-0 transition-transform duration-200",
-                !on && "-rotate-90"
+                !isExpanded && "-rotate-90"
               )}
             />
 
@@ -118,7 +113,7 @@ const DroppableItem = ({
         )}
       </div>
 
-      {on && <div className="mt-2 space-y-1.5 pl-1 md:pl-2">{children}</div>}
+      {isExpanded && <div className="mt-2 space-y-1.5 pl-1 md:pl-2">{children}</div>}
     </div>
   );
 };
@@ -135,14 +130,34 @@ export const WorkspaceSidebar = ({
   const channelId = useChannelId();
   const memberId = useMemberId();
   const pathname = usePathname();
-  // Set Channels as the only expanded section by default
-  const [expandedSection, setExpandedSection] = useState<string>("Channels");
+  // Track which sections are expanded
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    Channels: true,  // Channels expanded by default
+    Members: false   // Members collapsed by default
+  });
 
   const [_open, setOpen] = useCreateChannelModal();
 
   const handleSectionToggle = (label: string) => {
-    if (label !== expandedSection) {
-      setExpandedSection(label);
+    // If we're expanding a section, collapse all others
+    if (!expandedSections[label]) {
+      const newExpandedSections: Record<string, boolean> = {};
+
+      // Set all sections to collapsed
+      Object.keys(expandedSections).forEach(section => {
+        newExpandedSections[section] = false;
+      });
+
+      // Expand only the clicked section
+      newExpandedSections[label] = true;
+
+      setExpandedSections(newExpandedSections);
+    } else {
+      // If we're collapsing a section, just toggle it
+      setExpandedSections({
+        ...expandedSections,
+        [label]: !expandedSections[label]
+      });
     }
   };
 
@@ -202,7 +217,7 @@ export const WorkspaceSidebar = ({
             hint="Channels"
             icon={Hash}
             isCollapsed={isCollapsed}
-            defaultExpanded={expandedSection === "Channels"}
+            isExpanded={expandedSections.Channels}
             onToggle={handleSectionToggle}
           >
             {channels.map((item) => (
@@ -253,7 +268,7 @@ export const WorkspaceSidebar = ({
             hint="Members"
             icon={Users}
             isCollapsed={isCollapsed}
-            defaultExpanded={expandedSection === "Members"}
+            isExpanded={expandedSections.Members}
             onToggle={handleSectionToggle}
           >
             {members.map((item) => (

@@ -61,5 +61,4 @@ export const siteConfig: Metadata = {
 		},
 	},
 	manifest: '/manifest.json',
-	themeColor: '#4A0D68', // Primary color
 } as const;

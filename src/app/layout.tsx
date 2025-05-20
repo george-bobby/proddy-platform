@@ -16,19 +16,21 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#4A0D68",
+};
+
 export const metadata: Metadata = {
   ...siteConfig,
   title: "Proddy - Your Team's Second Brain",
   description:
     "A vibrant team collaboration platform with real-time messaging, rich text editing, and emoji support.",
   manifest: "/manifest.json",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -38,7 +40,6 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  themeColor: "#4A0D68",
 };
 
 const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
