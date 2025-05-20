@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { EmojiPopover } from "@/components/emoji-popover";
 import { useGetChannels } from "@/features/channels/api/use-get-channels";
 import { useCreateChannel } from "@/features/channels/api/use-create-channel";
 import { useUpdateChannel } from "@/features/channels/api/use-update-channel";
@@ -52,7 +53,9 @@ export const ChannelsManagement = ({
 }: ChannelsManagementProps) => {
   const { data: channels, isLoading } = useGetChannels({ workspaceId });
   const [newChannelName, setNewChannelName] = useState("");
+  const [newChannelIcon, setNewChannelIcon] = useState<string | undefined>(undefined);
   const [editChannelName, setEditChannelName] = useState("");
+  const [editChannelIcon, setEditChannelIcon] = useState<string | undefined>(undefined);
   const [editChannelId, setEditChannelId] = useState<Id<"channels"> | null>(
     null
   );
@@ -70,6 +73,14 @@ export const ChannelsManagement = ({
   const updateChannel = useUpdateChannel();
   const removeChannel = useRemoveChannel();
 
+  const handleNewChannelEmojiSelect = (emoji: string) => {
+    setNewChannelIcon(emoji);
+  };
+
+  const handleEditChannelEmojiSelect = (emoji: string) => {
+    setEditChannelIcon(emoji);
+  };
+
   const handleCreateChannel = async () => {
     if (newChannelName.length < 3 || newChannelName.length > 20) {
       toast.error("Channel name must be between 3 and 20 characters");
@@ -82,10 +93,12 @@ export const ChannelsManagement = ({
       await createChannel.mutate({
         name: newChannelName,
         workspaceId,
+        icon: newChannelIcon,
       });
 
       toast.success("Channel created");
       setNewChannelName("");
+      setNewChannelIcon(undefined);
       setCreateDialogOpen(false);
     } catch (error) {
       toast.error("Failed to create channel");
@@ -108,10 +121,12 @@ export const ChannelsManagement = ({
       await updateChannel.mutate({
         id: editChannelId,
         name: editChannelName,
+        icon: editChannelIcon,
       });
 
       toast.success("Channel updated");
       setEditChannelName("");
+      setEditChannelIcon(undefined);
       setEditChannelId(null);
       setEditDialogOpen(false);
     } catch (error) {
@@ -144,6 +159,7 @@ export const ChannelsManagement = ({
   const openEditDialog = (channel: Doc<"channels">) => {
     setEditChannelId(channel._id);
     setEditChannelName(channel.name);
+    setEditChannelIcon(channel.icon);
     setEditDialogOpen(true);
   };
 
@@ -173,18 +189,43 @@ export const ChannelsManagement = ({
             <DialogHeader>
               <DialogTitle>Create Channel</DialogTitle>
               <DialogDescription>
-                Add a new channel to your workspace
+                Add a new channel to your workspace. Choose an emoji icon to make your channel easily recognizable.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Channel Name</Label>
-                <Input
-                  id="name"
-                  value={newChannelName}
-                  onChange={(e) => setNewChannelName(e.target.value)}
-                  placeholder="e.g. marketing"
-                />
+            <div className="space-y-4 py-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Channel Icon</Label>
+                  <span className="text-xs text-muted-foreground">Click to select an emoji</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <EmojiPopover onEmojiSelect={handleNewChannelEmojiSelect} hint="Select channel icon">
+                      <div className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-gray-200 hover:border-gray-400 transition-all">
+                        {newChannelIcon ? (
+                          <span className="text-2xl">{newChannelIcon}</span>
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <span className="text-xs text-gray-600">Select</span>
+                            <span className="text-xs text-gray-600">Icon</span>
+                          </div>
+                        )}
+                      </div>
+                    </EmojiPopover>
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor="name" className="text-sm font-medium mb-1 block">Channel Name</Label>
+                    <Input
+                      id="name"
+                      value={newChannelName}
+                      onChange={(e) => setNewChannelName(e.target.value)}
+                      placeholder="e.g. marketing"
+                      required
+                      minLength={3}
+                      maxLength={20}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             <DialogFooter>
@@ -230,7 +271,11 @@ export const ChannelsManagement = ({
               <TableRow key={channel._id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center">
-                    <Hash className="mr-2 h-4 w-4 text-muted-foreground" />
+                    {channel.icon ? (
+                      <span className="mr-2 text-xl">{channel.icon}</span>
+                    ) : (
+                      <Hash className="mr-2 h-4 w-4 text-muted-foreground" />
+                    )}
                     {channel.name}
                   </div>
                 </TableCell>
@@ -264,16 +309,41 @@ export const ChannelsManagement = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Channel</DialogTitle>
-            <DialogDescription>Update the channel name</DialogDescription>
+            <DialogDescription>Update the channel name and icon</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Channel Name</Label>
-              <Input
-                id="edit-name"
-                value={editChannelName}
-                onChange={(e) => setEditChannelName(e.target.value)}
-              />
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium">Channel Icon</Label>
+                <span className="text-xs text-muted-foreground">Click to select an emoji</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
+                  <EmojiPopover onEmojiSelect={handleEditChannelEmojiSelect} hint="Select channel icon">
+                    <div className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-gray-200 hover:border-gray-400 transition-all">
+                      {editChannelIcon ? (
+                        <span className="text-2xl">{editChannelIcon}</span>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <span className="text-xs text-gray-600">Select</span>
+                          <span className="text-xs text-gray-600">Icon</span>
+                        </div>
+                      )}
+                    </div>
+                  </EmojiPopover>
+                </div>
+                <div className="flex-1">
+                  <Label htmlFor="edit-name" className="text-sm font-medium mb-1 block">Channel Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editChannelName}
+                    onChange={(e) => setEditChannelName(e.target.value)}
+                    required
+                    minLength={3}
+                    maxLength={20}
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>

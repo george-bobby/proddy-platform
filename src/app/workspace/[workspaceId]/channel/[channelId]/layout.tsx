@@ -44,6 +44,7 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
   const [value, setValue] = useState('');
   const [icon, setIcon] = useState<string | undefined>(undefined);
   const [editOpen, setEditOpen] = useState(false);
+  const [iconEditOpen, setIconEditOpen] = useState(false);
   const [channelDialogOpen, setChannelDialogOpen] = useState(false);
 
   const { mutate: updateChannel, isPending: isUpdatingChannel } = useUpdateChannel();
@@ -69,6 +70,10 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
     setEditOpen(value);
   };
 
+  const handleIconEditOpen = (value: boolean) => {
+    setIconEditOpen(value);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -81,6 +86,23 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
         },
         onError: () => {
           toast.error("Failed to update channel.");
+        },
+      },
+    );
+  };
+
+  const handleIconSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    updateChannel(
+      { id: channelId, name: channel.name, icon },
+      {
+        onSuccess: () => {
+          toast.success("Channel icon updated.");
+          setIconEditOpen(false);
+        },
+        onError: () => {
+          toast.error("Failed to update channel icon.");
         },
       },
     );
@@ -167,15 +189,47 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
             </DialogHeader>
 
             <div className="flex flex-col gap-y-2 px-4 pb-4 pt-4">
-              <Dialog open={editOpen || isUpdatingChannel} onOpenChange={handleEditOpen}>
+              {/* Admin-only dialog for editing both name and icon */}
+              {member?.role === 'admin' && (
+                <Dialog open={editOpen || isUpdatingChannel} onOpenChange={handleEditOpen}>
+                  <DialogTrigger asChild>
+                    <button
+                      disabled={isUpdatingChannel}
+                      className="flex w-full cursor-pointer flex-col rounded-lg border bg-white px-5 py-4 hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <p className="text-sm font-semibold">Channel name and icon</p>
+                        <p className="text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>
+                      </div>
+
+                      <div className="flex items-center gap-3 mt-2">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 border border-gray-200">
+                          {channel.icon ? (
+                            <span className="text-xl">{channel.icon}</span>
+                          ) : (
+                            <span className="text-sm font-medium text-gray-600">{channel.name.charAt(0).toLowerCase()}</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium"># {channel.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {channel.icon ? "Custom emoji icon" : "Default letter icon"}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  </DialogTrigger>
+                </Dialog>
+              )}
+
+              <Dialog open={iconEditOpen || (isUpdatingChannel && !editOpen)} onOpenChange={handleIconEditOpen}>
                 <DialogTrigger asChild>
                   <button
-                    disabled={isUpdatingChannel || member?.role !== 'admin'}
-                    className="flex w-full cursor-pointer flex-col rounded-lg border bg-white px-5 py-4 hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
+                    className="flex w-full cursor-pointer flex-col rounded-lg border bg-white px-5 py-4 hover:bg-gray-50"
                   >
                     <div className="flex w-full items-center justify-between">
-                      <p className="text-sm font-semibold">Channel name and icon</p>
-                      {member?.role === 'admin' && <p className="text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>}
+                      <p className="text-sm font-semibold">Channel icon</p>
+                      <p className="text-sm font-semibold text-[#1264A3] hover:underline">Edit</p>
                     </div>
 
                     <div className="flex items-center gap-3 mt-2">
@@ -187,15 +241,66 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium"># {channel.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {channel.icon ? "Custom emoji icon" : "Default letter icon"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Click to change the channel icon
                         </p>
                       </div>
                     </div>
                   </button>
                 </DialogTrigger>
 
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit channel icon</DialogTitle>
+                    <DialogDescription>
+                      Choose an emoji to represent this channel
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <form onSubmit={handleIconSubmit} className="space-y-4">
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-sm font-medium">Channel Icon</label>
+                          <span className="text-xs text-muted-foreground">Click to select an emoji</span>
+                        </div>
+                        <div className="flex items-center justify-center">
+                          <div className="flex-shrink-0">
+                            <EmojiPopover onEmojiSelect={handleEmojiSelect} hint="Select channel icon">
+                              <div className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-100 hover:bg-gray-200 hover:border-gray-400 transition-all">
+                                {icon ? (
+                                  <span className="text-4xl">{icon}</span>
+                                ) : (
+                                  <div className="flex flex-col items-center">
+                                    <span className="text-sm text-gray-600">Select</span>
+                                    <span className="text-sm text-gray-600">Icon</span>
+                                  </div>
+                                )}
+                              </div>
+                            </EmojiPopover>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline" disabled={isUpdatingChannel}>
+                          Cancel
+                        </Button>
+                      </DialogClose>
+
+                      <Button disabled={isUpdatingChannel} type="submit">Save</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              {/* Admin-only dialog for editing both name and icon */}
+              <Dialog open={editOpen || isUpdatingChannel} onOpenChange={handleEditOpen}>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Edit channel name and icon</DialogTitle>
