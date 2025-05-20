@@ -60,37 +60,37 @@ export const CardAssignmentTemplate: React.FC<Readonly<CardAssignmentTemplatePro
             <Text style={text}>
               {assignedBy} has assigned you to a card in {workspaceName}.
             </Text>
-            
+
             <Section style={cardContainer}>
               <Text style={cardTitle ? cardTitleStyle : {}}>
                 {cardTitle}
               </Text>
-              
+
               {cardDescription && (
                 <Text style={cardDescriptionStyle}>
                   {cardDescription}
                 </Text>
               )}
-              
+
               <Section style={metadataContainer}>
                 {listName && (
                   <Text style={metadataItem}>
                     <strong>List:</strong> {listName}
                   </Text>
                 )}
-                
+
                 {channelName && (
                   <Text style={metadataItem}>
                     <strong>Channel:</strong> {channelName}
                   </Text>
                 )}
-                
+
                 {priority && (
                   <Text style={metadataItem}>
                     <strong>Priority:</strong> {priority}
                   </Text>
                 )}
-                
+
                 {dueDate && (
                   <Text style={metadataItem}>
                     <strong>Due Date:</strong> {dueDate}
@@ -98,21 +98,25 @@ export const CardAssignmentTemplate: React.FC<Readonly<CardAssignmentTemplatePro
                 )}
               </Section>
             </Section>
-            
+
             <Section style={buttonContainer}>
               <Button
-                pX={20}
-                pY={12}
-                style={button}
+                style={{
+                  ...button,
+                  paddingLeft: '20px',
+                  paddingRight: '20px',
+                  paddingTop: '12px',
+                  paddingBottom: '12px'
+                }}
                 href={workspaceUrl}
               >
                 View Card
               </Button>
             </Section>
           </Section>
-          
+
           <Hr style={hr} />
-          
+
           <Text style={footer}>
             This email was sent from Proddy, your team collaboration platform.
             If you didn't expect this email, you can safely ignore it.
