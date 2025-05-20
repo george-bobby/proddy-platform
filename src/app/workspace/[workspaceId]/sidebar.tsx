@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useToggle } from "react-use";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/hint";
@@ -44,6 +45,8 @@ interface DroppableItemProps {
   onNew?: () => void;
   children: React.ReactNode;
   isCollapsed?: boolean;
+  defaultExpanded?: boolean;
+  onToggle?: (label: string) => void;
 }
 
 const DroppableItem = ({
@@ -53,8 +56,17 @@ const DroppableItem = ({
   icon: Icon,
   onNew,
   isCollapsed = false,
+  defaultExpanded = true,
+  onToggle,
 }: DroppableItemProps) => {
-  const [on, toggle] = useToggle(true);
+  const [on, toggle] = useToggle(defaultExpanded);
+
+  const handleToggle = () => {
+    toggle();
+    if (onToggle) {
+      onToggle(label);
+    }
+  };
 
   return (
     <div
@@ -65,7 +77,7 @@ const DroppableItem = ({
     >
       <div
         className="group flex w-full cursor-pointer items-center gap-x-2 md:gap-x-3 rounded-[10px] px-2 md:px-4 py-2.5 text-sm font-medium transition-standard text-secondary-foreground/80 hover:bg-secondary-foreground/10"
-        onClick={toggle}
+        onClick={handleToggle}
       >
         {isCollapsed ? (
           <div className="relative flex-shrink-0">
@@ -123,8 +135,16 @@ export const WorkspaceSidebar = ({
   const channelId = useChannelId();
   const memberId = useMemberId();
   const pathname = usePathname();
+  // Set Channels as the only expanded section by default
+  const [expandedSection, setExpandedSection] = useState<string>("Channels");
 
   const [_open, setOpen] = useCreateChannelModal();
+
+  const handleSectionToggle = (label: string) => {
+    if (label !== expandedSection) {
+      setExpandedSection(label);
+    }
+  };
 
   const { data: member, isLoading: memberLoading } = useCurrentMember({
     workspaceId,
@@ -179,14 +199,11 @@ export const WorkspaceSidebar = ({
         <div className="mt-4">
           <DroppableItem
             label="Channels"
-            hint="New Channel"
+            hint="Channels"
             icon={Hash}
-            onNew={
-              member.role === "admin" || member.role === "owner"
-                ? () => setOpen(true)
-                : undefined
-            }
             isCollapsed={isCollapsed}
+            defaultExpanded={expandedSection === "Channels"}
+            onToggle={handleSectionToggle}
           >
             {channels.map((item) => (
               <ChannelItem
@@ -198,6 +215,32 @@ export const WorkspaceSidebar = ({
                 isCollapsed={isCollapsed}
               />
             ))}
+
+            {/* New Channel option - only visible to admins and owners */}
+            {(member.role === "admin" || member.role === "owner") && (
+              <div
+                className={cn(
+                  "group flex items-center gap-2 md:gap-3 font-medium text-sm overflow-hidden rounded-[10px] transition-standard w-full text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:translate-x-1 cursor-pointer",
+                  isCollapsed ? "justify-center px-1 md:px-2 py-2 md:py-2.5" : "justify-start px-2 md:px-4 py-2 md:py-2.5"
+                )}
+                onClick={() => setOpen(true)}
+              >
+                {isCollapsed ? (
+                  <div className="relative flex-shrink-0">
+                    <Hint label="New Channel" side="right" align="center">
+                      <div className="flex items-center justify-center">
+                        <PlusIcon className="size-4 text-secondary-foreground/80" />
+                      </div>
+                    </Hint>
+                  </div>
+                ) : (
+                  <>
+                    <PlusIcon className="size-4 text-secondary-foreground/80" />
+                    <span className="truncate min-w-0">New Channel</span>
+                  </>
+                )}
+              </div>
+            )}
           </DroppableItem>
         </div>
       )}
@@ -207,14 +250,11 @@ export const WorkspaceSidebar = ({
         <div className="mt-2">
           <DroppableItem
             label="Members"
-            hint="New Direct Message"
+            hint="Members"
             icon={Users}
-            onNew={
-              member.role === "admin" || member.role === "owner"
-                ? () => { }
-                : undefined
-            }
             isCollapsed={isCollapsed}
+            defaultExpanded={expandedSection === "Members"}
+            onToggle={handleSectionToggle}
           >
             {members.map((item) => (
               <MemberItem

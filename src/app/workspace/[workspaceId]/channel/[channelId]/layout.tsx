@@ -94,6 +94,12 @@ const ChannelLayout = ({ children }: PropsWithChildren) => {
   const handleIconSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Make sure channel exists before accessing its properties
+    if (!channel) {
+      toast.error("Channel not found.");
+      return;
+    }
+
     updateChannel(
       { id: channelId, name: channel.name, icon },
       {
