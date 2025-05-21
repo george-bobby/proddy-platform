@@ -11,6 +11,32 @@ import { useRouter } from 'next/navigation';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
 import { format, addDays, isSameDay, startOfDay, endOfDay } from 'date-fns';
 
+// Define the CalendarEvent interface
+interface CalendarEventMessage {
+  _id: Id<'messages'>;
+  body: string;
+  _creationTime: number;
+  channelId?: Id<'channels'>;
+  conversationId?: Id<'conversations'>;
+  calendarEvent?: {
+    date: number;
+    time?: string;
+  };
+}
+
+interface CalendarEvent {
+  _id: Id<'events'>;
+  _creationTime: number;
+  date: number;
+  title?: string;
+  time?: string;
+  type: string;
+  message?: CalendarEventMessage | null;
+  memberId: Id<'members'>;
+  workspaceId: Id<'workspaces'>;
+  messageId?: Id<'messages'>;
+}
+
 interface CalendarPreviewWidgetProps {
   workspaceId: Id<'workspaces'>;
   member: any;
@@ -42,12 +68,12 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
     const endOfNextWeek = endOfDay(addDays(today, 6)).getTime();
 
     return events
-      .filter(event => {
+      .filter((event: CalendarEvent) => {
         // Use the date property instead of startTime
         const eventDate = event.date;
         return eventDate >= startOfToday && eventDate <= endOfNextWeek;
       })
-      .sort((a, b) => a.date - b.date);
+      .sort((a: CalendarEvent, b: CalendarEvent) => a.date - b.date);
   }, [events, today]);
 
   const handleViewEvent = (eventId: Id<'events'>) => {
@@ -68,7 +94,7 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
 
     nextSevenDays.forEach(day => {
       const dateKey = format(day, 'yyyy-MM-dd');
-      const dayEvents = upcomingEvents.filter(event =>
+      const dayEvents = upcomingEvents.filter((event: CalendarEvent) =>
         isSameDay(new Date(event.date), day)
       );
 
@@ -128,7 +154,7 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
                 </div>
 
                 {dayData.events.length > 0 ? (
-                  dayData.events.map((event) => (
+                  dayData.events.map((event: CalendarEvent) => (
                     <Card key={event._id} className="overflow-hidden">
                       <CardContent className="p-3">
                         <div className="space-y-1">
