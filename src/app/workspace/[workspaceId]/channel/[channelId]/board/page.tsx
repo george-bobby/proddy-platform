@@ -26,7 +26,7 @@ const BoardPage = () => {
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
     const members = useQuery(api.board.getMembersForChannel, { channelId }) || [];
-    const channel = useQuery(api.channels.get, { channelId });
+    const channel = useQuery(api.channels.getById, { id: channelId });
 
     // Set document title based on channel name
     useDocumentTitle(channel ? `Board - ${channel.name}` : 'Board');
