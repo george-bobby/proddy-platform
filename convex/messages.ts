@@ -324,6 +324,17 @@ export const create = mutation({
 			});
 		}
 
+		// If this is a direct message, send an email notification
+		if (args.conversationId) {
+			await ctx.scheduler.runAfter(
+				0,
+				api.directMessageEmails.sendDirectMessageEmail,
+				{
+					messageId,
+				}
+			);
+		}
+
 		// Process mentions in the message (skip for direct messages)
 		// If this is a direct message (has conversationId), skip mention processing
 		if (args.conversationId) {
