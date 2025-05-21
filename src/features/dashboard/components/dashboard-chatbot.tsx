@@ -68,7 +68,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
 
     try {
       // Call the AI assistant API
-      const response = await fetch('/api/dashboard-assistant', {
+      const response = await fetch('/api/assistant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error in chatbot:', error);
-      
+
       // Add fallback response
       const fallbackMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -105,9 +105,9 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
         sender: 'assistant',
         timestamp: new Date(),
       };
-      
+
       setMessages((prev) => [...prev, fallbackMessage]);
-      
+
       toast({
         title: 'Error',
         description: 'Failed to get a response from the assistant.',
@@ -153,9 +153,9 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
               </CardDescription>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearConversation}
             className="h-8 w-8 p-0"
           >
@@ -169,16 +169,14 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex ${
-                  message.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                    message.sender === 'user'
+                  className={`max-w-[80%] rounded-lg px-4 py-2 ${message.sender === 'user'
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted'
-                  }`}
+                    }`}
                 >
                   <p className="text-sm">{message.content}</p>
                   <p className="mt-1 text-right text-xs opacity-70">
@@ -213,8 +211,8 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
             disabled={isLoading}
             className="flex-1"
           />
-          <Button 
-            onClick={handleSendMessage} 
+          <Button
+            onClick={handleSendMessage}
             disabled={isLoading || !input.trim()}
             size="icon"
           >
