@@ -159,7 +159,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="mailto:support@proddy.freshdesk.com"
+                    href="mailto:support@proddy.tech"
                     className="text-sm text-gray-500 hover:text-primary transition-colors"
                   >
                     Email Support
@@ -245,10 +245,10 @@ export const Footer = () => {
                 Terms of Service
               </Link>
               <a
-                href="mailto:support@proddy.freshdesk.com"
+                href="mailto:support@proddy.tech"
                 className="text-sm text-gray-500 hover:text-primary transition-colors"
               >
-                support@proddy.freshdesk.com
+                support@proddy.tech
               </a>
             </div>
           </div>

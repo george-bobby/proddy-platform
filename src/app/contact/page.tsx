@@ -98,8 +98,8 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Email</h3>
-                    <a href="mailto:support@proddy.freshdesk.com" className="text-primary hover:underline block mb-1">
-                      support@proddy.freshdesk.com
+                    <a href="mailto:support@proddy.tech" className="text-primary hover:underline block mb-1">
+                      support@proddy.tech
                     </a>
                     <a href="https://proddy.freshdesk.com/support/home" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm">
                       Visit our Support Portal <ExternalLink className="size-3" />
@@ -237,7 +237,7 @@ const ContactPage = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="general">General Inquiry</SelectItem>
-                          <SelectItem value="support">Technical Support (support@proddy.freshdesk.com)</SelectItem>
+                          <SelectItem value="support">Technical Support (support@proddy.tech)</SelectItem>
                           <SelectItem value="sales">Sales Question</SelectItem>
                           <SelectItem value="feedback">Feedback</SelectItem>
                           <SelectItem value="other">Other</SelectItem>

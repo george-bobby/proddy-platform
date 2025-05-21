@@ -117,7 +117,7 @@ const PrivacyPage = () => {
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <p className="mt-2">
-                <strong>Email:</strong> <a href="mailto:support@proddy.freshdesk.com" className="text-primary hover:underline">support@proddy.freshdesk.com</a>
+                <strong>Email:</strong> <a href="mailto:support@proddy.tech" className="text-primary hover:underline">support@proddy.tech</a>
               </p>
             </div>
           </div>

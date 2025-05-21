@@ -49,7 +49,7 @@ const NotesPage = () => {
     const { data: currentUser } = useCurrentUser();
 
     // Get channel information for the title
-    const channel = useQuery(api.channels.get, { channelId });
+    const channel = useQuery(api.channels.getById, { id: channelId });
 
     // Set document title based on channel name
     useDocumentTitle(channel ? `Notes - ${channel.name}` : 'Notes');
