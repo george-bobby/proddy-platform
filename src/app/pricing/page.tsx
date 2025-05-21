@@ -62,7 +62,7 @@ const PricingPage = () => {
               <Badge variant="outline" className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200">
                 Current
               </Badge>
-              <h3 className="text-lg font-semibold mb-2">Free Beta</h3>
+              <h3 className="text-lg font-semibold mb-2">Free</h3>
               <div className="mb-6">
                 <span className="text-4xl font-bold">$0</span>
                 <span className="text-gray-500 ml-2">/month</span>

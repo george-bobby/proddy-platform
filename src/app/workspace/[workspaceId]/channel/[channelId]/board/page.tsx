@@ -18,6 +18,7 @@ import BoardKanbanView from '@/features/board/components/board-kanban-view';
 import BoardTableView from '@/features/board/components/board-table-view';
 import BoardGanttView from '@/features/board/components/board-gantt-view';
 import BoardHeader from '@/features/board/components/board-header';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 
 const BoardPage = () => {
     const channelId = useChannelId();
@@ -25,6 +26,10 @@ const BoardPage = () => {
     const allCards = useQuery(api.board.getAllCardsForChannel, { channelId }) || [];
     const uniqueLabels = useQuery(api.board.getUniqueLabels, { channelId }) || [];
     const members = useQuery(api.board.getMembersForChannel, { channelId }) || [];
+    const channel = useQuery(api.channels.get, { channelId });
+
+    // Set document title based on channel name
+    useDocumentTitle(channel ? `Board - ${channel.name}` : 'Board');
     const [view, setView] = useState<'kanban' | 'table' | 'gantt'>('kanban');
 
     // Modal state

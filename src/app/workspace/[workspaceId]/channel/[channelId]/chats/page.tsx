@@ -23,7 +23,7 @@ const ChannelChatPage = () => {
     });
 
     // Set document title based on channel name
-    useDocumentTitle(channel ? `#${channel.name}` : 'Channel');
+    useDocumentTitle(channel ? `Chats - ${channel.name}` : 'Chats');
 
     if (channelLoading || status == 'LoadingFirstPage') {
         return (

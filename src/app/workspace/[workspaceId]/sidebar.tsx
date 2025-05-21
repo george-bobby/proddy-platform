@@ -16,6 +16,7 @@ import {
   PanelLeftOpen,
   CheckSquare,
   Settings,
+  LayoutDashboard,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useToggle } from "react-use";
@@ -209,9 +210,21 @@ export const WorkspaceSidebar = ({
         />
       </div>
 
+      {/* Dashboard Link */}
+      <div className="mt-4 px-2 md:px-4">
+        <SidebarItem
+          label="Dashboard"
+          icon={LayoutDashboard}
+          id="dashboard"
+          href={`/workspace/${workspaceId}/dashboard`}
+          isActive={pathname.includes("/dashboard")}
+          isCollapsed={isCollapsed}
+        />
+      </div>
+
       {/* Channels Section */}
       {channels && channels.length > 0 && (
-        <div className="mt-4">
+        <div className="mt-2">
           <DroppableItem
             label="Channels"
             hint="Channels"

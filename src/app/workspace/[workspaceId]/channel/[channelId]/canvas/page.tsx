@@ -49,7 +49,7 @@ const CanvasPage = () => {
     const { data: currentUser } = useCurrentUser();
 
     // Set document title based on canvas name
-    useDocumentTitle(canvasName ? `Canvas: ${canvasName}` : 'Canvas');
+    useDocumentTitle(canvasName ? `Canvas - ${canvasName}` : 'Canvas');
 
     // Function to toggle full screen
     const toggleFullScreen = useCallback(() => {

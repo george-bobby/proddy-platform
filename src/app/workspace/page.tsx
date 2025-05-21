@@ -22,11 +22,11 @@ const WorkspacePage = () => {
 
     if (workspaces?.length) {
       if (lastActiveWorkspaceId) {
-        // If user has a last active workspace, redirect to it
-        router.replace(`/workspace/${lastActiveWorkspaceId}`);
+        // If user has a last active workspace, redirect to dashboard
+        router.replace(`/workspace/${lastActiveWorkspaceId}/dashboard`);
       } else {
-        // If no last active workspace, redirect to the first one
-        router.replace(`/workspace/${workspaces[0]._id}`);
+        // If no last active workspace, redirect to the first one's dashboard
+        router.replace(`/workspace/${workspaces[0]._id}/dashboard`);
       }
     } else if (!open) {
       // If user has no workspaces, open the create workspace modal

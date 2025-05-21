@@ -31,7 +31,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts", "src/features/landing/components/Replacement.tsx",
+    ".next/types/**/*.ts",
+    // "src/features/landing/components/Replacement.tsx",
     // "src/features/canvas/types/**/*.d.ts"
   ],
   "exclude": [

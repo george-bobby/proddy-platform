@@ -20,6 +20,7 @@ import { NotesCursorsPresence } from '@/features/notes/components/notes-cursors-
 import { DraggableFolder } from '@/features/notes/components/draggable-folder';
 import { DraggableNote } from '@/features/notes/components/draggable-note';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
+import { useDocumentTitle } from '@/hooks/use-document-title';
 
 const NotesPage = () => {
     const params = useParams();
@@ -46,6 +47,12 @@ const NotesPage = () => {
 
     // Get the current user
     const { data: currentUser } = useCurrentUser();
+
+    // Get channel information for the title
+    const channel = useQuery(api.channels.get, { channelId });
+
+    // Set document title based on channel name
+    useDocumentTitle(channel ? `Notes - ${channel.name}` : 'Notes');
 
     // Convex queries
     const notes = useQuery(api.notes.list, {

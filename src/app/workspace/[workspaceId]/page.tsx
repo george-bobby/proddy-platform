@@ -14,10 +14,9 @@ export default function WorkspacePage() {
   const { data: channels } = useGetChannels({ workspaceId });
 
   useEffect(() => {
-    if (channels?.length) {
-      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/chats`);
-    }
-  }, [channels, router, workspaceId]);
+    // Redirect to dashboard page
+    router.push(`/workspace/${workspaceId}/dashboard`);
+  }, [router, workspaceId]);
 
   return null;
 }
