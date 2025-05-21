@@ -139,7 +139,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="https://proddy.freshdesk.com/support/home"
+                    href="https://proddy.usetiful.help/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
@@ -149,7 +149,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="https://proddy.freshdesk.com/support/tickets/new"
+                    href="https://proddy.usetiful.help/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
@@ -212,7 +212,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <a
-                    href="https://proddy.freshdesk.com/support/home"
+                    href="https://proddy.usetiful.help/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"

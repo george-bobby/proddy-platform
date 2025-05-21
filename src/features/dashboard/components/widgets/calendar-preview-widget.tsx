@@ -69,7 +69,7 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
     nextSevenDays.forEach(day => {
       const dateKey = format(day, 'yyyy-MM-dd');
       const dayEvents = upcomingEvents.filter(event =>
-        isSameDay(new Date(event.startTime), day)
+        isSameDay(new Date(event.date), day)
       );
 
       grouped.set(dateKey, {

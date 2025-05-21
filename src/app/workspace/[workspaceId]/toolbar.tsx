@@ -158,7 +158,7 @@ export const WorkspaceToolbar = ({
             className="text-white relative hover:bg-white/15 transition-colors"
             onClick={() => {
               // Open support portal in a new tab
-              const supportUrl = 'https://proddy.freshdesk.com/support/home';
+              const supportUrl = 'https://proddy.usetiful.help/';
               window.open(supportUrl, '_blank', 'noopener,noreferrer');
             }}
           >

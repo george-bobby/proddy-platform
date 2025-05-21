@@ -216,7 +216,7 @@ export const Header = () => {
             </Link>
 
             <Link
-              href="https://proddy.freshdesk.com/support/home"
+              href="https://proddy.usetiful.help/"
               target="_blank"
               rel="noopener noreferrer"
               className={cn(
@@ -345,7 +345,7 @@ export const Header = () => {
                 </Link>
 
                 <Link
-                  href="https://proddy.freshdesk.com/support/home"
+                  href="https://proddy.usetiful.help/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-base font-medium text-gray-700 hover:text-primary transition-colors"
