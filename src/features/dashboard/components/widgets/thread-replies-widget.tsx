@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -14,23 +13,68 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface ThreadRepliesWidgetProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
-export const ThreadRepliesWidget = ({ workspaceId, member }: ThreadRepliesWidgetProps) => {
+// Define the actual structure returned by the API
+interface ThreadReplyMessage {
+  message: {
+    _id: Id<'messages'>;
+    _creationTime: number;
+    body: string;
+    memberId: Id<'members'>;
+    channelId?: Id<'channels'>;
+    parentMessageId?: Id<'messages'>;
+    workspaceId: Id<'workspaces'>;
+  };
+  parentMessage: {
+    _id: Id<'messages'>;
+    body: string;
+  };
+  parentUser: {
+    name: string;
+    image?: string;
+  };
+  currentUser: {
+    name: string;
+    image?: string;
+  };
+  context: {
+    name: string;
+    type: 'channel' | 'conversation';
+    id: Id<'channels'> | Id<'conversations'>;
+  };
+}
+
+export const ThreadRepliesWidget = ({ workspaceId }: ThreadRepliesWidgetProps) => {
   const router = useRouter();
   const rawThreadMessages = useGetThreadMessages();
 
   // Filter out threads with invalid data
   const threadMessages = rawThreadMessages ? rawThreadMessages.filter(thread =>
-    thread &&
-    thread.id &&
-    thread.channelId &&
-    thread.parentId
+    thread !== undefined &&
+    thread !== null &&
+    thread.message?._id !== undefined &&
+    thread.context?.type === 'channel' &&
+    thread.message?.parentMessageId !== undefined
   ) : null;
 
-  const handleViewThread = (channelId: Id<'channels'>, parentMessageId: Id<'messages'>) => {
-    router.push(`/workspace/${workspaceId}/channel/${channelId}/threads/${parentMessageId}`);
+  // Define the type for a thread message
+  type ThreadMessageType = NonNullable<typeof threadMessages>[0];
+
+  const handleViewThread = (thread: ThreadMessageType) => {
+    if (thread.context.type === 'channel' && thread.message.parentMessageId) {
+      router.push(`/workspace/${workspaceId}/channel/${thread.context.id as Id<'channels'>}/threads/${thread.message.parentMessageId}`);
+    }
   };
 
   // Extract plain text from message body (which might be rich text)
@@ -40,7 +84,7 @@ export const ThreadRepliesWidget = ({ workspaceId, member }: ThreadRepliesWidget
       const parsed = JSON.parse(body);
       if (parsed.ops) {
         return parsed.ops
-          .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+          .map((op: { insert?: string | object }) => (typeof op.insert === 'string' ? op.insert : ''))
           .join('')
           .trim()
           .substring(0, 50);
@@ -74,30 +118,30 @@ export const ThreadRepliesWidget = ({ workspaceId, member }: ThreadRepliesWidget
         </div>
       </div>
 
-      {threadMessages.length > 0 ? (
+      {threadMessages && threadMessages.length > 0 ? (
         <ScrollArea className="h-[250px] rounded-md border">
           <div className="space-y-2 p-4">
             {threadMessages.map((thread) => (
-              <Card key={thread.id} className="overflow-hidden">
+              <Card key={thread.message._id.toString()} className="overflow-hidden">
                 <CardContent className="p-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={thread.author?.image}
-                        alt={thread.author?.name || 'User avatar'}
+                        src={thread.currentUser.image}
+                        alt={thread.currentUser.name || 'User avatar'}
                       />
                       <AvatarFallback>
-                        {thread.author?.name ? thread.author.name.charAt(0).toUpperCase() : '?'}
+                        {thread.currentUser.name ? thread.currentUser.name.charAt(0).toUpperCase() : '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{thread.author?.name || 'Unknown User'}</p>
-                          {thread.channelName && (
+                          <p className="font-medium">{thread.currentUser.name || 'Unknown User'}</p>
+                          {thread.context.type === 'channel' && (
                             <Badge variant="outline" className="flex items-center gap-1">
                               <Hash className="h-3 w-3" />
-                              {thread.channelName}
+                              {thread.context.name}
                             </Badge>
                           )}
                         </div>
@@ -106,8 +150,8 @@ export const ThreadRepliesWidget = ({ workspaceId, member }: ThreadRepliesWidget
                           {(() => {
                             try {
                               // Try to safely format the date
-                              if (thread.createdAt && !isNaN(Number(thread.createdAt))) {
-                                const date = new Date(Number(thread.createdAt));
+                              if (thread.message._creationTime && !isNaN(Number(thread.message._creationTime))) {
+                                const date = new Date(Number(thread.message._creationTime));
                                 if (date.toString() !== 'Invalid Date') {
                                   return formatDistanceToNow(date, { addSuffix: true });
                                 }
@@ -124,15 +168,15 @@ export const ThreadRepliesWidget = ({ workspaceId, member }: ThreadRepliesWidget
                           Replied to your thread:
                         </p>
                         <p className="mt-1">
-                          {getMessagePreview(thread.content)}
-                          {thread.content.length > 50 ? '...' : ''}
+                          {getMessagePreview(thread.message.body)}
+                          {thread.message.body.length > 50 ? '...' : ''}
                         </p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="mt-2 w-full justify-start text-primary"
-                        onClick={() => handleViewThread(thread.channelId, thread.parentId)}
+                        onClick={() => handleViewThread(thread)}
                       >
                         View thread
                       </Button>

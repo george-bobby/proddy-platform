@@ -1,25 +1,32 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Clock, Plus, ArrowRight, Loader, Pin, PinOff } from 'lucide-react';
+import { FileText, Clock, Plus, Loader } from 'lucide-react';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
-import { useQuery } from 'convex/react';
-import { api } from '@/../convex/_generated/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useGetNotes } from '@/features/notes/api/use-get-notes';
 import { useGetChannels } from '@/features/channels/api/use-get-channels';
 
 interface NotesWidgetProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
-export const NotesWidget = ({ workspaceId, member }: NotesWidgetProps) => {
+export const NotesWidget = ({ workspaceId }: NotesWidgetProps) => {
   const router = useRouter();
   const { data: channels } = useGetChannels({ workspaceId });
 
@@ -46,13 +53,13 @@ export const NotesWidget = ({ workspaceId, member }: NotesWidgetProps) => {
 
     return [...allNotes]
       .sort((a, b) => {
-        // First sort by pinned status
-        if (a.isPinned !== b.isPinned) {
+        // First sort by pinned status (if exists)
+        if ('isPinned' in a && 'isPinned' in b && a.isPinned !== b.isPinned) {
           return a.isPinned ? -1 : 1;
         }
 
         // Then sort by last updated time
-        return b._updatedAt - a._updatedAt;
+        return b.updatedAt - a.updatedAt;
       })
       .slice(0, 10); // Limit to 10 notes
   }, [allNotes]);
@@ -68,7 +75,8 @@ export const NotesWidget = ({ workspaceId, member }: NotesWidgetProps) => {
     }
   };
 
-  const handleViewAllNotes = () => {
+  // View all notes button handler
+  const handleViewAll = () => {
     // Navigate to the first channel's notes section
     if (channels && channels.length > 0) {
       router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/notes`);
@@ -95,15 +103,24 @@ export const NotesWidget = ({ workspaceId, member }: NotesWidgetProps) => {
             </Badge>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCreateNote}
-          className="gap-1"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          New Note
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleViewAll}
+          >
+            View All
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCreateNote}
+            className="gap-1"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New Note
+          </Button>
+        </div>
       </div>
 
       {sortedNotes.length > 0 ? (
@@ -116,13 +133,10 @@ export const NotesWidget = ({ workspaceId, member }: NotesWidgetProps) => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <h5 className="font-medium">{note.title}</h5>
-                        {note.isPinned && (
-                          <Pin className="h-3.5 w-3.5 text-primary" />
-                        )}
                       </div>
                       <div className="flex items-center text-xs text-muted-foreground">
                         <Clock className="mr-1 h-3 w-3" />
-                        {formatDistanceToNow(new Date(note._updatedAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
                       </div>
                     </div>
                     <Badge variant="outline" className="text-xs">

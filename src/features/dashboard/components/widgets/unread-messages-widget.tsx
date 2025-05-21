@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,10 +17,21 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface UnreadMessagesWidgetProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
-export const UnreadMessagesWidget = ({ workspaceId, member }: UnreadMessagesWidgetProps) => {
+// No need for a separate interface as we're using typeof messages[0]
+
+export const UnreadMessagesWidget = ({ workspaceId }: UnreadMessagesWidgetProps) => {
   const router = useRouter();
   const { data: rawMessages, isLoading } = useGetDirectMessages(false); // false to get only unread
   const { counts, isLoading: countsLoading } = useGetUnreadDirectMessagesCount();
@@ -29,17 +40,20 @@ export const UnreadMessagesWidget = ({ workspaceId, member }: UnreadMessagesWidg
 
   // Filter out messages with invalid data
   const messages = rawMessages ? rawMessages.filter(message =>
-    message &&
-    message._id &&
-    message.conversationId
+    message !== undefined &&
+    message !== null &&
+    message.id !== undefined &&
+    message.source.type === 'direct'
   ) : [];
 
-  const handleViewMessage = (conversationId: Id<'conversations'>, messageId: Id<'messages'>) => {
+  const handleViewMessage = (message: typeof messages[0]) => {
     // Mark as read
-    markAsRead(messageId);
+    markAsRead(message.messageId);
 
     // Navigate to conversation
-    router.push(`/workspace/${workspaceId}/conversation/${conversationId}`);
+    if (message.source.type === 'direct') {
+      router.push(`/workspace/${workspaceId}/conversation/${message.source.id as Id<'conversations'>}`);
+    }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -47,21 +61,21 @@ export const UnreadMessagesWidget = ({ workspaceId, member }: UnreadMessagesWidg
   };
 
   // Extract plain text from message body (which might be rich text)
-  const getMessagePreview = (body: string) => {
+  const getMessagePreview = (text: string) => {
     try {
       // If it's JSON (rich text), try to extract plain text
-      const parsed = JSON.parse(body);
+      const parsed = JSON.parse(text);
       if (parsed.ops) {
         return parsed.ops
-          .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+          .map((op: { insert?: string | object }) => (typeof op.insert === 'string' ? op.insert : ''))
           .join('')
           .trim()
           .substring(0, 50);
       }
-      return body.substring(0, 50);
+      return text.substring(0, 50);
     } catch (e) {
       // If not JSON, just return the string
-      return body.substring(0, 50);
+      return text.substring(0, 50);
     }
   };
 
@@ -97,28 +111,28 @@ export const UnreadMessagesWidget = ({ workspaceId, member }: UnreadMessagesWidg
         <ScrollArea className="h-[250px] rounded-md border">
           <div className="space-y-2 p-4">
             {messages.map((message) => (
-              <Card key={message._id} className="overflow-hidden">
+              <Card key={message.id.toString()} className="overflow-hidden">
                 <CardContent className="p-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={message.sender?.image}
-                        alt={message.sender?.name || 'User avatar'}
+                        src={message.author.image}
+                        alt={message.author.name || 'User avatar'}
                       />
                       <AvatarFallback>
-                        {message.sender?.name ? message.sender.name.charAt(0).toUpperCase() : '?'}
+                        {message.author.name ? message.author.name.charAt(0).toUpperCase() : '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
-                        <p className="font-medium">{message.sender?.name || 'Unknown User'}</p>
+                        <p className="font-medium">{message.author.name || 'Unknown User'}</p>
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Clock className="mr-1 h-3 w-3" />
                           {(() => {
                             try {
                               // Try to safely format the date
-                              if (message._creationTime && !isNaN(Number(message._creationTime))) {
-                                const date = new Date(Number(message._creationTime));
+                              if (message.timestamp && !isNaN(Number(message.timestamp))) {
+                                const date = new Date(Number(message.timestamp));
                                 if (date.toString() !== 'Invalid Date') {
                                   return formatDistanceToNow(date, { addSuffix: true });
                                 }
@@ -131,14 +145,14 @@ export const UnreadMessagesWidget = ({ workspaceId, member }: UnreadMessagesWidg
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {getMessagePreview(message.body)}
-                        {message.body.length > 50 ? '...' : ''}
+                        {getMessagePreview(message.text)}
+                        {message.text.length > 50 ? '...' : ''}
                       </p>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="mt-2 w-full justify-start text-primary"
-                        onClick={() => handleViewMessage(message.conversationId, message._id)}
+                        onClick={() => handleViewMessage(message)}
                       >
                         View conversation
                       </Button>

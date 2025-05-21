@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -17,10 +16,38 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface MentionsWidgetProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
-export const MentionsWidget = ({ workspaceId, member }: MentionsWidgetProps) => {
+interface Mention {
+  id: Id<'mentions'>;
+  messageId?: Id<'messages'>;
+  cardId?: Id<'cards'>;
+  text: string;
+  timestamp: number;
+  read: boolean;
+  author: {
+    id: Id<'members'>;
+    name: string;
+    image?: string;
+  };
+  source: {
+    type: 'channel' | 'direct' | 'thread' | 'card';
+    id: Id<'channels'> | Id<'conversations'> | Id<'messages'> | Id<'cards'> | string;
+    name: string;
+  };
+}
+
+export const MentionsWidget = ({ workspaceId }: MentionsWidgetProps) => {
   const router = useRouter();
   const { data: rawMentions, isLoading } = useGetMentionedMessages(false); // false to get only unread
   const { counts, isLoading: countsLoading } = useGetUnreadMentionsCount();
@@ -28,20 +55,25 @@ export const MentionsWidget = ({ workspaceId, member }: MentionsWidgetProps) => 
   const markAllAsRead = useMarkAllMentionsAsRead();
 
   // Filter out mentions with invalid data
-  const mentions = rawMentions ? rawMentions.filter(mention =>
-    mention &&
-    mention._id
+  const mentions = rawMentions ? rawMentions.filter((mention): mention is typeof mention =>
+    mention !== undefined &&
+    mention !== null &&
+    mention.id !== undefined
   ) : [];
 
-  const handleViewMention = (mention: any) => {
+  const handleViewMention = (mention: Mention) => {
     // Mark as read
-    markAsRead(mention._id);
+    markAsRead(mention.id);
 
     // Navigate based on mention type
-    if (mention.channelId) {
-      router.push(`/workspace/${workspaceId}/channel/${mention.channelId}/chats`);
-    } else if (mention.conversationId) {
-      router.push(`/workspace/${workspaceId}/conversation/${mention.conversationId}`);
+    if (mention.source.type === 'channel') {
+      router.push(`/workspace/${workspaceId}/channel/${mention.source.id}/chats`);
+    } else if (mention.source.type === 'direct') {
+      router.push(`/workspace/${workspaceId}/conversation/${mention.source.id}`);
+    } else if (mention.source.type === 'thread' && mention.messageId) {
+      router.push(`/workspace/${workspaceId}/thread/${mention.messageId}`);
+    } else if (mention.source.type === 'card' && mention.cardId) {
+      router.push(`/workspace/${workspaceId}/card/${mention.cardId}`);
     }
   };
 
@@ -50,21 +82,21 @@ export const MentionsWidget = ({ workspaceId, member }: MentionsWidgetProps) => 
   };
 
   // Extract plain text from message body (which might be rich text)
-  const getMessagePreview = (body: string) => {
+  const getMessagePreview = (text: string) => {
     try {
       // If it's JSON (rich text), try to extract plain text
-      const parsed = JSON.parse(body);
+      const parsed = JSON.parse(text);
       if (parsed.ops) {
         return parsed.ops
-          .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+          .map((op: { insert?: string | object }) => (typeof op.insert === 'string' ? op.insert : ''))
           .join('')
           .trim()
           .substring(0, 50);
       }
-      return body.substring(0, 50);
+      return text.substring(0, 50);
     } catch (e) {
       // If not JSON, just return the string
-      return body.substring(0, 50);
+      return text.substring(0, 50);
     }
   };
 
@@ -100,26 +132,26 @@ export const MentionsWidget = ({ workspaceId, member }: MentionsWidgetProps) => 
         <ScrollArea className="h-[250px] rounded-md border">
           <div className="space-y-2 p-4">
             {mentions.map((mention) => (
-              <Card key={mention._id} className="overflow-hidden">
+              <Card key={mention.id} className="overflow-hidden">
                 <CardContent className="p-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={mention.author?.image}
-                        alt={mention.author?.name || 'User avatar'}
+                        src={mention.author.image}
+                        alt={mention.author.name || 'User avatar'}
                       />
                       <AvatarFallback>
-                        {mention.author?.name ? mention.author.name.charAt(0).toUpperCase() : '?'}
+                        {mention.author.name ? mention.author.name.charAt(0).toUpperCase() : '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{mention.author?.name || 'Unknown User'}</p>
-                          {mention.channelId && (
+                          <p className="font-medium">{mention.author.name || 'Unknown User'}</p>
+                          {mention.source.type === 'channel' && (
                             <Badge variant="outline" className="flex items-center gap-1">
                               <Hash className="h-3 w-3" />
-                              {mention.channelName}
+                              {mention.source.name}
                             </Badge>
                           )}
                         </div>
@@ -128,8 +160,8 @@ export const MentionsWidget = ({ workspaceId, member }: MentionsWidgetProps) => 
                           {(() => {
                             try {
                               // Try to safely format the date
-                              if (mention._creationTime && !isNaN(Number(mention._creationTime))) {
-                                const date = new Date(Number(mention._creationTime));
+                              if (mention.timestamp && !isNaN(Number(mention.timestamp))) {
+                                const date = new Date(Number(mention.timestamp));
                                 if (date.toString() !== 'Invalid Date') {
                                   return formatDistanceToNow(date, { addSuffix: true });
                                 }
@@ -142,8 +174,8 @@ export const MentionsWidget = ({ workspaceId, member }: MentionsWidgetProps) => 
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {getMessagePreview(mention.message.body)}
-                        {mention.message.body.length > 50 ? '...' : ''}
+                        {getMessagePreview(mention.text)}
+                        {mention.text.length > 50 ? '...' : ''}
                       </p>
                       <Button
                         variant="ghost"

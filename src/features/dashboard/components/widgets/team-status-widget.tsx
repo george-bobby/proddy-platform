@@ -17,10 +17,34 @@ import { useGetWorkspaceStatuses } from '@/features/status/api/use-get-workspace
 
 interface TeamStatusWidgetProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
-export const TeamStatusWidget = ({ workspaceId, member }: TeamStatusWidgetProps) => {
+interface TeamMember {
+  _id: Id<'members'>;
+  userId: Id<'users'>;
+  role: string;
+  workspaceId: Id<'workspaces'>;
+  user?: {
+    name: string;
+    image?: string;
+  };
+  status?: string;
+  statusEmoji?: string;
+  isOnline: boolean;
+  lastActive: number;
+}
+
+export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
   const router = useRouter();
   const { data: members, isLoading: membersLoading } = useGetMembers({ workspaceId });
   const { data: statuses, isLoading: statusesLoading } = useGetWorkspaceStatuses({ workspaceId });
@@ -37,10 +61,10 @@ export const TeamStatusWidget = ({ workspaceId, member }: TeamStatusWidgetProps)
 
       return {
         ...member,
-        status: status?.text || '',
-        statusEmoji: status?.emoji || '',
-        isOnline: status?.isOnline || false,
-        lastActive: status?.updatedAt || member?._creationTime || Date.now(),
+        status: status?.status || '',
+        statusEmoji: '',
+        isOnline: status ? true : false,
+        lastActive: status?.lastSeen || member?._creationTime || Date.now(),
         // Ensure user object exists
         user: member?.user || { name: 'Unknown User', image: '' }
       };

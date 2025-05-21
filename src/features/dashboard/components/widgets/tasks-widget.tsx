@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -15,14 +14,35 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface TasksWidgetProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
-export const TasksWidget = ({ workspaceId, member }: TasksWidgetProps) => {
+interface Task {
+  _id: Id<'tasks'>;
+  _creationTime: number;
+  title: string;
+  description?: string;
+  completed: boolean;
+  dueDate?: number;
+  priority?: string;
+  categoryId: Id<'categories'>;
+  workspaceId: Id<'workspaces'>;
+}
+
+export const TasksWidget = ({ workspaceId }: TasksWidgetProps) => {
   const router = useRouter();
   const { data: tasks, isLoading } = useGetTasks({ workspaceId });
   const { data: categories } = useGetTaskCategories({ workspaceId });
-  const { mutate: updateTask } = useUpdateTask();
+  const updateTask = useUpdateTask();
 
   // Filter tasks to show only incomplete ones first, then by due date
   const sortedTasks = tasks ? [...tasks]
@@ -58,8 +78,8 @@ export const TasksWidget = ({ workspaceId, member }: TasksWidgetProps) => {
   };
 
   // Get category name by ID
-  const getCategoryName = (categoryId: Id<'categories'>) => {
-    if (!categories) return 'Uncategorized';
+  const getCategoryName = (categoryId: Id<'categories'> | undefined) => {
+    if (!categoryId || !categories) return 'Uncategorized';
     const category = categories.find(cat => cat._id === categoryId);
     return category ? category.name : 'Uncategorized';
   };

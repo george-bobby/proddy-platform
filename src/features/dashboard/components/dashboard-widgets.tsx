@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Id } from '@/../convex/_generated/dataModel';
 import { UnreadMessagesWidget } from './widgets/unread-messages-widget';
 import { MentionsWidget } from './widgets/mentions-widget';
@@ -16,10 +16,7 @@ import {
   GripVertical,
   LayoutGrid,
   LayoutList,
-  Settings,
-  Eye,
-  EyeOff,
-  X
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -32,8 +29,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
-  SheetClose
+  SheetTrigger
 } from '@/components/ui/sheet';
 import {
   DndContext,
@@ -59,7 +55,16 @@ import { cn } from '@/lib/utils';
 
 interface DashboardWidgetsProps {
   workspaceId: Id<'workspaces'>;
-  member: any;
+  member: {
+    _id: Id<'members'>;
+    userId: Id<'users'>;
+    role: string;
+    workspaceId: Id<'workspaces'>;
+    user?: {
+      name: string;
+      image?: string;
+    };
+  };
 }
 
 // Widget types
@@ -136,7 +141,6 @@ const SortableWidget = ({ id, children, layout, size = 'medium' }: SortableWidge
 export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps) => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [layout, setLayout] = useState<LayoutType>('list');
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Default widget order with all available widgets
   const [widgets, setWidgets] = useState<WidgetConfig[]>([
