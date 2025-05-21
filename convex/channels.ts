@@ -3,6 +3,16 @@ import { v } from 'convex/values';
 
 import { mutation, query } from './_generated/server';
 
+// Helper query to get a channel by ID (for internal use)
+export const _getChannelById = query({
+	args: {
+		channelId: v.id('channels'),
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.channelId);
+	},
+});
+
 export const remove = mutation({
 	args: {
 		id: v.id('channels'),

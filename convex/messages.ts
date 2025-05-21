@@ -4,6 +4,7 @@ import { v } from 'convex/values';
 
 import type { Doc, Id } from './_generated/dataModel';
 import { type QueryCtx, mutation, query } from './_generated/server';
+import { api } from './_generated/api';
 
 const populateThread = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
 	const messages = await ctx.db
@@ -172,6 +173,16 @@ export const get = query({
 				(message): message is NonNullable<typeof message> => message !== null
 			),
 		};
+	},
+});
+
+// Helper query to get a message by ID (for internal use)
+export const _getMessageById = query({
+	args: {
+		messageId: v.id('messages'),
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.messageId);
 	},
 });
 
@@ -393,7 +404,8 @@ export const create = mutation({
 
 			// Create mention records for each mentioned member
 			for (const mentionedMemberId of Array.from(mentionedMemberIds)) {
-				await ctx.db.insert('mentions', {
+				// Create the mention record
+				const mentionId = await ctx.db.insert('mentions', {
 					messageId,
 					mentionedMemberId,
 					mentionerMemberId: member._id,
@@ -403,6 +415,11 @@ export const create = mutation({
 					parentMessageId: args.parentMessageId,
 					read: false,
 					createdAt: Date.now(),
+				});
+
+				// Schedule an email notification for the mention
+				await ctx.scheduler.runAfter(0, api.mentions.sendMentionEmail, {
+					mentionId,
 				});
 			}
 		} catch (error) {

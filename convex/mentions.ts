@@ -2,639 +2,914 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
-import { type QueryCtx, mutation, query } from './_generated/server';
+import {
+	type QueryCtx,
+	mutation,
+	query,
+	action,
+	type ActionCtx,
+} from './_generated/server';
+import { api } from './_generated/api';
 
 // Helper function to get a member by workspace and user ID
-const getMember = async (ctx: QueryCtx, workspaceId: Id<'workspaces'>, userId: Id<'users'>) => {
-  return await ctx.db
-    .query('members')
-    .withIndex('by_workspace_id_user_id', (q) => q.eq('workspaceId', workspaceId).eq('userId', userId))
-    .unique();
+const getMember = async (
+	ctx: QueryCtx,
+	workspaceId: Id<'workspaces'>,
+	userId: Id<'users'>
+) => {
+	return await ctx.db
+		.query('members')
+		.withIndex('by_workspace_id_user_id', (q) =>
+			q.eq('workspaceId', workspaceId).eq('userId', userId)
+		)
+		.unique();
 };
 
 // Helper function to populate user data for a member
 const populateUser = async (ctx: QueryCtx, userId: Id<'users'>) => {
-  return await ctx.db.get(userId);
+	return await ctx.db.get(userId);
 };
 
 // Helper function to populate member data
 const populateMember = async (ctx: QueryCtx, memberId: Id<'members'>) => {
-  const member = await ctx.db.get(memberId);
-  if (!member) return null;
+	const member = await ctx.db.get(memberId);
+	if (!member) return null;
 
-  const user = await populateUser(ctx, member.userId);
-  if (!user) return null;
+	const user = await populateUser(ctx, member.userId);
+	if (!user) return null;
 
-  return {
-    ...member,
-    user,
-  };
+	return {
+		...member,
+		user,
+	};
 };
 
 // Helper function to get channel data
 const getChannel = async (ctx: QueryCtx, channelId: Id<'channels'>) => {
-  return await ctx.db.get(channelId);
+	return await ctx.db.get(channelId);
 };
 
 // Helper function to get conversation data
-const getConversation = async (ctx: QueryCtx, conversationId: Id<'conversations'>) => {
-  return await ctx.db.get(conversationId);
+const getConversation = async (
+	ctx: QueryCtx,
+	conversationId: Id<'conversations'>
+) => {
+	return await ctx.db.get(conversationId);
 };
 
 // Helper function to get message data
 const getMessage = async (ctx: QueryCtx, messageId: Id<'messages'>) => {
-  return await ctx.db.get(messageId);
+	return await ctx.db.get(messageId);
 };
 
 // Get all mentions for the current user in a workspace
 export const getMentionsForCurrentUser = query({
-  args: {
-    workspaceId: v.id('workspaces'),
-    includeRead: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    try {
-      console.log('getMentionsForCurrentUser - Starting query with args:', {
-        workspaceId: args.workspaceId,
-        includeRead: args.includeRead
-      });
+	args: {
+		workspaceId: v.id('workspaces'),
+		includeRead: v.optional(v.boolean()),
+	},
+	handler: async (ctx, args) => {
+		try {
+			console.log('getMentionsForCurrentUser - Starting query with args:', {
+				workspaceId: args.workspaceId,
+				includeRead: args.includeRead,
+			});
 
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        console.log('getMentionsForCurrentUser - No userId found');
-        return [];
-      }
-      console.log('getMentionsForCurrentUser - userId:', userId);
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				console.log('getMentionsForCurrentUser - No userId found');
+				return [];
+			}
+			console.log('getMentionsForCurrentUser - userId:', userId);
 
-      // Get the current member
-      const currentMember = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
-      if (!currentMember) {
-        console.log('getMentionsForCurrentUser - No currentMember found for userId:', userId);
-        return [];
-      }
+			// Get the current member
+			const currentMember = await getMember(
+				ctx,
+				args.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				console.log(
+					'getMentionsForCurrentUser - No currentMember found for userId:',
+					userId
+				);
+				return [];
+			}
 
-      console.log('getMentionsForCurrentUser - currentMember:', currentMember._id);
+			console.log(
+				'getMentionsForCurrentUser - currentMember:',
+				currentMember._id
+			);
 
-      // Query mentions for the current member
-      let mentionsQuery = ctx.db
-        .query('mentions')
-        .withIndex('by_workspace_id_mentioned_member_id', (q) =>
-          q.eq('workspaceId', args.workspaceId).eq('mentionedMemberId', currentMember._id)
-        );
+			// Query mentions for the current member
+			let mentionsQuery = ctx.db
+				.query('mentions')
+				.withIndex('by_workspace_id_mentioned_member_id', (q) =>
+					q
+						.eq('workspaceId', args.workspaceId)
+						.eq('mentionedMemberId', currentMember._id)
+				);
 
-      // Filter by read status if specified
-      if (args.includeRead === false) {
-        mentionsQuery = ctx.db
-          .query('mentions')
-          .withIndex('by_workspace_id_mentioned_member_id_read', (q) =>
-            q.eq('workspaceId', args.workspaceId)
-             .eq('mentionedMemberId', currentMember._id)
-             .eq('read', false)
-          );
-      }
+			// Filter by read status if specified
+			if (args.includeRead === false) {
+				mentionsQuery = ctx.db
+					.query('mentions')
+					.withIndex('by_workspace_id_mentioned_member_id_read', (q) =>
+						q
+							.eq('workspaceId', args.workspaceId)
+							.eq('mentionedMemberId', currentMember._id)
+							.eq('read', false)
+					);
+			}
 
-      // Get mentions and sort by creation time (newest first)
-      const mentions = await mentionsQuery.order('desc').collect();
+			// Get mentions and sort by creation time (newest first)
+			const mentions = await mentionsQuery.order('desc').collect();
 
-      // Process mentions to include all necessary data
-      const processedMentions = [];
+			// Process mentions to include all necessary data
+			const processedMentions = [];
 
-      for (const mention of mentions) {
-        // Get the member who created the mention
-        const mentioner = await populateMember(ctx, mention.mentionerMemberId);
-        if (!mentioner) {
-          continue;
-        }
+			for (const mention of mentions) {
+				// Get the member who created the mention
+				const mentioner = await populateMember(ctx, mention.mentionerMemberId);
+				if (!mentioner) {
+					continue;
+				}
 
-        // Determine the source type and get source data
-        let sourceType = 'channel';
-        let sourceName = '';
-        let sourceId = '';
-        let messageText = '';
+				// Determine the source type and get source data
+				let sourceType = 'channel';
+				let sourceName = '';
+				let sourceId = '';
+				let messageText = '';
 
-        // Handle card assignment mentions
-        if (mention.cardId) {
-          sourceType = 'card';
-          const card = await ctx.db.get(mention.cardId);
+				// Handle card assignment mentions
+				if (mention.cardId) {
+					sourceType = 'card';
+					const card = await ctx.db.get(mention.cardId);
 
-          if (card) {
-            // Get the list to find the channel
-            const list = await ctx.db.get(card.listId);
-            if (list && mention.channelId) {
-              const channel = await getChannel(ctx, mention.channelId);
-              if (channel) {
-                sourceName = `${channel.name} - Board`;
-                sourceId = mention.channelId;
-                messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
-              }
-            } else {
-              sourceName = 'Board';
-              sourceId = mention.channelId || '';
-              messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
-            }
-          } else {
-            // Card was deleted but we still have the title
-            sourceName = 'Board';
-            sourceId = mention.channelId || '';
-            messageText = `You were assigned to card "${mention.cardTitle || 'Unknown'}" (deleted)`;
-          }
-        }
-        // Handle message mentions
-        else if (mention.messageId) {
-          const message = await getMessage(ctx, mention.messageId);
-          if (!message) continue;
+					if (card) {
+						// Get the list to find the channel
+						const list = await ctx.db.get(card.listId);
+						if (list && mention.channelId) {
+							const channel = await getChannel(ctx, mention.channelId);
+							if (channel) {
+								sourceName = `${channel.name} - Board`;
+								sourceId = mention.channelId;
+								messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
+							}
+						} else {
+							sourceName = 'Board';
+							sourceId = mention.channelId || '';
+							messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
+						}
+					} else {
+						// Card was deleted but we still have the title
+						sourceName = 'Board';
+						sourceId = mention.channelId || '';
+						messageText = `You were assigned to card "${mention.cardTitle || 'Unknown'}" (deleted)`;
+					}
+				}
+				// Handle message mentions
+				else if (mention.messageId) {
+					const message = await getMessage(ctx, mention.messageId);
+					if (!message) continue;
 
-          if (mention.channelId) {
-            sourceType = 'channel';
-            const channel = await getChannel(ctx, mention.channelId);
-            if (channel) {
-              sourceName = channel.name;
-              sourceId = channel._id;
-            }
-          } else if (mention.conversationId) {
-            sourceType = 'direct';
-            const conversation = await getConversation(ctx, mention.conversationId);
-            if (conversation) {
-              // For direct messages, use the other member's name
-              const otherMemberId = conversation.memberOneId === currentMember._id
-                ? conversation.memberTwoId
-                : conversation.memberOneId;
+					if (mention.channelId) {
+						sourceType = 'channel';
+						const channel = await getChannel(ctx, mention.channelId);
+						if (channel) {
+							sourceName = channel.name;
+							sourceId = channel._id;
+						}
+					} else if (mention.conversationId) {
+						sourceType = 'direct';
+						const conversation = await getConversation(
+							ctx,
+							mention.conversationId
+						);
+						if (conversation) {
+							// For direct messages, use the other member's name
+							const otherMemberId =
+								conversation.memberOneId === currentMember._id
+									? conversation.memberTwoId
+									: conversation.memberOneId;
 
-              const otherMember = await populateMember(ctx, otherMemberId);
-              if (otherMember && otherMember.user.name) {
-                sourceName = otherMember.user.name;
-                sourceId = otherMemberId;
-              }
-            }
-          } else if (mention.parentMessageId) {
-            sourceType = 'thread';
-            const parentMessage = await getMessage(ctx, mention.parentMessageId);
-            if (parentMessage) {
-              sourceId = parentMessage._id;
-              sourceName = 'Thread';
-            }
-          }
+							const otherMember = await populateMember(ctx, otherMemberId);
+							if (otherMember && otherMember.user.name) {
+								sourceName = otherMember.user.name;
+								sourceId = otherMemberId;
+							}
+						}
+					} else if (mention.parentMessageId) {
+						sourceType = 'thread';
+						const parentMessage = await getMessage(
+							ctx,
+							mention.parentMessageId
+						);
+						if (parentMessage) {
+							sourceId = parentMessage._id;
+							sourceName = 'Thread';
+						}
+					}
 
-          // Extract a preview of the message text
-          try {
-            // Try to parse as JSON (Quill Delta format)
-            const parsedBody = JSON.parse(message.body);
-            if (parsedBody.ops) {
-              messageText = parsedBody.ops
-                .map((op: any) => typeof op.insert === 'string' ? op.insert : '')
-                .join('')
-                .trim();
-            }
-          } catch (e) {
-            // Not JSON, use as is (might contain HTML)
-            messageText = message.body
-              .replace(/<[^>]*>/g, '') // Remove HTML tags
-              .trim();
-          }
-        }
+					// Extract a preview of the message text
+					try {
+						// Try to parse as JSON (Quill Delta format)
+						const parsedBody = JSON.parse(message.body);
+						if (parsedBody.ops) {
+							messageText = parsedBody.ops
+								.map((op: any) =>
+									typeof op.insert === 'string' ? op.insert : ''
+								)
+								.join('')
+								.trim();
+						}
+					} catch (e) {
+						// Not JSON, use as is (might contain HTML)
+						messageText = message.body
+							.replace(/<[^>]*>/g, '') // Remove HTML tags
+							.trim();
+					}
+				}
 
-        // Create the processed mention object
-        const processedMention = {
-          id: mention._id,
-          messageId: mention.messageId,
-          cardId: mention.cardId,
-          text: messageText,
-          timestamp: mention.createdAt,
-          read: mention.read,
-          author: {
-            id: mentioner._id,
-            name: mentioner.user.name || '',
-            image: mentioner.user.image,
-          },
-          source: {
-            type: sourceType as 'channel' | 'direct' | 'thread' | 'card',
-            id: sourceId,
-            name: sourceName,
-          },
-        };
+				// Create the processed mention object
+				const processedMention = {
+					id: mention._id,
+					messageId: mention.messageId,
+					cardId: mention.cardId,
+					text: messageText,
+					timestamp: mention.createdAt,
+					read: mention.read,
+					author: {
+						id: mentioner._id,
+						name: mentioner.user.name || '',
+						image: mentioner.user.image,
+					},
+					source: {
+						type: sourceType as 'channel' | 'direct' | 'thread' | 'card',
+						id: sourceId,
+						name: sourceName,
+					},
+				};
 
-        // Add the processed mention to the result
-        processedMentions.push(processedMention);
-      }
-      return processedMentions;
-    } catch (error) {
-      console.error('Error in getMentionsForCurrentUser:', error);
-      return [];
-    }
-  },
+				// Add the processed mention to the result
+				processedMentions.push(processedMention);
+			}
+			return processedMentions;
+		} catch (error) {
+			console.error('Error in getMentionsForCurrentUser:', error);
+			return [];
+		}
+	},
 });
 
 // Mark a mention as read or unread
 export const markMentionAsRead = mutation({
-  args: {
-    mentionId: v.id('mentions'),
-    status: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        throw new Error('Unauthorized');
-      }
+	args: {
+		mentionId: v.id('mentions'),
+		status: v.optional(v.boolean()),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				throw new Error('Unauthorized');
+			}
 
-      const mention = await ctx.db.get(args.mentionId);
-      if (!mention) {
-        throw new Error('Mention not found');
-      }
+			const mention = await ctx.db.get(args.mentionId);
+			if (!mention) {
+				throw new Error('Mention not found');
+			}
 
-      // Get the current member
-      const currentMember = await getMember(ctx, mention.workspaceId, userId as Id<'users'>);
-      if (!currentMember) {
-        throw new Error('Member not found');
-      }
+			// Get the current member
+			const currentMember = await getMember(
+				ctx,
+				mention.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				throw new Error('Member not found');
+			}
 
-      // Verify that the mention belongs to the current user
-      if (mention.mentionedMemberId !== currentMember._id) {
-        throw new Error('Unauthorized to change read status of this mention');
-      }
+			// Verify that the mention belongs to the current user
+			if (mention.mentionedMemberId !== currentMember._id) {
+				throw new Error('Unauthorized to change read status of this mention');
+			}
 
-      // If status is provided, use it; otherwise, mark as read
-      const newStatus = args.status !== undefined ? args.status : true;
+			// If status is provided, use it; otherwise, mark as read
+			const newStatus = args.status !== undefined ? args.status : true;
 
-      // Update the mention
-      await ctx.db.patch(args.mentionId, {
-        read: newStatus,
-      });
+			// Update the mention
+			await ctx.db.patch(args.mentionId, {
+				read: newStatus,
+			});
 
-      return { success: true, read: newStatus };
-    } catch (error) {
-
-      throw error;
-    }
-  },
+			return { success: true, read: newStatus };
+		} catch (error) {
+			throw error;
+		}
+	},
 });
 
 // Mark all mentions as read for the current user in a workspace
 export const markAllMentionsAsRead = mutation({
-  args: {
-    workspaceId: v.id('workspaces'),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        throw new Error('Unauthorized');
-      }
+	args: {
+		workspaceId: v.id('workspaces'),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				throw new Error('Unauthorized');
+			}
 
-      // Get the current member
-      const currentMember = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
-      if (!currentMember) {
-        throw new Error('Member not found');
-      }
+			// Get the current member
+			const currentMember = await getMember(
+				ctx,
+				args.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				throw new Error('Member not found');
+			}
 
-      // Get all unread mentions for the current user
-      const unreadMentions = await ctx.db
-        .query('mentions')
-        .withIndex('by_workspace_id_mentioned_member_id_read', (q) =>
-          q.eq('workspaceId', args.workspaceId)
-           .eq('mentionedMemberId', currentMember._id)
-           .eq('read', false)
-        )
-        .collect();
+			// Get all unread mentions for the current user
+			const unreadMentions = await ctx.db
+				.query('mentions')
+				.withIndex('by_workspace_id_mentioned_member_id_read', (q) =>
+					q
+						.eq('workspaceId', args.workspaceId)
+						.eq('mentionedMemberId', currentMember._id)
+						.eq('read', false)
+				)
+				.collect();
 
-      // Update all mentions to be read
-      for (const mention of unreadMentions) {
-        await ctx.db.patch(mention._id, {
-          read: true,
-        });
-      }
+			// Update all mentions to be read
+			for (const mention of unreadMentions) {
+				await ctx.db.patch(mention._id, {
+					read: true,
+				});
+			}
 
-      return { success: true, count: unreadMentions.length };
-    } catch (error) {
-
-      throw error;
-    }
-  },
+			return { success: true, count: unreadMentions.length };
+		} catch (error) {
+			throw error;
+		}
+	},
 });
 
 // Get processed mentions
 export const getProcessedMentions = query({
-  args: {
-    workspaceId: v.id('workspaces'),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        return [];
-      }
+	args: {
+		workspaceId: v.id('workspaces'),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				return [];
+			}
 
-      // Get the current member
-      const currentMember = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
-      if (!currentMember) {
-        return [];
-      }
+			// Get the current member
+			const currentMember = await getMember(
+				ctx,
+				args.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				return [];
+			}
 
-      // Get all mentions for the current member
-      const mentions = await ctx.db
-        .query('mentions')
-        .withIndex('by_workspace_id_mentioned_member_id', (q) =>
-          q.eq('workspaceId', args.workspaceId).eq('mentionedMemberId', currentMember._id)
-        )
-        .collect();
+			// Get all mentions for the current member
+			const mentions = await ctx.db
+				.query('mentions')
+				.withIndex('by_workspace_id_mentioned_member_id', (q) =>
+					q
+						.eq('workspaceId', args.workspaceId)
+						.eq('mentionedMemberId', currentMember._id)
+				)
+				.collect();
 
-      // Process the mentions
-      const processedMentions = [];
-      for (const mention of mentions) {
-        // Get the member who created the mention
-        const mentioner = await populateMember(ctx, mention.mentionerMemberId);
-        if (!mentioner) continue;
+			// Process the mentions
+			const processedMentions = [];
+			for (const mention of mentions) {
+				// Get the member who created the mention
+				const mentioner = await populateMember(ctx, mention.mentionerMemberId);
+				if (!mentioner) continue;
 
-        // Determine the source type and get source data
-        let sourceType = 'channel';
-        let sourceName = '';
-        let sourceId = '';
-        let messageText = '';
+				// Determine the source type and get source data
+				let sourceType = 'channel';
+				let sourceName = '';
+				let sourceId = '';
+				let messageText = '';
 
-        // Handle card assignment mentions
-        if (mention.cardId) {
-          sourceType = 'card';
-          const card = await ctx.db.get(mention.cardId);
+				// Handle card assignment mentions
+				if (mention.cardId) {
+					sourceType = 'card';
+					const card = await ctx.db.get(mention.cardId);
 
-          if (card) {
-            // Get the list to find the channel
-            const list = await ctx.db.get(card.listId);
-            if (list && mention.channelId) {
-              const channel = await getChannel(ctx, mention.channelId);
-              if (channel) {
-                sourceName = `${channel.name} - Board`;
-                sourceId = mention.channelId;
-                messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
-              }
-            } else {
-              sourceName = 'Board';
-              sourceId = mention.channelId || '';
-              messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
-            }
-          } else {
-            // Card was deleted but we still have the title
-            sourceName = 'Board';
-            sourceId = mention.channelId || '';
-            messageText = `You were assigned to card "${mention.cardTitle || 'Unknown'}" (deleted)`;
-          }
-        }
-        // Handle message mentions
-        else if (mention.messageId) {
-          const message = await getMessage(ctx, mention.messageId);
-          if (!message) {
-            messageText = "Message not found";
-          } else {
-            if (mention.channelId) {
-              sourceType = 'channel';
-              const channel = await getChannel(ctx, mention.channelId);
-              if (channel) {
-                sourceName = channel.name;
-                sourceId = channel._id;
-              }
-            } else if (mention.conversationId) {
-              sourceType = 'direct';
-              const conversation = await getConversation(ctx, mention.conversationId);
-              if (conversation) {
-                // For direct messages, use the other member's name
-                const otherMemberId = conversation.memberOneId === currentMember._id
-                  ? conversation.memberTwoId
-                  : conversation.memberOneId;
+					if (card) {
+						// Get the list to find the channel
+						const list = await ctx.db.get(card.listId);
+						if (list && mention.channelId) {
+							const channel = await getChannel(ctx, mention.channelId);
+							if (channel) {
+								sourceName = `${channel.name} - Board`;
+								sourceId = mention.channelId;
+								messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
+							}
+						} else {
+							sourceName = 'Board';
+							sourceId = mention.channelId || '';
+							messageText = `You were assigned to card "${mention.cardTitle || card.title}"`;
+						}
+					} else {
+						// Card was deleted but we still have the title
+						sourceName = 'Board';
+						sourceId = mention.channelId || '';
+						messageText = `You were assigned to card "${mention.cardTitle || 'Unknown'}" (deleted)`;
+					}
+				}
+				// Handle message mentions
+				else if (mention.messageId) {
+					const message = await getMessage(ctx, mention.messageId);
+					if (!message) {
+						messageText = 'Message not found';
+					} else {
+						if (mention.channelId) {
+							sourceType = 'channel';
+							const channel = await getChannel(ctx, mention.channelId);
+							if (channel) {
+								sourceName = channel.name;
+								sourceId = channel._id;
+							}
+						} else if (mention.conversationId) {
+							sourceType = 'direct';
+							const conversation = await getConversation(
+								ctx,
+								mention.conversationId
+							);
+							if (conversation) {
+								// For direct messages, use the other member's name
+								const otherMemberId =
+									conversation.memberOneId === currentMember._id
+										? conversation.memberTwoId
+										: conversation.memberOneId;
 
-                const otherMember = await populateMember(ctx, otherMemberId);
-                if (otherMember && otherMember.user.name) {
-                  sourceName = otherMember.user.name;
-                  sourceId = otherMemberId;
-                }
-              }
-            } else if (mention.parentMessageId) {
-              sourceType = 'thread';
-              const parentMessage = await getMessage(ctx, mention.parentMessageId);
-              if (parentMessage) {
-                sourceId = parentMessage._id;
-                sourceName = 'Thread';
-              }
-            }
+								const otherMember = await populateMember(ctx, otherMemberId);
+								if (otherMember && otherMember.user.name) {
+									sourceName = otherMember.user.name;
+									sourceId = otherMemberId;
+								}
+							}
+						} else if (mention.parentMessageId) {
+							sourceType = 'thread';
+							const parentMessage = await getMessage(
+								ctx,
+								mention.parentMessageId
+							);
+							if (parentMessage) {
+								sourceId = parentMessage._id;
+								sourceName = 'Thread';
+							}
+						}
 
-            // Extract a preview of the message text
-            try {
-              // Try to parse as JSON (Quill Delta format)
-              const parsedBody = JSON.parse(message.body);
-              if (parsedBody.ops) {
-                messageText = parsedBody.ops
-                  .map((op: any) => typeof op.insert === 'string' ? op.insert : '')
-                  .join('')
-                  .trim();
-              }
-            } catch (e) {
-              // Not JSON, use as is (might contain HTML)
-              messageText = message.body
-                .replace(/<[^>]*>/g, '') // Remove HTML tags
-                .trim();
-            }
-          }
-        } else {
-          // If no message or card, use a default text
-          messageText = "You were mentioned";
-        }
+						// Extract a preview of the message text
+						try {
+							// Try to parse as JSON (Quill Delta format)
+							const parsedBody = JSON.parse(message.body);
+							if (parsedBody.ops) {
+								messageText = parsedBody.ops
+									.map((op: any) =>
+										typeof op.insert === 'string' ? op.insert : ''
+									)
+									.join('')
+									.trim();
+							}
+						} catch (e) {
+							// Not JSON, use as is (might contain HTML)
+							messageText = message.body
+								.replace(/<[^>]*>/g, '') // Remove HTML tags
+								.trim();
+						}
+					}
+				} else {
+					// If no message or card, use a default text
+					messageText = 'You were mentioned';
+				}
 
-        // Create a processed mention with actual content
-        const processedMention = {
-          id: mention._id,
-          messageId: mention.messageId,
-          cardId: mention.cardId,
-          text: messageText,
-          timestamp: mention.createdAt,
-          read: mention.read,
-          author: {
-            id: mentioner._id,
-            name: mentioner.user.name || '',
-            image: mentioner.user.image,
-          },
-          source: {
-            type: sourceType as 'channel' | 'direct' | 'thread' | 'card',
-            id: sourceId || mention.channelId || '',
-            name: sourceName || 'Channel',
-          },
-        };
+				// Create a processed mention with actual content
+				const processedMention = {
+					id: mention._id,
+					messageId: mention.messageId,
+					cardId: mention.cardId,
+					text: messageText,
+					timestamp: mention.createdAt,
+					read: mention.read,
+					author: {
+						id: mentioner._id,
+						name: mentioner.user.name || '',
+						image: mentioner.user.image,
+					},
+					source: {
+						type: sourceType as 'channel' | 'direct' | 'thread' | 'card',
+						id: sourceId || mention.channelId || '',
+						name: sourceName || 'Channel',
+					},
+				};
 
-        processedMentions.push(processedMention);
-      }
+				processedMentions.push(processedMention);
+			}
 
-      return processedMentions;
-    } catch (error) {
-
-      return [];
-    }
-  },
+			return processedMentions;
+		} catch (error) {
+			return [];
+		}
+	},
 });
 
 // Get all mentions in the workspace
 export const getAllMentions = query({
-  args: {
-    workspaceId: v.id('workspaces'),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        return [];
-      }
+	args: {
+		workspaceId: v.id('workspaces'),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				return [];
+			}
 
-      // Get all mentions for the workspace
-      const mentions = await ctx.db
-        .query('mentions')
-        .withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
-        .collect();
+			// Get all mentions for the workspace
+			const mentions = await ctx.db
+				.query('mentions')
+				.withIndex('by_workspace_id', (q) =>
+					q.eq('workspaceId', args.workspaceId)
+				)
+				.collect();
 
-      return mentions;
-    } catch (error) {
+			return mentions;
+		} catch (error) {
+			return [];
+		}
+	},
+});
 
-      return [];
-    }
-  },
+// Action to send email notification for mentions
+export const sendMentionEmail = action({
+	args: {
+		mentionId: v.id('mentions'),
+	},
+	handler: async (
+		ctx: ActionCtx,
+		{ mentionId }: { mentionId: Id<'mentions'> }
+	) => {
+		try {
+			// Get the mention
+			const mention = await ctx.runQuery(api.mentions._getMentionById, {
+				mentionId,
+			});
+			if (!mention) {
+				console.error('Mention not found:', mentionId);
+				return { success: false, error: 'Mention not found' };
+			}
+
+			// Get the mentioned member
+			const mentionedMember = await ctx.runQuery(api.members._getMemberById, {
+				memberId: mention.mentionedMemberId,
+			});
+			if (!mentionedMember || !mentionedMember.user) {
+				console.error('Mentioned member not found:', mention.mentionedMemberId);
+				return { success: false, error: 'Mentioned member not found' };
+			}
+
+			// Get the mentioner
+			const mentioner = await ctx.runQuery(api.members._getMemberById, {
+				memberId: mention.mentionerMemberId,
+			});
+			if (!mentioner || !mentioner.user) {
+				console.error('Mentioner not found:', mention.mentionerMemberId);
+				return { success: false, error: 'Mentioner not found' };
+			}
+
+			// Get the channel name if available
+			let channelName = 'a channel';
+			if (mention.channelId) {
+				const channel = await ctx.runQuery(api.channels._getChannelById, {
+					channelId: mention.channelId,
+				});
+				if (channel) {
+					channelName = channel.name;
+				}
+			}
+
+			// Get message text if available
+			let messagePreview = 'You were mentioned in a message';
+			if (mention.messageId) {
+				const message = await ctx.runQuery(api.messages._getMessageById, {
+					messageId: mention.messageId,
+				});
+				if (message) {
+					try {
+						// Try to parse as JSON (Quill Delta format)
+						const parsedBody = JSON.parse(message.body);
+						if (parsedBody.ops) {
+							messagePreview = parsedBody.ops
+								.map((op: any) =>
+									typeof op.insert === 'string' ? op.insert : ''
+								)
+								.join('')
+								.trim();
+						}
+					} catch (e) {
+						// Not JSON, use as is (might contain HTML)
+						messagePreview = message.body
+							.replace(/<[^>]*>/g, '') // Remove HTML tags
+							.trim();
+					}
+				}
+			}
+
+			// Get the workspace URL (fallback to default)
+			const workspaceUrl = `https://proddy-platform.vercel.app/workspace/${mention.workspaceId}`;
+
+			// Send the email
+			const baseUrl = 'https://proddy-platform.vercel.app';
+			const apiUrl = `${baseUrl}/api/email/mention`;
+			console.log(
+				'Sending mention email notification to:',
+				mentionedMember.user.email
+			);
+			console.log('Using API URL:', apiUrl);
+
+			try {
+				const response: Response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						to: mentionedMember.user.email,
+						firstName: mentionedMember.user.name || 'User',
+						mentionerName: mentioner.user.name || 'A team member',
+						messagePreview: messagePreview,
+						channelName: channelName,
+						workspaceUrl: workspaceUrl,
+						workspaceName: 'Proddy',
+					}),
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json();
+					console.error('Email API error:', errorData);
+					return {
+						success: false,
+						error: `Email API error: ${response.status} ${response.statusText}`,
+					};
+				}
+
+				const data = await response.json();
+				console.log('Email sent successfully:', data);
+				return { success: true };
+			} catch (fetchError: unknown) {
+				// If we can't reach the email API at all, log it but don't fail the whole operation
+				console.error('Failed to reach email API:', fetchError);
+				return {
+					success: false,
+					error: `Failed to reach email API: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`,
+				};
+			}
+		} catch (error) {
+			console.error('Error sending mention email:', error);
+			return { success: false, error: String(error) };
+		}
+	},
+});
+
+// Helper query to get a mention by ID (for internal use)
+export const _getMentionById = query({
+	args: {
+		mentionId: v.id('mentions'),
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.mentionId);
+	},
+});
+
+// Test function to create a mention and send an email
+export const createTestMentionWithEmail = mutation({
+	args: {
+		workspaceId: v.id('workspaces'),
+		channelId: v.id('channels'),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				throw new Error('Unauthorized');
+			}
+
+			// Get the current member (who will be both mentioner and mentioned)
+			const currentMember = await getMember(
+				ctx,
+				args.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				throw new Error('Member not found');
+			}
+
+			// Get the channel
+			const channel = await ctx.db.get(args.channelId);
+			if (!channel) {
+				throw new Error('Channel not found');
+			}
+
+			// Create a test message
+			const messageId = await ctx.db.insert('messages', {
+				body: 'This is a test message with a mention for email testing',
+				memberId: currentMember._id,
+				workspaceId: args.workspaceId,
+				channelId: args.channelId,
+			});
+
+			// Create a mention record
+			const mentionId = await ctx.db.insert('mentions', {
+				messageId,
+				mentionedMemberId: currentMember._id,
+				mentionerMemberId: currentMember._id,
+				workspaceId: args.workspaceId,
+				channelId: args.channelId,
+				read: false,
+				createdAt: Date.now(),
+			});
+
+			// Schedule the email notification
+			await ctx.scheduler.runAfter(0, api.mentions.sendMentionEmail, {
+				mentionId,
+			});
+
+			return { success: true, mentionId };
+		} catch (error) {
+			console.error('Error creating test mention with email:', error);
+			throw error;
+		}
+	},
 });
 
 // Create a complete test mention that will definitely show up in the UI
 export const createCompleteTestMention = mutation({
-  args: {
-    workspaceId: v.id('workspaces'),
-    channelId: v.id('channels'),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        throw new Error('Unauthorized');
-      }
+	args: {
+		workspaceId: v.id('workspaces'),
+		channelId: v.id('channels'),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				throw new Error('Unauthorized');
+			}
 
-      // Get the current member (who will be both mentioner and mentioned)
-      const currentMember = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
-      if (!currentMember) {
-        throw new Error('Member not found');
-      }
+			// Get the current member (who will be both mentioner and mentioned)
+			const currentMember = await getMember(
+				ctx,
+				args.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				throw new Error('Member not found');
+			}
 
-      // Get the channel
-      const channel = await ctx.db.get(args.channelId);
-      if (!channel) {
-        throw new Error('Channel not found');
-      }
+			// Get the channel
+			const channel = await ctx.db.get(args.channelId);
+			if (!channel) {
+				throw new Error('Channel not found');
+			}
 
-      // Get the user associated with the current member
-      const user = await ctx.db.get(currentMember.userId);
-      if (!user) {
-        throw new Error('User not found');
-      }
+			// Get the user associated with the current member
+			const user = await ctx.db.get(currentMember.userId);
+			if (!user) {
+				throw new Error('User not found');
+			}
 
-      // Create a message with a Quill Delta format for better testing
-      const messageId = await ctx.db.insert('messages', {
-        body: JSON.stringify({
-          ops: [
-            { insert: "Hello! This is a test message mentioning " },
-            { insert: `@${user.name}`, attributes: { mention: { userId: user._id, name: user.name } } },
-            { insert: ". Please check this out!" }
-          ]
-        }),
-        memberId: currentMember._id,
-        workspaceId: args.workspaceId,
-        channelId: args.channelId,
-      });
+			// Create a message with a Quill Delta format for better testing
+			const messageId = await ctx.db.insert('messages', {
+				body: JSON.stringify({
+					ops: [
+						{ insert: 'Hello! This is a test message mentioning ' },
+						{
+							insert: `@${user.name}`,
+							attributes: { mention: { userId: user._id, name: user.name } },
+						},
+						{ insert: '. Please check this out!' },
+					],
+				}),
+				memberId: currentMember._id,
+				workspaceId: args.workspaceId,
+				channelId: args.channelId,
+			});
 
-      // Create a mention record
-      const mentionId = await ctx.db.insert('mentions', {
-        messageId,
-        mentionedMemberId: currentMember._id,
-        mentionerMemberId: currentMember._id,
-        workspaceId: args.workspaceId,
-        channelId: args.channelId,
-        read: false,
-        createdAt: Date.now(),
-      });
+			// Create a mention record
+			const mentionId = await ctx.db.insert('mentions', {
+				messageId,
+				mentionedMemberId: currentMember._id,
+				mentionerMemberId: currentMember._id,
+				workspaceId: args.workspaceId,
+				channelId: args.channelId,
+				read: false,
+				createdAt: Date.now(),
+			});
 
-      return mentionId;
-    } catch (error) {
-
-      throw error;
-    }
-  },
+			return mentionId;
+		} catch (error) {
+			throw error;
+		}
+	},
 });
 
 // Create a test mention directly in the mentions table
 export const createTestMention = mutation({
-  args: {
-    workspaceId: v.id('workspaces'),
-    channelId: v.id('channels'),
-  },
-  handler: async (ctx, args) => {
-    try {
-      const userId = await getAuthUserId(ctx);
-      if (!userId) {
-        throw new Error('Unauthorized');
-      }
+	args: {
+		workspaceId: v.id('workspaces'),
+		channelId: v.id('channels'),
+	},
+	handler: async (ctx, args) => {
+		try {
+			const userId = await getAuthUserId(ctx);
+			if (!userId) {
+				throw new Error('Unauthorized');
+			}
 
-      // Get the current member (who will be both mentioner and mentioned)
-      const currentMember = await getMember(ctx, args.workspaceId, userId as Id<'users'>);
-      if (!currentMember) {
-        throw new Error('Member not found');
-      }
+			// Get the current member (who will be both mentioner and mentioned)
+			const currentMember = await getMember(
+				ctx,
+				args.workspaceId,
+				userId as Id<'users'>
+			);
+			if (!currentMember) {
+				throw new Error('Member not found');
+			}
 
-      // Get the channel
-      const channel = await ctx.db.get(args.channelId);
-      if (!channel) {
-        throw new Error('Channel not found');
-      }
+			// Get the channel
+			const channel = await ctx.db.get(args.channelId);
+			if (!channel) {
+				throw new Error('Channel not found');
+			}
 
-      // Get the user associated with the current member
-      const user = await ctx.db.get(currentMember.userId);
-      if (!user) {
-        throw new Error('User not found');
-      }
+			// Get the user associated with the current member
+			const user = await ctx.db.get(currentMember.userId);
+			if (!user) {
+				throw new Error('User not found');
+			}
 
-      // Create a message first
-      const messageId = await ctx.db.insert('messages', {
-        body: `This is a simple test message mentioning @${user.name}`,
-        memberId: currentMember._id,
-        workspaceId: args.workspaceId,
-        channelId: args.channelId,
-      });
+			// Create a message first
+			const messageId = await ctx.db.insert('messages', {
+				body: `This is a simple test message mentioning @${user.name}`,
+				memberId: currentMember._id,
+				workspaceId: args.workspaceId,
+				channelId: args.channelId,
+			});
 
-      // Create a test mention with all required fields
-      const mentionId = await ctx.db.insert('mentions', {
-        mentionedMemberId: currentMember._id,
-        mentionerMemberId: currentMember._id,
-        workspaceId: args.workspaceId,
-        channelId: args.channelId,
-        messageId: messageId,
-        read: false,
-        createdAt: Date.now(),
-      });
+			// Create a test mention with all required fields
+			const mentionId = await ctx.db.insert('mentions', {
+				mentionedMemberId: currentMember._id,
+				mentionerMemberId: currentMember._id,
+				workspaceId: args.workspaceId,
+				channelId: args.channelId,
+				messageId: messageId,
+				read: false,
+				createdAt: Date.now(),
+			});
 
-      // Now let's manually create a processed mention to ensure it has all the required fields
-      const processedMention = {
-        id: mentionId,
-        messageId: null,
-        cardId: null,
-        text: "This is a test mention",
-        timestamp: Date.now(),
-        read: false,
-        author: {
-          id: currentMember._id,
-          name: user.name || 'Test User',
-          image: user.image || '',
-        },
-        source: {
-          type: 'channel' as 'channel' | 'direct' | 'thread' | 'card',
-          id: args.channelId,
-          name: channel.name || 'Test Channel',
-        },
-      };
+			// Now let's manually create a processed mention to ensure it has all the required fields
+			const processedMention = {
+				id: mentionId,
+				messageId: null,
+				cardId: null,
+				text: 'This is a test mention',
+				timestamp: Date.now(),
+				read: false,
+				author: {
+					id: currentMember._id,
+					name: user.name || 'Test User',
+					image: user.image || '',
+				},
+				source: {
+					type: 'channel' as 'channel' | 'direct' | 'thread' | 'card',
+					id: args.channelId,
+					name: channel.name || 'Test Channel',
+				},
+			};
 
-      console.log('createTestMention - Created processed mention:', processedMention);
+			console.log(
+				'createTestMention - Created processed mention:',
+				processedMention
+			);
 
-      console.log('Created test mention:', mentionId);
-      return mentionId;
-    } catch (error) {
-      console.error('Error creating test mention:', error);
-      throw error;
-    }
-  },
+			console.log('Created test mention:', mentionId);
+			return mentionId;
+		} catch (error) {
+			console.error('Error creating test mention:', error);
+			throw error;
+		}
+	},
 });
