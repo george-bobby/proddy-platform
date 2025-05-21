@@ -101,9 +101,6 @@ const ContactPage = () => {
                     <a href="mailto:support@proddy.tech" className="text-primary hover:underline block mb-1">
                       support@proddy.tech
                     </a>
-                    <a href="https://proddy.freshdesk.com/support/home" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm">
-                      Visit our Support Portal <ExternalLink className="size-3" />
-                    </a>
                   </div>
                 </div>
 
