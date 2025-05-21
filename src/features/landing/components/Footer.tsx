@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Github, Linkedin, Twitter, ExternalLink } from "lucide-react";
+import { GithubIcon, Linkedin, TwitterIcon, ExternalLink } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -38,7 +38,7 @@ export const Footer = () => {
                 className="text-gray-400 hover:text-primary transition-all duration-200 hover:scale-110"
                 aria-label="Twitter"
               >
-                <Twitter size={20} />
+                <TwitterIcon size={20} />
               </a>
               <a
                 href="https://linkedin.com"
@@ -56,7 +56,7 @@ export const Footer = () => {
                 className="text-gray-400 hover:text-primary transition-all duration-200 hover:scale-110"
                 aria-label="GitHub"
               >
-                <Github size={20} />
+                <GithubIcon size={20} />
               </a>
             </div>
           </div>

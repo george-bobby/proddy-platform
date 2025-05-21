@@ -60,12 +60,12 @@ export const ActivityWidget = ({ workspaceId, member }: ActivityWidgetProps) => 
   // Add messages to activity
   if (recentMessages) {
     recentMessages.forEach((message) => {
-      // Ensure we have valid author data
-      const authorName = message.authorName || 'Unknown User';
+      // Get author name from user object if available
+      const authorName = message.user?.name || 'Unknown User';
 
       // Ensure we have a valid timestamp
-      const timestamp = message.creationTime && !isNaN(message.creationTime)
-        ? message.creationTime
+      const timestamp = message._creationTime && !isNaN(message._creationTime)
+        ? message._creationTime
         : Date.now();
 
       // Parse message body to extract plain text
@@ -88,17 +88,17 @@ export const ActivityWidget = ({ workspaceId, member }: ActivityWidgetProps) => 
       }
 
       activityItems.push({
-        id: message.id,
+        id: message._id,
         type: 'message',
         action: 'created',
         title: messageText + (messageText.length > 50 ? '...' : ''),
         author: {
           name: authorName,
-          image: message.authorImage,
+          image: message.user?.image,
         },
         timestamp: timestamp,
         channelId: message.channelId,
-        channelName: message.channelName || 'General',
+        channelName: message.context?.name || 'General',
       });
     });
   }
