@@ -122,7 +122,7 @@ export const WorkspaceToolbar = ({
             className="text-white relative hover:bg-white/15 transition-colors"
             onClick={() => {
               // Open status page in a new tab
-              const statusPageUrl = 'https://proddy.betteruptime.com/';
+              const statusPageUrl = 'https://status.proddy.tech/';
               window.open(statusPageUrl, '_blank', 'noopener,noreferrer');
             }}
           >

@@ -43,10 +43,11 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
 
     return events
       .filter(event => {
-        const eventStart = event.startTime;
-        return eventStart >= startOfToday && eventStart <= endOfNextWeek;
+        // Use the date property instead of startTime
+        const eventDate = event.date;
+        return eventDate >= startOfToday && eventDate <= endOfNextWeek;
       })
-      .sort((a, b) => a.startTime - b.startTime);
+      .sort((a, b) => a.date - b.date);
   }, [events, today]);
 
   const handleViewEvent = (eventId: Id<'events'>) => {
@@ -133,15 +134,13 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
                             <h5 className="font-medium">{event.title}</h5>
-                            <Badge variant={event.isAllDay ? "outline" : "secondary"} className="text-xs">
-                              {event.isAllDay
+                            <Badge variant={!event.time ? "outline" : "secondary"} className="text-xs">
+                              {!event.time
                                 ? 'All day'
-                                : `${format(new Date(event.startTime), 'h:mm a')} - ${format(new Date(event.endTime), 'h:mm a')}`}
+                                : event.time}
                             </Badge>
                           </div>
-                          {event.location && (
-                            <p className="text-xs text-muted-foreground">{event.location}</p>
-                          )}
+                          {/* Location is not available in the current event structure */}
                           <Button
                             variant="ghost"
                             size="sm"

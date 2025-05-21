@@ -94,7 +94,7 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="https://proddy.betteruptime.com/"
+                    href="https://status.proddy.tech/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
@@ -176,7 +176,7 @@ export const Footer = () => {
               <ul className="space-y-3">
                 <li>
                   <Link
-                    href="https://proddy.betteruptime.com/"
+                    href="https://status.proddy.tech/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
