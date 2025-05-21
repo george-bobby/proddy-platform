@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AssigneeTemplate } from '@/features/email/components/assignee';
 import { CardAssignmentTemplate } from '@/features/email/components/card-assignment';
 import { Resend } from 'resend';
 
@@ -23,7 +22,7 @@ export async function POST(req: NextRequest) {
 		const {
 			to,
 			firstName,
-			type = 'mention',
+			type,
 			cardTitle,
 			cardDescription,
 			dueDate,
@@ -44,30 +43,26 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		let subject = 'You were mentioned in Proddy';
-		let emailTemplate;
+		// Set the subject based on the notification type
+		let subject =
+			type === 'card_assignment'
+				? `Card Assignment: ${cardTitle}`
+				: 'You were mentioned in Proddy';
 
-		// Choose the template based on the notification type
-		if (type === 'card_assignment') {
-			console.log('Preparing card assignment email template');
-			subject = `Card Assignment: ${cardTitle}`;
-			emailTemplate = CardAssignmentTemplate({
-				firstName: firstName || 'User',
-				cardTitle,
-				cardDescription,
-				dueDate: dueDate ? new Date(dueDate).toLocaleDateString() : undefined,
-				priority,
-				listName,
-				channelName,
-				assignedBy,
-				workspaceUrl,
-				workspaceName,
-			});
-		} else {
-			console.log('Preparing mention email template');
-			// Default to mention template
-			emailTemplate = AssigneeTemplate({ firstName: firstName || 'User' });
-		}
+		console.log('Preparing email template');
+		// Use CardAssignmentTemplate for all email types
+		const emailTemplate = CardAssignmentTemplate({
+			firstName: firstName || 'User',
+			cardTitle: cardTitle || 'Task',
+			cardDescription,
+			dueDate: dueDate ? new Date(dueDate).toLocaleDateString() : undefined,
+			priority,
+			listName,
+			channelName,
+			assignedBy,
+			workspaceUrl,
+			workspaceName,
+		});
 
 		console.log('Sending email via Resend to:', to);
 		console.log('Email subject:', subject);
