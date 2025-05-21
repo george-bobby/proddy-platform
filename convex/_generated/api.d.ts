@@ -30,6 +30,7 @@ import type * as presence from "../presence.js";
 import type * as reactions from "../reactions.js";
 import type * as status from "../status.js";
 import type * as tasks from "../tasks.js";
+import type * as threadReplies from "../threadReplies.js";
 import type * as upload from "../upload.js";
 import type * as userPreferences from "../userPreferences.js";
 import type * as users from "../users.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   reactions: typeof reactions;
   status: typeof status;
   tasks: typeof tasks;
+  threadReplies: typeof threadReplies;
   upload: typeof upload;
   userPreferences: typeof userPreferences;
   users: typeof users;

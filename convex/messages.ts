@@ -316,6 +316,14 @@ export const create = mutation({
 			calendarEvent: args.calendarEvent,
 		});
 
+		// If this is a reply to a thread, send an email notification
+		if (args.parentMessageId) {
+			await ctx.scheduler.runAfter(0, api.threadReplies.sendThreadReplyEmail, {
+				messageId,
+				parentMessageId: args.parentMessageId,
+			});
+		}
+
 		// Process mentions in the message (skip for direct messages)
 		// If this is a direct message (has conversationId), skip mention processing
 		if (args.conversationId) {
