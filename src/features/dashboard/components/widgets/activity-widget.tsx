@@ -60,8 +60,9 @@ export const ActivityWidget = ({ workspaceId, member }: ActivityWidgetProps) => 
   // Add messages to activity
   if (recentMessages) {
     recentMessages.forEach((message) => {
-      // Get author name from user object if available
-      const authorName = message.user?.name || 'Unknown User';
+      // Get author name - in Convex, member data is populated separately
+      // We don't have direct access to user data on the message object
+      const authorName = 'User'; // Default fallback
 
       // Ensure we have a valid timestamp
       const timestamp = message._creationTime && !isNaN(message._creationTime)
@@ -94,7 +95,8 @@ export const ActivityWidget = ({ workspaceId, member }: ActivityWidgetProps) => 
         title: messageText + (messageText.length > 50 ? '...' : ''),
         author: {
           name: authorName,
-          image: message.user?.image,
+          // Don't try to access message.user.image as it doesn't exist
+          image: undefined,
         },
         timestamp: timestamp,
         channelId: message.channelId,
