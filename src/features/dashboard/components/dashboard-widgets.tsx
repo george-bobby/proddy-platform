@@ -5,7 +5,7 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { MentionsWidget } from './widgets/mentions-widget';
 import { ThreadRepliesWidget } from './widgets/thread-replies-widget';
 import { TasksWidget } from './widgets/tasks-widget';
-import { ActivityWidget } from './widgets/activity-widget';
+import { AssignedCardsWidget } from './widgets/assigned-cards-widget';
 import { CalendarPreviewWidget } from './widgets/calendar-preview-widget';
 import { NotesWidget } from './widgets/notes-widget';
 import { CanvasWidget } from './widgets/canvas-widget';
@@ -64,7 +64,7 @@ interface DashboardWidgetsProps {
 }
 
 // Widget types
-type WidgetType = 'activity' | 'mentions' | 'threads' | 'tasks' | 'calendar' | 'notes' | 'canvas';
+type WidgetType = 'mentions' | 'threads' | 'tasks' | 'cards' | 'calendar' | 'notes' | 'canvas';
 
 interface WidgetConfig {
   id: WidgetType;
@@ -133,13 +133,6 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   // Default widget order with all available widgets
   const [widgets, setWidgets] = useState<WidgetConfig[]>([
     {
-      id: 'activity',
-      title: 'Recent Activity',
-      description: 'Shows recent messages and tasks',
-      visible: true,
-      size: 'large'
-    },
-    {
       id: 'calendar',
       title: 'Upcoming Events',
       description: 'Shows events for the next 7 days',
@@ -162,10 +155,17 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
     },
     {
       id: 'tasks',
-      title: 'Tasks',
-      description: 'Shows your assigned tasks',
+      title: 'Workspace Tasks',
+      description: 'Shows your assigned workspace tasks',
       visible: true,
-      size: 'large'
+      size: 'small'
+    },
+    {
+      id: 'cards',
+      title: 'Board Cards',
+      description: 'Shows your assigned board cards',
+      visible: true,
+      size: 'small'
     },
     {
       id: 'notes',
@@ -269,15 +269,6 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   // Render the appropriate widget based on type
   const renderWidget = useCallback((type: WidgetType) => {
     switch (type) {
-      case 'activity':
-        return (
-          <ActivityWidget
-            key={`activity-${refreshKey}`}
-            workspaceId={workspaceId}
-            member={member}
-          />
-        );
-
       case 'mentions':
         return (
           <MentionsWidget
@@ -298,6 +289,14 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
         return (
           <TasksWidget
             key={`tasks-${refreshKey}`}
+            workspaceId={workspaceId}
+            member={member}
+          />
+        );
+      case 'cards':
+        return (
+          <AssignedCardsWidget
+            key={`cards-${refreshKey}`}
             workspaceId={workspaceId}
             member={member}
           />

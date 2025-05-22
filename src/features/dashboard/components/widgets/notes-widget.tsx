@@ -133,33 +133,46 @@ export const NotesWidget = ({ workspaceId }: NotesWidgetProps) => {
                       {note.channelName}
                     </Badge>
                     <p className="text-sm text-muted-foreground line-clamp-1">
-                      {note.content ? (
-                        typeof note.content === 'string'
-                          ? note.content.substring(0, 100)
-                          : (() => {
-                            try {
-                              // Define a type for Quill Delta operations
-                              interface DeltaOperation {
-                                insert?: string | object;
-                                delete?: number;
-                                retain?: number;
-                                attributes?: Record<string, any>;
-                              }
+                      {(() => {
+                        try {
+                          // Define a type for Quill Delta operations
+                          interface DeltaOperation {
+                            insert?: string | object;
+                            delete?: number;
+                            retain?: number;
+                            attributes?: Record<string, any>;
+                          }
 
-                              const parsed = JSON.parse(typeof note.content === 'string' ? note.content : JSON.stringify(note.content));
-                              if (parsed && parsed.ops && Array.isArray(parsed.ops)) {
-                                // Extract text from the first insert operation
-                                const firstLine = parsed.ops
-                                  .map((op: DeltaOperation) => (typeof op.insert === 'string' ? op.insert : ''))
-                                  .join('')
-                                  .split('\n')[0]
-                                  .trim();
-                                return firstLine || 'No content';
-                              }
-                            } catch (e) { }
-                            return 'Note content';
-                          })()
-                      ) : 'No content'}
+                          // Handle different content formats
+                          if (!note.content) return 'No content';
+
+                          // If content is already a string but not JSON
+                          if (typeof note.content === 'string' && !note.content.includes('{"ops":')) {
+                            return note.content.substring(0, 100);
+                          }
+
+                          // Parse JSON content
+                          const contentStr = typeof note.content === 'string' ? note.content : JSON.stringify(note.content);
+                          const parsed = JSON.parse(contentStr);
+
+                          if (parsed && parsed.ops && Array.isArray(parsed.ops)) {
+                            // Extract text from all insert operations
+                            const plainText = parsed.ops
+                              .map((op: DeltaOperation) => (typeof op.insert === 'string' ? op.insert : ''))
+                              .join('')
+                              .trim();
+
+                            // Get first line or first 100 chars
+                            const firstLine = plainText.split('\n')[0].trim();
+                            return firstLine || 'No content';
+                          }
+
+                          return typeof note.content === 'string' ? note.content.substring(0, 100) : 'Note content';
+                        } catch (e) {
+                          // If parsing fails, return a fallback
+                          return typeof note.content === 'string' ? note.content.substring(0, 100) : 'Note content';
+                        }
+                      })()}
                     </p>
                     <Button
                       variant="ghost"

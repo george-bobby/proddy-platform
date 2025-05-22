@@ -1,6 +1,5 @@
 export * from './dashboard-chatbot';
 export * from './dashboard-widgets';
-export * from './widgets/activity-widget';
 export * from './widgets/mentions-widget';
 export * from './widgets/tasks-widget';
 export * from './widgets/thread-replies-widget';
@@ -9,3 +8,4 @@ export * from './widgets/calendar-preview-widget';
 export * from './widgets/notes-widget';
 export * from './widgets/canvas-widget';
 export * from './widgets/team-status-widget';
+export * from './widgets/assigned-cards-widget';
