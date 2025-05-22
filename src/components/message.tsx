@@ -3,8 +3,7 @@
 import { format, isToday, isYesterday } from 'date-fns';
 import { CalendarIcon, Loader } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Quill from 'quill';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -129,41 +128,22 @@ export const Message = ({
         return contents;
       }
 
-      // Check if we're in a browser environment
-      if (typeof document !== 'undefined') {
-        // Create a temporary Quill instance
-        const quill = new Quill(document.createElement('div'), {
-          theme: 'snow'
-        });
+      // Always use the server-side rendering approach for safety
+      // Try to extract text directly from the Delta object
+      if (contents && contents.ops && Array.isArray(contents.ops)) {
+        const text = contents.ops
+          .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+          .join('')
+          .trim();
 
-        // Disable editing
-        quill.enable(false);
-
-        // Set the contents in Quill
-        quill.setContents(contents);
-
-        // Extract the text
-        const extractedText = quill.getText().trim();
-
-        // Cache the result
-        extractedTextRef.current[bodyJson] = extractedText;
-
-        return extractedText;
-      } else {
-        // Server-side rendering fallback
-        // Try to extract text directly from the Delta object
-        if (Array.isArray(contents.ops)) {
-          const text = contents.ops
-            .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
-            .join('')
-            .trim();
-
-          extractedTextRef.current[bodyJson] = text;
-          return text;
-        }
-        return '';
+        extractedTextRef.current[bodyJson] = text;
+        return text;
       }
+
+      // If we can't extract text, return an empty string
+      return '';
     } catch (error) {
+      console.error('Error extracting text from message body:', error);
       return '';
     }
   };

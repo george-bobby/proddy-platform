@@ -1,3 +1,5 @@
+'use client';
+
 import { differenceInMinutes, format, isToday, isYesterday } from 'date-fns';
 import { AlertTriangle, Loader, XIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
