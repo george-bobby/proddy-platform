@@ -111,7 +111,7 @@ const SortableWidget = ({ id, children, size }: SortableWidgetProps) => {
       className={cn(
         "relative",
         gridSizeClasses[size],
-        "h-auto",
+        "h-auto mb-4",
         isDragging ? "z-10" : ""
       )}
     >
@@ -410,7 +410,7 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
         </div>
       </CardHeader>
       <CardContent className="p-4">
-        <ScrollArea className="h-[calc(100vh-180px)]">
+        <ScrollArea className="h-[calc(100vh-180px)] pb-8">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -422,7 +422,7 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
               strategy={rectSortingStrategy}
             >
               {/* Grid layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
                 {widgets.filter(w => w.visible).map((widget) => (
                   <SortableWidget
                     key={widget.id}
