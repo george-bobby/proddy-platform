@@ -19,10 +19,11 @@ export const useGetAssignedCards = ({
 	});
 
 	// Get all channels in the workspace
-	const { data: channels, isLoading: channelsLoading } = useQuery(
+	const channels = useQuery(
 		api.channels.get,
 		workspaceId ? { workspaceId } : 'skip'
 	);
+	const channelsLoading = channels === undefined;
 
 	// Get all cards assigned to the current member across all channels
 	const assignedCardsResult = useQuery(
@@ -43,7 +44,10 @@ export const useGetAssignedCards = ({
 		if (!assignedCards || !channels) return [];
 
 		return assignedCards.map((card) => {
+			// Find the channel that matches the card's channelId
 			const channel = channels.find((c) => c._id === card.channelId);
+
+			// Return the card with added channel information
 			return {
 				...card,
 				channelName: channel?.name || 'Unknown Channel',
