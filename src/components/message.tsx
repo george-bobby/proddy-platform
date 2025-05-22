@@ -1,3 +1,5 @@
+'use client';
+
 import { format, isToday, isYesterday } from 'date-fns';
 import { CalendarIcon, Loader } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -118,15 +120,7 @@ export const Message = ({
     }
 
     try {
-      // Create a temporary Quill instance
-      const quill = new Quill(document.createElement('div'), {
-        theme: 'snow'
-      });
-
-      // Disable editing
-      quill.enable(false);
-
-      // Parse the body and set the contents
+      // First try to parse the body
       const contents = JSON.parse(bodyJson);
 
       // If it's already a string, return it directly
@@ -135,16 +129,40 @@ export const Message = ({
         return contents;
       }
 
-      // Set the contents in Quill
-      quill.setContents(contents);
+      // Check if we're in a browser environment
+      if (typeof document !== 'undefined') {
+        // Create a temporary Quill instance
+        const quill = new Quill(document.createElement('div'), {
+          theme: 'snow'
+        });
 
-      // Extract the text
-      const extractedText = quill.getText().trim();
+        // Disable editing
+        quill.enable(false);
 
-      // Cache the result
-      extractedTextRef.current[bodyJson] = extractedText;
+        // Set the contents in Quill
+        quill.setContents(contents);
 
-      return extractedText;
+        // Extract the text
+        const extractedText = quill.getText().trim();
+
+        // Cache the result
+        extractedTextRef.current[bodyJson] = extractedText;
+
+        return extractedText;
+      } else {
+        // Server-side rendering fallback
+        // Try to extract text directly from the Delta object
+        if (Array.isArray(contents.ops)) {
+          const text = contents.ops
+            .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+            .join('')
+            .trim();
+
+          extractedTextRef.current[bodyJson] = text;
+          return text;
+        }
+        return '';
+      }
     } catch (error) {
       return '';
     }

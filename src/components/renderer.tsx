@@ -1,3 +1,5 @@
+'use client';
+
 import Quill from 'quill';
 import { useEffect, useRef, useState } from 'react';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
@@ -72,6 +74,12 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     if (!rendererRef.current) return;
 
     const container = rendererRef.current;
+
+    // Check if we're in a browser environment
+    if (typeof document === 'undefined') {
+      console.log('Renderer: document is not defined, skipping Quill initialization');
+      return;
+    }
 
     const quill = new Quill(document.createElement('div'), {
       theme: 'snow'

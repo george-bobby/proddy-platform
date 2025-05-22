@@ -135,10 +135,10 @@ export const sendThreadReplyEmail = action({
 			}
 
 			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy-platform.vercel.app/workspace/${replyMessage.workspaceId}`;
+			const workspaceUrl = `https://proddy.tech/workspace/${replyMessage.workspaceId}`;
 
 			// Send the email
-			const baseUrl = 'https://proddy-platform.vercel.app';
+			const baseUrl = 'https://proddy.tech';
 			const apiUrl = `${baseUrl}/api/email/thread-reply`;
 			console.log(
 				'Sending thread reply email notification to:',

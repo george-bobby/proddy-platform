@@ -36,7 +36,7 @@ export const CardAssignmentTemplate: React.FC<Readonly<CardAssignmentTemplatePro
   listName,
   channelName,
   assignedBy = 'A team member',
-  workspaceUrl = 'https://proddy-platform.vercel.app',
+  workspaceUrl = 'https://proddy.tech',
   workspaceName = 'Proddy',
 }) => {
   const previewText = `${assignedBy} assigned you to "${cardTitle}"`;
@@ -48,7 +48,7 @@ export const CardAssignmentTemplate: React.FC<Readonly<CardAssignmentTemplatePro
       <Body style={main}>
         <Container style={container}>
           <Img
-            src="https://proddy-platform.vercel.app/logo-nobg.png"
+            src="https://proddy.tech/logo-nobg.png"
             width="40"
             height="40"
             alt="Proddy"

@@ -28,7 +28,7 @@ export const MentionTemplate: React.FC<Readonly<MentionTemplateProps>> = ({
   mentionerName,
   messagePreview,
   channelName = 'a channel',
-  workspaceUrl = 'https://proddy-platform.vercel.app',
+  workspaceUrl = 'https://proddy.tech',
   workspaceName = 'Proddy',
 }) => {
   const previewText = `${mentionerName} mentioned you in ${channelName}`;
@@ -40,7 +40,7 @@ export const MentionTemplate: React.FC<Readonly<MentionTemplateProps>> = ({
       <Body style={main}>
         <Container style={container}>
           <Img
-            src="https://proddy-platform.vercel.app/logo-nobg.png"
+            src="https://proddy.tech/logo-nobg.png"
             width="40"
             height="40"
             alt="Proddy"

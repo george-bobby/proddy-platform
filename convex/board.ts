@@ -558,11 +558,11 @@ export const sendCardAssignmentEmail = action({
 			console.log('Assigner name:', assignerName);
 
 			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy-platform.vercel.app/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
+			const workspaceUrl = `https://proddy.tech/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
 
 			// Send the email
 			// Make sure we're using the correct URL format for the API endpoint
-			const baseUrl = 'https://proddy-platform.vercel.app';
+			const baseUrl = 'https://proddy.tech';
 			const apiUrl = `${baseUrl}/api/email/assignee`;
 			console.log('Sending email notification to:', assigneeEmail);
 			console.log('Using API URL:', apiUrl);

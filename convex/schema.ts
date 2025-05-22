@@ -52,7 +52,11 @@ const schema = defineSchema({
 			'channelId',
 			'parentMessageId',
 			'conversationId',
-		]),
+		])
+		.searchIndex('search_body', {
+			searchField: 'body',
+			filterFields: ['workspaceId', 'channelId', 'conversationId'],
+		}),
 	events: defineTable({
 		title: v.string(),
 		date: v.number(), // timestamp for the event date
@@ -107,7 +111,12 @@ const schema = defineSchema({
 		),
 		dueDate: v.optional(v.number()),
 		assignees: v.optional(v.array(v.id('members'))),
-	}).index('by_list_id', ['listId']),
+	})
+		.index('by_list_id', ['listId'])
+		.searchIndex('search_title_description', {
+			searchField: 'title',
+			filterFields: ['listId'],
+		}),
 
 	categories: defineTable({
 		name: v.string(),
@@ -146,7 +155,11 @@ const schema = defineSchema({
 		.index('by_user_id', ['userId'])
 		.index('by_workspace_id', ['workspaceId'])
 		.index('by_workspace_id_user_id', ['workspaceId', 'userId'])
-		.index('by_category_id', ['categoryId']),
+		.index('by_category_id', ['categoryId'])
+		.searchIndex('search_title_description', {
+			searchField: 'title',
+			filterFields: ['workspaceId', 'userId'],
+		}),
 
 	mentions: defineTable({
 		messageId: v.optional(v.id('messages')),
@@ -278,7 +291,11 @@ const schema = defineSchema({
 		.index('by_channel_id', ['channelId'])
 		.index('by_member_id', ['memberId'])
 		.index('by_workspace_id_channel_id', ['workspaceId', 'channelId'])
-		.index('by_folder_id', ['folderId']),
+		.index('by_folder_id', ['folderId'])
+		.searchIndex('search_title_content', {
+			searchField: 'title',
+			filterFields: ['workspaceId', 'channelId'],
+		}),
 
 	presence: defineTable({
 		userId: v.id('users'),
@@ -292,6 +309,22 @@ const schema = defineSchema({
 		.index('by_channel_id', ['channelId'])
 		.index('by_user_channel', ['userId', 'channelId'])
 		.index('by_channel_status', ['channelId', 'status']),
+
+	chatHistory: defineTable({
+		workspaceId: v.id('workspaces'),
+		memberId: v.id('members'),
+		messages: v.array(
+			v.object({
+				role: v.union(v.literal('user'), v.literal('assistant')),
+				content: v.string(),
+				timestamp: v.number(),
+			})
+		),
+		updatedAt: v.number(),
+	})
+		.index('by_workspace_id', ['workspaceId'])
+		.index('by_member_id', ['memberId'])
+		.index('by_workspace_id_member_id', ['workspaceId', 'memberId']),
 });
 
 export default schema;
