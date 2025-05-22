@@ -82,9 +82,6 @@ export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
     router.push(`/workspace/${workspaceId}/direct/${userId}`);
   };
 
-  const handleViewMembers = () => {
-    router.push(`/workspace/${workspaceId}/members`);
-  };
 
   if (membersLoading || statusesLoading) {
     return (
@@ -106,13 +103,6 @@ export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
             </Badge>
           )}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleViewMembers}
-        >
-          View All
-        </Button>
       </div>
 
       {teamMembers.length > 0 ? (

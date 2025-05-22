@@ -2,25 +2,22 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Id } from '@/../convex/_generated/dataModel';
-import { UnreadMessagesWidget } from './widgets/unread-messages-widget';
 import { MentionsWidget } from './widgets/mentions-widget';
 import { ThreadRepliesWidget } from './widgets/thread-replies-widget';
 import { TasksWidget } from './widgets/tasks-widget';
 import { ActivityWidget } from './widgets/activity-widget';
 import { CalendarPreviewWidget } from './widgets/calendar-preview-widget';
 import { NotesWidget } from './widgets/notes-widget';
-import { TeamStatusWidget } from './widgets/team-status-widget';
+import { CanvasWidget } from './widgets/canvas-widget';
 import { useState, useCallback, useEffect } from 'react';
 import {
   RefreshCw,
   GripVertical,
-  LayoutGrid,
-  LayoutList,
   Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import {
@@ -47,7 +44,6 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy,
   rectSortingStrategy
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -68,28 +64,24 @@ interface DashboardWidgetsProps {
 }
 
 // Widget types
-type WidgetType = 'activity' | 'messages' | 'mentions' | 'threads' | 'tasks' | 'calendar' | 'notes' | 'team';
-
-// Layout types
-type LayoutType = 'list' | 'grid';
+type WidgetType = 'activity' | 'mentions' | 'threads' | 'tasks' | 'calendar' | 'notes' | 'canvas';
 
 interface WidgetConfig {
   id: WidgetType;
   title: string;
   description: string;
   visible: boolean;
-  size?: 'small' | 'medium' | 'large'; // For grid layout
+  size: 'small' | 'large';
 }
 
 // Sortable widget wrapper component
 interface SortableWidgetProps {
   id: string;
   children: React.ReactNode;
-  layout: LayoutType;
-  size?: 'small' | 'medium' | 'large';
+  size: 'small' | 'large';
 }
 
-const SortableWidget = ({ id, children, layout, size = 'medium' }: SortableWidgetProps) => {
+const SortableWidget = ({ id, children, size }: SortableWidgetProps) => {
   const {
     attributes,
     listeners,
@@ -108,9 +100,8 @@ const SortableWidget = ({ id, children, layout, size = 'medium' }: SortableWidge
 
   // Grid layout classes based on size
   const gridSizeClasses = {
-    small: 'col-span-1',
-    medium: 'col-span-1 md:col-span-2',
-    large: 'col-span-1 md:col-span-3',
+    small: 'col-span-1', // Half width (1 column)
+    large: 'col-span-1 md:col-span-2', // Full width (2 columns)
   };
 
   return (
@@ -118,11 +109,9 @@ const SortableWidget = ({ id, children, layout, size = 'medium' }: SortableWidge
       ref={setNodeRef}
       style={style}
       className={cn(
-        layout === 'list' ? "mb-4 relative w-full" : cn(
-          "relative",
-          gridSizeClasses[size],
-          "h-auto"
-        ),
+        "relative",
+        gridSizeClasses[size],
+        "h-auto",
         isDragging ? "z-10" : ""
       )}
     >
@@ -140,7 +129,6 @@ const SortableWidget = ({ id, children, layout, size = 'medium' }: SortableWidge
 
 export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps) => {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [layout, setLayout] = useState<LayoutType>('list');
 
   // Default widget order with all available widgets
   const [widgets, setWidgets] = useState<WidgetConfig[]>([
@@ -149,14 +137,14 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
       title: 'Recent Activity',
       description: 'Shows recent messages and tasks',
       visible: true,
-      size: 'medium'
+      size: 'large'
     },
     {
-      id: 'messages',
-      title: 'Unread Messages',
-      description: 'Shows unread direct messages',
+      id: 'calendar',
+      title: 'Upcoming Events',
+      description: 'Shows events for the next 7 days',
       visible: true,
-      size: 'medium'
+      size: 'large'
     },
     {
       id: 'mentions',
@@ -177,28 +165,21 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
       title: 'Tasks',
       description: 'Shows your assigned tasks',
       visible: true,
-      size: 'medium'
-    },
-    {
-      id: 'calendar',
-      title: 'Upcoming Events',
-      description: 'Shows events for the next 7 days',
-      visible: true,
-      size: 'medium'
+      size: 'large'
     },
     {
       id: 'notes',
       title: 'Recent Notes',
       description: 'Shows recently updated notes',
       visible: true,
-      size: 'medium'
+      size: 'small'
     },
     {
-      id: 'team',
-      title: 'Team Status',
-      description: 'Shows team members and their status',
+      id: 'canvas',
+      title: 'Recent Canvas',
+      description: 'Shows recently updated canvas items',
       visible: true,
-      size: 'large'
+      size: 'small'
     }
   ]);
 
@@ -208,24 +189,18 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   useEffect(() => {
     try {
       localStorage.setItem('dashboard-widgets', JSON.stringify(widgets));
-      localStorage.setItem('dashboard-layout', layout);
     } catch (error) {
       console.error('Error saving widget preferences:', error);
     }
-  }, [widgets, layout]);
+  }, [widgets]);
 
   // Load widget preferences from localStorage
   useEffect(() => {
     try {
       const savedWidgets = localStorage.getItem('dashboard-widgets');
-      const savedLayout = localStorage.getItem('dashboard-layout');
 
       if (savedWidgets) {
         setWidgets(JSON.parse(savedWidgets));
-      }
-
-      if (savedLayout && (savedLayout === 'list' || savedLayout === 'grid')) {
-        setLayout(savedLayout as LayoutType);
       }
     } catch (error) {
       console.error('Error loading widget preferences:', error);
@@ -281,7 +256,7 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   };
 
   // Update widget size
-  const updateWidgetSize = (id: WidgetType, size: 'small' | 'medium' | 'large') => {
+  const updateWidgetSize = (id: WidgetType, size: 'small' | 'large') => {
     setWidgets(prev =>
       prev.map(widget =>
         widget.id === id
@@ -302,14 +277,7 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
             member={member}
           />
         );
-      case 'messages':
-        return (
-          <UnreadMessagesWidget
-            key={`messages-${refreshKey}`}
-            workspaceId={workspaceId}
-            member={member}
-          />
-        );
+
       case 'mentions':
         return (
           <MentionsWidget
@@ -350,10 +318,11 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
             member={member}
           />
         );
-      case 'team':
+
+      case 'canvas':
         return (
-          <TeamStatusWidget
-            key={`team-${refreshKey}`}
+          <CanvasWidget
+            key={`canvas-${refreshKey}`}
             workspaceId={workspaceId}
             member={member}
           />
@@ -369,21 +338,6 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Workspace Overview</CardTitle>
           <div className="flex items-center gap-2">
-            <Tabs
-              value={layout}
-              onValueChange={(value) => setLayout(value as LayoutType)}
-              className="mr-2"
-            >
-              <TabsList className="h-8">
-                <TabsTrigger value="list" className="px-2 h-7">
-                  <LayoutList className="h-4 w-4" />
-                </TabsTrigger>
-                <TabsTrigger value="grid" className="px-2 h-7">
-                  <LayoutGrid className="h-4 w-4" />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
             <Button
               variant="ghost"
               size="sm"
@@ -429,34 +383,24 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
                           </div>
                           <p className="text-xs text-muted-foreground">{widget.description}</p>
                         </div>
-                        {layout === 'grid' && (
-                          <div className="flex items-center space-x-1">
-                            <Button
-                              variant={widget.size === 'small' ? 'default' : 'outline'}
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => updateWidgetSize(widget.id, 'small')}
-                            >
-                              S
-                            </Button>
-                            <Button
-                              variant={widget.size === 'medium' ? 'default' : 'outline'}
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => updateWidgetSize(widget.id, 'medium')}
-                            >
-                              M
-                            </Button>
-                            <Button
-                              variant={widget.size === 'large' ? 'default' : 'outline'}
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                              onClick={() => updateWidgetSize(widget.id, 'large')}
-                            >
-                              L
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            variant={widget.size === 'small' ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => updateWidgetSize(widget.id, 'small')}
+                          >
+                            S
+                          </Button>
+                          <Button
+                            variant={widget.size === 'large' ? 'default' : 'outline'}
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={() => updateWidgetSize(widget.id, 'large')}
+                          >
+                            L
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -476,36 +420,20 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
           >
             <SortableContext
               items={widgets.filter(w => w.visible).map(w => w.id)}
-              strategy={layout === 'list' ? verticalListSortingStrategy : rectSortingStrategy}
+              strategy={rectSortingStrategy}
             >
-              {layout === 'list' ? (
-                // List layout
-                <div className="space-y-4">
-                  {widgets.filter(w => w.visible).map((widget) => (
-                    <SortableWidget
-                      key={widget.id}
-                      id={widget.id}
-                      layout={layout}
-                    >
-                      {renderWidget(widget.id)}
-                    </SortableWidget>
-                  ))}
-                </div>
-              ) : (
-                // Grid layout
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {widgets.filter(w => w.visible).map((widget) => (
-                    <SortableWidget
-                      key={widget.id}
-                      id={widget.id}
-                      layout={layout}
-                      size={widget.size}
-                    >
-                      {renderWidget(widget.id)}
-                    </SortableWidget>
-                  ))}
-                </div>
-              )}
+              {/* Grid layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {widgets.filter(w => w.visible).map((widget) => (
+                  <SortableWidget
+                    key={widget.id}
+                    id={widget.id}
+                    size={widget.size}
+                  >
+                    {renderWidget(widget.id)}
+                  </SortableWidget>
+                ))}
+              </div>
             </SortableContext>
 
             {/* Drag overlay for visual feedback */}
