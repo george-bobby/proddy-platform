@@ -164,7 +164,7 @@ export const clearChatHistory = mutation({
 	},
 });
 
-// Generate a response using RAG
+// Generate a response using RAG only
 export const generateResponse = action({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -172,31 +172,59 @@ export const generateResponse = action({
 	},
 	handler: async (ctx, args): Promise<GenerateResponseResult> => {
 		try {
-			// 1. Search for relevant content
+			// 1. Add user message to history first
+			await ctx.runMutation(api.chatbot.addMessage, {
+				workspaceId: args.workspaceId,
+				content: args.message,
+				role: 'user',
+			});
+
+			// 2. Search for relevant content
 			const searchResults = await ctx.runQuery(api.search.searchAll, {
 				workspaceId: args.workspaceId,
 				query: args.message,
 				limit: 5,
 			});
 
-			// 2. Get workspace info
+			// 3. Check if we have relevant search results
+			const hasRelevantResults = searchResults && searchResults.length > 0;
+
+			// 4. If no relevant results found, return a "no information" response
+			if (!hasRelevantResults) {
+				const noInfoResponse =
+					"I don't have any information about that in your workspace. I can only answer questions about content that exists in your workspace.";
+
+				// Add the "no information" response to history
+				await ctx.runMutation(api.chatbot.addMessage, {
+					workspaceId: args.workspaceId,
+					content: noInfoResponse,
+					role: 'assistant',
+				});
+
+				return {
+					response: noInfoResponse,
+					sources: [],
+				};
+			}
+
+			// 5. Get workspace info
 			const workspace = await ctx.runQuery(api.workspaces.getById, {
 				id: args.workspaceId,
 			});
 
-			// 3. Get chat history
+			// 6. Get chat history
 			const chatHistory = await ctx.runQuery(api.chatbot.getChatHistory, {
 				workspaceId: args.workspaceId,
 			});
 
-			// 4. Prepare context from search results
+			// 7. Prepare context from search results
 			const context = searchResults
 				.map((result) => {
 					return `[${result.type.toUpperCase()}] ${result.text}`;
 				})
 				.join('\n\n');
 
-			// 5. Prepare conversation history (last 5 messages)
+			// 8. Prepare conversation history (last 5 messages)
 			const recentMessages = chatHistory.messages.slice(-5);
 			const conversationHistory = recentMessages
 				.map((msg) => {
@@ -204,31 +232,24 @@ export const generateResponse = action({
 				})
 				.join('\n');
 
-			// 6. Construct the prompt
+			// 9. Construct the prompt
 			const prompt = `You are a helpful workspace assistant for ${workspace?.name || 'Proddy'}, a team collaboration platform.
 You can help users with information about their workspace, tasks, messages, and other features.
-Be concise, friendly, and helpful. If you don't know something, be honest about it.
+Be concise, friendly, and helpful.
 
-Here is some context from the workspace that might be relevant to the user's question:
-${context || 'No specific context found for this query.'}
+IMPORTANT: You must ONLY answer based on the context provided below. If the context doesn't contain information relevant to the user's question, respond with "I don't have information about that in your workspace." Do NOT use your general knowledge to answer questions.
+
+Here is the context from the workspace that might be relevant to the user's question:
+${context}
 
 Recent conversation history:
 ${conversationHistory || 'This is a new conversation.'}
 
 User's question: ${args.message}
 
-Please provide a helpful response based on the context provided. If the context doesn't contain relevant information, provide general guidance based on your knowledge of collaboration platforms.`;
+Remember: Only answer based on the context provided. If the context doesn't contain relevant information, say "I don't have information about that in your workspace."`;
 
-			// 7. Add user message to history
-			await ctx.runMutation(api.chatbot.addMessage, {
-				workspaceId: args.workspaceId,
-				content: args.message,
-				role: 'user',
-			});
-
-			// 8. Generate response using the Next.js API route
-			// This is a temporary solution until we implement OpenAI directly in Convex
-			// Use relative URL for local development and absolute URL as fallback
+			// 10. Generate response using the Next.js API route
 			const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy.tech';
 			const apiUrl = baseUrl.startsWith('http')
 				? `${baseUrl}/api/assistant`
@@ -241,7 +262,6 @@ Please provide a helpful response based on the context provided. If the context 
 				},
 				body: JSON.stringify({
 					message: prompt,
-					isRag: true,
 				}),
 			});
 
@@ -263,7 +283,7 @@ Please provide a helpful response based on the context provided. If the context 
 					(result.text.length > 100 ? '...' : ''),
 			}));
 
-			// 9. Add assistant response to history with sources
+			// 11. Add assistant response to history with sources
 			await ctx.runMutation(api.chatbot.addMessage, {
 				workspaceId: args.workspaceId,
 				content: assistantResponse,
@@ -271,7 +291,7 @@ Please provide a helpful response based on the context provided. If the context 
 				sources: sourcesForStorage.length > 0 ? sourcesForStorage : undefined,
 			});
 
-			// 10. Return the response
+			// 12. Return the response
 			return {
 				response: assistantResponse,
 				sources: searchResults.map((result) => ({

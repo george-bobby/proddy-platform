@@ -12,6 +12,7 @@ import { Profile } from "@/features/members/components/profile";
 import { Thread } from "@/features/messages/components/thread";
 import { StatusTracker } from "@/features/status/components/status-tracker";
 import { useUpdateLastActiveWorkspace } from "@/features/workspaces/api/use-update-last-active-workspace";
+import { useSidebarCollapsed } from "@/features/workspaces/api/use-workspace-preferences";
 import { usePanel } from "@/hooks/use-panel";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { setupGlobalMentionHandler } from "@/lib/mention-handler";
@@ -22,10 +23,12 @@ import { WorkspaceSidebar } from "./sidebar";
 
 const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
   const { parentMessageId, profileMemberId, onClose } = usePanel();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const workspaceId = useWorkspaceId();
   const updateLastActiveWorkspace = useUpdateLastActiveWorkspace();
+
+  // Use the Convex-backed sidebar collapsed state
+  const [isCollapsed, setIsCollapsed] = useSidebarCollapsed({ workspaceId });
 
   const showPanel = !!parentMessageId || !!profileMemberId;
 
@@ -50,7 +53,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
     if (isMobile) {
       setIsCollapsed(true);
     }
-  }, [isMobile]);
+  }, [isMobile, setIsCollapsed]);
 
   // Set up global mention handler
   useEffect(() => {

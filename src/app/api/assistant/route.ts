@@ -8,7 +8,22 @@ dotenv.config();
 
 export async function POST(req: NextRequest) {
 	try {
-		const { message, workspaceId, userId, isRag } = await req.json();
+		// Check if API key is configured
+		if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+			console.error(
+				'Missing GOOGLE_GENERATIVE_AI_API_KEY environment variable'
+			);
+			return NextResponse.json(
+				{
+					response:
+						"I'm having trouble connecting to the AI service. Please check your API configuration.",
+					error: 'API key not configured',
+				},
+				{ status: 500 }
+			);
+		}
+
+		const { message } = await req.json();
 
 		if (!message) {
 			return NextResponse.json(
@@ -17,37 +32,19 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		// If this is a RAG request, the message is already a complete prompt
-		const systemPrompt = isRag
-			? ''
-			: `You are a helpful workspace assistant for Proddy, a team collaboration platform.
-You can help users with information about their workspace, tasks, messages, and other features.
-Be concise, friendly, and helpful. If you don't know something, be honest about it.
-The current workspace ID is: ${workspaceId || 'unknown'}
-The current user ID is: ${userId || 'unknown'}
-
-Some things you can help with:
-- Explaining how to use Proddy features
-- Providing tips for better collaboration
-- Answering questions about the platform
-- Suggesting ways to organize tasks and channels
-- Explaining how to use the AI features in Proddy
-
-Always be professional and focus on helping the user be more productive.`;
+		// We only support RAG mode now - all requests are treated as RAG
 
 		try {
+			console.log('Calling Gemini API with model: gpt-4-turbo');
+
 			const { text } = await generateText({
-				model: google('gemini-1.5-pro'),
-				messages: isRag
-					? [{ role: 'user', content: message }] // For RAG, the message is already a complete prompt
-					: [
-							{ role: 'system', content: systemPrompt },
-							{ role: 'user', content: message },
-						],
+				model: google('gemini-2.0-flash-exp'),
+				messages: [{ role: 'user', content: message }], // Message is a complete prompt with context
 				temperature: 0.7,
 				maxTokens: 800,
 			});
 
+			console.log('Gemini API response received successfully');
 			return NextResponse.json({ response: text });
 		} catch (aiError) {
 			console.error('Error calling Gemini API:', aiError);

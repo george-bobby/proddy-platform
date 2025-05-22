@@ -28,6 +28,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from '@/components/ui/sheet';
+import { useDashboardWidgets } from '@/features/workspaces/api/use-workspace-preferences';
 import {
   DndContext,
   closestCenter,
@@ -48,6 +49,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
+import { DashboardWidget, WidgetSize } from '@/../convex/userPreferences';
 
 interface DashboardWidgetsProps {
   workspaceId: Id<'workspaces'>;
@@ -65,14 +67,6 @@ interface DashboardWidgetsProps {
 
 // Widget types
 type WidgetType = 'mentions' | 'threads' | 'tasks' | 'cards' | 'calendar' | 'notes' | 'canvas';
-
-interface WidgetConfig {
-  id: WidgetType;
-  title: string;
-  description: string;
-  visible: boolean;
-  size: 'small' | 'large';
-}
 
 // Sortable widget wrapper component
 interface SortableWidgetProps {
@@ -129,83 +123,10 @@ const SortableWidget = ({ id, children, size }: SortableWidgetProps) => {
 
 export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps) => {
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Default widget order with all available widgets
-  const [widgets, setWidgets] = useState<WidgetConfig[]>([
-    {
-      id: 'calendar',
-      title: 'Upcoming Events',
-      description: 'Shows events for the next 7 days',
-      visible: true,
-      size: 'large'
-    },
-    {
-      id: 'mentions',
-      title: 'Mentions',
-      description: 'Shows messages where you were mentioned',
-      visible: true,
-      size: 'small'
-    },
-    {
-      id: 'threads',
-      title: 'Thread Replies',
-      description: 'Shows replies to your message threads',
-      visible: true,
-      size: 'small'
-    },
-    {
-      id: 'tasks',
-      title: 'Your Tasks',
-      description: 'Shows your assigned tasks',
-      visible: true,
-      size: 'small'
-    },
-    {
-      id: 'cards',
-      title: 'Board Cards',
-      description: 'Shows your assigned board cards',
-      visible: true,
-      size: 'small'
-    },
-    {
-      id: 'notes',
-      title: 'Recent Notes',
-      description: 'Shows recently updated notes',
-      visible: true,
-      size: 'small'
-    },
-    {
-      id: 'canvas',
-      title: 'Recent Canvas',
-      description: 'Shows recently updated canvas items',
-      visible: true,
-      size: 'small'
-    }
-  ]);
-
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Save widget preferences to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('dashboard-widgets', JSON.stringify(widgets));
-    } catch (error) {
-      console.error('Error saving widget preferences:', error);
-    }
-  }, [widgets]);
-
-  // Load widget preferences from localStorage
-  useEffect(() => {
-    try {
-      const savedWidgets = localStorage.getItem('dashboard-widgets');
-
-      if (savedWidgets) {
-        setWidgets(JSON.parse(savedWidgets));
-      }
-    } catch (error) {
-      console.error('Error loading widget preferences:', error);
-    }
-  }, []);
+  // Use the Convex-backed dashboard widgets state
+  const [widgets, setWidgets] = useDashboardWidgets({ workspaceId });
 
   // Set up sensors for drag and drop
   const sensors = useSensors(
@@ -245,8 +166,8 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   };
 
   // Toggle widget visibility
-  const toggleWidgetVisibility = (id: WidgetType) => {
-    setWidgets(prev =>
+  const toggleWidgetVisibility = (id: string) => {
+    setWidgets((prev) =>
       prev.map(widget =>
         widget.id === id
           ? { ...widget, visible: !widget.visible }
@@ -256,8 +177,8 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   };
 
   // Update widget size
-  const updateWidgetSize = (id: WidgetType, size: 'small' | 'large') => {
-    setWidgets(prev =>
+  const updateWidgetSize = (id: string, size: WidgetSize) => {
+    setWidgets((prev) =>
       prev.map(widget =>
         widget.id === id
           ? { ...widget, size }
@@ -267,8 +188,10 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
   };
 
   // Render the appropriate widget based on type
-  const renderWidget = useCallback((type: WidgetType) => {
-    switch (type) {
+  const renderWidget = useCallback((type: string) => {
+    // Cast to WidgetType for switch statement
+    const widgetType = type as WidgetType;
+    switch (widgetType) {
       case 'mentions':
         return (
           <MentionsWidget

@@ -258,6 +258,30 @@ const schema = defineSchema({
 				// Add more user preferences as needed
 			})
 		),
+		// Workspace-specific preferences stored as a record
+		workspacePreferences: v.optional(
+			v.record(
+				v.string(), // workspaceId as string key
+				v.object({
+					// Sidebar preferences
+					sidebarCollapsed: v.optional(v.boolean()),
+					expandedSections: v.optional(v.record(v.string(), v.boolean())),
+
+					// Dashboard widget preferences
+					dashboardWidgets: v.optional(
+						v.array(
+							v.object({
+								id: v.string(), // Widget type
+								title: v.string(),
+								description: v.string(),
+								visible: v.boolean(),
+								size: v.union(v.literal('small'), v.literal('large')),
+							})
+						)
+					),
+				})
+			)
+		),
 	}).index('by_user_id', ['userId']),
 	noteFolders: defineTable({
 		name: v.string(),

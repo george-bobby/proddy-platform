@@ -11,25 +11,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
 interface DashboardChatbotProps {
   workspaceId: Id<'workspaces'>;
   member: any;
