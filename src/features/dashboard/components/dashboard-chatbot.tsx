@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader, RefreshCw, Info, AlertCircle } from 'lucide-react';
+import { Bot, Send, Loader, Info, AlertCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -205,7 +205,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
     });
 
     return (
-      <div className="flex flex-wrap gap-1 mt-2">
+      <div className="flex flex-wrap gap-1.5 mt-3 mb-1">
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
@@ -213,12 +213,12 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
               Sources
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-2">
+          <PopoverContent className="w-80 p-3">
             <div className="space-y-2">
               <h4 className="font-medium text-sm">Sources used for this response:</h4>
-              <div className="space-y-1">
+              <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
                 {sources.map((source, index) => (
-                  <div key={index} className="text-xs p-1 border-b">
+                  <div key={index} className="text-xs p-1.5 border-b">
                     <span className="font-semibold">{source.type.toUpperCase()}: </span>
                     <span>{source.text}</span>
                   </div>
@@ -229,7 +229,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
         </Popover>
 
         {Object.entries(sourcesByType).map(([type, count]) => (
-          <Badge key={type} variant="outline" className="text-xs px-1.5 py-0">
+          <Badge key={type} variant="outline" className="text-xs px-2 py-0.5">
             {type}: {count}
           </Badge>
         ))}
@@ -249,16 +249,22 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
             </Avatar>
             <div>
               <CardTitle className="text-lg">Proddy AI</CardTitle>
-              <CardDescription className="text-xs">
-                Ask me anything about your workspace
-              </CardDescription>
             </div>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearConversation}
+            className="text-xs text-muted-foreground hover:text-destructive border border-gray-300"
+          >
+            <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+            Clear chat
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
-        <ScrollArea className="h-[calc(100vh-220px)] px-4" ref={scrollAreaRef}>
-          <div className="flex flex-col gap-4 py-4 pb-6">
+        <ScrollArea className="h-[calc(100vh-240px)] px-4" ref={scrollAreaRef}>
+          <div className="flex flex-col gap-4 py-4 pb-10">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -266,14 +272,14 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
                   }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${message.sender === 'user'
+                  className={`max-w-[80%] rounded-lg px-4 py-3 ${message.sender === 'user'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted'
                     }`}
                 >
                   <p className="text-sm">{message.content}</p>
                   {message.sources && renderSourceBadges(message.sources)}
-                  <p className="mt-1 text-right text-xs opacity-70">
+                  <p className="mt-2 text-right text-xs opacity-70">
                     {message.timestamp.toLocaleTimeString([], {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -284,7 +290,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[80%] rounded-lg bg-muted px-4 py-2">
+                <div className="max-w-[80%] rounded-lg bg-muted px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Loader className="h-4 w-4 animate-spin" />
                     <p className="text-sm">Thinking...</p>
@@ -295,36 +301,23 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="p-3 pt-0 border-t">
-        <div className="flex flex-col w-full gap-2">
-          <div className="flex w-full items-center gap-2">
-            <Input
-              placeholder="Ask a question about your workspace..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={isLoading || !input.trim()}
-              size="icon"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearConversation}
-              className="text-xs"
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-              Clear chat
-            </Button>
-          </div>
+      <CardFooter className="p-4 pt-3 border-t mt-auto">
+        <div className="flex w-full items-center gap-2">
+          <Input
+            placeholder="Ask a question about your workspace..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+            className="flex-1"
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={isLoading || !input.trim()}
+            size="icon"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
       </CardFooter>
     </Card>
