@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,6 @@ import {
   Clock,
   Hash,
   Users,
-  PlusCircle,
-  Pencil,
-  Trash2,
   AtSign,
   Loader
 } from 'lucide-react';
@@ -160,22 +157,7 @@ export const ActivityWidget = ({ workspaceId, member }: ActivityWidgetProps) => 
     }
   };
 
-  const getActionIcon = (action: string) => {
-    switch (action) {
-      case 'created':
-        return <PlusCircle className="h-3 w-3" />;
-      case 'updated':
-        return <Pencil className="h-3 w-3" />;
-      case 'deleted':
-        return <Trash2 className="h-3 w-3" />;
-      case 'completed':
-        return <CheckSquare className="h-3 w-3" />;
-      case 'joined':
-        return <Users className="h-3 w-3" />;
-      default:
-        return null;
-    }
-  };
+
 
   const getActivityText = (item: ActivityItem) => {
     switch (item.type) {
@@ -233,6 +215,14 @@ export const ActivityWidget = ({ workspaceId, member }: ActivityWidgetProps) => 
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary" />
           <h3 className="font-medium">Recent Activity</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/workspace/${workspaceId}/reports`)}
+            className="ml-4"
+          >
+            View All
+          </Button>
         </div>
       </div>
 

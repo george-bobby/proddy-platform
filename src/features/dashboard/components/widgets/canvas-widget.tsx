@@ -34,28 +34,49 @@ export const CanvasWidget = ({ workspaceId }: CanvasWidgetProps) => {
   // Get boards from the first channel (for simplicity)
   const firstChannelId = channels && channels.length > 0 ? channels[0]._id : undefined;
 
-  // Get all cards for the channel (we'll use these as "canvas items")
-  const allCards = useQuery(
-    api.board.getAllCardsForChannel,
-    firstChannelId ? { channelId: firstChannelId } : 'skip'
+  // Get messages from the channel to find canvas items
+  const messages = useQuery(
+    api.messages.get,
+    firstChannelId ? {
+      channelId: firstChannelId,
+      paginationOpts: {
+        numItems: 100,
+        cursor: null
+      }
+    } : 'skip'
   );
 
-  // Combine cards with channel info
+  // Extract canvas items from messages
   const canvasItems = useMemo(() => {
-    if (!channels || !allCards) return [];
+    if (!channels || !messages || !messages.page) return [];
 
-    return allCards.map(card => {
-      const channel = channels.find(c => c._id === firstChannelId);
-      return {
-        _id: card._id,
-        title: card.title,
-        description: card.description || '',
-        updatedAt: card._creationTime,
-        channelId: firstChannelId,
-        channelName: channel?.name || 'Unknown Channel'
-      };
-    });
-  }, [channels, allCards, firstChannelId]);
+    const canvasMessages = [];
+
+    // Filter messages to find canvas-related messages
+    for (const message of messages.page) {
+      try {
+        const body = JSON.parse(message.body);
+
+        // Look for messages with canvas type
+        if (body && (body.type === "canvas" || body.type === "canvas-live")) {
+          const channel = channels.find(c => c._id === message.channelId);
+          canvasMessages.push({
+            _id: message._id,
+            title: body.canvasName || "Untitled Canvas",
+            description: "Collaborative whiteboard canvas",
+            updatedAt: message._creationTime,
+            channelId: message.channelId,
+            channelName: channel?.name || 'Unknown Channel',
+            roomId: body.roomId
+          });
+        }
+      } catch (e) {
+        // Not a JSON message or not a canvas message, skip
+      }
+    }
+
+    return canvasMessages;
+  }, [channels, messages, firstChannelId]);
 
   // Sort canvas items by last updated time
   const sortedCanvasItems = useMemo(() => {
@@ -69,22 +90,26 @@ export const CanvasWidget = ({ workspaceId }: CanvasWidgetProps) => {
       .slice(0, 10); // Limit to 10 items
   }, [canvasItems]);
 
-  const handleViewCanvas = (cardId: Id<'cards'>, channelId: Id<'channels'>) => {
-    router.push(`/workspace/${workspaceId}/channel/${channelId}/board?cardId=${cardId}`);
+  const handleViewCanvas = (_messageId: Id<'messages'>, channelId: Id<'channels'>, roomId?: string) => {
+    if (roomId) {
+      router.push(`/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}`);
+    } else {
+      router.push(`/workspace/${workspaceId}/channel/${channelId}/canvas`);
+    }
   };
 
   const handleCreateCanvas = () => {
-    // Navigate to the first channel's board section
+    // Navigate to the first channel's canvas section
     if (channels && channels.length > 0) {
-      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/board?action=create`);
+      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/canvas?new=true`);
     }
   };
 
   // View all canvas button handler
   const handleViewAll = () => {
-    // Navigate to the first channel's board section
+    // Navigate to the first channel's canvas section
     if (channels && channels.length > 0) {
-      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/board`);
+      router.push(`/workspace/${workspaceId}/channel/${channels[0]._id}/canvas`);
     }
   };
 
@@ -107,23 +132,13 @@ export const CanvasWidget = ({ workspaceId }: CanvasWidgetProps) => {
               {sortedCanvasItems.length}
             </Badge>
           )}
-        </div>
-        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleViewAll}
+            className="ml-4"
           >
             View All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCreateCanvas}
-            className="gap-1"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Canvas
           </Button>
         </div>
       </div>
@@ -154,7 +169,7 @@ export const CanvasWidget = ({ workspaceId }: CanvasWidgetProps) => {
                       variant="ghost"
                       size="sm"
                       className="mt-1 w-full justify-start text-primary"
-                      onClick={() => item.channelId && handleViewCanvas(item._id, item.channelId)}
+                      onClick={() => item.channelId && handleViewCanvas(item._id, item.channelId, item.roomId)}
                     >
                       View canvas
                     </Button>

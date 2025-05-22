@@ -115,6 +115,14 @@ export const ThreadRepliesWidget = ({ workspaceId }: ThreadRepliesWidgetProps) =
               {threadMessages.length}
             </Badge>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/workspace/${workspaceId}/threads`)}
+            className="ml-4"
+          >
+            View All
+          </Button>
         </div>
       </div>
 

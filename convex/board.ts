@@ -655,6 +655,59 @@ export const _getMemberEmail = query({
 	},
 });
 
+// Query to get all cards assigned to a specific member across all channels in a workspace
+export const getAssignedCards = query({
+	args: {
+		workspaceId: v.id('workspaces'),
+		memberId: v.id('members'),
+	},
+	handler: async (ctx, { workspaceId, memberId }) => {
+		// Get all channels in the workspace
+		const channels = await ctx.db
+			.query('channels')
+			.withIndex('by_workspace_id', (q) => q.eq('workspaceId', workspaceId))
+			.collect();
+
+		const assignedCards = [];
+
+		// For each channel, get all lists and cards
+		for (const channel of channels) {
+			const lists = await ctx.db
+				.query('lists')
+				.withIndex('by_channel_id', (q) => q.eq('channelId', channel._id))
+				.collect();
+
+			for (const list of lists) {
+				// Get all cards in the list
+				const cards = await ctx.db
+					.query('cards')
+					.withIndex('by_list_id', (q) => q.eq('listId', list._id))
+					.collect();
+
+				// Filter cards that have the member as an assignee
+				const memberCards = cards.filter(
+					(card) =>
+						card.assignees &&
+						Array.isArray(card.assignees) &&
+						card.assignees.includes(memberId)
+				);
+
+				// Add channel and list info to each card
+				const cardsWithContext = memberCards.map((card) => ({
+					...card,
+					channelId: channel._id,
+					channelName: channel.name,
+					listTitle: list.title,
+				}));
+
+				assignedCards.push(...cardsWithContext);
+			}
+		}
+
+		return assignedCards;
+	},
+});
+
 // Helper query to get member name
 export const _getMemberName = query({
 	args: { memberId: v.id('members') },

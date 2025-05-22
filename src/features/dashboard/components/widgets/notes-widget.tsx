@@ -102,23 +102,13 @@ export const NotesWidget = ({ workspaceId }: NotesWidgetProps) => {
               {sortedNotes.length}
             </Badge>
           )}
-        </div>
-        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={handleViewAll}
+            className="ml-4"
           >
             View All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCreateNote}
-            className="gap-1"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Note
           </Button>
         </div>
       </div>
@@ -142,11 +132,25 @@ export const NotesWidget = ({ workspaceId }: NotesWidgetProps) => {
                     <Badge variant="outline" className="text-xs">
                       {note.channelName}
                     </Badge>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
+                    <p className="text-sm text-muted-foreground line-clamp-1">
                       {note.content ? (
                         typeof note.content === 'string'
                           ? note.content.substring(0, 100)
-                          : JSON.stringify(note.content).substring(0, 100)
+                          : (() => {
+                            try {
+                              const parsed = JSON.parse(typeof note.content === 'string' ? note.content : JSON.stringify(note.content));
+                              if (parsed && parsed.ops && Array.isArray(parsed.ops)) {
+                                // Extract text from the first insert operation
+                                const firstLine = parsed.ops
+                                  .map(op => (typeof op.insert === 'string' ? op.insert : ''))
+                                  .join('')
+                                  .split('\n')[0]
+                                  .trim();
+                                return firstLine || 'No content';
+                              }
+                            } catch (e) { }
+                            return 'Note content';
+                          })()
                       ) : 'No content'}
                     </p>
                     <Button

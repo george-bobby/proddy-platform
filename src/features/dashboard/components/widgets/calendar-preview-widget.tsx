@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, Clock, Plus, ArrowRight, Loader } from 'lucide-react';
+import { Calendar as CalendarIcon, ArrowRight, Loader } from 'lucide-react';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import { useGetCalendarEvents } from '@/features/calendar/api/use-get-calendar-events';
@@ -42,7 +42,7 @@ interface CalendarPreviewWidgetProps {
   member: any;
 }
 
-export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWidgetProps) => {
+export const CalendarPreviewWidget = ({ workspaceId }: CalendarPreviewWidgetProps) => {
   const router = useRouter();
   const today = new Date();
   const currentMonth = today.getMonth();
@@ -80,9 +80,7 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
     router.push(`/workspace/${workspaceId}/calendar?eventId=${eventId}`);
   };
 
-  const handleCreateEvent = () => {
-    router.push(`/workspace/${workspaceId}/calendar?action=create`);
-  };
+
 
   const handleViewCalendar = () => {
     router.push(`/workspace/${workspaceId}/calendar`);
@@ -126,16 +124,15 @@ export const CalendarPreviewWidget = ({ workspaceId, member }: CalendarPreviewWi
               {upcomingEvents.length}
             </Badge>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleViewCalendar}
+            className="ml-4"
+          >
+            View All
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCreateEvent}
-          className="gap-1"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add Event
-        </Button>
       </div>
 
       {upcomingEvents.length > 0 ? (
