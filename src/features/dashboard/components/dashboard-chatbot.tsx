@@ -13,6 +13,7 @@ import { useQuery, useMutation, useAction } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import ReactMarkdown from 'react-markdown';
 interface DashboardChatbotProps {
   workspaceId: Id<'workspaces'>;
   member: any;
@@ -99,20 +100,38 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
       timestamp: new Date(),
     };
 
+    // Store the message for later use
+    const userQuery = input.trim();
+
+    // Update UI immediately
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
+      console.log('Sending message to assistant:', userQuery);
+
       // Call the Convex action to generate a response
       const result = await generateResponseAction({
         workspaceId,
-        message: input,
+        message: userQuery,
       });
 
-      if (!result || !result.response) {
-        throw new Error('Failed to get response');
+      // Validate response
+      if (!result) {
+        throw new Error('Empty response from assistant API');
       }
+
+      if (result.error) {
+        console.error('Error from assistant API:', result.error);
+        throw new Error(result.error);
+      }
+
+      if (!result.response) {
+        throw new Error('Missing response content from assistant API');
+      }
+
+      console.log('Received response from assistant');
 
       // Add assistant response to UI
       const assistantMessage: Message = {
@@ -127,10 +146,16 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
     } catch (error) {
       console.error('Error in chatbot:', error);
 
-      // Add fallback response
+      // Extract error message
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Unknown error occurred';
+
+      // Add fallback response with error details for better debugging
       const fallbackMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm having trouble connecting right now. Please try again later.",
+        content: `I'm having trouble connecting right now. Please try again later. ${process.env.NODE_ENV === 'development' ? `(Error: ${errorMessage})` : ''
+          }`,
         sender: 'assistant',
         timestamp: new Date(),
       };
@@ -138,7 +163,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
       setMessages((prev) => [...prev, fallbackMessage]);
 
       toast({
-        title: 'Error',
+        title: 'Assistant Error',
         description: 'Failed to get a response from the assistant.',
         variant: 'destructive',
       });
@@ -260,7 +285,13 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
                     : 'bg-muted'
                     }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  {message.sender === 'user' ? (
+                    <p className="text-sm">{message.content}</p>
+                  ) : (
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-2 prose-headings:mb-2 prose-p:my-1 prose-blockquote:my-2 prose-blockquote:pl-3 prose-blockquote:border-l-2 prose-blockquote:border-gray-300 prose-blockquote:italic prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300 prose-h2:text-primary prose-h3:text-primary/90 prose-h4:text-primary/80 prose-strong:font-semibold prose-ul:my-1 prose-li:my-0.5">
+                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                  )}
                   {message.sources && renderSourceBadges(message.sources)}
                   <p className="mt-2 text-right text-xs opacity-70">
                     {message.timestamp.toLocaleTimeString([], {
@@ -276,7 +307,12 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
                 <div className="max-w-[80%] rounded-lg bg-muted px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Loader className="h-4 w-4 animate-spin" />
-                    <p className="text-sm">Thinking...</p>
+                    <div>
+                      <p className="text-sm font-medium">Thinking...</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Searching workspace content for relevant information
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

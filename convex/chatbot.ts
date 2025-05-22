@@ -180,11 +180,213 @@ export const generateResponse = action({
 			});
 
 			// 2. Search for relevant content
-			const searchResults = await ctx.runQuery(api.search.searchAll, {
-				workspaceId: args.workspaceId,
-				query: args.message,
-				limit: 5,
-			});
+			// Check if the query is about meetings or events
+			const isMeetingQuery =
+				/\b(meeting|meetings|event|events|calendar|schedule|appointment|appointments|today['']s events)\b/i.test(
+					args.message
+				);
+
+			// Get today's date for meeting queries
+			const today = new Date();
+			const currentMonth = today.getMonth();
+			const currentYear = today.getFullYear();
+
+			// If asking about meetings, prioritize calendar events
+			let searchResults;
+			if (isMeetingQuery) {
+				console.log(
+					'[Chatbot] Detected meeting-related query, fetching calendar events'
+				);
+
+				// Get calendar events for the current month
+				try {
+					const calendarEvents = await ctx.runQuery(
+						api.calendar.getCalendarEvents,
+						{
+							workspaceId: args.workspaceId,
+							month: currentMonth,
+							year: currentYear,
+						}
+					);
+
+					// If we have calendar events, format them for the chatbot
+					if (calendarEvents && calendarEvents.length > 0) {
+						// Filter for today's events if the query specifically asks about today
+						const isTodayQuery = /\b(today|today['']s)\b/i.test(args.message);
+
+						let relevantEvents = calendarEvents;
+						if (isTodayQuery) {
+							const startOfToday = new Date(
+								today.getFullYear(),
+								today.getMonth(),
+								today.getDate()
+							).getTime();
+							const endOfToday = new Date(
+								today.getFullYear(),
+								today.getMonth(),
+								today.getDate(),
+								23,
+								59,
+								59
+							).getTime();
+
+							relevantEvents = calendarEvents.filter(
+								(event) =>
+									event.date >= startOfToday && event.date <= endOfToday
+							);
+						}
+
+						// Format events as search results
+						searchResults = relevantEvents.map((event) => {
+							const eventDate = new Date(event.date);
+							const formattedDate = eventDate.toLocaleDateString('en-US', {
+								weekday: 'long',
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							});
+							const formattedTime = event.time || 'No specific time';
+
+							// Extract additional details based on event type
+							let additionalDetails = '';
+							let locationInfo = '';
+
+							// Type guard to check if event has message property
+							const hasMessage = (
+								e: any
+							): e is {
+								message: { body: any; channelId?: any; channelName?: string };
+							} => {
+								return e && typeof e.message === 'object' && e.message !== null;
+							};
+
+							// Extract message details if available
+							if (hasMessage(event) && event.message.body) {
+								try {
+									// Try to extract text from rich text if available
+									const bodyContent =
+										typeof event.message.body === 'string'
+											? event.message.body
+											: JSON.stringify(event.message.body);
+
+									// Check if it's JSON and try to extract plain text
+									if (
+										bodyContent.startsWith('{') &&
+										bodyContent.includes('"ops"')
+									) {
+										const jsonBody = JSON.parse(bodyContent);
+										if (jsonBody.ops && Array.isArray(jsonBody.ops)) {
+											const textContent = jsonBody.ops
+												.map((op: any) => op.insert || '')
+												.join('')
+												.trim();
+											additionalDetails = ` | Description: ${textContent.substring(0, 100)}`;
+										}
+									}
+								} catch (e) {
+									// Ignore parsing errors
+								}
+
+								// Get channel information if available
+								if (event.message.channelId) {
+									locationInfo = ` | Channel: ${event.message.channelName || 'Unknown channel'}`;
+								}
+							}
+
+							// Check for task details
+							const hasTask = (
+								e: any
+							): e is { task: { title: string; description?: string } } => {
+								return e && typeof e.task === 'object' && e.task !== null;
+							};
+
+							if (hasTask(event) && event.task) {
+								if (event.task.description) {
+									additionalDetails = ` | Description: ${event.task.description.substring(0, 100)}`;
+								}
+							}
+
+							// Check for board card details
+							const hasBoardCard = (
+								e: any
+							): e is {
+								boardCard: {
+									title: string;
+									description?: string;
+									listTitle?: string;
+									channelName?: string;
+								};
+							} => {
+								return (
+									e && typeof e.boardCard === 'object' && e.boardCard !== null
+								);
+							};
+
+							if (hasBoardCard(event) && event.boardCard) {
+								if (event.boardCard.description) {
+									additionalDetails = ` | Description: ${event.boardCard.description.substring(0, 100)}`;
+								}
+								if (event.boardCard.listTitle || event.boardCard.channelName) {
+									locationInfo =
+										` | Location: ${event.boardCard.listTitle || ''} ${event.boardCard.channelName || ''}`.trim();
+								}
+							}
+
+							// Format the text with more details using Markdown for better rendering
+							return {
+								_id: event._id,
+								_creationTime: event._creationTime,
+								type: event.type || 'event',
+								text: `### ${event.title || 'Untitled event'}\n\n**When:** ${formattedDate} at ${formattedTime}\n**Type:** ${event.type === 'calendar-event' ? 'Calendar Event' : event.type === 'board-card' ? 'Board Card' : event.type === 'task' ? 'Task' : event.type || 'Event'}${locationInfo ? `\n**Location:** ${locationInfo.replace(' | Channel: ', '').replace(' | Location: ', '')}` : ''}${additionalDetails ? `\n**Details:** ${additionalDetails.replace(' | Description: ', '')}` : ''}`,
+								workspaceId: args.workspaceId,
+							};
+						});
+
+						// If no events found for today but it was a today query, add a message
+						if (isTodayQuery && relevantEvents.length === 0) {
+							// Create a special "no meetings today" result with better formatting
+							const todayFormatted = new Date().toLocaleDateString('en-US', {
+								weekday: 'long',
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							});
+
+							searchResults = [
+								{
+									_id: 'no-meetings-today' as any,
+									_creationTime: Date.now(),
+									type: 'info',
+									text: `## No Meetings Today\n\nYou don't have any meetings or events scheduled for today (${todayFormatted}).\n\nYour calendar is clear! 📅✨`,
+									workspaceId: args.workspaceId,
+								},
+							];
+						}
+					} else {
+						// Fall back to regular search if no calendar events
+						searchResults = await ctx.runQuery(api.search.searchAll, {
+							workspaceId: args.workspaceId,
+							query: args.message,
+							limit: 5,
+						});
+					}
+				} catch (error) {
+					console.error('[Chatbot] Error fetching calendar events:', error);
+					// Fall back to regular search
+					searchResults = await ctx.runQuery(api.search.searchAll, {
+						workspaceId: args.workspaceId,
+						query: args.message,
+						limit: 5,
+					});
+				}
+			} else {
+				// Regular search for non-meeting queries
+				searchResults = await ctx.runQuery(api.search.searchAll, {
+					workspaceId: args.workspaceId,
+					query: args.message,
+					limit: 5,
+				});
+			}
 
 			// 3. Check if we have relevant search results
 			const hasRelevantResults = searchResults && searchResults.length > 0;
@@ -247,6 +449,19 @@ ${conversationHistory || 'This is a new conversation.'}
 
 User's question: ${args.message}
 
+SPECIAL INSTRUCTIONS FOR MEETING/EVENT QUERIES:
+1. If the user asks about meetings, events, or calendar items, provide the FULL DETAILS of each event including title, date, time, and any other relevant information.
+2. DO NOT just say "There is a task/event called X" - instead, list out all the details of the events.
+3. For today's meetings, format the response as a clear list with times and titles.
+4. If multiple events exist, organize them chronologically and present them in a structured format.
+5. If the events are from different sources (messages, tasks, board cards), clearly indicate the source type for each.
+6. IMPORTANT: When presenting multiple meetings, use this format:
+   - Start with a summary line like "## Your Meetings for Today" or "## Upcoming Meetings"
+   - For each meeting, preserve the Markdown formatting that's already in the context
+   - DO NOT add extra formatting symbols or change the existing Markdown structure
+   - Present the meetings in chronological order
+   - Add a blank line between each meeting for better readability
+
 Remember: Only answer based on the context provided. If the context doesn't contain relevant information, say "I don't have information about that in your workspace."`;
 
 			// 10. Generate response using the Next.js API route
@@ -255,24 +470,71 @@ Remember: Only answer based on the context provided. If the context doesn't cont
 				? `${baseUrl}/api/assistant`
 				: '/api/assistant';
 
-			const response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					message: prompt,
-				}),
-			});
+			console.log(`[Chatbot] Calling assistant API at: ${apiUrl}`);
+			const startTime = Date.now();
 
-			if (!response.ok) {
-				throw new Error('Failed to generate response');
+			// Variable to store the assistant's response
+			let assistantResponse: string;
+
+			try {
+				const response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						message: prompt,
+					}),
+				});
+
+				console.log(
+					`[Chatbot] Assistant API response status: ${response.status}`
+				);
+
+				if (!response.ok) {
+					const errorText = await response
+						.text()
+						.catch(() => 'Could not read error response');
+					console.error(
+						`[Chatbot] Assistant API error (${response.status}):`,
+						errorText
+					);
+					throw new Error(
+						`Failed to generate response: ${response.status} ${response.statusText}`
+					);
+				}
+
+				const data = await response.json();
+				console.log(
+					`[Chatbot] Assistant API response received in ${Date.now() - startTime}ms`
+				);
+
+				// Check for success flag in the new API response format
+				if (data.success === false) {
+					console.error('[Chatbot] Assistant API returned error:', data.error);
+					throw new Error(data.error || 'Assistant API returned an error');
+				}
+
+				// Store the response text
+				assistantResponse =
+					data.response ||
+					"I'm sorry, I couldn't process your request at the moment.";
+
+				// Log processing time if available
+				if (data.processingTime) {
+					console.log(`[Chatbot] AI processing time: ${data.processingTime}ms`);
+				}
+			} catch (fetchError) {
+				console.error(
+					'[Chatbot] Error fetching from assistant API:',
+					fetchError
+				);
+				throw new Error(
+					fetchError instanceof Error
+						? `Assistant API error: ${fetchError.message}`
+						: 'Failed to communicate with assistant API'
+				);
 			}
-
-			const data = await response.json();
-			const assistantResponse =
-				data.response ||
-				"I'm sorry, I couldn't process your request at the moment.";
 
 			// Prepare sources for storage
 			const sourcesForStorage = searchResults.map((result) => ({
