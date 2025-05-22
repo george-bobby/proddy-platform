@@ -5,10 +5,17 @@ import { Id } from './_generated/dataModel';
 import { getAuthUserId } from '@convex-dev/auth/server';
 
 // Define types for chat messages and responses
+type Source = {
+	id: string;
+	type: string;
+	text: string;
+};
+
 type ChatMessage = {
 	role: 'user' | 'assistant';
 	content: string;
 	timestamp: number;
+	sources?: Source[];
 };
 
 type ChatHistory = {
@@ -75,6 +82,15 @@ export const addMessage = mutation({
 		workspaceId: v.id('workspaces'),
 		content: v.string(),
 		role: v.union(v.literal('user'), v.literal('assistant')),
+		sources: v.optional(
+			v.array(
+				v.object({
+					id: v.string(),
+					type: v.string(),
+					text: v.string(),
+				})
+			)
+		),
 	},
 	handler: async (ctx, args) => {
 		const member = await getCurrentMember(ctx, args.workspaceId);
@@ -91,6 +107,7 @@ export const addMessage = mutation({
 			role: args.role,
 			content: args.content,
 			timestamp,
+			sources: args.sources,
 		};
 
 		if (chatHistory) {
@@ -237,11 +254,21 @@ Please provide a helpful response based on the context provided. If the context 
 				data.response ||
 				"I'm sorry, I couldn't process your request at the moment.";
 
-			// 9. Add assistant response to history
+			// Prepare sources for storage
+			const sourcesForStorage = searchResults.map((result) => ({
+				id: result._id.toString(),
+				type: result.type,
+				text:
+					result.text.substring(0, 100) +
+					(result.text.length > 100 ? '...' : ''),
+			}));
+
+			// 9. Add assistant response to history with sources
 			await ctx.runMutation(api.chatbot.addMessage, {
 				workspaceId: args.workspaceId,
 				content: assistantResponse,
 				role: 'assistant',
+				sources: sourcesForStorage.length > 0 ? sourcesForStorage : undefined,
 			});
 
 			// 10. Return the response

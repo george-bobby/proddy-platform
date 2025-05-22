@@ -318,6 +318,15 @@ const schema = defineSchema({
 				role: v.union(v.literal('user'), v.literal('assistant')),
 				content: v.string(),
 				timestamp: v.number(),
+				sources: v.optional(
+					v.array(
+						v.object({
+							id: v.string(),
+							type: v.string(),
+							text: v.string(),
+						})
+					)
+				),
 			})
 		),
 		updatedAt: v.number(),

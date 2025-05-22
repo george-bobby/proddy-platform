@@ -75,6 +75,11 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
           content: msg.content,
           sender: msg.role,
           timestamp: new Date(msg.timestamp),
+          sources: msg.sources ? msg.sources.map(source => ({
+            id: source.id,
+            type: source.type,
+            text: source.text
+          })) : undefined
         }));
         setMessages(formattedMessages);
       } else {
