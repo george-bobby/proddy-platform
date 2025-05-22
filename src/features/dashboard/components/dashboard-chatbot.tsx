@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader, RefreshCw, Info } from 'lucide-react';
+import { Bot, Send, Loader, RefreshCw, Info, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,16 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DashboardChatbotProps {
   workspaceId: Id<'workspaces'>;
@@ -223,44 +233,27 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
   };
 
   return (
-    <Card className="flex flex-col h-full shadow-md">
-      <CardHeader className="pb-2">
+    <Card className="flex flex-col h-full shadow-md overflow-hidden">
+      <CardHeader className="pb-2 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8 bg-primary/10">
               <AvatarFallback>
-                <Bot className="h-5 w-5 text-primary" />
+                <Bot className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-lg">Workspace Assistant</CardTitle>
+              <CardTitle className="text-lg">Proddy AI</CardTitle>
               <CardDescription className="text-xs">
                 Ask me anything about your workspace
               </CardDescription>
             </div>
           </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearConversation}
-                  className="h-8 w-8 p-0"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Clear conversation</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
-        <ScrollArea className="h-[400px] px-4" ref={scrollAreaRef}>
-          <div className="flex flex-col gap-4 py-4">
+        <ScrollArea className="h-[calc(100vh-220px)] px-4" ref={scrollAreaRef}>
+          <div className="flex flex-col gap-4 py-4 pb-6">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -297,23 +290,36 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="pt-2">
-        <div className="flex w-full items-center gap-2">
-          <Input
-            placeholder="Ask a question about your workspace..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={isLoading || !input.trim()}
-            size="icon"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+      <CardFooter className="p-3 pt-0 border-t">
+        <div className="flex flex-col w-full gap-2">
+          <div className="flex w-full items-center gap-2">
+            <Input
+              placeholder="Ask a question about your workspace..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={isLoading || !input.trim()}
+              size="icon"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearConversation}
+              className="text-xs"
+            >
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+              Clear chat
+            </Button>
+          </div>
         </div>
       </CardFooter>
     </Card>

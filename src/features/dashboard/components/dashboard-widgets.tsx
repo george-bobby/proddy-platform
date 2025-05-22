@@ -155,8 +155,8 @@ export const DashboardWidgets = ({ workspaceId, member }: DashboardWidgetsProps)
     },
     {
       id: 'tasks',
-      title: 'Workspace Tasks',
-      description: 'Shows your assigned workspace tasks',
+      title: 'Your Tasks',
+      description: 'Shows your assigned tasks',
       visible: true,
       size: 'small'
     },

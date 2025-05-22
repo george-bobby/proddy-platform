@@ -65,7 +65,7 @@ export const NotesWidget = ({ workspaceId }: NotesWidgetProps) => {
   }, [allNotes]);
 
   const handleViewNote = (noteId: Id<'notes'>, channelId: Id<'channels'>) => {
-    router.push(`/workspace/${workspaceId}/channel/${channelId}/notes/${noteId}`);
+    router.push(`/workspace/${workspaceId}/channel/${channelId}/notes?noteId=${noteId}`);
   };
 
   const handleCreateNote = () => {

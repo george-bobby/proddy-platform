@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { FileText, Plus, FolderPlus, Save } from 'lucide-react';
 import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ import { useDocumentTitle } from '@/hooks/use-document-title';
 
 const NotesPage = () => {
     const params = useParams();
+    const searchParams = useSearchParams();
     const workspaceId = params.workspaceId as Id<'workspaces'>;
     const channelId = params.channelId as Id<'channels'>;
     const [ConfirmDialog, confirm] = useConfirm(
@@ -31,8 +32,11 @@ const NotesPage = () => {
         "Are you sure you want to delete this note? This action cannot be undone."
     );
 
+    // Get noteId from URL query parameters if available
+    const noteIdFromUrl = searchParams.get('noteId');
+
     // State
-    const [activeNoteId, setActiveNoteId] = useState<Id<'notes'> | null>(null);
+    const [activeNoteId, setActiveNoteId] = useState<Id<'notes'> | null>(noteIdFromUrl as Id<'notes'> || null);
     const [title, setTitle] = useState('Untitled');
     const [content, setContent] = useState(JSON.stringify({ ops: [{ insert: '\n' }] }));
     const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
@@ -82,6 +86,13 @@ const NotesPage = () => {
     const createMessage = useMutation(api.messages.create);
     const deleteFolder = useMutation(api.noteFolders.remove);
     const updateFolder = useMutation(api.noteFolders.update);
+
+    // Update activeNoteId when URL query parameters change
+    useEffect(() => {
+        if (noteIdFromUrl) {
+            setActiveNoteId(noteIdFromUrl as Id<'notes'>);
+        }
+    }, [noteIdFromUrl]);
 
     // Update title and content when active note changes
     useEffect(() => {

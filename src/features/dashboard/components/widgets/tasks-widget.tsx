@@ -31,7 +31,7 @@ interface TasksWidgetProps {
 export const TasksWidget = ({ workspaceId }: TasksWidgetProps) => {
   const router = useRouter();
 
-  // Fetch workspace tasks
+  // Fetch your tasks
   const { data: tasks, isLoading } = useGetTasks({ workspaceId });
   const { data: categories } = useGetTaskCategories({ workspaceId });
   const updateTask = useUpdateTask();
@@ -107,7 +107,7 @@ export const TasksWidget = ({ workspaceId }: TasksWidgetProps) => {
       <div className="flex items-center justify-between pr-8"> {/* Added padding-right to avoid overlap with drag handle */}
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          <h3 className="font-medium">Workspace Tasks</h3>
+          <h3 className="font-medium">Your Tasks</h3>
           {sortedTasks.length > 0 && (
             <Badge variant="default" className="ml-2">
               {sortedTasks.length}
@@ -193,7 +193,7 @@ export const TasksWidget = ({ workspaceId }: TasksWidgetProps) => {
           <CheckSquare className="mb-2 h-10 w-10 text-muted-foreground" />
           <h3 className="text-lg font-medium">No tasks</h3>
           <p className="text-sm text-muted-foreground">
-            You don't have any workspace tasks assigned
+            You don't have any tasks created
           </p>
           <div className="flex gap-2 mt-4">
             <Button
