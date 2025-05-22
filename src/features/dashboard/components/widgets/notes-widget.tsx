@@ -138,11 +138,19 @@ export const NotesWidget = ({ workspaceId }: NotesWidgetProps) => {
                           ? note.content.substring(0, 100)
                           : (() => {
                             try {
+                              // Define a type for Quill Delta operations
+                              interface DeltaOperation {
+                                insert?: string | object;
+                                delete?: number;
+                                retain?: number;
+                                attributes?: Record<string, any>;
+                              }
+
                               const parsed = JSON.parse(typeof note.content === 'string' ? note.content : JSON.stringify(note.content));
                               if (parsed && parsed.ops && Array.isArray(parsed.ops)) {
                                 // Extract text from the first insert operation
                                 const firstLine = parsed.ops
-                                  .map(op => (typeof op.insert === 'string' ? op.insert : ''))
+                                  .map((op: DeltaOperation) => (typeof op.insert === 'string' ? op.insert : ''))
                                   .join('')
                                   .split('\n')[0]
                                   .trim();
