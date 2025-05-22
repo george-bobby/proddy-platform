@@ -6,6 +6,8 @@ import { WhyProddySection } from "@/features/landing/components/WhyProddySection
 import { FeatureSection } from "@/features/landing/components/FeatureSection";
 import { CTASection } from "@/features/landing/components/CTASection";
 import Replacement from "@/features/landing/components/Replacement";
+import { ChatDemoSection } from "@/features/landing/components/ChatDemoSection";
+import { DashboardPreviewSection } from "@/features/landing/components/DashboardPreviewSection";
 import { Footer } from "@/features/landing/components/Footer";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
@@ -18,6 +20,8 @@ const HomePage = () => {
       <HeroSection />
       <FeatureSection />
       <WhyProddySection />
+      <ChatDemoSection />
+      <DashboardPreviewSection />
       <Replacement />
       <CTASection />
       <Footer />
