@@ -630,10 +630,10 @@ export const sendMentionEmail = action({
 			}
 
 			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy-platform.vercel.app/workspace/${mention.workspaceId}`;
+			const workspaceUrl = `https://proddy.tech/workspace/${mention.workspaceId}`;
 
 			// Send the email
-			const baseUrl = 'https://proddy-platform.vercel.app';
+			const baseUrl = 'https://proddy.tech';
 			const apiUrl = `${baseUrl}/api/email/mention`;
 			console.log(
 				'Sending mention email notification to:',

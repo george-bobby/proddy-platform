@@ -112,10 +112,10 @@ export const sendDirectMessageEmail = action({
 			}
 
 			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy-platform.vercel.app/workspace/${message.workspaceId}`;
+			const workspaceUrl = `https://proddy.tech/workspace/${message.workspaceId}`;
 
 			// Send the email
-			const baseUrl = 'https://proddy-platform.vercel.app';
+			const baseUrl = 'https://proddy.tech';
 			const apiUrl = `${baseUrl}/api/email/direct-message`;
 			console.log(
 				'Sending direct message email notification to:',

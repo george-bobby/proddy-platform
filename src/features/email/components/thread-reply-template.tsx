@@ -30,7 +30,7 @@ export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> =
   originalMessagePreview,
   replyMessagePreview,
   channelName = 'a channel',
-  workspaceUrl = 'https://proddy-platform.vercel.app',
+  workspaceUrl = 'https://proddy.tech',
   workspaceName = 'Proddy',
 }) => {
   const previewText = `${replierName} replied to your message in ${channelName}`;
@@ -42,7 +42,7 @@ export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> =
       <Body style={main}>
         <Container style={container}>
           <Img
-            src="https://proddy-platform.vercel.app/logo-nobg.png"
+            src="https://proddy.tech/logo-nobg.png"
             width="40"
             height="40"
             alt="Proddy"
@@ -62,9 +62,9 @@ export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> =
               <Text style={messageText}>
                 "{originalMessagePreview}"
               </Text>
-              
+
               <Hr style={messageDivider} />
-              
+
               <Text style={replyMessageText}>
                 <strong>Reply from {replierName}:</strong>
               </Text>

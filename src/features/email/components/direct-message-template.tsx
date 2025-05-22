@@ -26,7 +26,7 @@ export const DirectMessageTemplate: React.FC<Readonly<DirectMessageTemplateProps
   firstName,
   senderName,
   messagePreview,
-  workspaceUrl = 'https://proddy-platform.vercel.app',
+  workspaceUrl = 'https://proddy.tech',
   workspaceName = 'Proddy',
 }) => {
   const previewText = `New direct message from ${senderName}`;
@@ -38,7 +38,7 @@ export const DirectMessageTemplate: React.FC<Readonly<DirectMessageTemplateProps
       <Body style={main}>
         <Container style={container}>
           <Img
-            src="https://proddy-platform.vercel.app/logo-nobg.png"
+            src="https://proddy.tech/logo-nobg.png"
             width="40"
             height="40"
             alt="Proddy"
