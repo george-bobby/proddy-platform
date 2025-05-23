@@ -14,37 +14,63 @@ export const showTidioChat = (): boolean => {
 	if (typeof window === 'undefined') return false;
 
 	if (window.tidioChatApi) {
-		// Check if the chat widget is visible by checking its DOM element
-		const tidioElement = document.getElementById('tidio-chat-iframe');
-		const isChatVisible =
-			tidioElement &&
-			window.getComputedStyle(tidioElement).getPropertyValue('display') !==
-				'none';
-
-		if (isChatVisible) {
-			// If chat is visible, hide it
-			window.tidioChatApi.hide();
-		} else {
-			// If chat is hidden, show and open it
+		try {
+			// First, always make sure the widget is shown (the icon is visible)
 			window.tidioChatApi.show();
-			window.tidioChatApi.open();
+
+			// Then check if the chat window is open
+			const isOpen = window.tidioChatApi.isOpen();
+
+			if (isOpen) {
+				// If chat window is open, close it (but keep the icon visible)
+				window.tidioChatApi.hide();
+				// And then show it again to ensure the icon remains visible
+				setTimeout(() => window.tidioChatApi?.show(), 100);
+			} else {
+				// If chat window is closed, open it
+				window.tidioChatApi.open();
+			}
+			return true;
+		} catch (error) {
+			console.error('Error toggling Tidio chat:', error);
+			// Fallback approach - just try to show and open
+			try {
+				window.tidioChatApi.show();
+				window.tidioChatApi.open();
+				return true;
+			} catch (e) {
+				return false;
+			}
 		}
-		return true;
 	}
 
 	return false;
 };
 
 /**
- * Hides the Tidio chat widget
+ * Hides the Tidio chat window but keeps the icon visible
  * @returns {boolean} True if the chat was successfully hidden, false otherwise
  */
 export const hideTidioChat = (): boolean => {
 	if (typeof window === 'undefined') return false;
 
 	if (window.tidioChatApi) {
-		window.tidioChatApi.hide();
-		return true;
+		try {
+			// First hide the chat window
+			window.tidioChatApi.hide();
+
+			// Then make sure the icon is still visible
+			setTimeout(() => {
+				if (window.tidioChatApi) {
+					window.tidioChatApi.show();
+				}
+			}, 100);
+
+			return true;
+		} catch (error) {
+			console.error('Error hiding Tidio chat:', error);
+			return false;
+		}
 	}
 
 	return false;

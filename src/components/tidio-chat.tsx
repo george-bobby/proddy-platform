@@ -44,12 +44,8 @@ export const TidioChat = () => {
         window.tidioChatApi.hide();
       }
 
-      // Set up event listener to hide chat when closed
-      if (window.tidioChatApi) {
-        window.tidioChatApi.on("close", function () {
-          window.tidioChatApi?.hide();
-        });
-      }
+      // We don't hide the widget when closed anymore
+      // This allows the icon to remain visible after closing the chat
     };
 
     // Check if Tidio is already loaded
