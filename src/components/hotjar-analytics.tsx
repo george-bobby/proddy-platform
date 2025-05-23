@@ -1,36 +1,18 @@
 'use client';
 
-import Script from 'next/script';
-
-// Simple TypeScript declaration for Hotjar
-declare global {
-  interface Window {
-    hj?: Function;
-    _hjSettings?: {
-      hjid: number;
-      hjsv: number;
-    };
-  }
-}
+import { useEffect } from 'react';
+import Hotjar from '@hotjar/browser';
 
 export const HotjarAnalytics = () => {
-  return (
-    <Script
-      id="hotjar-analytics"
-      strategy="afterInteractive"
-      dangerouslySetInnerHTML={{
-        __html: `
-          // Hotjar Tracking Code for https://www.proddy.tech
-          (function(h,o,t,j,a,r){
-              h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-              h._hjSettings={hjid:6413729,hjsv:6};
-              a=o.getElementsByTagName('head')[0];
-              r=o.createElement('script');r.async=1;
-              r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-              a.appendChild(r);
-          })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-        `
-      }}
-    />
-  );
+  useEffect(() => {
+    // Initialize Hotjar with your site ID and version
+    const siteId = 6413729;
+    const hotjarVersion = 6;
+
+    // Initialize Hotjar
+    Hotjar.init(siteId, hotjarVersion);
+  }, []);
+
+  // This component doesn't render anything visible
+  return null;
 };
