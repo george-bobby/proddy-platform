@@ -18,14 +18,14 @@ const ComparisonItem = ({
   proddy,
   delay,
 }: ComparisonItemProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
+  const itemRef = useRef<HTMLDivElement>(null);
+  const isItemInView = useInView(itemRef, { once: true, margin: "-50px 0px" });
 
   return (
     <motion.div
-      ref={ref}
+      ref={itemRef}
       initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      animate={isItemInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ duration: 0.5, delay: delay * 0.1 }}
       className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 border-b border-gray-200"
     >
@@ -43,8 +43,13 @@ const ComparisonItem = ({
 };
 
 export const WhyProddySection = () => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px 0px" });
+  // Create separate refs for each section
+  const aiSectionRef = useRef<HTMLDivElement>(null);
+  const whySectionRef = useRef<HTMLDivElement>(null);
+
+  // Create separate isInView states for each section
+  const isAiSectionInView = useInView(aiSectionRef, { once: true, margin: "-100px 0px" });
+  const isWhySectionInView = useInView(whySectionRef, { once: true, margin: "-100px 0px" });
 
   const comparisonItems = [
     {
@@ -66,7 +71,7 @@ export const WhyProddySection = () => {
 
   return (
     <div>
-      <section className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
+      <section ref={aiSectionRef} className="py-16 md:py-24 bg-gray-50 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-[10%] -right-[5%] w-[30%] h-[30%] rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute -bottom-[10%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
@@ -75,9 +80,8 @@ export const WhyProddySection = () => {
         <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl">
           <div className="text-center mb-10">
             <motion.div
-              ref={ref}
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              animate={isAiSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5 }}
               className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-primary/10 text-primary mb-4"
             >
@@ -85,7 +89,7 @@ export const WhyProddySection = () => {
             </motion.div>
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              animate={isAiSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4"
             >
@@ -94,7 +98,7 @@ export const WhyProddySection = () => {
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              animate={isAiSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-gray-600 max-w-[800px] mx-auto mb-6"
             >
@@ -106,7 +110,7 @@ export const WhyProddySection = () => {
 
           <motion.div
             initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+            animate={isAiSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             transition={{ duration: 0.7, delay: 0.5 }}
             className="mt-10 bg-white rounded-xl shadow-md p-6"
           >
@@ -176,6 +180,7 @@ export const WhyProddySection = () => {
         </div>
       </section>
       <section
+        ref={whySectionRef}
         id="why-proddy"
         className="py-12 md:py-16 bg-white relative overflow-hidden w-full"
       >
@@ -189,10 +194,9 @@ export const WhyProddySection = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto">
             <div>
               <motion.div
-                ref={ref}
                 initial={{ opacity: 0, y: 20 }}
                 animate={
-                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+                  isWhySectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
                 }
                 transition={{ duration: 0.5 }}
                 className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-secondary/10 text-secondary mb-3"
@@ -202,7 +206,7 @@ export const WhyProddySection = () => {
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={
-                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+                  isWhySectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
                 }
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-3"
@@ -231,7 +235,7 @@ export const WhyProddySection = () => {
 
             <motion.div
               initial={{ opacity: 0, x: 50 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
+              animate={isWhySectionInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
               transition={{ duration: 0.7, delay: 0.3 }}
               className="relative"
             >
