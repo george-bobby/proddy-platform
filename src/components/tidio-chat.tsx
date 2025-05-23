@@ -119,7 +119,7 @@ export const TidioChat = () => {
   }, [pathname]);
 
   // Use Next.js public environment variable for Tidio key
-  const tidioKey = process.env.NEXT_PUBLIC_TIDIO_KEY;
+  const tidioKey = process.env.NEXT_PUBLIC_TIDIO_PUBLIC_KEY;
 
   return (
     <>

@@ -2,7 +2,7 @@
  * Helper functions for interacting with the Tidio Chat API
  *
  * The Tidio Chat API is loaded from the script with the public key
- * stored in the NEXT_PUBLIC_TIDIO_KEY environment variable.
+ * stored in the NEXT_PUBLIC_TIDIO_PUBLIC_KEY environment variable.
  */
 
 /**
