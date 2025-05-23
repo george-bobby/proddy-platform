@@ -139,12 +139,14 @@ const FeaturesPage = () => {
   const FeatureImage = ({ feature, color }: { feature: Feature, color: string }) => {
     const gradientClass = `bg-gradient-to-r from-${color}-50 to-${color}-100`;
     const accentClass = `bg-${color}-400`;
+    // Default image fallback if imageSrc is undefined
+    const imageSrc = feature.imageSrc || '/placeholder-feature.png';
 
     return (
       <div className={`relative h-full ${gradientClass} overflow-hidden`}>
         <div className="absolute inset-0">
           <Image
-            src={feature.imageSrc}
+            src={imageSrc}
             alt={`${feature.name} preview`}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"

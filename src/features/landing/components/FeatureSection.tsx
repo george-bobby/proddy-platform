@@ -128,7 +128,7 @@ export const FeatureSection = () => {
               </div>
               <div className="relative bg-gray-100 h-full overflow-hidden">
                 <Image
-                  src={activeFeature.imageSrc}
+                  src={activeFeature.imageSrc || '/placeholder-feature.png'}
                   alt={`${activeFeature.name} module preview`}
                   fill
                   className="object-cover object-right p-4"
