@@ -1,4 +1,4 @@
-import { MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBucket, FileText, BarChart, Bot, Mic, AtSign, UserRound } from 'lucide-react';
+import { MessageSquare, CheckSquare, Calendar, LayoutGrid, PaintBucket, FileText, BarChart, LayoutDashboard } from 'lucide-react';
 import { ReactNode } from 'react';
 
 export interface Feature {
@@ -9,8 +9,9 @@ export interface Feature {
   icon: ReactNode;
   color: string;
   features: string[];
+  benefits?: string[];
   useCases: string[];
-  imageSrc: string;
+  imageSrc?: string;
 }
 
 export const featureGroups = [
@@ -32,7 +33,7 @@ export const featureGroups = [
   {
     title: "Analytics & Intelligence",
     description: "Tools that provide insights and intelligent assistance",
-    features: ["reports", "ai"]
+    features: ["reports", "dashboard"]
   }
 ];
 
@@ -132,7 +133,6 @@ export const features: Feature[] = [
       'Customizable workflows',
       'Card assignments and due dates',
       'Progress tracking',
-      'Automated workflows',
       'Integration with Tasks and Calendar',
       'Custom fields and labels',
       'Drag-and-drop card management',
@@ -237,31 +237,36 @@ export const features: Feature[] = [
     imageSrc: '/reports.png',
   },
   {
-    id: 'ai',
-    name: 'AI Assistant',
-    description: 'Intelligent assistant that helps with summarization, suggestions, and automation.',
-    detailedDescription: 'Proddy AI Assistant is your team\'s intelligent companion, enhancing productivity across all modules. From summarizing long conversations to suggesting responses and automating routine tasks, the AI Assistant learns from your team\'s patterns to provide increasingly valuable assistance over time.',
-    icon: <Bot className="size-6" />,
+    id: 'dashboard',
+    name: 'Dashboard',
+    description: 'Customizable command center that brings all your workspace information into one place.',
+    detailedDescription: 'The Proddy Dashboard is your team\'s central hub, providing a bird\'s-eye view of everything that matters. With customizable widgets and real-time updates, you can monitor activity, track progress, and access key information without switching between different modules.',
+    icon: <LayoutDashboard className="size-6" />,
     color: 'bg-indigo-500',
     features: [
-      'Message summarization',
-      'Smart replies and suggestions',
-      'Content generation',
-      'Task prioritization',
-      'Meeting notes and action items',
-      'Predictive analytics',
-      'Natural language processing',
-      'Personalized recommendations',
-      'Daily conversation recaps',
+      'Customizable widget layout',
+      'Real-time activity feed',
+      'Task and deadline tracking',
+      'Calendar events overview',
+      'Team mentions and replies',
+      'Notes and canvas previews',
+      'Board cards status',
+      'Personalized workspace insights',
     ],
-
+    benefits: [
+      'Get a complete overview of your workspace in one place',
+      'Customize your view to focus on what matters most',
+      'Stay updated on team activity in real-time',
+      'Access key information without switching contexts',
+      'Improve productivity with personalized insights',
+    ],
     useCases: [
-      'Meeting summarization and follow-up',
-      'Email and message drafting',
-      'Research assistance',
-      'Data analysis and pattern recognition',
-      'Personal productivity enhancement',
+      'Daily team status overview',
+      'Project progress monitoring',
+      'Personal task management',
+      'Meeting and event tracking',
+      'Cross-module information access',
     ],
-    imageSrc: '/assistant.png',
+    imageSrc: '/dashboard.png',
   }
 ];

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { GithubIcon, Linkedin, TwitterIcon, ExternalLink } from "lucide-react";
+import { showTidioChat } from "@/lib/tidio-helpers";
 
 export const Footer = () => {
   return (
@@ -28,37 +29,8 @@ export const Footer = () => {
               artificial intelligence.
             </p>
             <p className="text-sm text-gray-500 mb-6">
-              Made with ❤️ in Bengaluru, India
+              Made with ❤️ in Bengaluru
             </p>
-            <div className="flex space-x-5">
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-primary transition-all duration-200 hover:scale-110"
-                aria-label="Twitter"
-              >
-                <TwitterIcon size={20} />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-primary transition-all duration-200 hover:scale-110"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={20} />
-              </a>
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-primary transition-all duration-200 hover:scale-110"
-                aria-label="GitHub"
-              >
-                <GithubIcon size={20} />
-              </a>
-            </div>
           </div>
 
           <div className="md:w-2/3 flex flex-col md:flex-row justify-between">
@@ -94,24 +66,13 @@ export const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="https://status.proddy.tech/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
+                    href="/assistant"
+                    className="text-sm text-gray-500 hover:text-primary transition-colors"
                   >
-                    Status <ExternalLink className="size-3" />
+                    Assistant
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="https://proddy.canny.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
-                  >
-                    Roadmap <ExternalLink className="size-3" />
-                  </Link>
-                </li>
+
               </ul>
             </div>
 
@@ -148,22 +109,12 @@ export const Footer = () => {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="https://proddy.usetiful.help/"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => showTidioChat()}
                     className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
-                    New Ticket <ExternalLink className="size-3" />
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="mailto:support@proddy.tech"
-                    className="text-sm text-gray-500 hover:text-primary transition-colors"
-                  >
-                    Email Support
-                  </a>
+                    Support
+                  </button>
                 </li>
               </ul>
             </div>
@@ -210,16 +161,6 @@ export const Footer = () => {
                     Terms of Service
                   </Link>
                 </li>
-                <li>
-                  <a
-                    href="https://proddy.usetiful.help/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-500 hover:text-primary transition-colors inline-flex items-center gap-1"
-                  >
-                    Support <ExternalLink className="size-3" />
-                  </a>
-                </li>
               </ul>
             </div>
           </div>
@@ -232,6 +173,12 @@ export const Footer = () => {
               © {new Date().getFullYear()} Proddy. All rights reserved.
             </p>
             <div className="flex flex-wrap gap-6 mt-4 md:mt-0">
+              <a
+                href="mailto:support@proddy.tech"
+                className="text-sm text-gray-500 hover:text-primary transition-colors"
+              >
+                support@proddy.tech
+              </a>
               <Link
                 href="/privacy"
                 className="text-sm text-gray-500 hover:text-primary transition-colors"
@@ -244,12 +191,6 @@ export const Footer = () => {
               >
                 Terms of Service
               </Link>
-              <a
-                href="mailto:support@proddy.tech"
-                className="text-sm text-gray-500 hover:text-primary transition-colors"
-              >
-                support@proddy.tech
-              </a>
             </div>
           </div>
         </div>

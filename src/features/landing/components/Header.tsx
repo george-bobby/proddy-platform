@@ -27,7 +27,7 @@ const featureToTabMap: Record<string, string> = {
   'calendar': 'planning',
   'notes': 'planning',
   'reports': 'analytics',
-  'ai': 'analytics',
+  'dashboard': 'analytics',
 };
 
 const modules: Module[] = [
@@ -74,10 +74,10 @@ const modules: Module[] = [
     href: `/features?tab=${featureToTabMap['reports']}&feature=reports`,
   },
   {
-    name: 'AI Assistant',
-    description: 'Intelligent productivity tools',
-    icon: '🤖',
-    href: `/features?tab=${featureToTabMap['ai']}&feature=ai`,
+    name: 'Dashboard',
+    description: 'Your workspace command center',
+    icon: '🎛️',
+    href: `/features?tab=${featureToTabMap['dashboard']}&feature=dashboard`,
   },
 ];
 
@@ -161,22 +161,43 @@ export const Header = () => {
                     transition={{ duration: 0.2 }}
                     className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[600px] bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50"
                   >
-                    <div className="grid grid-cols-2 gap-4 p-6">
-                      {modules.map((module) => (
+                    <div className="p-6">
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        {modules.map((module) => (
+                          <Link
+                            key={module.name}
+                            href={module.href}
+                            className="flex items-start p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:translate-x-1"
+                          >
+                            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-md bg-primary/5 text-xl">
+                              {module.icon}
+                            </div>
+                            <div className="ml-4">
+                              <p className="text-sm font-medium text-gray-900">{module.name}</p>
+                              <p className="mt-1 text-xs text-gray-500">{module.description}</p>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+
+                      {/* Special Assistant Feature */}
+                      <div className="mt-4 pt-4 border-t border-gray-100">
                         <Link
-                          key={module.name}
-                          href={module.href}
-                          className="flex items-start p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:translate-x-1"
+                          href="/assistant"
+                          className="flex items-start p-4 rounded-lg bg-primary/5 hover:bg-primary/10 transition-all duration-200"
                         >
-                          <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-md bg-primary/5 text-xl">
-                            {module.icon}
+                          <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-md bg-primary/20 text-2xl">
+                            🤖
                           </div>
                           <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-900">{module.name}</p>
-                            <p className="mt-1 text-xs text-gray-500">{module.description}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-base font-medium text-gray-900">Proddy AI Assistant</p>
+                              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">New</span>
+                            </div>
+                            <p className="mt-1 text-sm text-gray-600">Your intelligent workspace companion powered by AI</p>
                           </div>
                         </Link>
-                      ))}
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -191,6 +212,17 @@ export const Header = () => {
               )}
             >
               Why Proddy?
+            </Link>
+
+            <Link
+              href="/assistant"
+              className={cn(
+                "text-sm font-medium transition-colors duration-200 flex items-center gap-1",
+                isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
+              )}
+            >
+              <span>AI Assistant</span>
+              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">New</span>
             </Link>
 
             <Link
@@ -213,18 +245,6 @@ export const Header = () => {
               )}
             >
               Roadmap <ExternalLink className="size-3" />
-            </Link>
-
-            <Link
-              href="https://proddy.usetiful.help/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                "text-sm font-medium transition-colors duration-200 flex items-center gap-1",
-                isScrolled ? "text-gray-700 hover:text-primary" : "text-gray-700 hover:text-primary"
-              )}
-            >
-              Support <ExternalLink className="size-3" />
             </Link>
           </nav>
 
@@ -317,6 +337,19 @@ export const Header = () => {
                         <span>{module.name}</span>
                       </Link>
                     ))}
+
+                    {/* Special Assistant Feature for mobile */}
+                    <Link
+                      href="/assistant"
+                      className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors col-span-2 mt-2 bg-primary/5 p-2 rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-lg">🤖</span>
+                      <div>
+                        <span>Proddy AI Assistant</span>
+                        <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">New</span>
+                      </div>
+                    </Link>
                   </div>
                 </div>
                 <Link
@@ -326,6 +359,7 @@ export const Header = () => {
                 >
                   Why Proddy?
                 </Link>
+
                 <Link
                   href="/pricing"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
@@ -342,16 +376,6 @@ export const Header = () => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Roadmap <ExternalLink className="size-3" />
-                </Link>
-
-                <Link
-                  href="https://proddy.usetiful.help/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-base font-medium text-gray-700 hover:text-primary transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Support <ExternalLink className="size-3" />
                 </Link>
               </div>
               <div className="pt-4 border-t border-gray-200 space-y-3">

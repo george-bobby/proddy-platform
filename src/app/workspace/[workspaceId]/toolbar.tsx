@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, Activity, Map, HelpCircle } from 'lucide-react';
+import { Bell, Search, Activity, Map, HelpCircle, HeartPulse } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
@@ -24,6 +24,7 @@ import { useGetMembers } from '@/features/members/api/use-get-members';
 import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
 import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
 import { useGetUnreadMentionsCount } from '@/features/messages/api/use-get-unread-mentions-count';
+import { showTidioChat } from '@/lib/tidio-helpers';
 
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
@@ -114,23 +115,6 @@ export const WorkspaceToolbar = ({
 
       {/* Right section - Actions */}
       <div className="ml-auto flex flex-1 items-center justify-end gap-x-3 px-6">
-        {/* Status Page Button */}
-        <Hint label="System Status" side="bottom">
-          <Button
-            variant="ghost"
-            size="iconSm"
-            className="text-white relative hover:bg-white/15 transition-colors"
-            onClick={() => {
-              // Open status page in a new tab
-              const statusPageUrl = 'https://status.proddy.tech/';
-              window.open(statusPageUrl, '_blank', 'noopener,noreferrer');
-            }}
-          >
-            <div className="relative">
-              <Activity className="size-5" />
-            </div>
-          </Button>
-        </Hint>
 
         {/* Roadmap Button */}
         <Hint label="Roadmap & Feedback" side="bottom">
@@ -150,16 +134,16 @@ export const WorkspaceToolbar = ({
           </Button>
         </Hint>
 
-        {/* Support Button */}
-        <Hint label="Need Help?" side="bottom">
+        {/* Documentation Button */}
+        <Hint label="Documentation" side="bottom">
           <Button
             variant="ghost"
             size="iconSm"
             className="text-white relative hover:bg-white/15 transition-colors"
             onClick={() => {
-              // Open support portal in a new tab
-              const supportUrl = 'https://proddy.usetiful.help/';
-              window.open(supportUrl, '_blank', 'noopener,noreferrer');
+              // Open documentation in a new tab
+              const docsUrl = 'https://proddy.usetiful.help/';
+              window.open(docsUrl, '_blank', 'noopener,noreferrer');
             }}
           >
             <div className="relative">
@@ -167,6 +151,42 @@ export const WorkspaceToolbar = ({
             </div>
           </Button>
         </Hint>
+
+        {/* Chat Support Button */}
+        <Hint label="Chat Support" side="bottom">
+          <Button
+            variant="ghost"
+            size="iconSm"
+            className="text-white relative hover:bg-white/15 transition-colors"
+            onClick={() => {
+              // Show Tidio chat widget
+              showTidioChat();
+            }}
+          >
+            <div className="relative">
+              <HeartPulse className="size-5" />
+            </div>
+          </Button>
+        </Hint>
+
+        {/* Status Page Button */}
+        <Hint label="System Status" side="bottom">
+          <Button
+            variant="ghost"
+            size="iconSm"
+            className="text-white relative hover:bg-white/15 transition-colors"
+            onClick={() => {
+              // Open status page in a new tab
+              const statusPageUrl = 'https://status.proddy.tech/';
+              window.open(statusPageUrl, '_blank', 'noopener,noreferrer');
+            }}
+          >
+            <div className="relative">
+              <Activity className="size-5" />
+            </div>
+          </Button>
+        </Hint>
+
 
         {/* Notifications Button */}
         <Hint label="Notifications" side="bottom">

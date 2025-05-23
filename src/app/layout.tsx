@@ -7,6 +7,7 @@ import { ConvexClientProvider } from "@/config/convex-client-provider";
 import { JotaiProvider } from "@/components/jotai-provider";
 import { ModalProvider } from "@/components/modal-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { TidioChat } from "@/components/tidio-chat";
 import { siteConfig } from "@/config";
 
 import "./globals.css";
@@ -56,6 +57,7 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
             <JotaiProvider>
               <Toaster theme="light" richColors closeButton />
               <ModalProvider />
+              <TidioChat />
 
               {children}
             </JotaiProvider>
