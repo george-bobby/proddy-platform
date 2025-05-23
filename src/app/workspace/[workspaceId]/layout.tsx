@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import type { Id } from "@/../convex/_generated/dataModel";
 import { SummarizeButton } from "@/features/ai/components/summarize-button";
+import { HotjarAnalytics } from "@/components/hotjar-analytics";
 
 import { MessageSelectionProvider } from "@/features/ai/contexts/message-selection-context";
 import { Profile } from "@/features/members/components/profile";
@@ -69,6 +70,8 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
 
   return (
     <MessageSelectionProvider>
+      {/* Add Hotjar Analytics to all workspace pages */}
+      <HotjarAnalytics />
       <StatusTracker />
       <div className="h-full">
         <div className="flex h-full">
