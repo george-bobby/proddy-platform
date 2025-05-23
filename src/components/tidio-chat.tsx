@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
+import { useQuery } from 'convex/react';
+import { api } from '@/../convex/_generated/api';
 
 // Add TypeScript declaration for Tidio Chat API
 declare global {
@@ -13,6 +15,14 @@ declare global {
       open: () => void;
       on: (event: string, callback: () => void) => void;
       isOpen: () => boolean;
+      setVisitorData: (data: Record<string, any>) => void;
+      addVisitorTags: (tags: string[]) => void;
+    };
+    tidioIdentify?: {
+      distinct_id?: string;
+      email?: string;
+      name?: string;
+      phone?: string;
     };
   }
 }
@@ -30,6 +40,52 @@ const PUBLIC_ROUTES = [
 
 export const TidioChat = () => {
   const pathname = usePathname();
+
+  // Get current user from Convex
+  const currentUser = useQuery(api.users.current);
+
+  useEffect(() => {
+    // Set up user identification for Tidio
+    if (currentUser && currentUser._id) {
+      // Define the tidioIdentify object directly on the document
+      // This must be done before the Tidio script loads
+      window.tidioIdentify = {
+        distinct_id: currentUser._id,
+        email: currentUser.email || '',
+        name: currentUser.name || '',
+      };
+
+      // Also set up a handler for when Tidio is loaded to update visitor data
+      const handleTidioLoaded = () => {
+        if (window.tidioChatApi) {
+          // Set additional visitor data after Tidio is loaded
+          window.tidioChatApi.setVisitorData({
+            email: currentUser.email || '',
+            name: currentUser.name || '',
+            // You can add additional custom fields here if needed
+          });
+
+          // Add tags if needed
+          if (currentUser.name) {
+            window.tidioChatApi.addVisitorTags(['logged-in-user']);
+          }
+        }
+      };
+
+      // Check if Tidio is already loaded
+      if (window.tidioChatApi) {
+        handleTidioLoaded();
+      } else {
+        // If not loaded yet, add event listener for when it's ready
+        document.addEventListener("tidioChat-ready", handleTidioLoaded);
+      }
+
+      // Cleanup function
+      return () => {
+        document.removeEventListener("tidioChat-ready", handleTidioLoaded);
+      };
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     // Function to initialize Tidio when it's ready
@@ -66,10 +122,48 @@ export const TidioChat = () => {
   const tidioKey = process.env.NEXT_PUBLIC_TIDIO_KEY;
 
   return (
-    <Script
-      id="tidio-chat"
-      src={`//code.tidio.co/${tidioKey}.js`}
-      strategy="lazyOnload"
-    />
+    <>
+      {/* Set up tidioIdentify before loading the Tidio script */}
+      {currentUser && currentUser._id && (
+        <Script
+          id="tidio-identify"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Define visitor identification data
+              document.tidioIdentify = {
+                distinct_id: "${currentUser._id}",
+                email: "${currentUser.email || ''}",
+                name: "${currentUser.name || ''}"
+              };
+
+              // Create a function to handle when Tidio is ready
+              function onTidioReady() {
+                if (window.tidioChatApi) {
+                  // Set additional visitor data
+                  window.tidioChatApi.setVisitorData({
+                    email: "${currentUser.email || ''}",
+                    name: "${currentUser.name || ''}",
+                    userId: "${currentUser._id}"
+                  });
+
+                  // Add tags for better visitor categorization
+                  window.tidioChatApi.addVisitorTags(['logged-in-user']);
+                }
+              }
+
+              // Add event listener for when Tidio is ready
+              document.addEventListener("tidioChat-ready", onTidioReady);
+            `
+          }}
+        />
+      )}
+
+      <Script
+        id="tidio-chat"
+        src={`//code.tidio.co/${tidioKey}.js`}
+        strategy="lazyOnload"
+      />
+    </>
   );
 };
