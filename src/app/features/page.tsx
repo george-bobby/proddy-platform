@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Header } from '@/features/landing/Header';
 import { Footer } from '@/features/landing/Footer';
 import { CTASection } from '@/features/landing/CTASection';
-import { Feature, features, featureGroups } from '@/features/landing/data/features-data';
+import { Feature, features, featureGroups } from '@/features/landing/features/features-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const FeaturesPage = () => {

@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { features } from "@/features/landing/data/features-data";
+import { features } from "@/features/landing/features/features-data";
 
 export const FeatureSection = () => {
   const ref = useRef<HTMLDivElement>(null);
