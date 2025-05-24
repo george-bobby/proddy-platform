@@ -2,8 +2,10 @@
 
 import { Header } from "@/features/landing/components/Header";
 import { HeroSection } from "@/features/landing/components/HeroSection";
-import { WhyProddySection } from "@/features/landing/components/WhyProddySection";
 import { FeatureSection } from "@/features/landing/components/FeatureSection";
+import { AIFeaturesCardsSection } from "@/features/landing/components/AIFeaturesCardsSection";
+import { AIFeaturesSection } from "@/features/landing/components/AIFeaturesSection";
+import { ComparisonSection } from "@/features/landing/components/ComparisonSection";
 import { CTASection } from "@/features/landing/components/CTASection";
 import Replacement from "@/features/landing/components/Replacement";
 import { ChatDemoSection } from "@/features/landing/components/ChatDemoSection";
@@ -19,7 +21,9 @@ const HomePage = () => {
       <Header />
       <HeroSection />
       <FeatureSection />
-      <WhyProddySection />
+      <AIFeaturesCardsSection />
+      <AIFeaturesSection />
+      <ComparisonSection />
       <ChatDemoSection />
       <DashboardPreviewSection />
       <Replacement />
