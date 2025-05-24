@@ -46,10 +46,10 @@ const FeatureCard = ({
         {/* Image */}
         <div className="relative h-48 bg-gray-50 overflow-hidden rounded-t-2xl">
           <Image
-            src="/dashboard-preview.svg"
+            src={imageSrc}
             alt={title}
             fill
-            className="object-contain object-center p-4"
+            className="object-cover object-center"
           />
         </div>
 
@@ -70,21 +70,21 @@ const FeatureCard = ({
       </div>
 
       {/* Desktop Layout - Horizontal Accordion */}
-      <div className="hidden lg:block h-full">
+      <div className="hidden lg:block h-[28rem]">
         {/* Image Section */}
-        <div className="relative bg-gray-50 overflow-hidden rounded-t-2xl" style={{ height: '240px' }}>
+        <div className="relative bg-gray-50 overflow-hidden rounded-t-2xl h-64">
           <Image
-            src="/dashboard-preview.svg"
+            src={imageSrc}
             alt={title}
             fill
-            className="object-contain object-center p-6 transition-transform duration-500 group-hover:scale-105"
+            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
         </div>
 
-        {/* Content Section */}
-        <div className="p-6">
+        {/* Content Section - Fixed height */}
+        <div className="p-6 h-48 flex flex-col">
           {/* Number Badge */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
               0{delay - 2}
             </span>
@@ -95,17 +95,19 @@ const FeatureCard = ({
             {title}
           </h3>
 
-          {/* Description - Expands on hover */}
-          <div className={`
-            overflow-hidden transition-all duration-500 ease-in-out
-            ${isExpanded
-              ? 'max-h-32 opacity-100'
-              : 'max-h-0 opacity-0'
-            }
-          `}>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {description}
-            </p>
+          {/* Description - Expands on hover with fixed container */}
+          <div className="flex-1 relative overflow-hidden">
+            <div className={`
+              absolute inset-0 transition-all duration-500 ease-in-out
+              ${isExpanded
+                ? 'translate-y-0 opacity-100'
+                : 'translate-y-4 opacity-0'
+              }
+            `}>
+              <p className="text-gray-600 text-sm leading-relaxed line-clamp-4">
+                {description}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -113,7 +115,7 @@ const FeatureCard = ({
   );
 };
 
-export const AIFeaturesCardsSection = () => {
+export const AIFeaturesSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isSectionInView = useInView(sectionRef, { once: true, margin: "-100px 0px" });
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
@@ -121,22 +123,22 @@ export const AIFeaturesCardsSection = () => {
   const features = [
     {
       title: "Reply Suggestions",
-      imageSrc: "/ai-reply.png",
+      imageSrc: "/ai-reply.svg",
       description: "AI analyzes conversation context and generates smart reply options, helping you respond faster and more effectively to messages and comments."
     },
     {
       title: "Daily Recap",
-      imageSrc: "/ai-recap.png",
+      imageSrc: "/ai-recap.svg",
       description: "Get intelligent summaries of your day's activities, important updates, and key highlights delivered right to your dashboard every morning."
     },
     {
       title: "Text to Diagram",
-      imageSrc: "/ai-diagram.png",
+      imageSrc: "/ai-diagram.svg",
       description: "Transform written descriptions into visual flowcharts, diagrams, and process maps automatically using advanced AI understanding."
     },
     {
       title: "Notes Formatter",
-      imageSrc: "/ai-notes.png",
+      imageSrc: "/ai-notes.svg",
       description: "Automatically organize, structure, and enhance your meeting notes with intelligent formatting, bullet points, and action item extraction."
     },
   ];
@@ -180,14 +182,6 @@ export const AIFeaturesCardsSection = () => {
             Smart Tools That{" "}
             <span className="text-primary">Amplify</span> Your Productivity
           </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={isSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-gray-600 max-w-[700px] mx-auto"
-          >
-            Experience the power of AI integrated seamlessly into your workflow with features designed to save time and enhance collaboration.
-          </motion.p>
         </div>
 
         {/* Feature Cards - Horizontal Accordion */}

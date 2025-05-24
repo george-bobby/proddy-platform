@@ -9,9 +9,9 @@ import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Header } from '@/features/landing/components/Header';
-import { Footer } from '@/features/landing/components/Footer';
-import { CTASection } from '@/features/landing/components/CTASection';
+import { Header } from '@/features/landing/Header';
+import { Footer } from '@/features/landing/Footer';
+import { CTASection } from '@/features/landing/CTASection';
 import { Feature, features, featureGroups } from '@/features/landing/data/features-data';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 

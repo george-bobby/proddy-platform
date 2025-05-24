@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { ArrowRight, Users, Lightbulb, Target, Clock, Zap, Heart } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Header } from '@/features/landing/components/Header';
-import { Footer } from '@/features/landing/components/Footer';
-import { CTASection } from '@/features/landing/components/CTASection';
+import { Header } from '@/features/landing/Header';
+import { Footer } from '@/features/landing/Footer';
+import { CTASection } from '@/features/landing/CTASection';
 
 const AboutPage = () => {
   return (

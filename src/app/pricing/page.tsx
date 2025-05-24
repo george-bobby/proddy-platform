@@ -7,9 +7,9 @@ import { ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
-import { Header } from '@/features/landing/components/Header';
-import { Footer } from '@/features/landing/components/Footer';
-import { CTASection } from '@/features/landing/components/CTASection';
+import { Header } from '@/features/landing/Header';
+import { Footer } from '@/features/landing/Footer';
+import { CTASection } from '@/features/landing/CTASection';
 
 const PricingPage = () => {
   return (

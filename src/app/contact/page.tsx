@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Header } from '@/features/landing/components/Header';
-import { Footer } from '@/features/landing/components/Footer';
+import { Header } from '@/features/landing/Header';
+import { Footer } from '@/features/landing/Footer';
 
 const ContactPage = () => {
   const [formState, setFormState] = useState({
@@ -120,7 +120,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Phone</h3>
-                    <p className="text-gray-600">+91 (800) 123-4567</p>
+                    <p className="text-gray-600">+91 (974) 609-5420</p>
                   </div>
                 </div>
               </div>

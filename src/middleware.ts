@@ -12,13 +12,14 @@ const isPublicPage = createRouteMatcher([
 	'/home',
 	'/signin',
 	'/signup',
-	'/solutions',
 	'/about',
 	'/contact',
 	'/privacy',
 	'/terms',
 	'/features',
 	'/pricing',
+	'/why-proddy',
+	'/assistant',
 ]);
 
 // Define authenticated-only pages

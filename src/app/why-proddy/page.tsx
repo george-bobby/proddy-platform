@@ -8,10 +8,10 @@ import { X, Check, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { Header } from "@/features/landing/components/Header";
-import { Footer } from "@/features/landing/components/Footer";
-import { CTASection } from "@/features/landing/components/CTASection";
-import { CapabilitysSection } from "@/features/landing/components/CapabilitySection";
+import { Header } from "@/features/landing/Header";
+import { Footer } from "@/features/landing/Footer";
+import { CTASection } from "@/features/landing/CTASection";
+import { CapabilitysSection } from "@/features/landing/home/CapabilitySection";
 
 interface ComparisonItemProps {
   title: string;

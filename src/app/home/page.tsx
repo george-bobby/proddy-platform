@@ -1,16 +1,13 @@
 "use client";
 
-import { Header } from "@/features/landing/components/Header";
-import { HeroSection } from "@/features/landing/components/HeroSection";
-import { FeatureSection } from "@/features/landing/components/FeatureSection";
-import { AIFeaturesCardsSection } from "@/features/landing/components/AIFeaturesCardsSection";
-import { AIFeaturesSection } from "@/features/landing/components/AIFeaturesSection";
-import { ComparisonSection } from "@/features/landing/components/ComparisonSection";
-import { CTASection } from "@/features/landing/components/CTASection";
-import Replacement from "@/features/landing/components/Replacement";
-import { ChatDemoSection } from "@/features/landing/components/ChatDemoSection";
-import { DashboardPreviewSection } from "@/features/landing/components/DashboardPreviewSection";
-import { Footer } from "@/features/landing/components/Footer";
+import { Header } from "@/features/landing/Header";
+import { HeroSection } from "@/features/landing/home/HeroSection";
+import { FeatureSection } from "@/features/landing/home/FeatureSection";
+import { AIFeaturesSection } from "@/features/landing/home/AIFeaturesSection";
+import { ComparisonSection } from "@/features/landing/home/ComparisonSection";
+import { CTASection } from "@/features/landing/CTASection";
+import { ReplacementSection } from "@/features/landing/home/ReplacementSection";
+import { Footer } from "@/features/landing/Footer";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
 const HomePage = () => {
@@ -21,12 +18,9 @@ const HomePage = () => {
       <Header />
       <HeroSection />
       <FeatureSection />
-      <AIFeaturesCardsSection />
       <AIFeaturesSection />
       <ComparisonSection />
-      <ChatDemoSection />
-      <DashboardPreviewSection />
-      <Replacement />
+      <ReplacementSection />
       <CTASection />
       <Footer />
     </div>

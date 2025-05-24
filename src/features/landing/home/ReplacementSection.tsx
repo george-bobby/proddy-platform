@@ -78,7 +78,7 @@ const AnimatedArrow: React.FC<AnimatedArrowProps> = ({
   );
 };
 
-const Replacement = () => {
+export const ReplacementSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px 0px" });
 
@@ -159,10 +159,10 @@ const Replacement = () => {
                 animate={
                   isInView
                     ? {
-                        x: 0,
-                        opacity: 1,
-                        scale: 1,
-                      }
+                      x: 0,
+                      opacity: 1,
+                      scale: 1,
+                    }
                     : { x: -50, opacity: 0 }
                 }
                 transition={{
@@ -228,4 +228,3 @@ const Replacement = () => {
   );
 };
 
-export default Replacement;
