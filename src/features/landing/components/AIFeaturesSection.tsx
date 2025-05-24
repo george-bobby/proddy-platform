@@ -77,8 +77,7 @@ const FeatureCard = ({
             src={imageSrc}
             alt={title}
             fill
-            className="object-cover object-center transition-transform duration-500 group-hover:scale-105 w-full h-full"
-            style={{ objectFit: 'cover' }}
+            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           />
         </div>
 
@@ -183,6 +182,14 @@ export const AIFeaturesSection = () => {
             Smart Tools That{" "}
             <span className="text-primary">Amplify</span> Your Productivity
           </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={isSectionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-lg text-gray-600 max-w-[700px] mx-auto"
+          >
+            Experience the power of AI integrated seamlessly into your workflow with features designed to save time and enhance collaboration.
+          </motion.p>
         </div>
 
         {/* Feature Cards - Horizontal Accordion */}

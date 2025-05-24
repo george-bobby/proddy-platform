@@ -5,19 +5,17 @@ import {
   SiNotion,
   SiMiro,
   SiTodoist,
-  SiClickup,
-  SiJira,
+  SiConfluence,
   SiSlack,
 } from "react-icons/si";
 
 // Tool data with icons and names
 const tools = [
-  { name: "Jira", icon: SiJira, color: "#0052CC" },
+  { name: "Confluence", icon: SiConfluence, color: "#0052CC" },
   { name: "Notion", icon: SiNotion, color: "#000000" },
-  { name: "Miro", icon: SiMiro, color: "#FFD02F" },
-  { name: "Todoist", icon: SiTodoist, color: "#E44332" },
   { name: "Slack", icon: SiSlack, color: "#4A154B" },
-  { name: "ClickUp", icon: SiClickup, color: "#7B68EE" },
+  { name: "Todoist", icon: SiTodoist, color: "#E44332" },
+  { name: "Miro Board", icon: SiMiro, color: "#FFD02F" }
 ];
 
 // Define types for the AnimatedArrow props
@@ -146,8 +144,8 @@ export const ReplacementSection = () => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="relative h-[400px] md:h-[500px] w-full"
         >
-          {/* Left: Tools */}
-          <div className="z-30 absolute left-0 top-1/2 transform -translate-y-1/2 w-1/3 flex flex-col items-center space-y-4 md:space-y-6">
+          {/* Left: Tools - Increased space-y to space-y-8 for more vertical separation */}
+          <div className="z-30 absolute left-0 top-1/2 transform -translate-y-1/2 w-1/3 flex flex-col items-center space-y-8">
             {tools.map((tool, index) => (
               <motion.div
                 key={tool.name}
@@ -187,7 +185,8 @@ export const ReplacementSection = () => {
             toolPositions.length === tools.length &&
             tools.map((tool, index) => {
               const { x, y } = toolPositions[index];
-              const endX = dimensions.width * 0.75;
+              // Adjusted endX to align with the new Proddy center
+              const endX = dimensions.width * 0.85; // Adjusted from 0.70 to 0.85
               const endY = dimensions.height / 2;
               return (
                 <AnimatedArrow
@@ -201,9 +200,9 @@ export const ReplacementSection = () => {
               );
             })}
 
-          {/* Right: Proddy */}
+          {/* Right: Proddy - Adjusted to center horizontally at the new arrow convergence point */}
           <motion.div
-            className="absolute right-[5%] top-[35%] w-[30%] flex justify-center z-30"
+            className="absolute left-[70%] top-[40%] -translate-x-1/2 -translate-y-1/2 w-1/3 flex justify-center z-30" // Adjusted left-[70%] to left-[85%]
             initial={{ x: 50, opacity: 0 }}
             animate={isInView ? { x: 0, opacity: 1 } : { x: 50, opacity: 0 }}
             transition={{ duration: 0.7, delay: 0.5 }}
@@ -227,4 +226,3 @@ export const ReplacementSection = () => {
     </section>
   );
 };
-

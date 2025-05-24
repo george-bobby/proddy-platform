@@ -82,9 +82,9 @@ export const FAQSection = () => {
             </div>
 
             <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">Is Proddy AI included in all plans?</h3>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Is Proddy AI free to use?</h3>
               <p className="text-gray-600">
-                Yes, Proddy AI is included in all plans during our beta period. In the future, some advanced AI features may be limited to paid plans, but we'll always provide a useful AI assistant experience for all users.
+                Yes, Proddy AI is completely free during our public beta period. We're using a freemium model where core AI features will remain free, with advanced features available in paid plans once we exit beta.
               </p>
             </div>
           </motion.div>
