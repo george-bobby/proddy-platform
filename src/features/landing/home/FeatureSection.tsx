@@ -117,14 +117,6 @@ export const FeatureSection = () => {
                     ))}
                   </ul>
                 </div>
-
-                <div className="mt-auto">
-                  <Link href="/signin">
-                    <Button className="gap-2 px-6 py-2 rounded-lg">
-                      Try {activeFeature.name} <ArrowRight className="size-4" />
-                    </Button>
-                  </Link>
-                </div>
               </div>
               <div className="relative bg-gray-100 h-full overflow-hidden">
                 <Image
