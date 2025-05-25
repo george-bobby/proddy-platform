@@ -266,13 +266,21 @@ export const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.5, duration: 0.5 }}
           >
-            <a
-              href="#features"
-              className="flex flex-col items-center text-gray-500 hover:text-gray-700 transition-colors"
+            <button
+              onClick={() => {
+                const element = document.getElementById('modules');
+                if (element) {
+                  element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+              }}
+              className="flex flex-col items-center text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
             >
               <span className="text-sm font-medium mb-2">Discover More</span>
               <ChevronDown className="size-5 animate-bounce" />
-            </a>
+            </button>
           </motion.div>
         </motion.div>
       </div>

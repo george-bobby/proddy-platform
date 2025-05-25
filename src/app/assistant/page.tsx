@@ -4,7 +4,6 @@ import { Header } from '@/features/landing/Header';
 import { Footer } from '@/features/landing/Footer';
 import { HeroSection } from '@/features/landing/assistant/HeroSection';
 import { FeaturesSection } from '@/features/landing/assistant/FeaturesSection';
-import { DemoSection } from '@/features/landing/assistant/DemoSection';
 import { UseCasesSection } from '@/features/landing/assistant/UseCasesSection';
 import { FAQSection } from '@/features/landing/assistant/FAQSection';
 import { CTASection } from '@/features/landing/CTASection';
@@ -26,7 +25,6 @@ export default function AssistantPage() {
       <Header />
       <HeroSection />
       <FeaturesSection />
-      <DemoSection />
       <UseCasesSection />
       <FAQSection />
       <CTASection />
