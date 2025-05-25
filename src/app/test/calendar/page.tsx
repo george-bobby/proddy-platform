@@ -1,0 +1,590 @@
+'use client';
+
+import { addMonths, getMonth, getYear, subMonths, format, isSameDay, addDays } from 'date-fns';
+import { CalendarIcon, Clock, MapPin, Users, AlertTriangle, Filter } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useDocumentTitle } from '@/hooks/use-document-title';
+import { TestCalendarHeader } from '@/app/test/components/test-calendar-header';
+import { cn } from '@/lib/utils';
+
+// Hardcoded test events - Always available for demo
+const HARDCODED_EVENTS = [
+  // December 2024 Events
+  {
+    id: '1',
+    title: 'Sprint Planning - Q2 Feature Development',
+    date: new Date(2024, 11, 20, 10, 0), // December 20, 2024, 10:00 AM
+    endDate: new Date(2024, 11, 20, 12, 0), // December 20, 2024, 12:00 PM
+    type: 'meeting',
+    priority: 'high',
+    location: 'Conference Room A',
+    attendees: ['Lisa Chen', 'Alex Rodriguez', 'Sarah Johnson', 'Maya Patel'],
+    description: 'Review completed stories from last sprint, plan capacity for upcoming sprint, and discuss mobile app delays.',
+    organizer: 'Lisa Chen',
+    status: 'confirmed'
+  },
+  {
+    id: '2',
+    title: 'Daily Standup',
+    date: new Date(2024, 11, 20, 9, 0), // December 20, 2024, 9:00 AM
+    endDate: new Date(2024, 11, 20, 9, 15), // December 20, 2024, 9:15 AM
+    type: 'meeting',
+    priority: 'medium',
+    location: 'Conference Room B',
+    attendees: ['Full Dev Team'],
+    description: 'Daily team sync and blocker discussion.',
+    organizer: 'Alex Rodriguez',
+    status: 'confirmed'
+  },
+  {
+    id: '3',
+    title: 'Stakeholder Review',
+    date: new Date(2024, 11, 20, 14, 30), // December 20, 2024, 2:30 PM
+    endDate: new Date(2024, 11, 20, 15, 30), // December 20, 2024, 3:30 PM
+    type: 'meeting',
+    priority: 'high',
+    location: 'Zoom Call',
+    attendees: ['Client Team', 'Product Manager'],
+    description: 'Review project progress and gather feedback from stakeholders.',
+    organizer: 'Lisa Chen',
+    status: 'confirmed'
+  },
+  {
+    id: '4',
+    title: '1:1 with Sarah',
+    date: new Date(2024, 11, 20, 16, 0), // December 20, 2024, 4:00 PM
+    endDate: new Date(2024, 11, 20, 16, 30), // December 20, 2024, 4:30 PM
+    type: 'meeting',
+    priority: 'medium',
+    location: 'Office',
+    attendees: ['Sarah Johnson'],
+    description: 'P1 incident discussion and career development.',
+    organizer: 'You',
+    status: 'confirmed'
+  },
+  {
+    id: '5',
+    title: 'Payment API Testing Deadline',
+    date: new Date(2024, 11, 21, 17, 0), // December 21, 2024, 5:00 PM
+    endDate: new Date(2024, 11, 21, 17, 0), // December 21, 2024, 5:00 PM
+    type: 'deadline',
+    priority: 'high',
+    location: 'Remote',
+    attendees: ['Alex Rodriguez', 'Jordan Smith', 'Sam Wilson'],
+    description: 'Complete testing phase for Payment API integration.',
+    organizer: 'Alex Rodriguez',
+    status: 'pending'
+  },
+  {
+    id: '6',
+    title: 'Architecture Review',
+    date: new Date(2024, 11, 21, 9, 0), // December 21, 2024, 9:00 AM
+    endDate: new Date(2024, 11, 21, 10, 30), // December 21, 2024, 10:30 AM
+    type: 'meeting',
+    priority: 'medium',
+    location: 'Conference Room A',
+    attendees: ['Senior Developers', 'Tech Lead'],
+    description: 'Review system architecture for upcoming features.',
+    organizer: 'Tech Lead',
+    status: 'confirmed'
+  },
+  {
+    id: '7',
+    title: 'Client Demo Preparation',
+    date: new Date(2024, 11, 21, 10, 30), // December 21, 2024, 10:30 AM
+    endDate: new Date(2024, 11, 21, 12, 0), // December 21, 2024, 12:00 PM
+    type: 'task',
+    priority: 'high',
+    location: 'Remote',
+    attendees: ['Maya Patel', 'David Kim'],
+    description: 'Prepare demo materials and test environment for client presentation.',
+    organizer: 'Maya Patel',
+    status: 'in-progress'
+  },
+  {
+    id: '8',
+    title: 'Mobile App UI Review',
+    date: new Date(2024, 11, 23, 14, 0), // December 23, 2024, 2:00 PM
+    endDate: new Date(2024, 11, 23, 15, 0), // December 23, 2024, 3:00 PM
+    type: 'meeting',
+    priority: 'medium',
+    location: 'Design Studio',
+    attendees: ['Design Team', 'Mobile Developers'],
+    description: 'Review mobile app UI changes and approve final designs.',
+    organizer: 'Design Lead',
+    status: 'confirmed'
+  },
+  {
+    id: '9',
+    title: 'Database Performance Incident Resolution',
+    date: new Date(2024, 11, 20, 8, 0), // December 20, 2024, 8:00 AM
+    endDate: new Date(2024, 11, 20, 11, 0), // December 20, 2024, 11:00 AM
+    type: 'incident',
+    priority: 'critical',
+    location: 'Remote',
+    attendees: ['Sarah Johnson', 'DevOps Team'],
+    description: 'P1 incident: Database performance issue affecting 15% of users.',
+    organizer: 'Sarah Johnson',
+    status: 'in-progress'
+  },
+  {
+    id: '10',
+    title: 'Team Lunch',
+    date: new Date(2024, 11, 22, 12, 0), // December 22, 2024, 12:00 PM
+    endDate: new Date(2024, 11, 22, 13, 30), // December 22, 2024, 1:30 PM
+    type: 'social',
+    priority: 'low',
+    location: 'Local Restaurant',
+    attendees: ['Entire Team'],
+    description: 'Monthly team lunch and bonding activity.',
+    organizer: 'HR Team',
+    status: 'confirmed'
+  }
+];
+
+interface CalendarDay {
+  day: number | null;
+  isCurrentMonth: boolean;
+  events: typeof HARDCODED_EVENTS;
+}
+
+const TestCalendarPage = () => {
+  useDocumentTitle('Test Calendar');
+  const router = useRouter();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState<typeof HARDCODED_EVENTS[0] | null>(null);
+  const [filterOptions, setFilterOptions] = useState({
+    meeting: true,
+    deadline: true,
+    task: true,
+    incident: true,
+    social: true,
+  });
+
+  const handlePreviousMonth = () => {
+    setCurrentDate((prev) => subMonths(prev, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate((prev) => addMonths(prev, 1));
+  };
+
+  const handleEventClick = (event: typeof HARDCODED_EVENTS[0]) => {
+    // Show the event details modal first
+    setSelectedEvent(event);
+    
+    // Add a small delay then navigate to test board
+    setTimeout(() => {
+      router.push('/test/board');
+    }, 1500); // 1.5 second delay to show the modal briefly
+  };
+
+  // Filter events for current month and by selected filters
+  const currentMonthEvents = useMemo(() => {
+    return HARDCODED_EVENTS.filter(event => 
+      event.date.getMonth() === currentDate.getMonth() &&
+      event.date.getFullYear() === currentDate.getFullYear() &&
+      filterOptions[event.type as keyof typeof filterOptions]
+    );
+  }, [currentDate, filterOptions]);
+
+  // Get all events for current month (unfiltered) for statistics
+  const allCurrentMonthEvents = useMemo(() => {
+    return HARDCODED_EVENTS.filter(event => 
+      event.date.getMonth() === currentDate.getMonth() &&
+      event.date.getFullYear() === currentDate.getFullYear()
+    );
+  }, [currentDate]);
+
+  // Group events by day
+  const eventsByDay = useMemo(() => {
+    const grouped: { [key: number]: typeof HARDCODED_EVENTS } = {};
+    currentMonthEvents.forEach(event => {
+      const day = event.date.getDate();
+      if (!grouped[day]) {
+        grouped[day] = [];
+      }
+      grouped[day].push(event);
+    });
+    return grouped;
+  }, [currentMonthEvents]);
+
+  // Generate calendar days
+  const generateCalendarDays = (): CalendarDay[][] => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days: CalendarDay[] = [];
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push({ day: null, isCurrentMonth: false, events: [] });
+    }
+
+    // Add days of the current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({
+        day,
+        isCurrentMonth: true,
+        events: eventsByDay[day] || []
+      });
+    }
+
+    // Add empty cells to complete the last week if needed
+    const remainingCells = 7 - (days.length % 7);
+    if (remainingCells < 7) {
+      for (let i = 0; i < remainingCells; i++) {
+        days.push({ day: null, isCurrentMonth: false, events: [] });
+      }
+    }
+
+    // Group days into weeks
+    const weeks: CalendarDay[][] = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
+    }
+    return weeks;
+  };
+
+  const weeks = generateCalendarDays();
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const getEventTypeColor = (type: string) => {
+    switch (type) {
+      case 'meeting': return 'bg-blue-100 hover:bg-blue-200 border-l-2 border-blue-500';
+      case 'deadline': return 'bg-red-100 hover:bg-red-200 border-l-2 border-red-500';
+      case 'task': return 'bg-green-100 hover:bg-green-200 border-l-2 border-green-500';
+      case 'incident': return 'bg-orange-100 hover:bg-orange-200 border-l-2 border-orange-500';
+      case 'social': return 'bg-purple-100 hover:bg-purple-200 border-l-2 border-purple-500';
+      default: return 'bg-gray-100 hover:bg-gray-200 border-l-2 border-gray-500';
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'critical': return <AlertTriangle className="h-3 w-3 text-red-600" />;
+      case 'high': return <AlertTriangle className="h-3 w-3 text-orange-500" />;
+      default: return null;
+    }
+  };
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="border-b bg-primary p-4">
+        <Button
+          variant="ghost"
+          className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+          size="sm"
+        >
+          <CalendarIcon className="mr-2 size-5" />
+          <span className="truncate">Test Calendar</span>
+        </Button>
+      </div>
+      
+      <div className="flex h-full flex-col bg-white">
+        <TestCalendarHeader
+          currentDate={currentDate}
+          onPreviousMonth={handlePreviousMonth}
+          onNextMonth={handleNextMonth}
+          filterOptions={filterOptions}
+          onFilterChange={setFilterOptions}
+          eventCounts={{
+            total: allCurrentMonthEvents.length,
+            meeting: allCurrentMonthEvents.filter(e => e.type === 'meeting').length,
+            deadline: allCurrentMonthEvents.filter(e => e.type === 'deadline').length,
+            task: allCurrentMonthEvents.filter(e => e.type === 'task').length,
+            incident: allCurrentMonthEvents.filter(e => e.type === 'incident').length,
+            social: allCurrentMonthEvents.filter(e => e.type === 'social').length,
+          }}
+        />
+        
+        <div className="flex-1 overflow-auto p-4">
+          {/* Filter Status Banner */}
+          {Object.values(filterOptions).some(v => !v) && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    Filters Active: Showing {currentMonthEvents.length} of {allCurrentMonthEvents.length} events
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFilterOptions({
+                    meeting: true,
+                    deadline: true,
+                    task: true,
+                    incident: true,
+                    social: true,
+                  })}
+                  className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {Object.entries(filterOptions).map(([type, enabled]) => (
+                  <Badge 
+                    key={type} 
+                    variant={enabled ? "default" : "secondary"}
+                    className={cn(
+                      "text-xs capitalize",
+                      !enabled && "opacity-50"
+                    )}
+                  >
+                    {type}: {enabled ? 'On' : 'Off'}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div className="flex gap-4 h-full">
+            {/* Main Calendar */}
+            <div className="flex-1 rounded-md border">
+              {/* Calendar header */}
+              <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">
+                {weekdays.map((day) => (
+                  <div
+                    key={day}
+                    className="bg-background p-2 text-xs font-medium text-muted-foreground"
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar grid */}
+              <div className="grid h-[calc(100%-1rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
+                {weeks.flat().map((dayObj, index) => (
+                  <div
+                    key={index}
+                    className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
+                      }`}
+                  >
+                    {dayObj.day && (
+                      <>
+                        <div className={`absolute right-1 top-1 text-xs ${dayObj.day &&
+                            new Date().getDate() === dayObj.day &&
+                            new Date().getMonth() === currentDate.getMonth() &&
+                            new Date().getFullYear() === currentDate.getFullYear()
+                            ? 'h-5 w-5 flex items-center justify-center rounded-full bg-primary text-white -mt-0.5 -mr-0.5'
+                            : ''
+                          }`}>
+                          {dayObj.day}
+                        </div>
+
+                        {dayObj.events && dayObj.events.length > 0 && (
+                          <div className="mt-4 flex max-h-[80px] flex-col gap-1 overflow-y-auto">
+                            {dayObj.events.map((event) => (
+                              <button
+                                key={event.id}
+                                onClick={() => handleEventClick(event)}
+                                className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors text-left ${getEventTypeColor(event.type)} hover:opacity-80`}
+                                title={`${event.title} - ${format(event.date, 'h:mm a')} (Click to view related tasks)`}
+                              >
+                                <div className="flex items-center gap-1">
+                                  {getPriorityIcon(event.priority)}
+                                  <span className="font-bold">{format(event.date, 'h:mm a')}</span>
+                                </div>
+                                <div className="truncate">{event.title}</div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sidebar with upcoming events */}
+            <div className="w-80 space-y-4">
+              {/* Upcoming Events */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Upcoming Events
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[300px]">
+                    <div className="space-y-3">
+                      {HARDCODED_EVENTS
+                        .filter(event => 
+                          event.date >= new Date() && 
+                          filterOptions[event.type as keyof typeof filterOptions]
+                        )
+                        .sort((a, b) => a.date.getTime() - b.date.getTime())
+                        .slice(0, 10)
+                        .map((event) => (
+                          <div
+                            key={event.id}
+                            className="p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors"
+                            onClick={() => handleEventClick(event)}
+                            title="Click to view related tasks"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">{event.title}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {format(event.date, 'MMM d, h:mm a')}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {event.location}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                <Badge variant={event.priority === 'critical' ? 'destructive' : event.priority === 'high' ? 'default' : 'secondary'} className="text-xs">
+                                  {event.priority}
+                                </Badge>
+                                {getPriorityIcon(event.priority)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Event Statistics */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Event Statistics</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{currentMonthEvents.filter(e => e.type === 'meeting').length}</div>
+                      <div className="text-xs text-blue-600">Meetings</div>
+                      <div className="text-xs text-muted-foreground">({allCurrentMonthEvents.filter(e => e.type === 'meeting').length} total)</div>
+                    </div>
+                    <div className="text-center p-3 bg-red-50 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">{currentMonthEvents.filter(e => e.type === 'deadline').length}</div>
+                      <div className="text-xs text-red-600">Deadlines</div>
+                      <div className="text-xs text-muted-foreground">({allCurrentMonthEvents.filter(e => e.type === 'deadline').length} total)</div>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{currentMonthEvents.filter(e => e.type === 'task').length}</div>
+                      <div className="text-xs text-green-600">Tasks</div>
+                      <div className="text-xs text-muted-foreground">({allCurrentMonthEvents.filter(e => e.type === 'task').length} total)</div>
+                    </div>
+                    <div className="text-center p-3 bg-orange-50 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">{currentMonthEvents.filter(e => e.type === 'incident').length}</div>
+                      <div className="text-xs text-orange-600">Incidents</div>
+                      <div className="text-xs text-muted-foreground">({allCurrentMonthEvents.filter(e => e.type === 'incident').length} total)</div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-3 border-t">
+                    <div className="text-sm font-medium mb-2">Priority Breakdown (Filtered)</div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-red-600">Critical</span>
+                        <span>{currentMonthEvents.filter(e => e.priority === 'critical').length} / {allCurrentMonthEvents.filter(e => e.priority === 'critical').length}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-orange-600">High</span>
+                        <span>{currentMonthEvents.filter(e => e.priority === 'high').length} / {allCurrentMonthEvents.filter(e => e.priority === 'high').length}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-blue-600">Medium</span>
+                        <span>{currentMonthEvents.filter(e => e.priority === 'medium').length} / {allCurrentMonthEvents.filter(e => e.priority === 'medium').length}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Low</span>
+                        <span>{currentMonthEvents.filter(e => e.priority === 'low').length} / {allCurrentMonthEvents.filter(e => e.priority === 'low').length}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Event Details Modal/Sidebar would go here */}
+      {selectedEvent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedEvent(null)}>
+          <Card className="w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-lg">{selectedEvent.title}</CardTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant={selectedEvent.priority === 'critical' ? 'destructive' : selectedEvent.priority === 'high' ? 'default' : 'secondary'}>
+                      {selectedEvent.priority}
+                    </Badge>
+                    <Badge variant="outline">{selectedEvent.type}</Badge>
+                    <Badge variant={selectedEvent.status === 'confirmed' ? 'default' : 'secondary'}>
+                      {selectedEvent.status}
+                    </Badge>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setSelectedEvent(null)}>×</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>{format(selectedEvent.date, 'EEEE, MMMM d, yyyy')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>{format(selectedEvent.date, 'h:mm a')} - {format(selectedEvent.endDate, 'h:mm a')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>{selectedEvent.location}</span>
+              </div>
+              <div className="flex items-start gap-2 text-sm">
+                <Users className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <div>
+                  <div className="font-medium">Attendees:</div>
+                  <div className="text-muted-foreground">{selectedEvent.attendees.join(', ')}</div>
+                </div>
+              </div>
+              <div className="text-sm">
+                <div className="font-medium mb-1">Description:</div>
+                <div className="text-muted-foreground">{selectedEvent.description}</div>
+              </div>
+              <div className="text-sm">
+                <div className="font-medium">Organizer: <span className="font-normal text-muted-foreground">{selectedEvent.organizer}</span></div>
+              </div>
+              
+              {/* Navigation notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-sm text-blue-800">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="font-medium">Navigating to related tasks...</span>
+                </div>
+                <div className="text-xs text-blue-600 mt-1">
+                  You'll be redirected to the project board to view tasks related to this event.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TestCalendarPage;

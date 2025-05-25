@@ -116,7 +116,7 @@ export const CalendarFilter = ({
             <div className="flex items-center justify-between space-x-2">
               <div className="flex items-center space-x-2">
                 <LayoutGrid className="h-4 w-4 text-purple-500" />
-                <Label htmlFor="board-card-events" className="cursor-pointer text-purple-700">Board Card Events</Label>
+                <Label htmlFor="board-card-events" className="cursor-pointer text-purple-700">Board Assignments</Label>
               </div>
               <Switch
                 id="board-card-events"
