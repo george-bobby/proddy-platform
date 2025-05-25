@@ -158,17 +158,7 @@ export const TestDashboardChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: `Hello! I'm your Proddy AI assistant. Try asking me:
-
-• "How's my day looking?"
-• "What's the context for the 10am sprint planning?"
-• "What are my tasks for today?"
-• "Show me my calendar"
-• "What's my team status?"
-• "Tell me about the P1 incident"
-• "What emails need my attention?"
-• "Show me project status"
-• "What meetings do I have today?"`,
+      content: `Hello! I'm your Proddy AI assistant. How can I help you today?`,
       sender: 'assistant',
       timestamp: new Date(),
     }
@@ -235,17 +225,7 @@ export const TestDashboardChatbot = () => {
     setMessages([
       {
         id: '1',
-        content: `Hello! I'm your Proddy AI assistant. Try asking me:
-
-• "How's my day looking?"
-• "What's the context for the 10am sprint planning?"
-• "What are my tasks for today?"
-• "Show me my calendar"
-• "What's my team status?"
-• "Tell me about the P1 incident"
-• "What emails need my attention?"
-• "Show me project status"
-• "What meetings do I have today?"`,
+        content: `Hello! I'm your Proddy AI assistant. How can I help you today?`,
         sender: 'assistant',
         timestamp: new Date(),
       }
