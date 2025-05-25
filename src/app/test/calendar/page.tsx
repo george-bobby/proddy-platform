@@ -1,6 +1,6 @@
 'use client';
 
-import { addMonths, getMonth, getYear, subMonths, format, isSameDay, addDays } from 'date-fns';
+import { addMonths, subMonths, format } from 'date-fns';
 import { CalendarIcon, Clock, MapPin, Users, AlertTriangle, Filter } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,146 +8,13 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 import { TestCalendarHeader } from '@/app/test/components/test-calendar-header';
 import { cn } from '@/lib/utils';
+import { TEST_EVENTS, generateDemoEvents } from '@/app/test/data/shared-test-data';
 
-// Hardcoded test events - Always available for demo
-const HARDCODED_EVENTS = [
-  // December 2024 Events
-  {
-    id: '1',
-    title: 'Sprint Planning - Q2 Feature Development',
-    date: new Date(2024, 11, 20, 10, 0), // December 20, 2024, 10:00 AM
-    endDate: new Date(2024, 11, 20, 12, 0), // December 20, 2024, 12:00 PM
-    type: 'meeting',
-    priority: 'high',
-    location: 'Conference Room A',
-    attendees: ['Lisa Chen', 'Alex Rodriguez', 'Sarah Johnson', 'Maya Patel'],
-    description: 'Review completed stories from last sprint, plan capacity for upcoming sprint, and discuss mobile app delays.',
-    organizer: 'Lisa Chen',
-    status: 'confirmed'
-  },
-  {
-    id: '2',
-    title: 'Daily Standup',
-    date: new Date(2024, 11, 20, 9, 0), // December 20, 2024, 9:00 AM
-    endDate: new Date(2024, 11, 20, 9, 15), // December 20, 2024, 9:15 AM
-    type: 'meeting',
-    priority: 'medium',
-    location: 'Conference Room B',
-    attendees: ['Full Dev Team'],
-    description: 'Daily team sync and blocker discussion.',
-    organizer: 'Alex Rodriguez',
-    status: 'confirmed'
-  },
-  {
-    id: '3',
-    title: 'Stakeholder Review',
-    date: new Date(2024, 11, 20, 14, 30), // December 20, 2024, 2:30 PM
-    endDate: new Date(2024, 11, 20, 15, 30), // December 20, 2024, 3:30 PM
-    type: 'meeting',
-    priority: 'high',
-    location: 'Zoom Call',
-    attendees: ['Client Team', 'Product Manager'],
-    description: 'Review project progress and gather feedback from stakeholders.',
-    organizer: 'Lisa Chen',
-    status: 'confirmed'
-  },
-  {
-    id: '4',
-    title: '1:1 with Sarah',
-    date: new Date(2024, 11, 20, 16, 0), // December 20, 2024, 4:00 PM
-    endDate: new Date(2024, 11, 20, 16, 30), // December 20, 2024, 4:30 PM
-    type: 'meeting',
-    priority: 'medium',
-    location: 'Office',
-    attendees: ['Sarah Johnson'],
-    description: 'P1 incident discussion and career development.',
-    organizer: 'You',
-    status: 'confirmed'
-  },
-  {
-    id: '5',
-    title: 'Payment API Testing Deadline',
-    date: new Date(2024, 11, 21, 17, 0), // December 21, 2024, 5:00 PM
-    endDate: new Date(2024, 11, 21, 17, 0), // December 21, 2024, 5:00 PM
-    type: 'deadline',
-    priority: 'high',
-    location: 'Remote',
-    attendees: ['Alex Rodriguez', 'Jordan Smith', 'Sam Wilson'],
-    description: 'Complete testing phase for Payment API integration.',
-    organizer: 'Alex Rodriguez',
-    status: 'pending'
-  },
-  {
-    id: '6',
-    title: 'Architecture Review',
-    date: new Date(2024, 11, 21, 9, 0), // December 21, 2024, 9:00 AM
-    endDate: new Date(2024, 11, 21, 10, 30), // December 21, 2024, 10:30 AM
-    type: 'meeting',
-    priority: 'medium',
-    location: 'Conference Room A',
-    attendees: ['Senior Developers', 'Tech Lead'],
-    description: 'Review system architecture for upcoming features.',
-    organizer: 'Tech Lead',
-    status: 'confirmed'
-  },
-  {
-    id: '7',
-    title: 'Client Demo Preparation',
-    date: new Date(2024, 11, 21, 10, 30), // December 21, 2024, 10:30 AM
-    endDate: new Date(2024, 11, 21, 12, 0), // December 21, 2024, 12:00 PM
-    type: 'task',
-    priority: 'high',
-    location: 'Remote',
-    attendees: ['Maya Patel', 'David Kim'],
-    description: 'Prepare demo materials and test environment for client presentation.',
-    organizer: 'Maya Patel',
-    status: 'in-progress'
-  },
-  {
-    id: '8',
-    title: 'Mobile App UI Review',
-    date: new Date(2024, 11, 23, 14, 0), // December 23, 2024, 2:00 PM
-    endDate: new Date(2024, 11, 23, 15, 0), // December 23, 2024, 3:00 PM
-    type: 'meeting',
-    priority: 'medium',
-    location: 'Design Studio',
-    attendees: ['Design Team', 'Mobile Developers'],
-    description: 'Review mobile app UI changes and approve final designs.',
-    organizer: 'Design Lead',
-    status: 'confirmed'
-  },
-  {
-    id: '9',
-    title: 'Database Performance Incident Resolution',
-    date: new Date(2024, 11, 20, 8, 0), // December 20, 2024, 8:00 AM
-    endDate: new Date(2024, 11, 20, 11, 0), // December 20, 2024, 11:00 AM
-    type: 'incident',
-    priority: 'critical',
-    location: 'Remote',
-    attendees: ['Sarah Johnson', 'DevOps Team'],
-    description: 'P1 incident: Database performance issue affecting 15% of users.',
-    organizer: 'Sarah Johnson',
-    status: 'in-progress'
-  },
-  {
-    id: '10',
-    title: 'Team Lunch',
-    date: new Date(2024, 11, 22, 12, 0), // December 22, 2024, 12:00 PM
-    endDate: new Date(2024, 11, 22, 13, 30), // December 22, 2024, 1:30 PM
-    type: 'social',
-    priority: 'low',
-    location: 'Local Restaurant',
-    attendees: ['Entire Team'],
-    description: 'Monthly team lunch and bonding activity.',
-    organizer: 'HR Team',
-    status: 'confirmed'
-  }
-];
+// Use shared test events for consistency
+const HARDCODED_EVENTS = TEST_EVENTS;
 
 interface CalendarDay {
   day: number | null;
@@ -156,7 +23,7 @@ interface CalendarDay {
 }
 
 const TestCalendarPage = () => {
-  useDocumentTitle('Test Calendar');
+  useDocumentTitle('Calendar');
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<typeof HARDCODED_EVENTS[0] | null>(null);
@@ -177,36 +44,44 @@ const TestCalendarPage = () => {
   };
 
   const handleEventClick = (event: typeof HARDCODED_EVENTS[0]) => {
-    // Show the event details modal first
+    // Show the event details modal
     setSelectedEvent(event);
-    
-    // Add a small delay then navigate to test board
-    setTimeout(() => {
-      router.push('/test/board');
-    }, 1500); // 1.5 second delay to show the modal briefly
   };
 
-  // Filter events for current month and by selected filters
-  const currentMonthEvents = useMemo(() => {
-    return HARDCODED_EVENTS.filter(event => 
-      event.date.getMonth() === currentDate.getMonth() &&
-      event.date.getFullYear() === currentDate.getFullYear() &&
-      filterOptions[event.type as keyof typeof filterOptions]
-    );
-  }, [currentDate, filterOptions]);
+  const handleViewOnBoard = () => {
+    // Navigate to test board
+    router.push('/test/board');
+  };
 
   // Get all events for current month (unfiltered) for statistics
   const allCurrentMonthEvents = useMemo(() => {
-    return HARDCODED_EVENTS.filter(event => 
+    const filtered = HARDCODED_EVENTS.filter(event =>
       event.date.getMonth() === currentDate.getMonth() &&
       event.date.getFullYear() === currentDate.getFullYear()
     );
+
+    // If no events for current month, add some demo events for the current month
+    if (filtered.length === 0) {
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+
+      return generateDemoEvents(currentYear, currentMonth);
+    }
+
+    return filtered;
   }, [currentDate]);
 
-  // Group events by day
+  // Filter events for current month and by selected filters (for statistics)
+  const currentMonthEvents = useMemo(() => {
+    return allCurrentMonthEvents.filter(event =>
+      filterOptions[event.type as keyof typeof filterOptions]
+    );
+  }, [allCurrentMonthEvents, filterOptions]);
+
+  // Group events by day (use all events, filter at display level)
   const eventsByDay = useMemo(() => {
     const grouped: { [key: number]: typeof HARDCODED_EVENTS } = {};
-    currentMonthEvents.forEach(event => {
+    allCurrentMonthEvents.forEach(event => {
       const day = event.date.getDate();
       if (!grouped[day]) {
         grouped[day] = [];
@@ -214,7 +89,7 @@ const TestCalendarPage = () => {
       grouped[day].push(event);
     });
     return grouped;
-  }, [currentMonthEvents]);
+  }, [allCurrentMonthEvents]);
 
   // Generate calendar days
   const generateCalendarDays = (): CalendarDay[][] => {
@@ -288,10 +163,10 @@ const TestCalendarPage = () => {
           size="sm"
         >
           <CalendarIcon className="mr-2 size-5" />
-          <span className="truncate">Test Calendar</span>
+          <span className="truncate">Calendar</span>
         </Button>
       </div>
-      
+
       <div className="flex h-full flex-col bg-white">
         <TestCalendarHeader
           currentDate={currentDate}
@@ -308,7 +183,7 @@ const TestCalendarPage = () => {
             social: allCurrentMonthEvents.filter(e => e.type === 'social').length,
           }}
         />
-        
+
         <div className="flex-1 overflow-auto p-4">
           {/* Filter Status Banner */}
           {Object.values(filterOptions).some(v => !v) && (
@@ -337,8 +212,8 @@ const TestCalendarPage = () => {
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {Object.entries(filterOptions).map(([type, enabled]) => (
-                  <Badge 
-                    key={type} 
+                  <Badge
+                    key={type}
                     variant={enabled ? "default" : "secondary"}
                     className={cn(
                       "text-xs capitalize",
@@ -351,7 +226,7 @@ const TestCalendarPage = () => {
               </div>
             </div>
           )}
-          
+
           <div className="flex gap-4 h-full">
             {/* Main Calendar */}
             <div className="flex-1 rounded-md border">
@@ -378,31 +253,33 @@ const TestCalendarPage = () => {
                     {dayObj.day && (
                       <>
                         <div className={`absolute right-1 top-1 text-xs ${dayObj.day &&
-                            new Date().getDate() === dayObj.day &&
-                            new Date().getMonth() === currentDate.getMonth() &&
-                            new Date().getFullYear() === currentDate.getFullYear()
-                            ? 'h-5 w-5 flex items-center justify-center rounded-full bg-primary text-white -mt-0.5 -mr-0.5'
-                            : ''
+                          new Date().getDate() === dayObj.day &&
+                          new Date().getMonth() === currentDate.getMonth() &&
+                          new Date().getFullYear() === currentDate.getFullYear()
+                          ? 'h-5 w-5 flex items-center justify-center rounded-full bg-primary text-white -mt-0.5 -mr-0.5'
+                          : ''
                           }`}>
                           {dayObj.day}
                         </div>
 
                         {dayObj.events && dayObj.events.length > 0 && (
                           <div className="mt-4 flex max-h-[80px] flex-col gap-1 overflow-y-auto">
-                            {dayObj.events.map((event) => (
-                              <button
-                                key={event.id}
-                                onClick={() => handleEventClick(event)}
-                                className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors text-left ${getEventTypeColor(event.type)} hover:opacity-80`}
-                                title={`${event.title} - ${format(event.date, 'h:mm a')} (Click to view related tasks)`}
-                              >
-                                <div className="flex items-center gap-1">
-                                  {getPriorityIcon(event.priority)}
-                                  <span className="font-bold">{format(event.date, 'h:mm a')}</span>
-                                </div>
-                                <div className="truncate">{event.title}</div>
-                              </button>
-                            ))}
+                            {dayObj.events
+                              .filter(event => filterOptions[event.type as keyof typeof filterOptions])
+                              .map((event) => (
+                                <button
+                                  key={event.id}
+                                  onClick={() => handleEventClick(event)}
+                                  className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors text-left ${getEventTypeColor(event.type)} hover:opacity-80`}
+                                  title={`${event.title} - ${format(event.date, 'h:mm a')} (Click to view related tasks)`}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    {getPriorityIcon(event.priority)}
+                                    <span className="font-bold">{format(event.date, 'h:mm a')}</span>
+                                  </div>
+                                  <div className="truncate">{event.title}</div>
+                                </button>
+                              ))}
                           </div>
                         )}
                       </>
@@ -415,7 +292,7 @@ const TestCalendarPage = () => {
             {/* Sidebar with upcoming events */}
             <div className="w-80 space-y-4">
               {/* Upcoming Events */}
-              <Card>
+              {/* <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Clock className="h-5 w-5" />
@@ -426,8 +303,8 @@ const TestCalendarPage = () => {
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-3">
                       {HARDCODED_EVENTS
-                        .filter(event => 
-                          event.date >= new Date() && 
+                        .filter(event =>
+                          event.date >= new Date() &&
                           filterOptions[event.type as keyof typeof filterOptions]
                         )
                         .sort((a, b) => a.date.getTime() - b.date.getTime())
@@ -461,7 +338,7 @@ const TestCalendarPage = () => {
                     </div>
                   </ScrollArea>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               {/* Event Statistics */}
               <Card>
@@ -491,7 +368,7 @@ const TestCalendarPage = () => {
                       <div className="text-xs text-muted-foreground">({allCurrentMonthEvents.filter(e => e.type === 'incident').length} total)</div>
                     </div>
                   </div>
-                  
+
                   <div className="pt-3 border-t">
                     <div className="text-sm font-medium mb-2">Priority Breakdown (Filtered)</div>
                     <div className="space-y-2">
@@ -568,16 +445,15 @@ const TestCalendarPage = () => {
               <div className="text-sm">
                 <div className="font-medium">Organizer: <span className="font-normal text-muted-foreground">{selectedEvent.organizer}</span></div>
               </div>
-              
-              {/* Navigation notice */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="flex items-center gap-2 text-sm text-blue-800">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="font-medium">Navigating to related tasks...</span>
-                </div>
-                <div className="text-xs text-blue-600 mt-1">
-                  You'll be redirected to the project board to view tasks related to this event.
-                </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" onClick={() => setSelectedEvent(null)} className="flex-1">
+                  Close
+                </Button>
+                <Button onClick={handleViewOnBoard} className="flex-1">
+                  View on Board
+                </Button>
               </div>
             </CardContent>
           </Card>

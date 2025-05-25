@@ -49,7 +49,8 @@ const FeatureCard = ({
             src={imageSrc}
             alt={title}
             fill
-            className="object-cover object-center"
+            className="object-cover object-center w-full h-full"
+            sizes="(max-width: 1024px) 100vw, 25vw"
           />
         </div>
 
@@ -71,14 +72,19 @@ const FeatureCard = ({
 
       {/* Desktop Layout - Horizontal Accordion */}
       <div className="hidden lg:block h-[28rem]">
-        {/* Image Section */}
+        {/* Image Section - Full container fill */}
         <div className="relative bg-gray-50 overflow-hidden rounded-t-2xl h-64">
           <Image
             src={imageSrc}
             alt={title}
             fill
-            className="object-cover object-center transition-transform duration-500 group-hover:scale-105 w-full h-full"
-            style={{ objectFit: 'cover' }}
+            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 1024px) 100vw, 25vw"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
           />
         </div>
 

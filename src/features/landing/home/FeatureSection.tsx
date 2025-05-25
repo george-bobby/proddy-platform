@@ -62,7 +62,7 @@ export const FeatureSection = () => {
               {features.map((feature) => (
                 <button
                   key={feature.id}
-                  onClick={() => setActiveTab(feature.id)}
+                  onMouseEnter={() => setActiveTab(feature.id)}
                   className={cn(
                     "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200",
                     activeTab === feature.id

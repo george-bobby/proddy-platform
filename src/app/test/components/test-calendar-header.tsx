@@ -1,9 +1,11 @@
 'use client';
 
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Filter, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { TestNavigation } from '@/app/test/components/test-navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,26 +16,30 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
+export interface FilterOptions {
+  meeting: boolean;
+  deadline: boolean;
+  task: boolean;
+  incident: boolean;
+  social: boolean;
+}
+
+export interface EventCounts {
+  total: number;
+  meeting: number;
+  deadline: number;
+  task: number;
+  incident: number;
+  social: number;
+}
+
 interface TestCalendarHeaderProps {
   currentDate: Date;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
-  filterOptions: {
-    meeting: boolean;
-    deadline: boolean;
-    task: boolean;
-    incident: boolean;
-    social: boolean;
-  };
-  onFilterChange: (filters: typeof filterOptions) => void;
-  eventCounts: {
-    total: number;
-    meeting: number;
-    deadline: number;
-    task: number;
-    incident: number;
-    social: number;
-  };
+  filterOptions: FilterOptions;
+  onFilterChange: (filters: FilterOptions) => void;
+  eventCounts: EventCounts;
 }
 
 export const TestCalendarHeader = ({
@@ -44,13 +50,30 @@ export const TestCalendarHeader = ({
   onFilterChange,
   eventCounts,
 }: TestCalendarHeaderProps) => {
+  const router = useRouter();
+
+  const handleBackToDashboard = () => {
+    router.push('/test/dashboard');
+  };
+
   return (
     <div className="border-b bg-background p-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* Left side - Calendar navigation and title */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">Test Calendar</h1>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToDashboard}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold">Calendar</h1>
             <Badge variant="secondary" className="text-xs">
               Demo
             </Badge>
@@ -64,8 +87,10 @@ export const TestCalendarHeader = ({
           </div>
         </div>
 
-        {/* Right side - Month navigation and filters */}
-        <div className="flex items-center gap-2">
+        {/* Right side - Navigation, month controls and filters */}
+        <div className="flex items-center gap-4">
+          <TestNavigation variant="compact" />
+
           {/* Month Navigation */}
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={onPreviousMonth}>
@@ -97,7 +122,7 @@ export const TestCalendarHeader = ({
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Filter by Event Type</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              
+
               <DropdownMenuCheckboxItem
                 checked={filterOptions.meeting}
                 onCheckedChange={(checked) =>
@@ -109,7 +134,7 @@ export const TestCalendarHeader = ({
                   <span>Meetings ({eventCounts.meeting})</span>
                 </div>
               </DropdownMenuCheckboxItem>
-              
+
               <DropdownMenuCheckboxItem
                 checked={filterOptions.deadline}
                 onCheckedChange={(checked) =>
@@ -121,7 +146,7 @@ export const TestCalendarHeader = ({
                   <span>Deadlines ({eventCounts.deadline})</span>
                 </div>
               </DropdownMenuCheckboxItem>
-              
+
               <DropdownMenuCheckboxItem
                 checked={filterOptions.task}
                 onCheckedChange={(checked) =>
@@ -133,7 +158,7 @@ export const TestCalendarHeader = ({
                   <span>Tasks ({eventCounts.task})</span>
                 </div>
               </DropdownMenuCheckboxItem>
-              
+
               <DropdownMenuCheckboxItem
                 checked={filterOptions.incident}
                 onCheckedChange={(checked) =>
@@ -145,7 +170,7 @@ export const TestCalendarHeader = ({
                   <span>Incidents ({eventCounts.incident})</span>
                 </div>
               </DropdownMenuCheckboxItem>
-              
+
               <DropdownMenuCheckboxItem
                 checked={filterOptions.social}
                 onCheckedChange={(checked) =>
@@ -159,7 +184,7 @@ export const TestCalendarHeader = ({
               </DropdownMenuCheckboxItem>
 
               <DropdownMenuSeparator />
-              
+
               <div className="flex gap-2 p-2">
                 <Button
                   variant="outline"
@@ -231,15 +256,6 @@ export const TestCalendarHeader = ({
             </div>
           );
         })}
-      </div>
-
-      {/* Calendar Description */}
-      <div className="mt-4 text-sm text-muted-foreground">
-        <p>
-          This is a demo calendar showcasing event management features with sample events,
-          filtering capabilities, and various event types.
-          <span className="font-medium text-blue-600"> Click on any event to view related project tasks.</span>
-        </p>
       </div>
     </div>
   );

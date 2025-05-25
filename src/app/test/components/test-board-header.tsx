@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
+import { TestNavigation } from '@/app/test/components/test-navigation';
 
 interface TestBoardHeaderProps {
   view: 'kanban' | 'table' | 'gantt';
@@ -21,11 +22,11 @@ interface TestBoardHeaderProps {
   listCount: number;
 }
 
-export const TestBoardHeader = ({ 
-  view, 
-  onViewChange, 
-  cardCount, 
-  listCount 
+export const TestBoardHeader = ({
+  view,
+  onViewChange,
+  cardCount,
+  listCount
 }: TestBoardHeaderProps) => {
   const router = useRouter();
 
@@ -40,14 +41,18 @@ export const TestBoardHeader = ({
   return (
     <>
       <div className="border-b bg-primary p-4">
-        <Button
-          variant="ghost"
-          className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
-          size="sm"
-        >
-          <LayoutGrid className="mr-2 size-5" />
-          <span className="truncate">Test Board</span>
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+            size="sm"
+          >
+            <LayoutGrid className="mr-2 size-5" />
+            <span className="truncate">Board</span>
+          </Button>
+
+          <TestNavigation />
+        </div>
       </div>
 
       <div className="border-b bg-background p-4">
@@ -76,7 +81,7 @@ export const TestBoardHeader = ({
               <span>→</span>
               <span className="text-foreground font-medium">Project Board</span>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold">Project Management Board</h1>
