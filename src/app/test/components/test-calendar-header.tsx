@@ -1,11 +1,9 @@
 'use client';
 
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, Filter, Calendar, ArrowLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useRouter } from 'next/navigation';
-import { TestNavigation } from '@/app/test/components/test-navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 
 export interface FilterOptions {
   meeting: boolean;
@@ -50,57 +47,24 @@ export const TestCalendarHeader = ({
   onFilterChange,
   eventCounts,
 }: TestCalendarHeaderProps) => {
-  const router = useRouter();
-
-  const handleBackToDashboard = () => {
-    router.push('/test/dashboard');
-  };
-
   return (
-    <div className="border-b bg-background p-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        {/* Left side - Calendar navigation and title */}
+    <div className="border-b bg-muted/30 p-3">
+      <div className="flex items-center justify-between">
+        {/* Left side - Month display */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToDashboard}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">Calendar</h1>
-            <Badge variant="secondary" className="text-xs">
-              Demo
-            </Badge>
-          </div>
-
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>{eventCounts.total} events this month</span>
-            </div>
+          <div className="text-lg font-semibold text-foreground">
+            {format(currentDate, 'MMMM yyyy')}
           </div>
         </div>
 
-        {/* Right side - Navigation, month controls and filters */}
-        <div className="flex items-center gap-4">
-          <TestNavigation variant="compact" />
+        {/* Right side - Month controls and filters */}
+        <div className="flex items-center gap-3">
 
           {/* Month Navigation */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button variant="outline" size="sm" onClick={onPreviousMonth}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="min-w-[140px] text-center">
-              <span className="text-lg font-medium">
-                {format(currentDate, 'MMMM yyyy')}
-              </span>
-            </div>
             <Button variant="outline" size="sm" onClick={onNextMonth}>
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -224,7 +188,7 @@ export const TestCalendarHeader = ({
 
           {/* View Options */}
           <div className="flex items-center gap-1 border rounded-md">
-            <Button variant="ghost" size="sm" className="bg-primary/10 text-primary">
+            <Button variant="ghost" size="sm" className="bg-muted text-foreground">
               Month
             </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground">
@@ -235,27 +199,6 @@ export const TestCalendarHeader = ({
             </Button>
           </div>
         </div>
-      </div>
-
-      {/* Event Type Legend */}
-      <div className="mt-4 flex flex-wrap items-center gap-4 text-xs">
-        <span className="text-muted-foreground">Legend:</span>
-        {Object.entries(eventCounts).map(([type, count]) => {
-          if (type === 'total' || count === 0) return null;
-
-          return (
-            <div key={type} className="flex items-center gap-1">
-              <div className={cn("h-3 w-3 rounded-sm", {
-                'bg-blue-500': type === 'meeting',
-                'bg-red-500': type === 'deadline',
-                'bg-green-500': type === 'task',
-                'bg-orange-500': type === 'incident',
-                'bg-purple-500': type === 'social',
-              })} />
-              <span className="capitalize">{type} ({count})</span>
-            </div>
-          );
-        })}
       </div>
     </div>
   );

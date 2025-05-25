@@ -11,6 +11,7 @@ interface CanvasItem {
   width: number;
   height: number;
   content: string;
+  shapeType?: 'rectangle' | 'circle'; // For shape items
   style: {
     backgroundColor: string;
     borderColor: string;
@@ -48,8 +49,14 @@ export const TestCanvasBoard = ({
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleCanvasClick = (e: React.MouseEvent) => {
+    // Only deselect if we're in select mode and clicking on empty canvas
+    // Don't deselect when using other tools
     if (selectedTool === 'select') {
-      onItemSelect(null);
+      // Check if we clicked on an empty area (not on an item)
+      const target = e.target as HTMLElement;
+      if (target === canvasRef.current || target.closest('[data-canvas-item]') === null) {
+        onItemSelect(null);
+      }
       return;
     }
 
@@ -60,13 +67,21 @@ export const TestCanvasBoard = ({
     const y = (e.clientY - rect.top) / (zoom / 100);
 
     // Create new item based on selected tool
+    let itemType: CanvasItem['type'] = 'text';
+    if (selectedTool === 'text' || selectedTool === 'note' || selectedTool === 'image') {
+      itemType = selectedTool;
+    } else if (selectedTool === 'rectangle' || selectedTool === 'circle') {
+      itemType = 'shape';
+    }
+
     const newItem: Omit<CanvasItem, 'id' | 'createdAt' | 'updatedAt'> = {
-      type: selectedTool as CanvasItem['type'],
+      type: itemType,
       x: x - 75, // Center the item
       y: y - 40,
       width: 150,
       height: 80,
       content: getDefaultContent(selectedTool),
+      shapeType: (selectedTool === 'rectangle' || selectedTool === 'circle') ? selectedTool : undefined,
       style: {
         backgroundColor: '#fef3c7',
         borderColor: '#f59e0b',
@@ -94,18 +109,18 @@ export const TestCanvasBoard = ({
 
   const handleItemMouseDown = (e: React.MouseEvent, item: CanvasItem) => {
     e.stopPropagation();
-    
+
     if (selectedTool !== 'select') return;
 
     onItemSelect(item.id);
     setIsDragging(true);
-    
+
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
 
     const x = (e.clientX - rect.left) / (zoom / 100);
     const y = (e.clientY - rect.top) / (zoom / 100);
-    
+
     setDragStart({ x, y });
     setDragOffset({
       x: x - item.x,
@@ -141,14 +156,15 @@ export const TestCanvasBoard = ({
 
   const renderItem = (item: CanvasItem) => {
     const isSelected = selectedItemId === item.id;
-    
+
     return (
       <div
         key={item.id}
+        data-canvas-item={item.id}
         className={cn(
           "absolute cursor-pointer border-2 transition-all",
           isSelected ? "border-primary shadow-lg" : "border-transparent hover:border-muted-foreground/30",
-          item.type === 'circle' && "rounded-full",
+          item.shapeType === 'circle' && "rounded-full",
           item.type === 'note' && "rounded-lg shadow-md",
           selectedTool === 'select' ? "cursor-move" : "cursor-default"
         )}
@@ -178,7 +194,7 @@ export const TestCanvasBoard = ({
             </div>
           )}
         </div>
-        
+
         {isSelected && (
           <>
             {/* Resize handles */}
@@ -219,7 +235,7 @@ export const TestCanvasBoard = ({
           }}
         >
           {items.map(renderItem)}
-          
+
           {/* Canvas info overlay */}
           {items.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

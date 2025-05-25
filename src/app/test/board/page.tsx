@@ -5,6 +5,7 @@ import { useDocumentTitle } from '@/hooks/use-document-title';
 import { TestBoardKanbanView } from '@/app/test/components/test-board-kanban-view';
 import { TestBoardHeader } from '@/app/test/components/test-board-header';
 import { TestBoardModals } from '@/app/test/components/test-board-modals';
+import { TestLiveCursors, useTestLiveCursors } from '@/app/test/components/test-live-cursors';
 import { TEST_LISTS, TEST_CARDS, TEST_MEMBERS } from '@/app/test/data/shared-test-data';
 
 // Use shared test data for consistency
@@ -16,6 +17,7 @@ const DEMO_MEMBERS = TEST_MEMBERS;
 
 const TestBoardPage = () => {
   useDocumentTitle('Board');
+  const { showCursors } = useTestLiveCursors(true);
 
   const [view, setView] = useState<'kanban' | 'table' | 'gantt'>('kanban');
   const [lists, setLists] = useState(DEMO_LISTS);
@@ -143,6 +145,9 @@ const TestBoardPage = () => {
         selectedListId={selectedListId}
         lists={lists}
       />
+
+      {/* Live Cursors */}
+      <TestLiveCursors enabled={showCursors} maxCursors={3} />
     </div>
   );
 };

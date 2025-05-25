@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Menu, Phone, Video, MoreHorizontal, Users, Clock, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Menu, Phone, Video, MoreHorizontal, Users, Clock, MessageSquare, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
-import { TestNavigation } from '@/app/test/components/test-navigation';
 
 interface Chat {
   id: string;
@@ -62,71 +61,40 @@ export const TestChatsHeader = ({
   };
 
   return (
-    <div className="border-b bg-background p-4">
+    <div className="border-b bg-muted/30 p-3">
       <div className="flex items-center justify-between">
-        {/* Left side - Navigation and chat info */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToDashboard}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-          </div>
+        {/* Left side - Chat info */}
+        {selectedChat && (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-sm">
+                  {getInitials(selectedChat.name)}
+                </AvatarFallback>
+              </Avatar>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggleSidebar}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-foreground">{selectedChat.name}</span>
+                  {getChatIcon(selectedChat.type)}
+                  {selectedChat.type === 'direct' && selectedChat.isOnline && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  )}
+                </div>
 
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">Chats</h1>
-            <Badge variant="secondary" className="text-xs">
-              Demo
-            </Badge>
-          </div>
-
-          {selectedChat && (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-sm">
-                    {getInitials(selectedChat.name)}
-                  </AvatarFallback>
-                </Avatar>
-
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{selectedChat.name}</span>
-                    {getChatIcon(selectedChat.type)}
-                    {selectedChat.type === 'direct' && selectedChat.isOnline && (
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    )}
-                  </div>
-
-                  <div className="text-xs text-muted-foreground">
-                    {selectedChat.type === 'direct' && selectedChat.isOnline && 'Online'}
-                    {selectedChat.type === 'direct' && !selectedChat.isOnline && 'Offline'}
-                    {selectedChat.type === 'group' && `${selectedChat.participants.length} members`}
-                    {selectedChat.type === 'channel' && `${selectedChat.participants.length} subscribers`}
-                  </div>
+                <div className="text-xs text-muted-foreground">
+                  {selectedChat.type === 'direct' && selectedChat.isOnline && 'Online'}
+                  {selectedChat.type === 'direct' && !selectedChat.isOnline && 'Offline'}
+                  {selectedChat.type === 'group' && `${selectedChat.participants.length} members`}
+                  {selectedChat.type === 'channel' && `${selectedChat.participants.length} subscribers`}
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Right side - Navigation and actions */}
-        <div className="flex items-center gap-4">
-          <TestNavigation variant="compact" />
+        {/* Right side - Actions */}
+        <div className="flex items-center gap-3">
 
           <div className="flex items-center gap-2">
             <Button

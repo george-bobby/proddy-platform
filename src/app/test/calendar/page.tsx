@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 import { TestCalendarHeader } from '@/app/test/components/test-calendar-header';
+import { TestLiveCursors, useTestLiveCursors } from '@/app/test/components/test-live-cursors';
+import { TestNavigation } from '@/app/test/components/test-navigation';
 import { cn } from '@/lib/utils';
 import { TEST_EVENTS, generateDemoEvents } from '@/app/test/data/shared-test-data';
 
@@ -25,6 +27,7 @@ interface CalendarDay {
 const TestCalendarPage = () => {
   useDocumentTitle('Calendar');
   const router = useRouter();
+  const { showCursors } = useTestLiveCursors(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<typeof HARDCODED_EVENTS[0] | null>(null);
   const [filterOptions, setFilterOptions] = useState({
@@ -156,18 +159,27 @@ const TestCalendarPage = () => {
 
   return (
     <div className="flex h-full flex-col">
+      {/* Generic Header */}
       <div className="border-b bg-primary p-4">
-        <Button
-          variant="ghost"
-          className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
-          size="sm"
-        >
-          <CalendarIcon className="mr-2 size-5" />
-          <span className="truncate">Calendar</span>
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+            size="sm"
+          >
+            <CalendarIcon className="mr-2 size-5" />
+            <span className="truncate">Calendar</span>
+            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
+              Demo
+            </Badge>
+          </Button>
+
+          <TestNavigation />
+        </div>
       </div>
 
       <div className="flex h-full flex-col bg-white">
+        {/* Specific Calendar Header */}
         <TestCalendarHeader
           currentDate={currentDate}
           onPreviousMonth={handlePreviousMonth}
@@ -459,6 +471,9 @@ const TestCalendarPage = () => {
           </Card>
         </div>
       )}
+
+      {/* Live Cursors */}
+      <TestLiveCursors enabled={showCursors} maxCursors={3} />
     </div>
   );
 };

@@ -1,18 +1,27 @@
 'use client';
 
 import React, { useState } from 'react';
+import { FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/use-document-title';
-import { TestNotesHeader } from '@/app/test/components/test-notes-header';
-import { TestNotesSidebar } from '@/app/test/components/test-notes-sidebar';
-import { TestNotesEditor } from '@/app/test/components/test-notes-editor';
+import {
+  TestNotesHeader,
+  TestNotesSidebar,
+  TestNotesEditor,
+  TestLiveCursors,
+  useTestLiveCursors,
+  TestNavigation
+} from '@/app/test/components';
 import { TEST_NOTES } from '@/app/test/data/shared-test-data';
 
 const TestNotesPage = () => {
   useDocumentTitle('Notes');
-  
+  const { showCursors } = useTestLiveCursors(true);
+
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>('note-1');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [notes, setNotes] = useState(TEST_NOTES);
+  const [notes, setNotes] = useState(TEST_NOTES as any[]);
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
 
@@ -21,7 +30,7 @@ const TestNotesPage = () => {
   };
 
   const handleNoteUpdate = (noteId: string, updates: Partial<typeof selectedNote>) => {
-    setNotes(prev => prev.map(note => 
+    setNotes(prev => prev.map(note =>
       note.id === noteId ? { ...note, ...updates } : note
     ));
   };
@@ -44,13 +53,33 @@ const TestNotesPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <TestNotesHeader 
+      {/* Generic Header */}
+      <div className="border-b bg-primary p-4">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+            size="sm"
+          >
+            <FileText className="mr-2 size-5" />
+            <span className="truncate">Notes</span>
+            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
+              Demo
+            </Badge>
+          </Button>
+
+          <TestNavigation />
+        </div>
+      </div>
+
+      {/* Specific Notes Header */}
+      <TestNotesHeader
         selectedNote={selectedNote}
         onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
         sidebarCollapsed={sidebarCollapsed}
         onCreateNote={handleCreateNote}
       />
-      
+
       <div className="flex flex-1 overflow-hidden">
         <TestNotesSidebar
           notes={notes}
@@ -59,12 +88,12 @@ const TestNotesPage = () => {
           collapsed={sidebarCollapsed}
           onCreateNote={handleCreateNote}
         />
-        
+
         <div className="flex-1 overflow-hidden">
           {selectedNote ? (
             <TestNotesEditor
               note={selectedNote}
-              onUpdate={(updates) => handleNoteUpdate(selectedNote.id, updates)}
+              onUpdate={(updates: any) => handleNoteUpdate(selectedNote.id, updates)}
             />
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -76,6 +105,9 @@ const TestNotesPage = () => {
           )}
         </div>
       </div>
+
+      {/* Live Cursors */}
+      <TestLiveCursors enabled={showCursors} maxCursors={3} />
     </div>
   );
 };

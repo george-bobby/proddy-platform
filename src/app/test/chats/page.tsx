@@ -1,12 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import { MessageSquare } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/use-document-title';
-import { TestChatsSidebar } from '@/app/test/components/test-chats-sidebar';
-import { TestChatsHeader } from '@/app/test/components/test-chats-header';
-import { TestChatsMessages } from '@/app/test/components/test-chats-messages';
-import { TestChatsInput } from '@/app/test/components/test-chats-input';
-import { TestDailyRecap } from '@/app/test/components/test-daily-recap';
+import {
+  TestChatsSidebar,
+  TestChatsHeader,
+  TestChatsMessages,
+  TestChatsInput,
+  TestDailyRecap,
+  TestLiveCursors,
+  useTestLiveCursors,
+  TestNavigation
+} from '@/app/test/components';
 import { TEST_CHATS, TEST_MESSAGES, TEST_SMART_REPLIES } from '@/app/test/data/shared-test-data';
 
 export interface ChatMessage {
@@ -46,11 +54,12 @@ export interface SmartReply {
 
 const TestChatsPage = () => {
   useDocumentTitle('Chats');
+  const { showCursors } = useTestLiveCursors(true);
 
   const [selectedChatId, setSelectedChatId] = useState<string>('chat-1');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showDailyRecap, setShowDailyRecap] = useState(false);
-  const [chats, setChats] = useState<Chat[]>(TEST_CHATS);
+  const [chats, setChats] = useState<Chat[]>(TEST_CHATS as unknown as Chat[]);
   const [messages, setMessages] = useState<ChatMessage[]>(TEST_MESSAGES);
   const [smartReplies, setSmartReplies] = useState<SmartReply[]>(TEST_SMART_REPLIES);
 
@@ -206,6 +215,26 @@ const TestChatsPage = () => {
 
   return (
     <div className="flex h-full flex-col">
+      {/* Generic Header */}
+      <div className="border-b bg-primary p-4">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+            size="sm"
+          >
+            <MessageSquare className="mr-2 size-5" />
+            <span className="truncate">Chats</span>
+            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
+              Demo
+            </Badge>
+          </Button>
+
+          <TestNavigation />
+        </div>
+      </div>
+
+      {/* Specific Chats Header */}
       <TestChatsHeader
         selectedChat={selectedChat}
         onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -254,6 +283,9 @@ const TestChatsPage = () => {
       {showDailyRecap && (
         <TestDailyRecap onClose={() => setShowDailyRecap(false)} />
       )}
+
+      {/* Live Cursors */}
+      <TestLiveCursors enabled={showCursors} maxCursors={3} />
     </div>
   );
 };

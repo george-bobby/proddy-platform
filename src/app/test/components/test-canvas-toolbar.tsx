@@ -14,6 +14,7 @@ interface CanvasItem {
   width: number;
   height: number;
   content: string;
+  shapeType?: 'rectangle' | 'circle'; // For shape items
   style: {
     backgroundColor: string;
     borderColor: string;
@@ -29,6 +30,7 @@ interface TestCanvasToolbarProps {
   onToolSelect: (toolId: string) => void;
   selectedItem?: CanvasItem;
   onItemUpdate?: (itemId: string, updates: Partial<CanvasItem>) => void;
+  onItemDelete?: (itemId: string) => void;
 }
 
 const tools = [
@@ -50,6 +52,7 @@ export const TestCanvasToolbar = ({
   onToolSelect,
   selectedItem,
   onItemUpdate,
+  onItemDelete,
 }: TestCanvasToolbarProps) => {
   const handleColorChange = (color: string) => {
     if (selectedItem && onItemUpdate) {
@@ -93,7 +96,7 @@ export const TestCanvasToolbar = ({
       {selectedItem && (
         <div className="p-4 border-b">
           <h3 className="font-medium mb-3">Properties</h3>
-          
+
           <div className="space-y-3">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-2 block">
@@ -151,8 +154,9 @@ export const TestCanvasToolbar = ({
               size="sm"
               className="w-full"
               onClick={() => {
-                // Handle delete - would need to be passed from parent
-                console.log('Delete item:', selectedItem.id);
+                if (selectedItem && onItemDelete) {
+                  onItemDelete(selectedItem.id);
+                }
               }}
             >
               <Trash2 className="h-4 w-4 mr-2" />

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bot, Send, Trash2, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,12 @@ interface Message {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  hasActions?: boolean;
+  actions?: Array<{
+    label: string;
+    action: () => void;
+    icon?: React.ReactNode;
+  }>;
 }
 
 const HARDCODED_RESPONSES: Record<string, string> = {
@@ -147,6 +154,7 @@ Location: Office`,
 };
 
 export const TestDashboardChatbot = () => {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -208,6 +216,14 @@ export const TestDashboardChatbot = () => {
         content: response,
         sender: 'assistant',
         timestamp: new Date(),
+        hasActions: normalizedInput.includes('calendar') || normalizedInput.includes('day looking') || normalizedInput.includes('meetings'),
+        actions: (normalizedInput.includes('calendar') || normalizedInput.includes('day looking') || normalizedInput.includes('meetings')) ? [
+          {
+            label: 'View Calendar',
+            action: () => router.push('/test/calendar'),
+            icon: <Calendar className="h-4 w-4" />
+          }
+        ] : undefined,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     }, 500);
@@ -278,6 +294,25 @@ export const TestDashboardChatbot = () => {
                   <div className='whitespace-pre-wrap text-sm'>
                     {message.content}
                   </div>
+
+                  {/* Action buttons for assistant messages */}
+                  {message.sender === 'assistant' && message.hasActions && message.actions && (
+                    <div className='mt-3 flex flex-wrap gap-2'>
+                      {message.actions.map((action, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={action.action}
+                          className="flex items-center gap-2 text-xs"
+                        >
+                          {action.icon}
+                          {action.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+
                   <div className='mt-1 text-xs opacity-70'>
                     {message.timestamp.toLocaleTimeString([], {
                       hour: '2-digit',

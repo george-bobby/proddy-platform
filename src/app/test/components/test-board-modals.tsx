@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { X, Calendar, User, Tag, FileText, AlertTriangle } from 'lucide-react';
+import { X, Calendar, User, Tag, FileText, AlertTriangle, ExternalLink } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -54,6 +55,7 @@ export const TestBoardModals = ({
   selectedListId,
   lists,
 }: TestBoardModalsProps) => {
+  const router = useRouter();
   const [editingCard, setEditingCard] = useState<any>(null);
   const [newCard, setNewCard] = useState({
     title: '',
@@ -63,6 +65,10 @@ export const TestBoardModals = ({
     assignees: [] as string[],
     labels: [] as string[],
   });
+
+  const handleViewNotes = () => {
+    router.push('/test/notes');
+  };
 
   useEffect(() => {
     if (selectedCard) {
@@ -154,7 +160,7 @@ export const TestBoardModals = ({
               Edit Card
             </DialogTitle>
           </DialogHeader>
-          
+
           {editingCard && (
             <div className="space-y-6">
               {/* Title */}
@@ -263,13 +269,19 @@ export const TestBoardModals = ({
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={onCardModalClose}>
-                  Cancel
+              <div className="flex justify-between gap-2">
+                <Button variant="outline" onClick={handleViewNotes} className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  View Notes
                 </Button>
-                <Button onClick={handleSaveCard}>
-                  Save Changes
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={onCardModalClose}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveCard}>
+                    Save Changes
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -290,7 +302,7 @@ export const TestBoardModals = ({
               )}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-6">
             {/* Title */}
             <div className="space-y-2">

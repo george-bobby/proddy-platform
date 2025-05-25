@@ -34,9 +34,9 @@ export const TestDashboardWidgets = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Calendar Widget */}
-      <Card className="h-full">
+      <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export const TestDashboardWidgets = () => {
               className="flex items-center gap-2"
             >
               <ExternalLink className="h-4 w-4" />
-              View All Events
+              View Calendar
             </Button>
           </div>
         </CardHeader>
@@ -110,7 +110,7 @@ export const TestDashboardWidgets = () => {
       </Card>
 
       {/* Mentions Widget */}
-      <Card className="h-full">
+      <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
@@ -174,7 +174,7 @@ export const TestDashboardWidgets = () => {
       </Card>
 
       {/* Thread Replies Widget */}
-      <Card className="h-full">
+      <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
@@ -238,7 +238,7 @@ export const TestDashboardWidgets = () => {
       </Card>
 
       {/* Tasks Widget */}
-      <Card className="h-full">
+      <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
@@ -301,7 +301,7 @@ export const TestDashboardWidgets = () => {
       </Card>
 
       {/* Assigned Cards Widget */}
-      <Card className="h-full">
+      <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -412,61 +412,151 @@ export const TestDashboardWidgets = () => {
         </CardContent>
       </Card>
 
-      {/* Team Status Widget */}
-      <Card className="h-full">
+      {/* Team Status Widget - Full Width */}
+      <Card className="md:col-span-2">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Team Status</CardTitle>
-            <Badge variant="secondary">12 members</Badge>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">Team Status</CardTitle>
+              <Badge variant="secondary">6 members</Badge>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                <span>2 Online</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                <span>2 Away</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                <span>2 Offline</span>
+              </div>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[200px]">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Online (8)</span>
-                <div className="flex -space-x-1">
-                  <Avatar className="h-6 w-6 border-2 border-white">
-                    <AvatarFallback className="text-xs">AR</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="h-6 w-6 border-2 border-white">
-                    <AvatarFallback className="text-xs">SJ</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="h-6 w-6 border-2 border-white">
-                    <AvatarFallback className="text-xs">MP</AvatarFallback>
-                  </Avatar>
-                  <div className="h-6 w-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
-                    <span className="text-xs text-gray-600">+5</span>
+          <ScrollArea className="h-[300px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Online Members */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-green-600 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  Online (2)
+                </h4>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border bg-green-50/50">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-green-100 text-green-700">AR</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Alex Rodriguez</div>
+                      <div className="text-xs text-muted-foreground">Lead Developer</div>
+                      <div className="text-xs text-green-600">Active now</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <div>Working on</div>
+                      <div className="font-medium">Payment API</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg border bg-green-50/50">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-green-100 text-green-700">SJ</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Sarah Johnson</div>
+                      <div className="text-xs text-muted-foreground">Database Specialist</div>
+                      <div className="text-xs text-green-600">Active 2 min ago</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <div>Working on</div>
+                      <div className="font-medium">DB Optimization</div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span className="text-sm">Alex Rodriguez</span>
-                  <span className="text-xs text-muted-foreground ml-auto">Available</span>
-                </div>
-                <div className="flex items-center gap-2">
+              {/* Away/Busy Members */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-yellow-600 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  <span className="text-sm">Sarah Johnson</span>
-                  <span className="text-xs text-muted-foreground ml-auto">In incident call</span>
+                  Away (2)
+                </h4>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border bg-yellow-50/50">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-yellow-100 text-yellow-700">LC</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Lisa Chen</div>
+                      <div className="text-xs text-muted-foreground">Project Manager</div>
+                      <div className="text-xs text-yellow-600">In meeting</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <div>Last seen</div>
+                      <div className="font-medium">30 min ago</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg border bg-yellow-50/50">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-yellow-100 text-yellow-700">JS</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Jordan Smith</div>
+                      <div className="text-xs text-muted-foreground">DevOps Engineer</div>
+                      <div className="text-xs text-yellow-600">Do not disturb</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <div>Last seen</div>
+                      <div className="font-medium">1 hour ago</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span className="text-sm">Maya Patel</span>
-                  <span className="text-xs text-muted-foreground ml-auto">Available</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  <span className="text-sm">David Kim</span>
-                  <span className="text-xs text-muted-foreground ml-auto">Busy</span>
-                </div>
-                <div className="flex items-center gap-2">
+              </div>
+
+              {/* Offline Members */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-600 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                  <span className="text-sm">Lisa Chen</span>
-                  <span className="text-xs text-muted-foreground ml-auto">Offline</span>
+                  Offline (2)
+                </h4>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50/50">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-gray-100 text-gray-700">MP</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">Maya Patel</div>
+                      <div className="text-xs text-muted-foreground">UI/UX Designer</div>
+                      <div className="text-xs text-gray-600">Offline</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <div>Last seen</div>
+                      <div className="font-medium">Yesterday 6:30 PM</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50/50">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-gray-100 text-gray-700">DK</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">David Kim</div>
+                      <div className="text-xs text-muted-foreground">Security Engineer</div>
+                      <div className="text-xs text-gray-600">Offline</div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <div>Last seen</div>
+                      <div className="font-medium">2 days ago</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

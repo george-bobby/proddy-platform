@@ -1,10 +1,20 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Palette } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useDocumentTitle } from '@/hooks/use-document-title';
-import { TestCanvasHeader } from '@/app/test/components/test-canvas-header';
-import { TestCanvasToolbar } from '@/app/test/components/test-canvas-toolbar';
-import { TestCanvasBoard } from '@/app/test/components/test-canvas-board';
+import {
+  TestCanvasHeader,
+  TestCanvasToolbar,
+  TestCanvasBoard,
+  TestLiveCursors,
+  useTestLiveCursors,
+  TestNavigation,
+  TestAudioRoom,
+  TestCanvasChat
+} from '@/app/test/components';
 import { TEST_CANVAS_ITEMS } from '@/app/test/data/shared-test-data';
 
 export interface CanvasItem {
@@ -15,6 +25,7 @@ export interface CanvasItem {
   width: number;
   height: number;
   content: string;
+  shapeType?: 'rectangle' | 'circle'; // For shape items
   style: {
     backgroundColor: string;
     borderColor: string;
@@ -34,14 +45,15 @@ export interface CanvasTool {
 
 const TestCanvasPage = () => {
   useDocumentTitle('Canvas');
-  
-  const [canvasItems, setCanvasItems] = useState<CanvasItem[]>(TEST_CANVAS_ITEMS);
+  const { showCursors } = useTestLiveCursors(true);
+
+  const [canvasItems, setCanvasItems] = useState<CanvasItem[]>(TEST_CANVAS_ITEMS as CanvasItem[]);
   const [selectedTool, setSelectedTool] = useState<string>('select');
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(100);
 
   const handleItemUpdate = (itemId: string, updates: Partial<CanvasItem>) => {
-    setCanvasItems(prev => prev.map(item => 
+    setCanvasItems(prev => prev.map(item =>
       item.id === itemId ? { ...item, ...updates, updatedAt: new Date() } : item
     ));
   };
@@ -73,20 +85,41 @@ const TestCanvasPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <TestCanvasHeader 
+      {/* Generic Header */}
+      <div className="border-b bg-primary p-4">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="group w-auto overflow-hidden px-3 py-2 text-lg font-semibold text-white hover:bg-white/10 transition-standard"
+            size="sm"
+          >
+            <Palette className="mr-2 size-5" />
+            <span className="truncate">Canvas</span>
+            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
+              Demo
+            </Badge>
+          </Button>
+
+          <TestNavigation />
+        </div>
+      </div>
+
+      {/* Specific Canvas Header */}
+      <TestCanvasHeader
         zoom={zoom}
         onZoomChange={handleZoomChange}
         itemCount={canvasItems.length}
       />
-      
+
       <div className="flex flex-1 overflow-hidden">
         <TestCanvasToolbar
           selectedTool={selectedTool}
           onToolSelect={handleToolSelect}
           selectedItem={canvasItems.find(item => item.id === selectedItemId)}
           onItemUpdate={handleItemUpdate}
+          onItemDelete={handleItemDelete}
         />
-        
+
         <div className="flex-1 overflow-hidden">
           <TestCanvasBoard
             items={canvasItems}
@@ -99,7 +132,16 @@ const TestCanvasPage = () => {
             onItemDelete={handleItemDelete}
           />
         </div>
+
+        {/* Fixed Right Chat Panel */}
+        <TestCanvasChat />
       </div>
+
+      {/* Live Cursors */}
+      <TestLiveCursors enabled={showCursors} maxCursors={3} />
+
+      {/* Audio Room */}
+      <TestAudioRoom />
     </div>
   );
 };

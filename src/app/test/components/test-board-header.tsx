@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, Table, BarChart3, Plus, Filter, Search, Users, Calendar, ArrowLeft } from 'lucide-react';
+import { LayoutGrid, Table, BarChart3, Plus, Filter, Search, Users, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -49,6 +49,9 @@ export const TestBoardHeader = ({
           >
             <LayoutGrid className="mr-2 size-5" />
             <span className="truncate">Board</span>
+            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
+              Demo
+            </Badge>
           </Button>
 
           <TestNavigation />
