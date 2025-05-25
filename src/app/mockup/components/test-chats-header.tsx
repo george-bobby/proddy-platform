@@ -42,7 +42,7 @@ export const TestChatsHeader = ({
   const router = useRouter();
 
   const handleBackToDashboard = () => {
-    router.push('/test/dashboard');
+    router.push('/mockup/dashboard');
   };
 
   const getInitials = (name: string) => {

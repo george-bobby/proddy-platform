@@ -220,7 +220,7 @@ export const TestDashboardChatbot = () => {
         actions: (normalizedInput.includes('calendar') || normalizedInput.includes('day looking') || normalizedInput.includes('meetings')) ? [
           {
             label: 'View Calendar',
-            action: () => router.push('/test/calendar'),
+            action: () => router.push('/mockup/calendar'),
             icon: <Calendar className="h-4 w-4" />
           }
         ] : undefined,

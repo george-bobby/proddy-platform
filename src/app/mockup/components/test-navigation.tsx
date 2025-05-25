@@ -15,12 +15,12 @@ export const TestNavigation = ({ variant = 'header', className }: TestNavigation
   const pathname = usePathname();
 
   const navigationItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/test/dashboard' },
-    { name: 'Calendar', icon: Calendar, path: '/test/calendar' },
-    { name: 'Board', icon: Kanban, path: '/test/board' },
-    { name: 'Notes', icon: FileText, path: '/test/notes' },
-    { name: 'Canvas', icon: Palette, path: '/test/canvas' },
-    { name: 'Chats', icon: MessageSquare, path: '/test/chats' },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/mockup/dashboard' },
+    { name: 'Calendar', icon: Calendar, path: '/mockup/calendar' },
+    { name: 'Board', icon: Kanban, path: '/mockup/board' },
+    { name: 'Notes', icon: FileText, path: '/mockup/notes' },
+    { name: 'Canvas', icon: Palette, path: '/mockup/canvas' },
+    { name: 'Chats', icon: MessageSquare, path: '/mockup/chats' },
   ];
 
   const isActive = (path: string) => pathname === path;
@@ -31,7 +31,7 @@ export const TestNavigation = ({ variant = 'header', className }: TestNavigation
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
-          
+
           return (
             <Button
               key={item.name}
@@ -57,7 +57,7 @@ export const TestNavigation = ({ variant = 'header', className }: TestNavigation
       {navigationItems.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.path);
-        
+
         return (
           <Button
             key={item.name}

@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
-import { TestNavigation } from '@/app/test/components/test-navigation';
+import { TestNavigation } from '@/app/mockup/components/test-navigation';
 
 interface TestBoardHeaderProps {
   view: 'kanban' | 'table' | 'gantt';
@@ -31,11 +31,11 @@ export const TestBoardHeader = ({
   const router = useRouter();
 
   const handleBackToCalendar = () => {
-    router.push('/test/calendar');
+    router.push('/mockup/calendar');
   };
 
   const handleBackToDashboard = () => {
-    router.push('/test/dashboard');
+    router.push('/mockup/dashboard');
   };
 
   return (
@@ -49,9 +49,7 @@ export const TestBoardHeader = ({
           >
             <LayoutGrid className="mr-2 size-5" />
             <span className="truncate">Board</span>
-            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
-              Demo
-            </Badge>
+
           </Button>
 
           <TestNavigation />
@@ -88,9 +86,7 @@ export const TestBoardHeader = ({
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold">Project Management Board</h1>
-                <Badge variant="secondary" className="text-xs">
-                  Demo
-                </Badge>
+
               </div>
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground">

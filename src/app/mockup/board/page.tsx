@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useDocumentTitle } from '@/hooks/use-document-title';
-import { TestBoardKanbanView } from '@/app/test/components/test-board-kanban-view';
-import { TestBoardHeader } from '@/app/test/components/test-board-header';
-import { TestBoardModals } from '@/app/test/components/test-board-modals';
-import { TestLiveCursors, useTestLiveCursors } from '@/app/test/components/test-live-cursors';
-import { TEST_LISTS, TEST_CARDS, TEST_MEMBERS } from '@/app/test/data/shared-test-data';
+import { TestBoardKanbanView } from '@/app/mockup/components/test-board-kanban-view';
+import { TestBoardHeader } from '@/app/mockup/components/test-board-header';
+import { TestBoardModals } from '@/app/mockup/components/test-board-modals';
+import { TestLiveCursors, useTestLiveCursors } from '@/app/mockup/components/test-live-cursors';
+import { TEST_LISTS, TEST_CARDS, TEST_MEMBERS } from '@/app/mockup/data/shared-test-data';
 
 // Use shared test data for consistency
 const DEMO_LISTS = TEST_LISTS;

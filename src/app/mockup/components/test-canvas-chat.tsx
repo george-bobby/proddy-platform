@@ -91,7 +91,7 @@ export const TestCanvasChat = ({ onViewAllChats }: TestCanvasChatProps) => {
   };
 
   const handleViewAllChats = () => {
-    router.push('/test/chats');
+    router.push('/mockup/chats');
     onViewAllChats?.();
   };
 
@@ -185,7 +185,6 @@ export const TestCanvasChat = ({ onViewAllChats }: TestCanvasChatProps) => {
 
         <Button
           onClick={handleViewAllChats}
-          variant="outline"
           size="sm"
           className="w-full text-sm"
         >

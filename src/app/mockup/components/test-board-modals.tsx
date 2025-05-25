@@ -67,7 +67,7 @@ export const TestBoardModals = ({
   });
 
   const handleViewNotes = () => {
-    router.push('/test/notes');
+    router.push('/mockup/notes');
   };
 
   useEffect(() => {
@@ -270,7 +270,11 @@ export const TestBoardModals = ({
 
               {/* Actions */}
               <div className="flex justify-between gap-2">
-                <Button variant="outline" onClick={handleViewNotes} className="flex items-center gap-2">
+                <Button
+                  onClick={handleViewNotes}
+                  className="flex items-center gap-2"
+                  size="default"
+                >
                   <FileText className="h-4 w-4" />
                   View Notes
                 </Button>

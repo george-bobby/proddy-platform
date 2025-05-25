@@ -70,7 +70,7 @@ export const TestBoardKanbanView = ({
   const router = useRouter();
 
   const handleViewNotes = () => {
-    router.push('/test/notes');
+    router.push('/mockup/notes');
   };
 
   const getPriorityColor = (priority: BoardCard['priority']) => {

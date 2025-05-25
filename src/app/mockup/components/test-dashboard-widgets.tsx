@@ -26,11 +26,11 @@ export const TestDashboardWidgets = () => {
   const router = useRouter();
 
   const handleViewAllEvents = () => {
-    router.push('/test/calendar');
+    router.push('/mockup/calendar');
   };
 
   const handleViewBoard = () => {
-    router.push('/test/board');
+    router.push('/mockup/board');
   };
 
   return (

@@ -12,8 +12,8 @@ import {
   TestLiveCursors,
   useTestLiveCursors,
   TestNavigation
-} from '@/app/test/components';
-import { TEST_NOTES } from '@/app/test/data/shared-test-data';
+} from '@/app/mockup/components';
+import { TEST_NOTES } from '@/app/mockup/data/shared-test-data';
 
 const TestNotesPage = () => {
   useDocumentTitle('Notes');
@@ -63,9 +63,7 @@ const TestNotesPage = () => {
           >
             <FileText className="mr-2 size-5" />
             <span className="truncate">Notes</span>
-            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
-              Demo
-            </Badge>
+
           </Button>
 
           <TestNavigation />

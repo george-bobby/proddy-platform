@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDocumentTitle } from '@/hooks/use-document-title';
-import { TestCalendarHeader } from '@/app/test/components/test-calendar-header';
-import { TestLiveCursors, useTestLiveCursors } from '@/app/test/components/test-live-cursors';
-import { TestNavigation } from '@/app/test/components/test-navigation';
+import { TestCalendarHeader } from '@/app/mockup/components/test-calendar-header';
+import { TestLiveCursors, useTestLiveCursors } from '@/app/mockup/components/test-live-cursors';
+import { TestNavigation } from '@/app/mockup/components/test-navigation';
 import { cn } from '@/lib/utils';
-import { TEST_EVENTS, generateDemoEvents } from '@/app/test/data/shared-test-data';
+import { TEST_EVENTS, generateDemoEvents } from '@/app/mockup/data/shared-test-data';
 
 // Use shared test events for consistency
 const HARDCODED_EVENTS = TEST_EVENTS;
@@ -53,7 +53,7 @@ const TestCalendarPage = () => {
 
   const handleViewOnBoard = () => {
     // Navigate to test board
-    router.push('/test/board');
+    router.push('/mockup/board');
   };
 
   // Get all events for current month (unfiltered) for statistics
@@ -169,9 +169,7 @@ const TestCalendarPage = () => {
           >
             <CalendarIcon className="mr-2 size-5" />
             <span className="truncate">Calendar</span>
-            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
-              Demo
-            </Badge>
+
           </Button>
 
           <TestNavigation />

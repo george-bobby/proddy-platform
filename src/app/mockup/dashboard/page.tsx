@@ -1,10 +1,10 @@
 'use client';
 
 import { useDocumentTitle } from '@/hooks/use-document-title';
-import { TestDashboardChatbot } from '@/app/test/components/test-dashboard-chatbot';
-import { TestDashboardWidgets } from '@/app/test/components/test-dashboard-widgets';
-import { TestNavigation } from '@/app/test/components/test-navigation';
-import { TestLiveCursors, useTestLiveCursors } from '@/app/test/components/test-live-cursors';
+import { TestDashboardChatbot } from '@/app/mockup/components/test-dashboard-chatbot';
+import { TestDashboardWidgets } from '@/app/mockup/components/test-dashboard-widgets';
+import { TestNavigation } from '@/app/mockup/components/test-navigation';
+import { TestLiveCursors, useTestLiveCursors } from '@/app/mockup/components/test-live-cursors';
 import { LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

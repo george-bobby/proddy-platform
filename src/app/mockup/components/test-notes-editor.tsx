@@ -52,7 +52,7 @@ export const TestNotesEditor = ({ note, onUpdate }: TestNotesEditorProps) => {
   };
 
   const handleLinkClick = (href: string) => {
-    if (href.startsWith('/test/')) {
+    if (href.startsWith('/mockup/')) {
       router.push(href);
     } else {
       window.open(href, '_blank');
@@ -153,7 +153,7 @@ export const TestNotesEditor = ({ note, onUpdate }: TestNotesEditorProps) => {
                 </p>
               </div>
               <Button
-                onClick={() => handleLinkClick('/test/canvas')}
+                onClick={() => handleLinkClick('/mockup/canvas')}
                 variant="outline"
                 size="sm"
                 className="border-blue-300 text-blue-700 hover:bg-blue-100"

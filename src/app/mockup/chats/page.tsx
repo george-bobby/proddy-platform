@@ -14,8 +14,8 @@ import {
   TestLiveCursors,
   useTestLiveCursors,
   TestNavigation
-} from '@/app/test/components';
-import { TEST_CHATS, TEST_MESSAGES, TEST_SMART_REPLIES } from '@/app/test/data/shared-test-data';
+} from '@/app/mockup/components';
+import { TEST_CHATS, TEST_MESSAGES, TEST_SMART_REPLIES } from '@/app/mockup/data/shared-test-data';
 
 export interface ChatMessage {
   id: string;
@@ -225,9 +225,7 @@ const TestChatsPage = () => {
           >
             <MessageSquare className="mr-2 size-5" />
             <span className="truncate">Chats</span>
-            <Badge variant="secondary" className="ml-2 text-xs bg-white/20 text-white border-white/20">
-              Demo
-            </Badge>
+
           </Button>
 
           <TestNavigation />

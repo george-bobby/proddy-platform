@@ -508,8 +508,8 @@ Mobile platform development with focus on user experience:
 ## Progress Tracking & Resources
 
 For detailed progress tracking and visual project management:
-- **Project Board**: [View current tasks and progress](/test/board) 📋
-- **Team Calendar**: [Check deadlines and meetings](/test/calendar) 📅
+- **Project Board**: [View current tasks and progress](/mockup/board) 📋
+- **Team Calendar**: [Check deadlines and meetings](/mockup/calendar) 📅
 - **Team Communication**: Regular standups and progress updates
 
 ## Risk Assessment & Mitigation
