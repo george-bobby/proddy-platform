@@ -1,1 +1,0 @@
-export { PricingPageContent } from './PricingPageContent';

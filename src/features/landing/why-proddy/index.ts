@@ -1,1 +1,0 @@
-export { WhyProddyPageContent } from './WhyProddyPageContent';
