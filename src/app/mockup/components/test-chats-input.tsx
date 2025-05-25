@@ -1,10 +1,19 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Send, Paperclip, Smile, Mic, Zap } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Paperclip, Smile, Mic, Zap, Calendar, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
@@ -12,6 +21,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { TEST_MEMBERS } from '@/app/mockup/data/shared-test-data';
 
 interface SmartReply {
   id: string;
@@ -41,6 +51,13 @@ export const TestChatsInput = ({
 }: TestChatsInputProps) => {
   const [message, setMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskContent, setTaskContent] = useState('');
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDueDate, setTaskDueDate] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = () => {
@@ -56,7 +73,93 @@ export const TestChatsInput = ({
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      if (showMentions) {
+        setShowMentions(false);
+        return;
+      }
       handleSend();
+    }
+    if (e.key === 'Escape') {
+      setShowMentions(false);
+      setShowTaskModal(false);
+    }
+  };
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart;
+
+    setMessage(value);
+    setCursorPosition(cursorPos);
+    adjustTextareaHeight();
+
+    // Handle @ mentions
+    const beforeCursor = value.substring(0, cursorPos);
+    const atIndex = beforeCursor.lastIndexOf('@');
+
+    if (atIndex !== -1 && atIndex === beforeCursor.length - 1) {
+      // Just typed @
+      setShowMentions(true);
+      setMentionQuery('');
+    } else if (atIndex !== -1 && beforeCursor.substring(atIndex).indexOf(' ') === -1) {
+      // Typing after @
+      const query = beforeCursor.substring(atIndex + 1);
+      setMentionQuery(query);
+      setShowMentions(true);
+    } else {
+      setShowMentions(false);
+    }
+
+    // Handle ! task creation
+    if (value.includes('!') && !showTaskModal) {
+      const exclamationIndex = value.lastIndexOf('!');
+      const contentBeforeExclamation = value.substring(0, exclamationIndex).trim();
+      if (contentBeforeExclamation) {
+        setTaskContent(contentBeforeExclamation);
+        setTaskTitle(contentBeforeExclamation.substring(0, 50) + (contentBeforeExclamation.length > 50 ? '...' : ''));
+        setShowTaskModal(true);
+      }
+    }
+  };
+
+  const handleMentionSelect = (member: typeof TEST_MEMBERS[0]) => {
+    const beforeCursor = message.substring(0, cursorPosition);
+    const afterCursor = message.substring(cursorPosition);
+    const atIndex = beforeCursor.lastIndexOf('@');
+
+    const newMessage = beforeCursor.substring(0, atIndex) + `@${member.user.name} ` + afterCursor;
+    setMessage(newMessage);
+    setShowMentions(false);
+
+    // Focus back to textarea
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        const newCursorPos = atIndex + member.user.name.length + 2;
+        textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  };
+
+  const handleTaskCreate = () => {
+    // Here you would typically save the task to your backend
+    console.log('Creating task:', { title: taskTitle, content: taskContent, dueDate: taskDueDate });
+
+    // Send the original message without the !
+    const messageWithoutExclamation = message.replace('!', '').trim();
+    if (messageWithoutExclamation) {
+      onSendMessage(messageWithoutExclamation, replyTo?.id);
+    }
+
+    // Reset states
+    setMessage('');
+    setShowTaskModal(false);
+    setTaskTitle('');
+    setTaskContent('');
+    setTaskDueDate('');
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
     }
   };
 
@@ -66,6 +169,10 @@ export const TestChatsInput = ({
       onCancelReply();
     }
   };
+
+  const filteredMembers = TEST_MEMBERS.filter(member =>
+    member.user.name.toLowerCase().includes(mentionQuery.toLowerCase())
+  );
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
@@ -156,16 +263,39 @@ export const TestChatsInput = ({
             <Textarea
               ref={textareaRef}
               value={message}
-              onChange={(e) => {
-                setMessage(e.target.value);
-                adjustTextareaHeight();
-              }}
-              onKeyPress={handleKeyPress}
+              onChange={handleMessageChange}
+              onKeyDown={handleKeyPress}
               placeholder={placeholder}
               className="min-h-[40px] max-h-[120px] resize-none pr-12"
               rows={1}
             />
-            
+
+            {/* Mentions Dropdown */}
+            {showMentions && filteredMembers.length > 0 && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto z-50">
+                <div className="p-2 text-xs text-muted-foreground border-b">
+                  Select a user to mention
+                </div>
+                {filteredMembers.map((member) => (
+                  <button
+                    key={member._id}
+                    onClick={() => handleMentionSelect(member)}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-muted transition-colors text-left"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {member.user.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium text-sm">{member.user.name}</div>
+                      <div className="text-xs text-muted-foreground">@{member.user.name.toLowerCase().replace(' ', '')}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Emoji Button */}
             <Button
               variant="ghost"
@@ -208,6 +338,64 @@ export const TestChatsInput = ({
           )}
         </div>
       </div>
+
+      {/* Task Creation Modal */}
+      <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Create Task from Message
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="taskTitle">Task Title</Label>
+              <Input
+                id="taskTitle"
+                value={taskTitle}
+                onChange={(e) => setTaskTitle(e.target.value)}
+                placeholder="Enter task title..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="taskContent">Task Description</Label>
+              <Textarea
+                id="taskContent"
+                value={taskContent}
+                onChange={(e) => setTaskContent(e.target.value)}
+                placeholder="Task description..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="taskDueDate">Due Date (Optional)</Label>
+              <Input
+                id="taskDueDate"
+                type="date"
+                value={taskDueDate}
+                onChange={(e) => setTaskDueDate(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowTaskModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleTaskCreate}>
+                Create Task
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
