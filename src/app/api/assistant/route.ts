@@ -73,11 +73,11 @@ export async function POST(req: NextRequest) {
 
 		try {
 			console.log(
-				'[Assistant API] Processing request with Google Generative AI model: gemini-pro'
+				'[Assistant API] Processing request with Google Generative AI'
 			);
 
 			const { text } = await generateText({
-				model: google('gemini-pro'),
+				model: google('gemini-1.5-pro'),
 				messages: [{ role: 'user', content: message }],
 				temperature: 0.7,
 				maxTokens: 800,
