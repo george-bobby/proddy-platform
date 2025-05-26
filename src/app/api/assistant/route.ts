@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 			);
 
 			const { text } = await generateText({
-				model: google('gemini-1.5-pro'),
+				model: openai('gpt-4.1-nano'),
 				messages: [{ role: 'user', content: message }],
 				temperature: 0.7,
 				maxTokens: 800,
