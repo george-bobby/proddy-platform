@@ -112,7 +112,7 @@ export const sendDirectMessageEmail = action({
 			}
 
 			// Send the email
-			const baseUrl = process.env.SITE_URL || 'https://proddy.tech';
+			const baseUrl = 'https://proddy.tech';
 			const workspaceUrl = `${baseUrl}/workspace/${message.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/direct-message`;
 			console.log(

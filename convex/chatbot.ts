@@ -465,7 +465,7 @@ SPECIAL INSTRUCTIONS FOR MEETING/EVENT QUERIES:
 Remember: Only answer based on the context provided. If the context doesn't contain relevant information, say "I don't have information about that in your workspace."`;
 
 			// 10. Generate response using the Next.js API route
-			const baseUrl = process.env.SITE_URL || 'https://proddy.tech';
+			const baseUrl = 'https://proddy.tech';
 			const apiUrl = `${baseUrl}/api/assistant`;
 
 			console.log(`[Chatbot] Calling assistant API at: ${apiUrl}`);
