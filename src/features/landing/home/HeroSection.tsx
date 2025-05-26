@@ -131,10 +131,10 @@ export const HeroSection = () => {
                   padding: "10px 0 10px 0"
                 }}>
                   <iframe
-                    src="https://mockup.proddy.tech/embed/cmb4pxevm02kw1c0i434gztui?embed_v=2"
+                    src="https://mockup.proddy.tech/embed/cmb4xp1ch2omwppkpndluqnku?embed_v=2"
                     loading="lazy"
                     title="Proddy Interactive Demo"
-                    allow="clipboard-write"
+                    allow="fullscreen https://mockup.proddy.tech clipboard-write"
                     style={{
                       position: "absolute",
                       top: 0,
