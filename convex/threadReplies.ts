@@ -134,11 +134,9 @@ export const sendThreadReplyEmail = action({
 				}
 			}
 
-			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy.tech/workspace/${replyMessage.workspaceId}`;
-
 			// Send the email
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.SITE_URL || 'https://proddy.tech';
+			const workspaceUrl = `${baseUrl}/workspace/${replyMessage.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/thread-reply`;
 			console.log(
 				'Sending thread reply email notification to:',

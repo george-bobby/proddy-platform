@@ -629,11 +629,9 @@ export const sendMentionEmail = action({
 				}
 			}
 
-			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy.tech/workspace/${mention.workspaceId}`;
-
 			// Send the email
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.SITE_URL || 'https://proddy.tech';
+			const workspaceUrl = `${baseUrl}/workspace/${mention.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/mention`;
 			console.log(
 				'Sending mention email notification to:',

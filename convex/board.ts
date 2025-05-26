@@ -557,12 +557,10 @@ export const sendCardAssignmentEmail = action({
 			);
 			console.log('Assigner name:', assignerName);
 
-			// Get the workspace URL (fallback to default)
-			const workspaceUrl = `https://proddy.tech/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
-
 			// Send the email
 			// Make sure we're using the correct URL format for the API endpoint
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.SITE_URL || 'https://proddy.tech';
+			const workspaceUrl = `${baseUrl}/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
 			const apiUrl = `${baseUrl}/api/email/assignee`;
 			console.log('Sending email notification to:', assigneeEmail);
 			console.log('Using API URL:', apiUrl);
