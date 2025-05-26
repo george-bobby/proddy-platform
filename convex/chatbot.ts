@@ -466,9 +466,7 @@ Remember: Only answer based on the context provided. If the context doesn't cont
 
 			// 10. Generate response using the Next.js API route
 			const baseUrl = process.env.SITE_URL || 'https://proddy.tech';
-			const apiUrl = baseUrl.startsWith('http')
-				? `${baseUrl}/api/assistant`
-				: '/api/assistant';
+			const apiUrl = `${baseUrl}/api/assistant`;
 
 			console.log(`[Chatbot] Calling assistant API at: ${apiUrl}`);
 			const startTime = Date.now();
