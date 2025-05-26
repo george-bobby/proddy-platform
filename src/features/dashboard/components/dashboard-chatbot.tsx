@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader, Info, AlertCircle, Trash2 } from 'lucide-react';
+import { Bot, Send, Loader, Info, AlertCircle, Trash2, Calendar, FileText, Kanban, CheckSquare, MessageSquare, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,13 @@ interface DashboardChatbotProps {
   member: any;
 }
 
+type NavigationAction = {
+  label: string;
+  type: string;
+  url: string;
+  noteId?: string;
+};
+
 type Message = {
   id: string;
   content: string;
@@ -29,6 +37,7 @@ type Message = {
     type: string;
     text: string;
   }>;
+  actions?: NavigationAction[];
 };
 
 export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps) => {
@@ -38,6 +47,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isInitialized, setIsInitialized] = useState(false);
+  const router = useRouter();
 
   // Get workspace data
   const workspace = useQuery(api.workspaces.getById, { id: workspaceId });
@@ -63,7 +73,8 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
             id: source.id,
             type: source.type,
             text: source.text
-          })) : undefined
+          })) : undefined,
+          actions: (msg as any).actions || undefined
         }));
         setMessages(formattedMessages);
       } else {
@@ -140,6 +151,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
         sender: 'assistant',
         timestamp: new Date(),
         sources: result.sources,
+        actions: result.actions,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -202,6 +214,67 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
     }
   };
 
+  // Handle navigation actions
+  const handleNavigation = (action: NavigationAction) => {
+    const url = action.url.replace('[workspaceId]', workspaceId);
+    router.push(url);
+  };
+
+  // Get icon for action type
+  const getActionIcon = (type: string) => {
+    switch (type) {
+      case 'calendar':
+        return <Calendar className="h-4 w-4" />;
+      case 'note':
+        return <FileText className="h-4 w-4" />;
+      case 'board':
+        return <Kanban className="h-4 w-4" />;
+      case 'task':
+        return <CheckSquare className="h-4 w-4" />;
+      case 'message':
+        return <MessageSquare className="h-4 w-4" />;
+      default:
+        return <ExternalLink className="h-4 w-4" />;
+    }
+  };
+
+  // Helper function to clean and format source text
+  const cleanSourceText = (text: string, type: string) => {
+    // Remove markdown formatting for cleaner display
+    let cleaned = text
+      .replace(/#{1,6}\s/g, '') // Remove markdown headers
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic formatting
+      .replace(/\n+/g, ' ') // Replace newlines with spaces
+      .trim();
+
+    // Truncate if too long
+    if (cleaned.length > 100) {
+      cleaned = cleaned.substring(0, 100) + '...';
+    }
+
+    return cleaned;
+  };
+
+  // Helper function to get source type display name
+  const getSourceTypeDisplay = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'message':
+        return 'Chat Message';
+      case 'task':
+        return 'Task';
+      case 'note':
+        return 'Note';
+      case 'card':
+        return 'Board Card';
+      case 'event':
+      case 'calendar-event':
+        return 'Calendar Event';
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
+
   // Helper function to render source badges
   const renderSourceBadges = (sources: Message['sources']) => {
     if (!sources || sources.length === 0) return null;
@@ -218,17 +291,21 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm" className="h-6 px-2 text-xs">
               <Info className="h-3 w-3 mr-1" />
-              Sources
+              Sources ({sources.length})
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 p-3">
+          <PopoverContent className="w-96 p-3">
             <div className="space-y-2">
               <h4 className="font-medium text-sm">Sources used for this response:</h4>
-              <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                 {sources.map((source, index) => (
-                  <div key={index} className="text-xs p-1.5 border-b">
-                    <span className="font-semibold">{source.type.toUpperCase()}: </span>
-                    <span>{source.text}</span>
+                  <div key={index} className="text-xs p-2 bg-muted/50 rounded border">
+                    <div className="font-semibold text-primary mb-1">
+                      {getSourceTypeDisplay(source.type)}
+                    </div>
+                    <div className="text-muted-foreground leading-relaxed">
+                      {cleanSourceText(source.text, source.type)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -238,7 +315,7 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
 
         {Object.entries(sourcesByType).map(([type, count]) => (
           <Badge key={type} variant="outline" className="text-xs px-2 py-0.5">
-            {type}: {count}
+            {getSourceTypeDisplay(type)}: {count}
           </Badge>
         ))}
       </div>
@@ -293,6 +370,22 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
                     </div>
                   )}
                   {message.sources && renderSourceBadges(message.sources)}
+                  {message.actions && message.actions.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {message.actions.map((action, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleNavigation(action)}
+                          className="h-8 px-3 text-xs bg-primary/5 hover:bg-primary/10 border-primary/20"
+                        >
+                          {getActionIcon(action.type)}
+                          <span className="ml-1.5">{action.label}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                   <p className="mt-2 text-right text-xs opacity-70">
                     {message.timestamp.toLocaleTimeString([], {
                       hour: '2-digit',

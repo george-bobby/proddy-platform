@@ -16,10 +16,18 @@ type ChatMessage = {
 	content: string;
 	timestamp: number;
 	sources?: Source[];
+	actions?: NavigationAction[];
 };
 
 type ChatHistory = {
 	messages: ChatMessage[];
+};
+
+type NavigationAction = {
+	label: string;
+	type: string;
+	url: string;
+	noteId?: string;
 };
 
 type GenerateResponseResult = {
@@ -29,6 +37,7 @@ type GenerateResponseResult = {
 		type: string;
 		text: string;
 	}>;
+	actions?: NavigationAction[];
 	error?: string;
 };
 
@@ -91,6 +100,16 @@ export const addMessage = mutation({
 				})
 			)
 		),
+		actions: v.optional(
+			v.array(
+				v.object({
+					label: v.string(),
+					type: v.string(),
+					url: v.string(),
+					noteId: v.optional(v.string()),
+				})
+			)
+		),
 	},
 	handler: async (ctx, args) => {
 		const member = await getCurrentMember(ctx, args.workspaceId);
@@ -108,6 +127,7 @@ export const addMessage = mutation({
 			content: args.content,
 			timestamp,
 			sources: args.sources,
+			actions: args.actions,
 		};
 
 		if (chatHistory) {
@@ -367,7 +387,7 @@ export const generateResponse = action({
 						searchResults = await ctx.runQuery(api.search.searchAll, {
 							workspaceId: args.workspaceId,
 							query: args.message,
-							limit: 5,
+							limit: 8,
 						});
 					}
 				} catch (error) {
@@ -376,15 +396,16 @@ export const generateResponse = action({
 					searchResults = await ctx.runQuery(api.search.searchAll, {
 						workspaceId: args.workspaceId,
 						query: args.message,
-						limit: 5,
+						limit: 8,
 					});
 				}
 			} else {
 				// Regular search for non-meeting queries
+				// Increased limit for better context coverage
 				searchResults = await ctx.runQuery(api.search.searchAll, {
 					workspaceId: args.workspaceId,
 					query: args.message,
-					limit: 5,
+					limit: 8, // Increased from 5 to 8 for better coverage
 				});
 			}
 
@@ -419,12 +440,45 @@ export const generateResponse = action({
 				workspaceId: args.workspaceId,
 			});
 
-			// 7. Prepare context from search results
+			// 7. Prepare context from search results with enhanced formatting for meeting queries
 			const context = searchResults
 				.map((result) => {
-					return `[${result.type.toUpperCase()}] ${result.text}`;
+					// Enhanced formatting for better AI comprehension
+					const typeLabel = `[${result.type.toUpperCase()}]`;
+
+					// For meeting queries, add extra emphasis to task-based content
+					if (isMeetingQuery && result.type === 'task') {
+						return `${typeLabel} **TASK MEETING:** ${result.text}`;
+					}
+
+					// For meeting queries, add emphasis to message-based content
+					if (isMeetingQuery && result.type === 'message') {
+						return `${typeLabel} **MESSAGE MEETING:** ${result.text}`;
+					}
+
+					// For meeting queries, add emphasis to card-based content
+					if (isMeetingQuery && result.type === 'card') {
+						return `${typeLabel} **BOARD CARD MEETING:** ${result.text}`;
+					}
+
+					// Default formatting for other content types
+					return `${typeLabel} ${result.text}`;
 				})
 				.join('\n\n');
+
+			// Debug logging for meeting queries
+			if (isMeetingQuery) {
+				console.log(
+					'[Chatbot] Meeting query detected. Search results breakdown:'
+				);
+				searchResults.forEach((result, index) => {
+					console.log(
+						`[Chatbot] Result ${index + 1}: Type=${result.type}, Text=${result.text.substring(0, 100)}...`
+					);
+				});
+				console.log('[Chatbot] Formatted context being sent to AI:');
+				console.log(context.substring(0, 500) + '...');
+			}
 
 			// 8. Prepare conversation history (last 5 messages)
 			const recentMessages = chatHistory.messages.slice(-5);
@@ -449,24 +503,35 @@ ${conversationHistory || 'This is a new conversation.'}
 
 User's question: ${args.message}
 
-SPECIAL INSTRUCTIONS FOR MEETING/EVENT QUERIES:
-1. If the user asks about meetings, events, or calendar items, provide the FULL DETAILS of each event including title, date, time, and any other relevant information.
-2. DO NOT just say "There is a task/event called X" - instead, list out all the details of the events.
-3. For today's meetings, format the response as a clear list with times and titles.
-4. If multiple events exist, organize them chronologically and present them in a structured format.
-5. If the events are from different sources (messages, tasks, board cards), clearly indicate the source type for each.
-6. IMPORTANT: When presenting multiple meetings, use this format:
-   - Start with a summary line like "## Your Meetings for Today" or "## Upcoming Meetings"
-   - For each meeting, preserve the Markdown formatting that's already in the context
-   - DO NOT add extra formatting symbols or change the existing Markdown structure
-   - Present the meetings in chronological order
-   - Add a blank line between each meeting for better readability
+CRITICAL INSTRUCTIONS FOR MEETING/EVENT QUERIES:
+1. EXAMINE ALL CONTENT TYPES: When the user asks about meetings, events, or calendar items, you MUST examine ALL content types in the context above - including [MESSAGE], [TASK], [CARD], [NOTE], and [EVENT] entries.
+
+2. INCLUDE ALL MEETING-RELATED CONTENT: If any content mentions meetings, events, appointments, or scheduled activities, include it in your response regardless of whether it's from a message, task, board card, or note.
+
+3. EQUAL TREATMENT: Treat tasks, messages, board cards, and notes equally - if a TASK contains meeting information, it's just as important as a MESSAGE containing meeting information.
+
+4. COMPREHENSIVE LISTING: Provide FULL DETAILS for each meeting/event found, including:
+   - Title/Subject
+   - Date and time (if available)
+   - Source type (Task, Message, Board Card, etc.)
+   - Any additional details like description, location, or participants
+
+5. STRUCTURED FORMAT: Organize your response like this:
+   - Start with "## Your Meetings" or "## Upcoming Meetings"
+   - List each meeting with clear source identification
+   - Example: "**From Task:** Meeting Title - Date/Time"
+   - Example: "**From Message:** Meeting Title - Date/Time"
+   - Add blank lines between entries for readability
+
+6. NO OMISSIONS: Do NOT skip or ignore any content type. If there are both task-based meetings AND message-based meetings in the context, include BOTH in your response.
 
 Remember: Only answer based on the context provided. If the context doesn't contain relevant information, say "I don't have information about that in your workspace."`;
 
 			// 10. Generate response using the Next.js API route
-			const baseUrl = 'https://proddy.tech';
-			const apiUrl = `${baseUrl}/api/assistant`;
+			const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://proddy.tech';
+			const apiUrl = baseUrl.startsWith('http')
+				? `${baseUrl}/api/assistant`
+				: '/api/assistant';
 
 			console.log(`[Chatbot] Calling assistant API at: ${apiUrl}`);
 			const startTime = Date.now();
@@ -543,15 +608,89 @@ Remember: Only answer based on the context provided. If the context doesn't cont
 					(result.text.length > 100 ? '...' : ''),
 			}));
 
-			// 11. Add assistant response to history with sources
+			// 11. Generate navigation actions based on search results
+			const navigationActions = [];
+
+			// Check if we have calendar/meeting related content
+			if (
+				isMeetingQuery ||
+				searchResults.some(
+					(result) =>
+						result.type === 'event' ||
+						result.text.toLowerCase().includes('meeting') ||
+						result.text.toLowerCase().includes('calendar') ||
+						result.text.toLowerCase().includes('appointment')
+				)
+			) {
+				navigationActions.push({
+					label: 'View Calendar',
+					type: 'calendar',
+					url: '/workspace/[workspaceId]/calendar',
+				});
+			}
+
+			// Check for notes content
+			const notesResults = searchResults.filter(
+				(result) => result.type === 'note'
+			);
+			if (notesResults.length > 0) {
+				// Add action for the first note found
+				const firstNote = notesResults[0];
+				navigationActions.push({
+					label: 'View Note',
+					type: 'note',
+					url: `/workspace/[workspaceId]/notes/${firstNote._id}`,
+					noteId: firstNote._id,
+				});
+			}
+
+			// Check for board cards content
+			const cardResults = searchResults.filter(
+				(result) => result.type === 'card'
+			);
+			if (cardResults.length > 0) {
+				// Add action for boards
+				navigationActions.push({
+					label: 'View Boards',
+					type: 'board',
+					url: '/workspace/[workspaceId]/boards',
+				});
+			}
+
+			// Check for task content
+			const taskResults = searchResults.filter(
+				(result) => result.type === 'task'
+			);
+			if (taskResults.length > 0) {
+				navigationActions.push({
+					label: 'View Tasks',
+					type: 'task',
+					url: '/workspace/[workspaceId]/tasks',
+				});
+			}
+
+			// Check for message content
+			const messageResults = searchResults.filter(
+				(result) => result.type === 'message'
+			);
+			if (messageResults.length > 0) {
+				navigationActions.push({
+					label: 'View Chats',
+					type: 'message',
+					url: '/workspace/[workspaceId]/chats',
+				});
+			}
+
+			// 12. Add assistant response to history with sources and actions
 			await ctx.runMutation(api.chatbot.addMessage, {
 				workspaceId: args.workspaceId,
 				content: assistantResponse,
 				role: 'assistant',
 				sources: sourcesForStorage.length > 0 ? sourcesForStorage : undefined,
+				actions: navigationActions.length > 0 ? navigationActions : undefined,
 			});
 
-			// 12. Return the response
+			// 13. Return the response with navigation actions
 			return {
 				response: assistantResponse,
 				sources: searchResults.map((result) => ({
@@ -561,6 +700,7 @@ Remember: Only answer based on the context provided. If the context doesn't cont
 						result.text.substring(0, 100) +
 						(result.text.length > 100 ? '...' : ''),
 				})),
+				actions: navigationActions,
 			};
 		} catch (error) {
 			console.error('Error generating response:', error);
