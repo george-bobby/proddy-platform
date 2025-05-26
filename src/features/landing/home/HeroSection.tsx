@@ -1,14 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   ChevronDown,
-  MousePointer,
-  Shield,
-  Users,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -65,7 +61,7 @@ export const HeroSection = () => {
         <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-secondary/5 blur-3xl" />
       </div>
 
-      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl">
+      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-7xl">
         <motion.div
           className="flex flex-col items-center text-center"
           initial="hidden"
@@ -97,7 +93,7 @@ export const HeroSection = () => {
             tools for messaging, tasks, boards, and more — all enhanced by AI.
           </motion.p>
 
-          <motion.div
+          {/* <motion.div
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 mb-8"
           >
@@ -118,146 +114,40 @@ export const HeroSection = () => {
                 Explore Features
               </Button>
             </Link>
-          </motion.div>
+          </motion.div> */}
 
           <motion.div
             variants={imageVariants}
-            className="relative w-full max-w-5xl"
+            className="relative w-full max-w-[1600px]"
           >
-            <div className="rounded-2xl overflow-hidden shadow-xl bg-white p-2">
+            <div className="rounded-2xl overflow-hidden shadow-xl bg-white p-1">
               <div className="relative rounded-xl overflow-hidden">
-                <Image
-                  src="/dashboard-preview.svg"
-                  alt="Proddy Dashboard Preview"
-                  width={1200}
-                  height={675}
-                  className="w-full h-auto"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-50"></div>
+                <div style={{
+                  position: "relative",
+                  boxSizing: "content-box",
+                  maxHeight: "95vh",
+                  width: "100%",
+                  aspectRatio: "1.761467889908257",
+                  padding: "10px 0 10px 0"
+                }}>
+                  <iframe
+                    src="https://mockup.proddy.tech/embed/cmb4pxevm02kw1c0i434gztui?embed_v=2"
+                    loading="lazy"
+                    title="Proddy Interactive Demo"
+                    allow="clipboard-write"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                      borderRadius: "12px"
+                    }}
+                  />
+                </div>
               </div>
             </div>
-
-            {/* Floating badges - repositioned with borders */}
-            {/* AI-Powered - bottom left */}
-            <motion.div
-              className="absolute left-[-10%] bottom-[50%] hidden md:block"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
-            >
-              <motion.div
-                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-primary/20"
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                }}
-              >
-                <span className="text-xl">🤖</span>
-                <span className="font-medium text-sm">AI-Powered</span>
-              </motion.div>
-            </motion.div>
-
-            {/* Real-time - top right */}
-            <motion.div
-              className="absolute right-[-5%] top-[55%] hidden md:block"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.2, duration: 0.5 }}
-            >
-              <motion.div
-                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-secondary/20"
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                  delay: 0.5,
-                }}
-              >
-                <span className="text-xl">⚡</span>
-                <span className="font-medium text-sm">Real-time</span>
-              </motion.div>
-            </motion.div>
-
-            {/* Live Presence (Cursor) - top left */}
-            <motion.div
-              className="absolute left-1/2 -translate-x-1/2 top-[25%] hidden md:block"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.3, duration: 0.5 }}
-            >
-              <motion.div
-                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-primary/30"
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                  delay: 1,
-                }}
-              >
-                <span className="text-xl flex items-center justify-center">
-                  <MousePointer className="h-5 w-5 text-primary" />
-                </span>
-                <span className="font-medium text-sm">Live Presence</span>
-              </motion.div>
-            </motion.div>
-
-            {/* Secure - bottom right */}
-            <motion.div
-              className="absolute right-[5%] bottom-[80%] hidden md:block"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.4, duration: 0.5 }}
-            >
-              <motion.div
-                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-green-200"
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                  delay: 1.5,
-                }}
-              >
-                <span className="text-xl flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-green-600" />
-                </span>
-                <span className="font-medium text-sm">Secure</span>
-              </motion.div>
-            </motion.div>
-
-            {/* Collaborative - center middle */}
-            <motion.div
-              className="absolute left-[15%] top-[15%] hidden md:block"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5, duration: 0.5 }}
-            >
-              <motion.div
-                className="bg-white rounded-lg shadow-lg p-3 flex items-center gap-2 border border-blue-200"
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                  delay: 2,
-                }}
-              >
-                <span className="text-xl flex items-center justify-center">
-                  <Users className="h-5 w-5 text-blue-500" />
-                </span>
-                <span className="font-medium text-sm">Collaborative</span>
-              </motion.div>
-            </motion.div>
           </motion.div>
 
           <motion.div

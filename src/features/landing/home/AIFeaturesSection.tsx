@@ -169,7 +169,7 @@ export const AIFeaturesSection = () => {
         <div className="absolute bottom-[30%] -left-[5%] w-[30%] h-[30%] rounded-full bg-secondary/5 blur-3xl" />
       </div>
 
-      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-6xl">
+      <div className="container px-6 md:px-8 mx-auto relative z-10 max-w-7xl">
         {/* Section Header */}
         <div className="text-center mb-12">
           <motion.div
