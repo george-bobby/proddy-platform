@@ -351,6 +351,16 @@ const schema = defineSchema({
 						})
 					)
 				),
+				actions: v.optional(
+					v.array(
+						v.object({
+							label: v.string(),
+							type: v.string(),
+							url: v.string(),
+							noteId: v.optional(v.string()),
+						})
+					)
+				),
 			})
 		),
 		updatedAt: v.number(),
