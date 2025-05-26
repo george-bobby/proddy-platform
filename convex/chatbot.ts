@@ -259,13 +259,6 @@ export const generateResponse = action({
 						// Format events as search results
 						searchResults = relevantEvents.map((event) => {
 							const eventDate = new Date(event.date);
-							const formattedDate = eventDate.toLocaleDateString('en-US', {
-								weekday: 'long',
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric',
-							});
-							const formattedTime = event.time || 'No specific time';
 
 							// Extract additional details based on event type
 							let additionalDetails = '';
@@ -352,12 +345,73 @@ export const generateResponse = action({
 								}
 							}
 
-							// Format the text with more details using Markdown for better rendering
+							// Enhanced formatting for better AI parsing and display
+							const eventTitle = event.title || 'Untitled event';
+							const sourceType =
+								event.type === 'calendar-event'
+									? 'Calendar Event'
+									: event.type === 'board-card'
+										? 'Board Card'
+										: event.type === 'task'
+											? 'Task'
+											: event.type || 'Event';
+
+							// Convert to 12-hour format for better readability
+							const eventTime = event.time || 'No specific time';
+							let formattedTimeDisplay = eventTime;
+							if (eventTime !== 'No specific time') {
+								try {
+									// Try to parse and format time to 12-hour format
+									const [hours, minutes] = eventTime.split(':');
+									const hour24 = parseInt(hours);
+									const hour12 =
+										hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+									const ampm = hour24 >= 12 ? 'PM' : 'AM';
+									formattedTimeDisplay = `${hour12}:${minutes} ${ampm}`;
+								} catch (e) {
+									// Keep original format if parsing fails
+									formattedTimeDisplay = eventTime;
+								}
+							}
+
+							// Get day of week for better context
+							const dayOfWeek = eventDate.toLocaleDateString('en-US', {
+								weekday: 'long',
+							});
+							const shortDate = eventDate.toLocaleDateString('en-US', {
+								month: 'short',
+								day: 'numeric',
+								year: 'numeric',
+							});
+
+							// Clean up additional details
+							const cleanDetails = additionalDetails.replace(
+								' | Description: ',
+								''
+							);
+							const cleanLocation = locationInfo
+								.replace(' | Channel: ', '')
+								.replace(' | Location: ', '');
+
 							return {
 								_id: event._id,
 								_creationTime: event._creationTime,
 								type: event.type || 'event',
-								text: `### ${event.title || 'Untitled event'}\n\n**When:** ${formattedDate} at ${formattedTime}\n**Type:** ${event.type === 'calendar-event' ? 'Calendar Event' : event.type === 'board-card' ? 'Board Card' : event.type === 'task' ? 'Task' : event.type || 'Event'}${locationInfo ? `\n**Location:** ${locationInfo.replace(' | Channel: ', '').replace(' | Location: ', '')}` : ''}${additionalDetails ? `\n**Details:** ${additionalDetails.replace(' | Description: ', '')}` : ''}`,
+								text: `MEETING: ${eventTitle}
+DAY: ${dayOfWeek}
+DATE: ${shortDate}
+TIME: ${formattedTimeDisplay}
+SOURCE: ${sourceType}${
+									cleanLocation
+										? `
+LOCATION: ${cleanLocation}`
+										: ''
+								}${
+									cleanDetails
+										? `
+DETAILS: ${cleanDetails}`
+										: ''
+								}`,
 								workspaceId: args.workspaceId,
 							};
 						});
@@ -510,20 +564,44 @@ CRITICAL INSTRUCTIONS FOR MEETING/EVENT QUERIES:
 
 3. EQUAL TREATMENT: Treat tasks, messages, board cards, and notes equally - if a TASK contains meeting information, it's just as important as a MESSAGE containing meeting information.
 
-4. COMPREHENSIVE LISTING: Provide FULL DETAILS for each meeting/event found, including:
-   - Title/Subject
-   - Date and time (if available)
-   - Source type (Task, Message, Board Card, etc.)
-   - Any additional details like description, location, or participants
+4. ENHANCED FORMATTING FOR MEETINGS: When presenting meetings, use this EXACT format with emojis and clear structure:
 
-5. STRUCTURED FORMAT: Organize your response like this:
-   - Start with "## Your Meetings" or "## Upcoming Meetings"
-   - List each meeting with clear source identification
-   - Example: "**From Task:** Meeting Title - Date/Time"
-   - Example: "**From Message:** Meeting Title - Date/Time"
-   - Add blank lines between entries for readability
+## 📅 Your Meetings
 
-6. NO OMISSIONS: Do NOT skip or ignore any content type. If there are both task-based meetings AND message-based meetings in the context, include BOTH in your response.
+### 🕐 Today
+- 🗓️ **Meeting Title**
+  📍 *Time: HH:MM AM/PM*
+  📝 *Source: Calendar Event/Task/Message*
+  💬 *Details: Brief description if available*
+
+### 📆 Tomorrow
+- 🗓️ **Meeting Title**
+  📍 *Time: HH:MM AM/PM*
+  📝 *Source: Calendar Event/Task/Message*
+  💬 *Details: Brief description if available*
+
+### 📅 This Week
+- 🗓️ **Meeting Title**
+  📍 *Day, Date at HH:MM AM/PM*
+  📝 *Source: Calendar Event/Task/Message*
+  💬 *Details: Brief description if available*
+
+5. GROUPING RULES:
+   - Group meetings by: Today, Tomorrow, This Week, Next Week
+   - Sort within each group by time (earliest first)
+   - Use clear day names (Monday, Tuesday, etc.) for dates
+   - Always include the time in 12-hour format (AM/PM)
+
+6. EMOJI USAGE:
+   - 📅 for section headers
+   - 🕐 🕑 🕒 etc. for different time periods
+   - 🗓️ for individual meetings
+   - 📍 for time/location
+   - 📝 for source type
+   - 💬 for additional details
+   - ⚡ for urgent/high priority meetings
+
+7. NO OMISSIONS: Do NOT skip or ignore any content type. Include ALL meetings found regardless of source.
 
 Remember: Only answer based on the context provided. If the context doesn't contain relevant information, say "I don't have information about that in your workspace."`;
 
