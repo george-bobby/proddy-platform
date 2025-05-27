@@ -107,7 +107,7 @@ export const TasksWidget = ({ workspaceId }: TasksWidgetProps) => {
       <div className="flex items-center justify-between pr-8"> {/* Added padding-right to avoid overlap with drag handle */}
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          <h3 className="font-medium">Your Tasks</h3>
+          <h3 className="font-medium">Tasks</h3>
           {sortedTasks.length > 0 && (
             <Badge variant="default" className="ml-2">
               {sortedTasks.length}
