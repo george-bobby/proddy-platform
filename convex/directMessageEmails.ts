@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, action, query } from './_generated/server';
-// import { api } from './_generated/api'; // Commented out to avoid TypeScript circular dependency issues
+import { api } from './_generated/api';
 
 // Helper function to get a member by workspace and user ID
 const getMember = async (
@@ -27,12 +27,9 @@ export const sendDirectMessageEmail = action({
 	handler: async (ctx, { messageId }: { messageId: Id<'messages'> }) => {
 		try {
 			// Get the message
-			const message = await (ctx.runQuery as any)(
-				'messages:_getMessageById' as any,
-				{
-					messageId,
-				}
-			);
+			const message = await ctx.runQuery(api.messages._getMessageById, {
+				messageId,
+			});
 			if (!message) {
 				console.error('Message not found:', messageId);
 				return { success: false, error: 'Message not found' };
@@ -45,8 +42,8 @@ export const sendDirectMessageEmail = action({
 			}
 
 			// Get the conversation
-			const conversation = await (ctx.runQuery as any)(
-				'conversations:_getConversationById' as any,
+			const conversation = await ctx.runQuery(
+				api.conversations._getConversationById,
 				{
 					conversationId: message.conversationId,
 				}
@@ -57,12 +54,9 @@ export const sendDirectMessageEmail = action({
 			}
 
 			// Get the sender (author of the message)
-			const sender = await (ctx.runQuery as any)(
-				'members:_getMemberById' as any,
-				{
-					memberId: message.memberId,
-				}
-			);
+			const sender = await ctx.runQuery(api.members._getMemberById, {
+				memberId: message.memberId,
+			});
 			if (!sender || !sender.user) {
 				console.error('Sender not found:', message.memberId);
 				return { success: false, error: 'Sender not found' };
@@ -75,25 +69,19 @@ export const sendDirectMessageEmail = action({
 					: conversation.memberOneId;
 
 			// Get the recipient
-			const recipient = await (ctx.runQuery as any)(
-				'members:_getMemberById' as any,
-				{
-					memberId: recipientId,
-				}
-			);
+			const recipient = await ctx.runQuery(api.members._getMemberById, {
+				memberId: recipientId,
+			});
 			if (!recipient || !recipient.user) {
 				console.error('Recipient not found:', recipientId);
 				return { success: false, error: 'Recipient not found' };
 			}
 
 			// Check if the message has already been read
-			const isRead = await (ctx.runQuery as any)(
-				'direct:_isDirectMessageRead' as any,
-				{
-					messageId,
-					memberId: recipientId,
-				}
-			);
+			const isRead = await ctx.runQuery(api.direct._isDirectMessageRead, {
+				messageId,
+				memberId: recipientId,
+			});
 
 			// Don't send email if the message has already been read
 			if (isRead) {
@@ -193,28 +181,26 @@ export const createTestDirectMessageWithEmail = action({
 	}> => {
 		try {
 			// Get the current user's member ID
-			const senderMemberId = await (ctx.runQuery as any)(
-				'members:current' as any,
-				{
-					workspaceId: args.workspaceId,
-				}
-			);
+			const senderMemberId = await ctx.runQuery(api.members.current, {
+				workspaceId: args.workspaceId,
+			});
 
 			if (!senderMemberId) {
 				throw new Error('Current member not found');
 			}
 
 			// Create or get a conversation between the sender and recipient
-			const conversationId: Id<'conversations'> = await (
-				ctx.runMutation as any
-			)('conversations:createOrGet' as any, {
-				workspaceId: args.workspaceId,
-				memberId: args.recipientMemberId,
-			});
+			const conversationId: Id<'conversations'> = await ctx.runMutation(
+				api.conversations.createOrGet,
+				{
+					workspaceId: args.workspaceId,
+					memberId: args.recipientMemberId,
+				}
+			);
 
 			// Create a direct message
-			const messageId: Id<'messages'> = await (ctx.runMutation as any)(
-				'messages:create' as any,
+			const messageId: Id<'messages'> = await ctx.runMutation(
+				api.messages.create,
 				{
 					workspaceId: args.workspaceId,
 					conversationId,
@@ -224,12 +210,9 @@ export const createTestDirectMessageWithEmail = action({
 
 			// Send the email notification
 			const result: { success: boolean; error?: string; skipped?: boolean } =
-				await (ctx.runAction as any)(
-					'directMessageEmails:sendDirectMessageEmail' as any,
-					{
-						messageId,
-					}
-				);
+				await ctx.runAction(api.directMessageEmails.sendDirectMessageEmail, {
+					messageId,
+				});
 
 			return {
 				success: true,

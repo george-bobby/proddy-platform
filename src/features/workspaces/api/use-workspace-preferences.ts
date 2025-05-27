@@ -104,14 +104,14 @@ export const useDashboardWidgets = ({
 		},
 		{
 			id: 'tasks',
-			title: 'Tasks',
+			title: 'Your Tasks',
 			description: 'Shows your assigned tasks',
 			visible: true,
 			size: 'small',
 		},
 		{
 			id: 'cards',
-			title: 'Cards',
+			title: 'Board Cards',
 			description: 'Shows your assigned board cards',
 			visible: true,
 			size: 'small',

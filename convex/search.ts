@@ -1,6 +1,6 @@
 import { action, query } from './_generated/server';
 import { v } from 'convex/values';
-// import { api } from './_generated/api'; // Commented out to avoid TypeScript circular dependency issues
+import { api } from './_generated/api';
 import { Id } from './_generated/dataModel';
 
 // Define result types
@@ -264,24 +264,24 @@ export const searchAll = query({
 
 		// Run all searches in parallel
 		const [messages, tasks, notes, cards] = await Promise.all([
-			(ctx.runQuery as any)('search:searchMessages' as any, {
+			ctx.runQuery(api.search.searchMessages, {
 				workspaceId: args.workspaceId,
 				channelId: args.channelId,
 				query: args.query,
 				limit: perTypeLimit,
 			}),
-			(ctx.runQuery as any)('search:searchTasks' as any, {
+			ctx.runQuery(api.search.searchTasks, {
 				workspaceId: args.workspaceId,
 				query: args.query,
 				limit: perTypeLimit,
 			}),
-			(ctx.runQuery as any)('search:searchNotes' as any, {
+			ctx.runQuery(api.search.searchNotes, {
 				workspaceId: args.workspaceId,
 				channelId: args.channelId,
 				query: args.query,
 				limit: perTypeLimit,
 			}),
-			(ctx.runQuery as any)('search:searchCards' as any, {
+			ctx.runQuery(api.search.searchCards, {
 				workspaceId: args.workspaceId,
 				query: args.query,
 				limit: perTypeLimit,

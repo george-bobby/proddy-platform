@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, action, query } from './_generated/server';
-// import { api } from './_generated/api'; // Commented out to avoid TypeScript circular dependency issues
+import { api } from './_generated/api';
 
 // Helper function to get a member by workspace and user ID
 const getMember = async (
@@ -34,48 +34,36 @@ export const sendThreadReplyEmail = action({
 	) => {
 		try {
 			// Get the reply message
-			const replyMessage = await (ctx.runQuery as any)(
-				'messages:_getMessageById' as any,
-				{
-					messageId,
-				}
-			);
+			const replyMessage = await ctx.runQuery(api.messages._getMessageById, {
+				messageId,
+			});
 			if (!replyMessage) {
 				console.error('Reply message not found:', messageId);
 				return { success: false, error: 'Reply message not found' };
 			}
 
 			// Get the parent message
-			const parentMessage = await (ctx.runQuery as any)(
-				'messages:_getMessageById' as any,
-				{
-					messageId: parentMessageId,
-				}
-			);
+			const parentMessage = await ctx.runQuery(api.messages._getMessageById, {
+				messageId: parentMessageId,
+			});
 			if (!parentMessage) {
 				console.error('Parent message not found:', parentMessageId);
 				return { success: false, error: 'Parent message not found' };
 			}
 
 			// Get the replier (author of the reply message)
-			const replier = await (ctx.runQuery as any)(
-				'members:_getMemberById' as any,
-				{
-					memberId: replyMessage.memberId,
-				}
-			);
+			const replier = await ctx.runQuery(api.members._getMemberById, {
+				memberId: replyMessage.memberId,
+			});
 			if (!replier || !replier.user) {
 				console.error('Replier not found:', replyMessage.memberId);
 				return { success: false, error: 'Replier not found' };
 			}
 
 			// Get the original message author
-			const originalAuthor = await (ctx.runQuery as any)(
-				'members:_getMemberById' as any,
-				{
-					memberId: parentMessage.memberId,
-				}
-			);
+			const originalAuthor = await ctx.runQuery(api.members._getMemberById, {
+				memberId: parentMessage.memberId,
+			});
 			if (!originalAuthor || !originalAuthor.user) {
 				console.error('Original author not found:', parentMessage.memberId);
 				return { success: false, error: 'Original author not found' };
@@ -92,12 +80,9 @@ export const sendThreadReplyEmail = action({
 			// Get the channel name if available
 			let channelName = 'a channel';
 			if (replyMessage.channelId) {
-				const channel = await (ctx.runQuery as any)(
-					'channels:_getChannelById' as any,
-					{
-						channelId: replyMessage.channelId,
-					}
-				);
+				const channel = await ctx.runQuery(api.channels._getChannelById, {
+					channelId: replyMessage.channelId,
+				});
 				if (channel) {
 					channelName = channel.name;
 				}
@@ -221,20 +206,17 @@ export const createTestThreadReplyWithEmail = action({
 	}> => {
 		try {
 			// Create a parent message
-			const parentMemberId = await (ctx.runQuery as any)(
-				'members:current' as any,
-				{
-					workspaceId: args.workspaceId,
-				}
-			);
+			const parentMemberId = await ctx.runQuery(api.members.current, {
+				workspaceId: args.workspaceId,
+			});
 
 			if (!parentMemberId) {
 				throw new Error('Current member not found');
 			}
 
 			// Create a parent message
-			const parentMessageId: Id<'messages'> = await (ctx.runMutation as any)(
-				'messages:create' as any,
+			const parentMessageId: Id<'messages'> = await ctx.runMutation(
+				api.messages.create,
 				{
 					workspaceId: args.workspaceId,
 					channelId: args.channelId,
@@ -243,8 +225,8 @@ export const createTestThreadReplyWithEmail = action({
 			);
 
 			// Create a reply message
-			const replyMessageId: Id<'messages'> = await (ctx.runMutation as any)(
-				'messages:create' as any,
+			const replyMessageId: Id<'messages'> = await ctx.runMutation(
+				api.messages.create,
 				{
 					workspaceId: args.workspaceId,
 					channelId: args.channelId,
@@ -255,13 +237,10 @@ export const createTestThreadReplyWithEmail = action({
 
 			// Send the email notification
 			const result: { success: boolean; error?: string; skipped?: boolean } =
-				await (ctx.runAction as any)(
-					'threadReplies:sendThreadReplyEmail' as any,
-					{
-						messageId: replyMessageId,
-						parentMessageId,
-					}
-				);
+				await ctx.runAction(api.threadReplies.sendThreadReplyEmail, {
+					messageId: replyMessageId,
+					parentMessageId,
+				});
 
 			return {
 				success: true,

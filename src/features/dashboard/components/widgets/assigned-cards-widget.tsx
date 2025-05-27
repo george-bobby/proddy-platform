@@ -70,7 +70,7 @@ export const AssignedCardsWidget = ({ workspaceId }: AssignedCardsWidgetProps) =
       <div className="flex items-center justify-between pr-8"> {/* Added padding-right to avoid overlap with drag handle */}
         <div className="flex items-center gap-2">
           <KanbanSquare className="h-5 w-5 text-primary" />
-          <h3 className="font-medium">Cards</h3>
+          <h3 className="font-medium">Assigned Cards</h3>
           {sortedCards.length > 0 && (
             <Badge variant="default" className="ml-2">
               {sortedCards.length}

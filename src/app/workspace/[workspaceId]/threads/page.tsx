@@ -120,7 +120,6 @@ export default function ThreadsPage() {
   // We'll use a consistent structure with conditional rendering for the content
   return (
     <div className="flex h-full flex-col">
-      {/* Fixed toolbar at top */}
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -132,167 +131,164 @@ export default function ThreadsPage() {
         </Button>
       </WorkspaceToolbar>
 
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-auto">
-        {!threads ? (
-          // Loading state
-          <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
-            <Loader className="size-12 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading threads...</p>
-          </div>
-        ) : !threads.length ? (
-          // Empty state
-          <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
-            <MessageSquareText className="size-12 text-muted-foreground" />
-            <h2 className="text-2xl font-semibold">Threads</h2>
-            <p className="text-sm text-muted-foreground">No threads yet.</p>
-          </div>
-        ) : (
-          // Threads loaded state
-          <div className="flex h-full flex-col bg-white">
-            <div className="border-b p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Your Threads</h2>
-                <div className="flex items-center gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-8 w-8">
-                          <Filter className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Filter threads</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+      {!threads ? (
+        // Loading state
+        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
+          <Loader className="size-12 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading threads...</p>
+        </div>
+      ) : !threads.length ? (
+        // Empty state
+        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
+          <MessageSquareText className="size-12 text-muted-foreground" />
+          <h2 className="text-2xl font-semibold">Threads</h2>
+          <p className="text-sm text-muted-foreground">No threads yet.</p>
+        </div>
+      ) : (
+        // Threads loaded state
+        <div className="flex h-full flex-col bg-white">
+          <div className="border-b p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Your Threads</h2>
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="icon" className="h-8 w-8">
+                        <Filter className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Filter threads</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-8 w-8">
-                          <SortDesc className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Sort threads</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search threads..."
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-
-                <Tabs defaultValue="all" className="w-[300px]">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger
-                      value="all"
-                      onClick={() => setActiveFilter('all')}
-                    >
-                      All
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="channels"
-                      onClick={() => setActiveFilter('channels')}
-                    >
-                      Channels
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="direct"
-                      onClick={() => setActiveFilter('direct')}
-                    >
-                      Direct
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="icon" className="h-8 w-8">
+                        <SortDesc className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Sort threads</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
-              {filteredThreads?.length === 0 ? (
-                <div className="flex h-full flex-col items-center justify-center gap-y-2">
-                  <Search className="size-12 text-muted-foreground" />
-                  <h3 className="text-lg font-medium">No matching threads</h3>
-                  <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Today's threads */}
-                  {groupedThreads.today?.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline" className="rounded-full px-3 py-1 bg-secondary/5">
-                          <Clock className="mr-1 h-3 w-3" />
-                          Today
-                        </Badge>
-                      </div>
-                      <div className="space-y-3">
-                        {groupedThreads.today.map((thread) => renderThreadCard(thread))}
-                      </div>
-                    </div>
-                  )}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search threads..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
-                  {/* Yesterday's threads */}
-                  {groupedThreads.yesterday?.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
-                          <Clock className="mr-1 h-3 w-3" />
-                          Yesterday
-                        </Badge>
-                      </div>
-                      <div className="space-y-3">
-                        {groupedThreads.yesterday.map((thread) => renderThreadCard(thread))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* This week's threads */}
-                  {groupedThreads.thisWeek?.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
-                          <Clock className="mr-1 h-3 w-3" />
-                          This Week
-                        </Badge>
-                      </div>
-                      <div className="space-y-3">
-                        {groupedThreads.thisWeek.map((thread) => renderThreadCard(thread))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Earlier threads */}
-                  {groupedThreads.earlier?.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
-                          <Clock className="mr-1 h-3 w-3" />
-                          Earlier
-                        </Badge>
-                      </div>
-                      <div className="space-y-3">
-                        {groupedThreads.earlier.map((thread) => renderThreadCard(thread))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              <Tabs defaultValue="all" className="w-[300px]">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger
+                    value="all"
+                    onClick={() => setActiveFilter('all')}
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="channels"
+                    onClick={() => setActiveFilter('channels')}
+                  >
+                    Channels
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="direct"
+                    onClick={() => setActiveFilter('direct')}
+                  >
+                    Direct
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
-        )}
-      </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            {filteredThreads?.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-y-2">
+                <Search className="size-12 text-muted-foreground" />
+                <h3 className="text-lg font-medium">No matching threads</h3>
+                <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Today's threads */}
+                {groupedThreads.today?.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-secondary/5">
+                        <Clock className="mr-1 h-3 w-3" />
+                        Today
+                      </Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {groupedThreads.today.map((thread) => renderThreadCard(thread))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Yesterday's threads */}
+                {groupedThreads.yesterday?.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
+                        <Clock className="mr-1 h-3 w-3" />
+                        Yesterday
+                      </Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {groupedThreads.yesterday.map((thread) => renderThreadCard(thread))}
+                    </div>
+                  </div>
+                )}
+
+                {/* This week's threads */}
+                {groupedThreads.thisWeek?.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
+                        <Clock className="mr-1 h-3 w-3" />
+                        This Week
+                      </Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {groupedThreads.thisWeek.map((thread) => renderThreadCard(thread))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Earlier threads */}
+                {groupedThreads.earlier?.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="outline" className="rounded-full px-3 py-1 bg-muted">
+                        <Clock className="mr-1 h-3 w-3" />
+                        Earlier
+                      </Badge>
+                    </div>
+                    <div className="space-y-3">
+                      {groupedThreads.earlier.map((thread) => renderThreadCard(thread))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 

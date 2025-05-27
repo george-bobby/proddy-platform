@@ -14,13 +14,10 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as analytics from "../analytics.js";
-import type * as assistant from "../assistant.js";
 import type * as auth from "../auth.js";
 import type * as board from "../board.js";
 import type * as calendar from "../calendar.js";
 import type * as channels from "../channels.js";
-import type * as chatbot_chat_history from "../chatbot/chat_history.js";
-import type * as chatbot_message_processing from "../chatbot/message_processing.js";
 import type * as chatbot from "../chatbot.js";
 import type * as conversations from "../conversations.js";
 import type * as direct from "../direct.js";
@@ -29,11 +26,6 @@ import type * as http from "../http.js";
 import type * as members from "../members.js";
 import type * as mentions from "../mentions.js";
 import type * as messages from "../messages.js";
-import type * as messaging_mention_processing from "../messaging/mention_processing.js";
-import type * as messaging_message_mutations from "../messaging/message_mutations.js";
-import type * as messaging_message_queries from "../messaging/message_queries.js";
-import type * as messaging_message_search from "../messaging/message_search.js";
-import type * as messaging_thread_management from "../messaging/thread_management.js";
 import type * as noteFolders from "../noteFolders.js";
 import type * as notes from "../notes.js";
 import type * as presence from "../presence.js";
@@ -58,13 +50,10 @@ import type * as workspaces from "../workspaces.js";
  */
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
-  assistant: typeof assistant;
   auth: typeof auth;
   board: typeof board;
   calendar: typeof calendar;
   channels: typeof channels;
-  "chatbot/chat_history": typeof chatbot_chat_history;
-  "chatbot/message_processing": typeof chatbot_message_processing;
   chatbot: typeof chatbot;
   conversations: typeof conversations;
   direct: typeof direct;
@@ -73,11 +62,6 @@ declare const fullApi: ApiFromModules<{
   members: typeof members;
   mentions: typeof mentions;
   messages: typeof messages;
-  "messaging/mention_processing": typeof messaging_mention_processing;
-  "messaging/message_mutations": typeof messaging_message_mutations;
-  "messaging/message_queries": typeof messaging_message_queries;
-  "messaging/message_search": typeof messaging_message_search;
-  "messaging/thread_management": typeof messaging_thread_management;
   noteFolders: typeof noteFolders;
   notes: typeof notes;
   presence: typeof presence;

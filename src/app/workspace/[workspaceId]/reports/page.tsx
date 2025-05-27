@@ -215,7 +215,6 @@ const ReportsPage = () => {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Fixed toolbar at top */}
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -226,594 +225,590 @@ const ReportsPage = () => {
           <span className="truncate">Reports</span>
         </Button>
       </WorkspaceToolbar>
-
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-auto">
-        <div className="flex h-full flex-col bg-white">
-          {/* Header with filters */}
-          <div className="border-b border-border/30 bg-white px-4 py-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Reports & Analytics</h1>
-                <p className="text-muted-foreground">
-                  Track workspace activity and performance metrics
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                {/* Time Range Filter */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Time Range:</span>
-                  <div className="flex rounded-md border border-input overflow-hidden">
-                    <Button
-                      type="button"
-                      variant={timeRange === "1d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("1d")}
-                    >
-                      1 day
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={timeRange === "7d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("7d")}
-                    >
-                      7 days
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={timeRange === "30d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("30d")}
-                    >
-                      30 days
-                    </Button>
-                  </div>
-                  <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      onClick={handleExport}
-                      disabled={isExporting || isOverviewLoading}
-                      className="rounded-r-none border-r-0"
-                    >
-                      {isExporting ? (
-                        <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Download className="mr-2 h-4 w-4" />
-                      )}
-                      Export {exportFormat.toUpperCase()}
-                    </Button>
-                    <Popover>
-                      <PopoverTrigger asChild>
+      <div className="flex h-full flex-col bg-white">
+        {/* Header with filters */}
+        <div className="border-b border-border/30 bg-white px-4 py-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Reports & Analytics</h1>
+              <p className="text-muted-foreground">
+                Track workspace activity and performance metrics
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              {/* Time Range Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Time Range:</span>
+                <div className="flex rounded-md border border-input overflow-hidden">
+                  <Button
+                    type="button"
+                    variant={timeRange === "1d" ? "default" : "ghost"}
+                    className="rounded-none border-0"
+                    onClick={() => setTimeRange("1d")}
+                  >
+                    1 day
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={timeRange === "7d" ? "default" : "ghost"}
+                    className="rounded-none border-0"
+                    onClick={() => setTimeRange("7d")}
+                  >
+                    7 days
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={timeRange === "30d" ? "default" : "ghost"}
+                    className="rounded-none border-0"
+                    onClick={() => setTimeRange("30d")}
+                  >
+                    30 days
+                  </Button>
+                </div>
+                <div className="flex items-center">
+                  <Button
+                    variant="outline"
+                    onClick={handleExport}
+                    disabled={isExporting || isOverviewLoading}
+                    className="rounded-r-none border-r-0"
+                  >
+                    {isExporting ? (
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="mr-2 h-4 w-4" />
+                    )}
+                    Export {exportFormat.toUpperCase()}
+                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-l-none px-2"
+                        disabled={isExporting || isOverviewLoading}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40 p-2">
+                      <div className="space-y-1">
                         <Button
-                          variant="outline"
+                          variant={exportFormat === "pdf" ? "default" : "ghost"}
                           size="sm"
-                          className="rounded-l-none px-2"
-                          disabled={isExporting || isOverviewLoading}
+                          className="w-full justify-start"
+                          onClick={() => setExportFormat("pdf")}
                         >
-                          <ChevronDown className="h-4 w-4" />
+                          <FileText className="mr-2 h-4 w-4" />
+                          PDF
                         </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-40 p-2">
-                        <div className="space-y-1">
-                          <Button
-                            variant={exportFormat === "pdf" ? "default" : "ghost"}
-                            size="sm"
-                            className="w-full justify-start"
-                            onClick={() => setExportFormat("pdf")}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            PDF
-                          </Button>
-                          <Button
-                            variant={exportFormat === "json" ? "default" : "ghost"}
-                            size="sm"
-                            className="w-full justify-start"
-                            onClick={() => setExportFormat("json")}
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            JSON
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                        <Button
+                          variant={exportFormat === "json" ? "default" : "ghost"}
+                          size="sm"
+                          className="w-full justify-start"
+                          onClick={() => setExportFormat("json")}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          JSON
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Main content area */}
-          <div className="flex-1 overflow-auto p-4">
-            <div className="mx-auto max-w-7xl space-y-6">
-              {/* Tabs */}
-              <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-7 mb-4">
-                  <TabsTrigger
-                    value="overview"
-                    onClick={() => setActiveTab("overview")}
-                  >
-                    <BarChart className="h-4 w-4 mr-2" />
-                    Overview
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="users"
-                    onClick={() => setActiveTab("users")}
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Users
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="channels"
-                    onClick={() => setActiveTab("channels")}
-                  >
-                    <Hash className="h-4 w-4 mr-2" />
-                    Channels
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="messages"
-                    onClick={() => setActiveTab("messages")}
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Messages
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="content"
-                    onClick={() => setActiveTab("content")}
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Content
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="performance"
-                    onClick={() => setActiveTab("performance")}
-                  >
-                    <Activity className="h-4 w-4 mr-2" />
-                    Performance
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="tasks"
-                    onClick={() => setActiveTab("tasks")}
-                  >
-                    <CheckSquare className="h-4 w-4 mr-2" />
-                    Tasks
-                  </TabsTrigger>
-                </TabsList>
+        {/* Main content area */}
+        <div className="flex-1 overflow-auto p-4">
+          <div className="mx-auto max-w-7xl space-y-6">
+            {/* Tabs */}
+            <Tabs defaultValue="overview" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-7 mb-4">
+                <TabsTrigger
+                  value="overview"
+                  onClick={() => setActiveTab("overview")}
+                >
+                  <BarChart className="h-4 w-4 mr-2" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="users"
+                  onClick={() => setActiveTab("users")}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Users
+                </TabsTrigger>
+                <TabsTrigger
+                  value="channels"
+                  onClick={() => setActiveTab("channels")}
+                >
+                  <Hash className="h-4 w-4 mr-2" />
+                  Channels
+                </TabsTrigger>
+                <TabsTrigger
+                  value="messages"
+                  onClick={() => setActiveTab("messages")}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                </TabsTrigger>
+                <TabsTrigger
+                  value="content"
+                  onClick={() => setActiveTab("content")}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Content
+                </TabsTrigger>
+                <TabsTrigger
+                  value="performance"
+                  onClick={() => setActiveTab("performance")}
+                >
+                  <Activity className="h-4 w-4 mr-2" />
+                  Performance
+                </TabsTrigger>
+                <TabsTrigger
+                  value="tasks"
+                  onClick={() => setActiveTab("tasks")}
+                >
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                  Tasks
+                </TabsTrigger>
+              </TabsList>
 
-                {/* Overview Tab */}
-                <TabsContent value="overview">
-                  {workspaceId ? (
-                    <OverviewDashboard workspaceId={workspaceId} timeRange={timeRange} />
-                  ) : (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  )}
-                </TabsContent>
+              {/* Overview Tab */}
+              <TabsContent value="overview">
+                {workspaceId ? (
+                  <OverviewDashboard workspaceId={workspaceId} timeRange={timeRange} />
+                ) : (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                )}
+              </TabsContent>
 
-                {/* Users Tab */}
-                <TabsContent value="users">
-                  {workspaceId ? (
-                    <UserActivityDashboard workspaceId={workspaceId} timeRange={timeRange} />
-                  ) : (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  )}
-                </TabsContent>
+              {/* Users Tab */}
+              <TabsContent value="users">
+                {workspaceId ? (
+                  <UserActivityDashboard workspaceId={workspaceId} timeRange={timeRange} />
+                ) : (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                )}
+              </TabsContent>
 
-                {/* Channels Tab */}
-                <TabsContent value="channels">
-                  {workspaceId ? (
-                    <ChannelActivityDashboard workspaceId={workspaceId} timeRange={timeRange} />
-                  ) : (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  )}
-                </TabsContent>
+              {/* Channels Tab */}
+              <TabsContent value="channels">
+                {workspaceId ? (
+                  <ChannelActivityDashboard workspaceId={workspaceId} timeRange={timeRange} />
+                ) : (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                )}
+              </TabsContent>
 
-                {/* Messages Tab */}
-                <TabsContent value="messages">
-                  {isMessageLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  ) : messageData && messageData.totalMessages !== undefined ? (
-                    <div className="space-y-6">
-                      {/* Message stats */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              Total Messages
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <MessageSquare className="h-5 w-5 text-secondary mr-2" />
-                              <div className="text-2xl font-bold">
-                                {messageData?.totalMessages
-                                  ? messageData.totalMessages.toLocaleString()
-                                  : 0}
-                              </div>
+              {/* Messages Tab */}
+              <TabsContent value="messages">
+                {isMessageLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                ) : messageData && messageData.totalMessages !== undefined ? (
+                  <div className="space-y-6">
+                    {/* Message stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Total Messages
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <MessageSquare className="h-5 w-5 text-secondary mr-2" />
+                            <div className="text-2xl font-bold">
+                              {messageData?.totalMessages
+                                ? messageData.totalMessages.toLocaleString()
+                                : 0}
                             </div>
-                            <CardDescription>
-                              in the selected time period
-                            </CardDescription>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              Daily Average
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <BarChart className="h-5 w-5 text-secondary mr-2" />
-                              <div className="text-2xl font-bold">
-                                {messageData.messagesByDate.length > 0
-                                  ? Math.round(
-                                    messageData.totalMessages /
-                                    messageData.messagesByDate.length
-                                  )
-                                  : 0}
-                              </div>
-                            </div>
-                            <CardDescription>messages per day</CardDescription>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              Top Sender
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <Users className="h-5 w-5 text-secondary mr-2" />
-                              <div className="text-xl font-bold truncate">
-                                {messageData.topSenders.length > 0
-                                  ? messageData.topSenders[0].name
-                                  : "No data"}
-                              </div>
-                            </div>
-                            <CardDescription>
-                              {messageData.topSenders.length > 0
-                                ? `${messageData.topSenders[0].count} messages`
-                                : ""}
-                            </CardDescription>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Message charts */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Messages Over Time</CardTitle>
-                            <CardDescription>Daily message count</CardDescription>
-                          </CardHeader>
-                          <CardContent className="h-80">
-                            {messageData.messagesByDate.length > 0 ? (
-                              <LineChartComponent
-                                data={messageData.messagesByDate.map((item) => ({
-                                  label: format(new Date(item.date), "MMM dd"),
-                                  value: item.count,
-                                }))}
-                                height={300}
-                                formatValue={(value) => `${value} messages`}
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center h-full bg-muted/20 rounded-md">
-                                <p className="text-muted-foreground">
-                                  No message data available
-                                </p>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Top Message Senders</CardTitle>
-                            <CardDescription>
-                              Users with most messages
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            {messageData.topSenders.length > 0 ? (
-                              <HorizontalBarChart
-                                data={messageData.topSenders.map((sender) => ({
-                                  label: sender.name,
-                                  value: sender.count,
-                                  color: "bg-secondary",
-                                }))}
-                                formatValue={(value) => `${value} messages`}
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center h-64 bg-muted/20 rounded-md">
-                                <p className="text-muted-foreground">
-                                  No sender data available
-                                </p>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-64 bg-muted/20 rounded-lg">
-                      <MessageSquare className="h-12 w-12 text-muted-foreground mb-2" />
-                      <h3 className="text-lg font-medium">No Message Data</h3>
-                      <p className="text-sm text-muted-foreground">
-                        There is no message data available for the selected time
-                        period.
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-
-                {/* Content Analysis Tab */}
-                <TabsContent value="content">
-                  {workspaceId ? (
-                    <ContentAnalysisDashboard workspaceId={workspaceId} timeRange={timeRange} />
-                  ) : (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  )}
-                </TabsContent>
-
-                {/* Performance Metrics Tab */}
-                <TabsContent value="performance">
-                  {workspaceId ? (
-                    <PerformanceMetricsDashboard workspaceId={workspaceId} timeRange={timeRange} />
-                  ) : (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  )}
-                </TabsContent>
-
-                {/* Tasks Tab */}
-                <TabsContent value="tasks">
-                  {isTaskLoading ? (
-                    <div className="flex items-center justify-center h-64">
-                      <Loader className="h-8 w-8 animate-spin text-secondary" />
-                    </div>
-                  ) : taskData && taskData.totalTasks !== undefined ? (
-                    <div className="space-y-6">
-                      {/* Task stats */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              Total Tasks
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <CheckSquare className="h-5 w-5 text-secondary mr-2" />
-                              <div className="text-2xl font-bold">
-                                {taskData.totalTasks}
-                              </div>
-                            </div>
-                            <CardDescription>
-                              in the selected time period
-                            </CardDescription>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              Completed Tasks
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <CheckSquare className="h-5 w-5 text-green-500 mr-2" />
-                              <div className="text-2xl font-bold">
-                                {taskData.completedTasks}
-                              </div>
-                            </div>
-                            <CardDescription>
-                              {taskData.totalTasks > 0
-                                ? `${Math.round((taskData.completedTasks / taskData.totalTasks) * 100)}% completion rate`
-                                : "0% completion rate"}
-                            </CardDescription>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              In Progress
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <CheckSquare className="h-5 w-5 text-blue-500 mr-2" />
-                              <div className="text-2xl font-bold">
-                                {taskData.statusCounts.in_progress}
-                              </div>
-                            </div>
-                            <CardDescription>
-                              tasks currently in progress
-                            </CardDescription>
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                              High Priority
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex items-center">
-                              <CheckSquare className="h-5 w-5 text-red-500 mr-2" />
-                              <div className="text-2xl font-bold">
-                                {taskData.priorityCounts.high}
-                              </div>
-                            </div>
-                            <CardDescription>high priority tasks</CardDescription>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Task charts */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Task Status Distribution</CardTitle>
-                            <CardDescription>
-                              Tasks by current status
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <PieChartComponent
-                              data={[
-                                {
-                                  label: "Completed",
-                                  value: taskData.statusCounts.completed,
-                                  color: "bg-green-500",
-                                },
-                                {
-                                  label: "In Progress",
-                                  value: taskData.statusCounts.in_progress,
-                                  color: "bg-blue-500",
-                                },
-                                {
-                                  label: "Not Started",
-                                  value: taskData.statusCounts.not_started,
-                                  color: "bg-gray-300",
-                                },
-                                {
-                                  label: "On Hold",
-                                  value: taskData.statusCounts.on_hold,
-                                  color: "bg-yellow-500",
-                                },
-                                {
-                                  label: "Cancelled",
-                                  value: taskData.statusCounts.cancelled,
-                                  color: "bg-red-500",
-                                },
-                              ].filter((item) => item.value > 0)}
-                              size={180}
-                              formatValue={(value) => `${value} tasks`}
-                            />
-                          </CardContent>
-                        </Card>
-
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Task Priority Distribution</CardTitle>
-                            <CardDescription>
-                              Tasks by priority level
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <PieChartComponent
-                              data={[
-                                {
-                                  label: "High",
-                                  value: taskData.priorityCounts.high,
-                                  color: "bg-red-500",
-                                },
-                                {
-                                  label: "Medium",
-                                  value: taskData.priorityCounts.medium,
-                                  color: "bg-yellow-500",
-                                },
-                                {
-                                  label: "Low",
-                                  value: taskData.priorityCounts.low,
-                                  color: "bg-green-500",
-                                },
-                              ].filter((item) => item.value > 0)}
-                              size={180}
-                              formatValue={(value) => `${value} tasks`}
-                            />
-                          </CardContent>
-                        </Card>
-                      </div>
+                          </div>
+                          <CardDescription>
+                            in the selected time period
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
 
                       <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Daily Average
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <BarChart className="h-5 w-5 text-secondary mr-2" />
+                            <div className="text-2xl font-bold">
+                              {messageData.messagesByDate.length > 0
+                                ? Math.round(
+                                  messageData.totalMessages /
+                                  messageData.messagesByDate.length
+                                )
+                                : 0}
+                            </div>
+                          </div>
+                          <CardDescription>messages per day</CardDescription>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Top Sender
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <Users className="h-5 w-5 text-secondary mr-2" />
+                            <div className="text-xl font-bold truncate">
+                              {messageData.topSenders.length > 0
+                                ? messageData.topSenders[0].name
+                                : "No data"}
+                            </div>
+                          </div>
+                          <CardDescription>
+                            {messageData.topSenders.length > 0
+                              ? `${messageData.topSenders[0].count} messages`
+                              : ""}
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Message charts */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card>
                         <CardHeader>
-                          <CardTitle>Tasks Created Over Time</CardTitle>
-                          <CardDescription>Daily task creation</CardDescription>
+                          <CardTitle>Messages Over Time</CardTitle>
+                          <CardDescription>Daily message count</CardDescription>
                         </CardHeader>
                         <CardContent className="h-80">
-                          {taskData.tasksByDate.length > 0 ? (
+                          {messageData.messagesByDate.length > 0 ? (
                             <LineChartComponent
-                              data={taskData.tasksByDate.map((item) => ({
+                              data={messageData.messagesByDate.map((item) => ({
                                 label: format(new Date(item.date), "MMM dd"),
                                 value: item.count,
                               }))}
                               height={300}
-                              formatValue={(value) => `${value} tasks`}
+                              formatValue={(value) => `${value} messages`}
                             />
                           ) : (
                             <div className="flex items-center justify-center h-full bg-muted/20 rounded-md">
                               <p className="text-muted-foreground">
-                                No task creation data available
+                                No message data available
                               </p>
                             </div>
                           )}
                         </CardContent>
                       </Card>
 
-                      {taskData.categoryData.length > 0 && (
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Tasks by Category</CardTitle>
-                            <CardDescription>
-                              Distribution of tasks across categories
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Top Message Senders</CardTitle>
+                          <CardDescription>
+                            Users with most messages
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {messageData.topSenders.length > 0 ? (
                             <HorizontalBarChart
-                              data={taskData.categoryData.map(
-                                (category, index) => {
-                                  // Generate different colors for each category
-                                  const colors = [
-                                    "bg-secondary",
-                                    "bg-secondary",
-                                    "bg-primary",
-                                    "bg-chart-1",
-                                    "bg-chart-2",
-                                  ];
-                                  return {
-                                    label: category.name,
-                                    value: category.count,
-                                    color: colors[index % colors.length],
-                                  };
-                                }
-                              )}
-                              formatValue={(value) => `${value} tasks`}
+                              data={messageData.topSenders.map((sender) => ({
+                                label: sender.name,
+                                value: sender.count,
+                                color: "bg-secondary",
+                              }))}
+                              formatValue={(value) => `${value} messages`}
                             />
-                          </CardContent>
-                        </Card>
-                      )}
+                          ) : (
+                            <div className="flex items-center justify-center h-64 bg-muted/20 rounded-md">
+                              <p className="text-muted-foreground">
+                                No sender data available
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-64 bg-muted/20 rounded-lg">
-                      <CheckSquare className="h-12 w-12 text-muted-foreground mb-2" />
-                      <h3 className="text-lg font-medium">No Task Data</h3>
-                      <p className="text-sm text-muted-foreground">
-                        There is no task data available for the selected time
-                        period.
-                      </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-64 bg-muted/20 rounded-lg">
+                    <MessageSquare className="h-12 w-12 text-muted-foreground mb-2" />
+                    <h3 className="text-lg font-medium">No Message Data</h3>
+                    <p className="text-sm text-muted-foreground">
+                      There is no message data available for the selected time
+                      period.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Content Analysis Tab */}
+              <TabsContent value="content">
+                {workspaceId ? (
+                  <ContentAnalysisDashboard workspaceId={workspaceId} timeRange={timeRange} />
+                ) : (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Performance Metrics Tab */}
+              <TabsContent value="performance">
+                {workspaceId ? (
+                  <PerformanceMetricsDashboard workspaceId={workspaceId} timeRange={timeRange} />
+                ) : (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Tasks Tab */}
+              <TabsContent value="tasks">
+                {isTaskLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader className="h-8 w-8 animate-spin text-secondary" />
+                  </div>
+                ) : taskData && taskData.totalTasks !== undefined ? (
+                  <div className="space-y-6">
+                    {/* Task stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Total Tasks
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <CheckSquare className="h-5 w-5 text-secondary mr-2" />
+                            <div className="text-2xl font-bold">
+                              {taskData.totalTasks}
+                            </div>
+                          </div>
+                          <CardDescription>
+                            in the selected time period
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Completed Tasks
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <CheckSquare className="h-5 w-5 text-green-500 mr-2" />
+                            <div className="text-2xl font-bold">
+                              {taskData.completedTasks}
+                            </div>
+                          </div>
+                          <CardDescription>
+                            {taskData.totalTasks > 0
+                              ? `${Math.round((taskData.completedTasks / taskData.totalTasks) * 100)}% completion rate`
+                              : "0% completion rate"}
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            In Progress
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <CheckSquare className="h-5 w-5 text-blue-500 mr-2" />
+                            <div className="text-2xl font-bold">
+                              {taskData.statusCounts.in_progress}
+                            </div>
+                          </div>
+                          <CardDescription>
+                            tasks currently in progress
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">
+                            High Priority
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center">
+                            <CheckSquare className="h-5 w-5 text-red-500 mr-2" />
+                            <div className="text-2xl font-bold">
+                              {taskData.priorityCounts.high}
+                            </div>
+                          </div>
+                          <CardDescription>high priority tasks</CardDescription>
+                        </CardContent>
+                      </Card>
                     </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </div>
+
+                    {/* Task charts */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Task Status Distribution</CardTitle>
+                          <CardDescription>
+                            Tasks by current status
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <PieChartComponent
+                            data={[
+                              {
+                                label: "Completed",
+                                value: taskData.statusCounts.completed,
+                                color: "bg-green-500",
+                              },
+                              {
+                                label: "In Progress",
+                                value: taskData.statusCounts.in_progress,
+                                color: "bg-blue-500",
+                              },
+                              {
+                                label: "Not Started",
+                                value: taskData.statusCounts.not_started,
+                                color: "bg-gray-300",
+                              },
+                              {
+                                label: "On Hold",
+                                value: taskData.statusCounts.on_hold,
+                                color: "bg-yellow-500",
+                              },
+                              {
+                                label: "Cancelled",
+                                value: taskData.statusCounts.cancelled,
+                                color: "bg-red-500",
+                              },
+                            ].filter((item) => item.value > 0)}
+                            size={180}
+                            formatValue={(value) => `${value} tasks`}
+                          />
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Task Priority Distribution</CardTitle>
+                          <CardDescription>
+                            Tasks by priority level
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <PieChartComponent
+                            data={[
+                              {
+                                label: "High",
+                                value: taskData.priorityCounts.high,
+                                color: "bg-red-500",
+                              },
+                              {
+                                label: "Medium",
+                                value: taskData.priorityCounts.medium,
+                                color: "bg-yellow-500",
+                              },
+                              {
+                                label: "Low",
+                                value: taskData.priorityCounts.low,
+                                color: "bg-green-500",
+                              },
+                            ].filter((item) => item.value > 0)}
+                            size={180}
+                            formatValue={(value) => `${value} tasks`}
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Tasks Created Over Time</CardTitle>
+                        <CardDescription>Daily task creation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="h-80">
+                        {taskData.tasksByDate.length > 0 ? (
+                          <LineChartComponent
+                            data={taskData.tasksByDate.map((item) => ({
+                              label: format(new Date(item.date), "MMM dd"),
+                              value: item.count,
+                            }))}
+                            height={300}
+                            formatValue={(value) => `${value} tasks`}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full bg-muted/20 rounded-md">
+                            <p className="text-muted-foreground">
+                              No task creation data available
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {taskData.categoryData.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Tasks by Category</CardTitle>
+                          <CardDescription>
+                            Distribution of tasks across categories
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <HorizontalBarChart
+                            data={taskData.categoryData.map(
+                              (category, index) => {
+                                // Generate different colors for each category
+                                const colors = [
+                                  "bg-secondary",
+                                  "bg-secondary",
+                                  "bg-primary",
+                                  "bg-chart-1",
+                                  "bg-chart-2",
+                                ];
+                                return {
+                                  label: category.name,
+                                  value: category.count,
+                                  color: colors[index % colors.length],
+                                };
+                              }
+                            )}
+                            formatValue={(value) => `${value} tasks`}
+                          />
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-64 bg-muted/20 rounded-lg">
+                    <CheckSquare className="h-12 w-12 text-muted-foreground mb-2" />
+                    <h3 className="text-lg font-medium">No Task Data</h3>
+                    <p className="text-sm text-muted-foreground">
+                      There is no task data available for the selected time
+                      period.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>

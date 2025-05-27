@@ -9,7 +9,7 @@ import {
 	action,
 	type ActionCtx,
 } from './_generated/server';
-// import { api } from './_generated/api'; // Commented out to avoid TypeScript circular dependency issues
+import { api } from './_generated/api';
 
 // Helper function to get a member by workspace and user ID
 const getMember = async (
@@ -565,36 +565,27 @@ export const sendMentionEmail = action({
 	) => {
 		try {
 			// Get the mention
-			const mention = await (ctx.runQuery as any)(
-				'mentions:_getMentionById' as any,
-				{
-					mentionId,
-				}
-			);
+			const mention = await ctx.runQuery(api.mentions._getMentionById, {
+				mentionId,
+			});
 			if (!mention) {
 				console.error('Mention not found:', mentionId);
 				return { success: false, error: 'Mention not found' };
 			}
 
 			// Get the mentioned member
-			const mentionedMember = await (ctx.runQuery as any)(
-				'members:_getMemberById' as any,
-				{
-					memberId: mention.mentionedMemberId,
-				}
-			);
+			const mentionedMember = await ctx.runQuery(api.members._getMemberById, {
+				memberId: mention.mentionedMemberId,
+			});
 			if (!mentionedMember || !mentionedMember.user) {
 				console.error('Mentioned member not found:', mention.mentionedMemberId);
 				return { success: false, error: 'Mentioned member not found' };
 			}
 
 			// Get the mentioner
-			const mentioner = await (ctx.runQuery as any)(
-				'members:_getMemberById' as any,
-				{
-					memberId: mention.mentionerMemberId,
-				}
-			);
+			const mentioner = await ctx.runQuery(api.members._getMemberById, {
+				memberId: mention.mentionerMemberId,
+			});
 			if (!mentioner || !mentioner.user) {
 				console.error('Mentioner not found:', mention.mentionerMemberId);
 				return { success: false, error: 'Mentioner not found' };
@@ -603,12 +594,9 @@ export const sendMentionEmail = action({
 			// Get the channel name if available
 			let channelName = 'a channel';
 			if (mention.channelId) {
-				const channel = await (ctx.runQuery as any)(
-					'channels:_getChannelById' as any,
-					{
-						channelId: mention.channelId,
-					}
-				);
+				const channel = await ctx.runQuery(api.channels._getChannelById, {
+					channelId: mention.channelId,
+				});
 				if (channel) {
 					channelName = channel.name;
 				}
@@ -617,12 +605,9 @@ export const sendMentionEmail = action({
 			// Get message text if available
 			let messagePreview = 'You were mentioned in a message';
 			if (mention.messageId) {
-				const message = await (ctx.runQuery as any)(
-					'messages:_getMessageById' as any,
-					{
-						messageId: mention.messageId,
-					}
-				);
+				const message = await ctx.runQuery(api.messages._getMessageById, {
+					messageId: mention.messageId,
+				});
 				if (message) {
 					try {
 						// Try to parse as JSON (Quill Delta format)
@@ -757,13 +742,9 @@ export const createTestMentionWithEmail = mutation({
 			});
 
 			// Schedule the email notification
-			await (ctx.scheduler.runAfter as any)(
-				0,
-				'mentions:sendMentionEmail' as any,
-				{
-					mentionId,
-				}
-			);
+			await ctx.scheduler.runAfter(0, api.mentions.sendMentionEmail, {
+				mentionId,
+			});
 
 			return { success: true, mentionId };
 		} catch (error) {
