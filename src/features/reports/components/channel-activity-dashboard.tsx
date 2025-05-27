@@ -13,10 +13,10 @@ import { formatDuration } from '@/features/reports/utils/format-duration';
 
 interface ChannelActivityDashboardProps {
   workspaceId: Id<'workspaces'>;
+  timeRange?: '1d' | '7d' | '30d';
 }
 
-export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboardProps) => {
-  const [timeRange, setTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+export const ChannelActivityDashboard = ({ workspaceId, timeRange = '7d' }: ChannelActivityDashboardProps) => {
 
   // Calculate date range based on selected time range
   const endDate = useMemo(() => Date.now(), []); // Only calculate once on component mount
@@ -112,29 +112,6 @@ export const ChannelActivityDashboard = ({ workspaceId }: ChannelActivityDashboa
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Channel Activity</h2>
-        <div className="flex rounded-md border border-input overflow-hidden">
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '1d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('1d')}
-          >
-            1 day
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('7d')}
-          >
-            7 days
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('30d')}
-          >
-            30 days
-          </button>
-        </div>
       </div>
 
       {/* Stats overview */}

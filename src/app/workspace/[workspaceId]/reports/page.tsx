@@ -106,10 +106,10 @@ const ReportsPage = () => {
     api.analytics.getWorkspaceOverview,
     workspaceId
       ? {
-          workspaceId,
-          startDate,
-          endDate,
-        }
+        workspaceId,
+        startDate,
+        endDate,
+      }
       : "skip"
   );
   const isOverviewLoading = overviewData === undefined;
@@ -119,10 +119,10 @@ const ReportsPage = () => {
     api.analytics.getMessageAnalytics,
     workspaceId
       ? {
-          workspaceId,
-          startDate,
-          endDate,
-        }
+        workspaceId,
+        startDate,
+        endDate,
+      }
       : "skip"
   );
   const isMessageLoading = messageData === undefined;
@@ -132,10 +132,10 @@ const ReportsPage = () => {
     api.analytics.getTaskAnalytics,
     workspaceId
       ? {
-          workspaceId,
-          startDate,
-          endDate,
-        }
+        workspaceId,
+        startDate,
+        endDate,
+      }
       : "skip"
   );
   const isTaskLoading = taskData === undefined;
@@ -225,137 +225,103 @@ const ReportsPage = () => {
           <span className="truncate">Reports</span>
         </Button>
       </WorkspaceToolbar>
-      <div className="flex h-[calc(100%-4rem)] bg-white">
-        {/* Main content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-6 py-8">
-            {/* Header with search and filters */}
-            <div className="mb-8 space-y-4">
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Reports & Analytics
-                </h1>
-                <div className="flex items-center gap-2">
-                  <div className="flex rounded-md border border-input overflow-hidden">
-                    <Button
-                      type="button"
-                      variant={timeRange === "1d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("1d")}
-                    >
-                      1 day
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={timeRange === "7d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("7d")}
-                    >
-                      7 days
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={timeRange === "30d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("30d")}
-                    >
-                      30 days
-                    </Button>
-                  </div>
-                  <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      onClick={handleExport}
-                      disabled={isExporting || isOverviewLoading}
-                      className="rounded-r-none border-r-0"
-                    >
-                      {isExporting ? (
-                        <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Download className="mr-2 h-4 w-4" />
-                      )}
-                      Export {exportFormat.toUpperCase()}
-                    </Button>
-                    <Popover>
-                      <PopoverTrigger asChild>
+      <div className="flex h-full flex-col bg-white">
+        {/* Header with filters */}
+        <div className="border-b border-border/30 bg-white px-4 py-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Reports & Analytics</h1>
+              <p className="text-muted-foreground">
+                Track workspace activity and performance metrics
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              {/* Time Range Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">Time Range:</span>
+                <div className="flex rounded-md border border-input overflow-hidden">
+                  <Button
+                    type="button"
+                    variant={timeRange === "1d" ? "default" : "ghost"}
+                    className="rounded-none border-0"
+                    onClick={() => setTimeRange("1d")}
+                  >
+                    1 day
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={timeRange === "7d" ? "default" : "ghost"}
+                    className="rounded-none border-0"
+                    onClick={() => setTimeRange("7d")}
+                  >
+                    7 days
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={timeRange === "30d" ? "default" : "ghost"}
+                    className="rounded-none border-0"
+                    onClick={() => setTimeRange("30d")}
+                  >
+                    30 days
+                  </Button>
+                </div>
+                <div className="flex items-center">
+                  <Button
+                    variant="outline"
+                    onClick={handleExport}
+                    disabled={isExporting || isOverviewLoading}
+                    className="rounded-r-none border-r-0"
+                  >
+                    {isExporting ? (
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="mr-2 h-4 w-4" />
+                    )}
+                    Export {exportFormat.toUpperCase()}
+                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-l-none px-2"
+                        disabled={isExporting || isOverviewLoading}
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40 p-2">
+                      <div className="space-y-1">
                         <Button
-                          variant="outline"
+                          variant={exportFormat === "pdf" ? "default" : "ghost"}
                           size="sm"
-                          className="rounded-l-none px-2"
-                          disabled={isExporting || isOverviewLoading}
+                          className="w-full justify-start"
+                          onClick={() => setExportFormat("pdf")}
                         >
-                          <ChevronDown className="h-4 w-4" />
+                          <FileText className="mr-2 h-4 w-4" />
+                          PDF
                         </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-40 p-2">
-                        <div className="space-y-1">
-                          <Button
-                            variant={exportFormat === "pdf" ? "default" : "ghost"}
-                            size="sm"
-                            className="w-full justify-start"
-                            onClick={() => setExportFormat("pdf")}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            PDF
-                          </Button>
-                          <Button
-                            variant={exportFormat === "json" ? "default" : "ghost"}
-                            size="sm"
-                            className="w-full justify-start"
-                            onClick={() => setExportFormat("json")}
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            JSON
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search reports..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline">
-                      <Filter className="mr-2 h-4 w-4" />
-                      Filters
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80">
-                    <div className="space-y-4">
-                      <h4 className="font-medium">Filter Reports</h4>
-                      <div className="space-y-2">
-                        <h5 className="text-sm font-medium">Data Types</h5>
-                        <div className="flex flex-wrap gap-2">
-                          <Button size="sm" variant="outline">
-                            Messages
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Tasks
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Users
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            Channels
-                          </Button>
-                        </div>
+                        <Button
+                          variant={exportFormat === "json" ? "default" : "ghost"}
+                          size="sm"
+                          className="w-full justify-start"
+                          onClick={() => setExportFormat("json")}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          JSON
+                        </Button>
                       </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
 
+        {/* Main content area */}
+        <div className="flex-1 overflow-auto p-4">
+          <div className="mx-auto max-w-7xl space-y-6">
             {/* Tabs */}
             <Tabs defaultValue="overview" className="space-y-6">
               <TabsList className="grid w-full grid-cols-7 mb-4">
@@ -424,7 +390,7 @@ const ReportsPage = () => {
               {/* Users Tab */}
               <TabsContent value="users">
                 {workspaceId ? (
-                  <UserActivityDashboard workspaceId={workspaceId} />
+                  <UserActivityDashboard workspaceId={workspaceId} timeRange={timeRange} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
                     <Loader className="h-8 w-8 animate-spin text-secondary" />
@@ -435,7 +401,7 @@ const ReportsPage = () => {
               {/* Channels Tab */}
               <TabsContent value="channels">
                 {workspaceId ? (
-                  <ChannelActivityDashboard workspaceId={workspaceId} />
+                  <ChannelActivityDashboard workspaceId={workspaceId} timeRange={timeRange} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
                     <Loader className="h-8 w-8 animate-spin text-secondary" />
@@ -486,9 +452,9 @@ const ReportsPage = () => {
                             <div className="text-2xl font-bold">
                               {messageData.messagesByDate.length > 0
                                 ? Math.round(
-                                    messageData.totalMessages /
-                                      messageData.messagesByDate.length
-                                  )
+                                  messageData.totalMessages /
+                                  messageData.messagesByDate.length
+                                )
                                 : 0}
                             </div>
                           </div>
@@ -590,7 +556,7 @@ const ReportsPage = () => {
               {/* Content Analysis Tab */}
               <TabsContent value="content">
                 {workspaceId ? (
-                  <ContentAnalysisDashboard workspaceId={workspaceId} />
+                  <ContentAnalysisDashboard workspaceId={workspaceId} timeRange={timeRange} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
                     <Loader className="h-8 w-8 animate-spin text-secondary" />
@@ -601,7 +567,7 @@ const ReportsPage = () => {
               {/* Performance Metrics Tab */}
               <TabsContent value="performance">
                 {workspaceId ? (
-                  <PerformanceMetricsDashboard workspaceId={workspaceId} />
+                  <PerformanceMetricsDashboard workspaceId={workspaceId} timeRange={timeRange} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
                     <Loader className="h-8 w-8 animate-spin text-secondary" />

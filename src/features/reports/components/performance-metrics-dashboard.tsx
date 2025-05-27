@@ -29,10 +29,10 @@ import { BarChart, PieChart, LineChart, HorizontalBarChart } from '@/features/re
 
 interface PerformanceMetricsDashboardProps {
   workspaceId: Id<'workspaces'>;
+  timeRange?: '1d' | '7d' | '30d';
 }
 
-export const PerformanceMetricsDashboard = ({ workspaceId }: PerformanceMetricsDashboardProps) => {
-  const [timeRange, setTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+export const PerformanceMetricsDashboard = ({ workspaceId, timeRange = '7d' }: PerformanceMetricsDashboardProps) => {
   const [activeTab, setActiveTab] = useState('tasks');
 
   // Calculate date ranges
@@ -186,29 +186,6 @@ export const PerformanceMetricsDashboard = ({ workspaceId }: PerformanceMetricsD
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Performance Metrics</h2>
-        <div className="flex rounded-md border border-input overflow-hidden">
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '1d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('1d')}
-          >
-            1 day
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('7d')}
-          >
-            7 days
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('30d')}
-          >
-            30 days
-          </button>
-        </div>
       </div>
 
       {/* Performance tabs */}

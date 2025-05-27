@@ -27,10 +27,10 @@ import { formatDuration } from '@/features/reports/utils/format-duration';
 
 interface ContentAnalysisDashboardProps {
   workspaceId: Id<'workspaces'>;
+  timeRange?: '1d' | '7d' | '30d';
 }
 
-export const ContentAnalysisDashboard = ({ workspaceId }: ContentAnalysisDashboardProps) => {
-  const [timeRange, setTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
+export const ContentAnalysisDashboard = ({ workspaceId, timeRange = '7d' }: ContentAnalysisDashboardProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('messages');
 
@@ -127,45 +127,6 @@ export const ContentAnalysisDashboard = ({ workspaceId }: ContentAnalysisDashboa
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Content Analysis</h2>
-        <div className="flex rounded-md border border-input overflow-hidden">
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '1d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('1d')}
-          >
-            1 day
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('7d')}
-          >
-            7 days
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '30d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('30d')}
-          >
-            30 days
-          </button>
-        </div>
-      </div>
-
-      {/* Search and filter */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search content..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <Button variant="outline">
-          Export Data
-        </Button>
       </div>
 
       {/* Content tabs */}
