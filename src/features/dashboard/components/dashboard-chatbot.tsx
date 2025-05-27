@@ -15,6 +15,7 @@ import { api } from '@/../convex/_generated/api';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 interface DashboardChatbotProps {
   workspaceId: Id<'workspaces'>;
   member: any;
@@ -25,6 +26,7 @@ type NavigationAction = {
   type: string;
   url: string;
   noteId?: string;
+  channelId?: string;
 };
 
 type Message = {
@@ -216,7 +218,18 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
 
   // Handle navigation actions
   const handleNavigation = (action: NavigationAction) => {
-    const url = action.url.replace('[workspaceId]', workspaceId);
+    let url = action.url.replace('[workspaceId]', workspaceId);
+
+    // Handle channelId replacement
+    if (url.includes('[channelId]') && action.channelId) {
+      url = url.replace('[channelId]', action.channelId);
+    }
+
+    // Handle noteId replacement
+    if (url.includes('[noteId]') && action.noteId) {
+      url = url.replace('[noteId]', action.noteId);
+    }
+
     router.push(url);
   };
 
@@ -365,8 +378,44 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
                   {message.sender === 'user' ? (
                     <p className="text-sm">{message.content}</p>
                   ) : (
-                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-2 prose-headings:mb-2 prose-p:my-1 prose-blockquote:my-2 prose-blockquote:pl-3 prose-blockquote:border-l-2 prose-blockquote:border-gray-300 prose-blockquote:italic prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300 prose-h2:text-primary prose-h3:text-primary/90 prose-h4:text-primary/80 prose-strong:font-semibold prose-ul:my-1 prose-li:my-0.5">
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-2 prose-headings:mb-2 prose-p:my-1 prose-blockquote:my-2 prose-blockquote:pl-3 prose-blockquote:border-l-2 prose-blockquote:border-gray-300 prose-blockquote:italic prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300 prose-h2:text-primary prose-h3:text-primary/90 prose-h4:text-primary/80 prose-strong:font-semibold prose-ul:my-1 prose-li:my-0.5 prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-pre:bg-muted prose-pre:p-3 prose-pre:rounded-md prose-pre:overflow-x-auto">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          // Custom link component to handle internal links
+                          a: ({ href, children, ...props }) => (
+                            <a
+                              href={href}
+                              className="text-primary hover:text-primary/80 underline"
+                              target={href?.startsWith('http') ? '_blank' : '_self'}
+                              rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+                              {...props}
+                            >
+                              {children}
+                            </a>
+                          ),
+                          // Custom code block styling
+                          code: ({ className, children, ...props }) => (
+                            <code
+                              className={`${className} bg-muted px-1 py-0.5 rounded text-sm font-mono`}
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          ),
+                          // Custom pre block styling
+                          pre: ({ children, ...props }) => (
+                            <pre
+                              className="bg-muted p-3 rounded-md overflow-x-auto text-sm"
+                              {...props}
+                            >
+                              {children}
+                            </pre>
+                          ),
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
                     </div>
                   )}
                   {message.sources && renderSourceBadges(message.sources)}

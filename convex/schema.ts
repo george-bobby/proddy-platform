@@ -358,6 +358,7 @@ const schema = defineSchema({
 							type: v.string(),
 							url: v.string(),
 							noteId: v.optional(v.string()),
+							channelId: v.optional(v.string()),
 						})
 					)
 				),

@@ -28,6 +28,7 @@ type NavigationAction = {
 	type: string;
 	url: string;
 	noteId?: string;
+	channelId?: string;
 };
 
 type GenerateResponseResult = {
@@ -107,6 +108,7 @@ export const addMessage = mutation({
 					type: v.string(),
 					url: v.string(),
 					noteId: v.optional(v.string()),
+					channelId: v.optional(v.string()),
 				})
 			)
 		),
@@ -712,12 +714,17 @@ Remember: Only answer based on the context provided. If the context doesn't cont
 			if (notesResults.length > 0) {
 				// Add action for the first note found
 				const firstNote = notesResults[0];
-				navigationActions.push({
-					label: 'View Note',
-					type: 'note',
-					url: `/workspace/[workspaceId]/notes/${firstNote._id}`,
-					noteId: firstNote._id,
-				});
+				// Notes are accessed through channels, so we need the channelId
+				const channelId = (firstNote as any).channelId;
+				if (channelId) {
+					navigationActions.push({
+						label: 'View Note',
+						type: 'note',
+						url: `/workspace/[workspaceId]/channel/[channelId]/notes?noteId=[noteId]`,
+						noteId: firstNote._id.toString(),
+						channelId: channelId.toString(),
+					});
+				}
 			}
 
 			// Check for board cards content
@@ -725,12 +732,17 @@ Remember: Only answer based on the context provided. If the context doesn't cont
 				(result) => result.type === 'card'
 			);
 			if (cardResults.length > 0) {
-				// Add action for boards
-				navigationActions.push({
-					label: 'View Boards',
-					type: 'board',
-					url: '/workspace/[workspaceId]/boards',
-				});
+				// Cards are accessed through channels, so we need the channelId
+				const firstCard = cardResults[0];
+				const channelId = (firstCard as any).channelId;
+				if (channelId) {
+					navigationActions.push({
+						label: 'View Board',
+						type: 'board',
+						url: `/workspace/[workspaceId]/channel/[channelId]/board`,
+						channelId: channelId.toString(),
+					});
+				}
 			}
 
 			// Check for task content
