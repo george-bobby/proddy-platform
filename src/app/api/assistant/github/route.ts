@@ -1,48 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OpenAIToolSet } from 'composio-core';
-import OpenAI from 'openai';
+import { openai } from '@ai-sdk/openai';
+import { VercelAIToolSet } from 'composio-core';
+import { generateText } from 'ai';
 
-const toolset = new OpenAIToolSet({
-  apiKey: process.env.COMPOSIO_API_KEY,
-});
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const toolset = new VercelAIToolSet({
+	apiKey: process.env.COMPOSIO_API_KEY,
 });
 
 export async function POST(req: NextRequest) {
-  try {
-    const { message, workspaceContext } = await req.json();
+	try {
+		const { message, workspaceContext } = await req.json();
 
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
-    }
+		if (!message) {
+			return NextResponse.json(
+				{ error: 'Message is required' },
+				{ status: 400 }
+			);
+		}
 
-    console.log('[GitHub Assistant] Processing request:', message);
+		console.log('[GitHub Assistant] Processing request:', message);
 
-    // Get GitHub tools from Composio
-    const tools = await toolset.getTools({
-      apps: ['github'],
-      actions: [
-        'GITHUB_CREATE_AN_ISSUE',
-        'GITHUB_LIST_ISSUES',
-        'GITHUB_GET_ISSUE',
-        'GITHUB_UPDATE_AN_ISSUE',
-      ],
-    });
+		// Get GitHub tools from Composio
+		const tools = await toolset.getTools({
+			apps: ['github'],
+			actions: [
+				'GITHUB_CREATE_AN_ISSUE',
+				'GITHUB_LIST_ISSUES',
+				'GITHUB_GET_ISSUE',
+				'GITHUB_UPDATE_AN_ISSUE',
+			],
+		});
 
-    // Define your target repository
-    const GITHUB_OWNER = process.env.GITHUB_OWNER || 'george-bobby';
-    const GITHUB_REPO = process.env.GITHUB_REPO || 'proddy-platform';
+		// Define your target repository
+		const GITHUB_OWNER = process.env.GITHUB_OWNER || 'george-bobby';
+		const GITHUB_REPO = process.env.GITHUB_REPO || 'proddy-platform';
 
-    console.log('[GitHub Assistant] Available tools:', tools.length);
-    console.log('[GitHub Assistant] Target repository:', `${GITHUB_OWNER}/${GITHUB_REPO}`);
+		console.log('[GitHub Assistant] Available tools:', tools.length);
+		console.log(
+			'[GitHub Assistant] Target repository:',
+			`${GITHUB_OWNER}/${GITHUB_REPO}`
+		);
 
-    // Create a system prompt that helps the AI understand when to use GitHub tools
-    const systemPrompt = `You are a helpful GitHub assistant that can interact with GitHub repositories.
+		// Create a system prompt that helps the AI understand when to use GitHub tools
+		const systemPrompt = `You are a helpful GitHub assistant that can interact with GitHub repositories.
 
 You have access to GitHub tools to:
 - Create issues
@@ -84,69 +84,49 @@ When creating issues:
 
 Always confirm what action you're taking and provide clear feedback about the results.`;
 
-    // Generate response with tools using OpenAI directly
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: message,
-        },
-      ],
-      tools,
-    });
+		// Generate response with tools using Vercel AI SDK
+		const result = await generateText({
+			model: openai('gpt-4o-mini'),
+			tools,
+			prompt: `${systemPrompt}\n\nUser: ${message}`,
+		});
 
-    console.log('[GitHub Assistant] AI response generated');
+		console.log('[GitHub Assistant] AI response generated');
 
-    const aiMessage = response.choices[0].message;
-    const toolCalls = aiMessage.tool_calls || [];
+		// Extract tool results from the result
+		const toolResults = [];
+		if (result.toolCalls && result.toolCalls.length > 0) {
+			console.log(
+				'[GitHub Assistant] Tool calls executed:',
+				result.toolCalls.length
+			);
 
-    // Execute any tool calls
-    const toolResults = [];
-    if (toolCalls.length > 0) {
-      console.log('[GitHub Assistant] Executing tool calls:', toolCalls.length);
+			for (const toolCall of result.toolCalls) {
+				toolResults.push({
+					toolName: toolCall.toolName,
+					args: toolCall.args,
+					// Tool results are handled automatically by Vercel AI SDK
+				});
+				console.log('[GitHub Assistant] Tool executed:', toolCall.toolName);
+			}
+		}
 
-      for (const toolCall of toolCalls) {
-        try {
-          const toolResult = await toolset.executeToolCall(toolCall);
-          toolResults.push({
-            toolName: toolCall.function.name,
-            args: JSON.parse(toolCall.function.arguments),
-            result: toolResult,
-          });
-          console.log('[GitHub Assistant] Tool executed:', toolCall.function.name);
-        } catch (toolError) {
-          console.error('[GitHub Assistant] Tool execution error:', toolError);
-          toolResults.push({
-            toolName: toolCall.function.name,
-            args: JSON.parse(toolCall.function.arguments),
-            error: toolError instanceof Error ? toolError.message : 'Unknown error',
-          });
-        }
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      response: aiMessage.content || 'GitHub action completed successfully!',
-      toolCalls: toolCalls,
-      toolResults,
-      hasGitHubAction: toolResults.length > 0,
-      repository: `${GITHUB_OWNER}/${GITHUB_REPO}`,
-    });
-
-  } catch (error) {
-    console.error('[GitHub Assistant] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json({
+			success: true,
+			response: result.text || 'GitHub action completed successfully!',
+			toolCalls: result.toolCalls || [],
+			toolResults,
+			hasGitHubAction: toolResults.length > 0,
+			repository: `${GITHUB_OWNER}/${GITHUB_REPO}`,
+		});
+	} catch (error) {
+		console.error('[GitHub Assistant] Error:', error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			},
+			{ status: 500 }
+		);
+	}
 }

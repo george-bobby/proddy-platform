@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 
 export async function POST(req: NextRequest) {
-  try {
-    const { message, workspaceContext } = await req.json();
+	try {
+		const { message, workspaceContext } = await req.json();
 
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
-    }
+		if (!message) {
+			return NextResponse.json(
+				{ error: 'Message is required' },
+				{ status: 400 }
+			);
+		}
 
-    console.log('[Notes Assistant] Processing request:', message);
+		console.log('[Notes Assistant] Processing request:', message);
 
-    // Create a system prompt for notes-specific assistance
-    const systemPrompt = `You are a helpful notes assistant for Proddy workspace.
+		// Create a system prompt for notes-specific assistance
+		const systemPrompt = `You are a helpful notes assistant for Proddy workspace.
 You specialize in helping users with notes, documentation, and knowledge management.
 Be concise, friendly, and helpful.
 
@@ -42,47 +42,46 @@ INSTRUCTIONS FOR NOTES QUERIES:
 
 Remember: Only answer based on the workspace context provided. If the context doesn't contain relevant notes information, say "I don't have information about that in your workspace notes."`;
 
-    // Generate response using Google Gemini
-    const result = await generateText({
-      model: google('gemini-2.0-flash-exp'),
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: message,
-        },
-      ],
-      temperature: 0.7,
-      maxTokens: 800,
-    });
+		// Generate response using OpenAI
+		const result = await generateText({
+			model: openai('gpt-4o-mini'),
+			messages: [
+				{
+					role: 'system',
+					content: systemPrompt,
+				},
+				{
+					role: 'user',
+					content: message,
+				},
+			],
+			temperature: 0.7,
+			maxTokens: 800,
+		});
 
-    console.log('[Notes Assistant] Response generated');
+		console.log('[Notes Assistant] Response generated');
 
-    return NextResponse.json({
-      success: true,
-      response: result.text,
-      sources: [], // This would be populated by the main chatbot logic
-      assistantType: 'notes',
-      actions: [
-        {
-          label: 'View Notes',
-          type: 'note',
-          url: '/workspace/[workspaceId]/notes',
-        },
-      ],
-    });
-
-  } catch (error) {
-    console.error('[Notes Assistant] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json({
+			success: true,
+			response: result.text,
+			sources: [], // This would be populated by the main chatbot logic
+			assistantType: 'notes',
+			actions: [
+				{
+					label: 'View Notes',
+					type: 'note',
+					url: '/workspace/[workspaceId]/notes',
+				},
+			],
+		});
+	} catch (error) {
+		console.error('[Notes Assistant] Error:', error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			},
+			{ status: 500 }
+		);
+	}
 }

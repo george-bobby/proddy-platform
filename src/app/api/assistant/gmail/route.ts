@@ -1,51 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OpenAIToolSet } from 'composio-core';
-import OpenAI from 'openai';
+import { openai } from '@ai-sdk/openai';
+import { VercelAIToolSet } from 'composio-core';
+import { generateText } from 'ai';
 
-const toolset = new OpenAIToolSet({
-  apiKey: process.env.COMPOSIO_API_KEY,
-});
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const toolset = new VercelAIToolSet({
+	apiKey: process.env.COMPOSIO_API_KEY,
 });
 
 export async function POST(req: NextRequest) {
-  try {
-    const { message, workspaceContext } = await req.json();
+	try {
+		const { message, workspaceContext } = await req.json();
 
-    if (!message) {
-      return NextResponse.json(
-        { error: 'Message is required' },
-        { status: 400 }
-      );
-    }
+		if (!message) {
+			return NextResponse.json(
+				{ error: 'Message is required' },
+				{ status: 400 }
+			);
+		}
 
-    console.log('[Gmail Assistant] Processing request:', message);
+		console.log('[Gmail Assistant] Processing request:', message);
 
-    // Get Gmail tools from Composio
-    const tools = await toolset.getTools({
-      apps: ['gmail'],
-      actions: [
-        'GMAIL_SEND_EMAIL',
-        'GMAIL_LIST_MESSAGES',
-        'GMAIL_GET_MESSAGE',
-        'GMAIL_SEARCH_MESSAGES',
-        'GMAIL_CREATE_DRAFT',
-        'GMAIL_SEND_DRAFT',
-        'GMAIL_DELETE_MESSAGE',
-        'GMAIL_MARK_AS_READ',
-        'GMAIL_MARK_AS_UNREAD',
-        'GMAIL_ADD_LABEL',
-        'GMAIL_REMOVE_LABEL',
-        'GMAIL_GET_LABELS',
-      ],
-    });
+		// Get Gmail tools from Composio
+		const tools = await toolset.getTools({
+			apps: ['gmail'],
+			actions: [
+				'GMAIL_SEND_EMAIL',
+				'GMAIL_LIST_MESSAGES',
+				'GMAIL_GET_MESSAGE',
+				'GMAIL_SEARCH_MESSAGES',
+				'GMAIL_CREATE_DRAFT',
+				'GMAIL_SEND_DRAFT',
+				'GMAIL_DELETE_MESSAGE',
+				'GMAIL_MARK_AS_READ',
+				'GMAIL_MARK_AS_UNREAD',
+				'GMAIL_ADD_LABEL',
+				'GMAIL_REMOVE_LABEL',
+				'GMAIL_GET_LABELS',
+			],
+		});
 
-    console.log('[Gmail Assistant] Available tools:', tools.length);
+		console.log('[Gmail Assistant] Available tools:', tools.length);
 
-    // Create a system prompt for Gmail-specific assistance
-    const systemPrompt = `You are a helpful Gmail assistant that can interact with Gmail accounts.
+		// Create a system prompt for Gmail-specific assistance
+		const systemPrompt = `You are a helpful Gmail assistant that can interact with Gmail accounts.
 
 You have access to Gmail tools to:
 - Send emails
@@ -92,68 +89,48 @@ When sending emails:
 
 Always confirm what action you're taking and provide clear feedback about the results.`;
 
-    // Generate response with tools using OpenAI directly
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: message,
-        },
-      ],
-      tools,
-    });
+		// Generate response with tools using Vercel AI SDK
+		const result = await generateText({
+			model: openai('gpt-4o-mini'),
+			tools,
+			prompt: `${systemPrompt}\n\nUser: ${message}`,
+		});
 
-    console.log('[Gmail Assistant] AI response generated');
+		console.log('[Gmail Assistant] AI response generated');
 
-    const aiMessage = response.choices[0].message;
-    const toolCalls = aiMessage.tool_calls || [];
+		// Extract tool results from the result
+		const toolResults = [];
+		if (result.toolCalls && result.toolCalls.length > 0) {
+			console.log(
+				'[Gmail Assistant] Tool calls executed:',
+				result.toolCalls.length
+			);
 
-    // Execute any tool calls
-    const toolResults = [];
-    if (toolCalls.length > 0) {
-      console.log('[Gmail Assistant] Executing tool calls:', toolCalls.length);
+			for (const toolCall of result.toolCalls) {
+				toolResults.push({
+					toolName: toolCall.toolName,
+					args: toolCall.args,
+					// Tool results are handled automatically by Vercel AI SDK
+				});
+				console.log('[Gmail Assistant] Tool executed:', toolCall.toolName);
+			}
+		}
 
-      for (const toolCall of toolCalls) {
-        try {
-          const toolResult = await toolset.executeToolCall(toolCall);
-          toolResults.push({
-            toolName: toolCall.function.name,
-            args: JSON.parse(toolCall.function.arguments),
-            result: toolResult,
-          });
-          console.log('[Gmail Assistant] Tool executed:', toolCall.function.name);
-        } catch (toolError) {
-          console.error('[Gmail Assistant] Tool execution error:', toolError);
-          toolResults.push({
-            toolName: toolCall.function.name,
-            args: JSON.parse(toolCall.function.arguments),
-            error: toolError instanceof Error ? toolError.message : 'Unknown error',
-          });
-        }
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      response: aiMessage.content || 'Gmail action completed successfully!',
-      toolCalls: toolCalls,
-      toolResults,
-      hasGmailAction: toolResults.length > 0,
-    });
-
-  } catch (error) {
-    console.error('[Gmail Assistant] Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json({
+			success: true,
+			response: result.text || 'Gmail action completed successfully!',
+			toolCalls: result.toolCalls || [],
+			toolResults,
+			hasGmailAction: toolResults.length > 0,
+		});
+	} catch (error) {
+		console.error('[Gmail Assistant] Error:', error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			},
+			{ status: 500 }
+		);
+	}
 }

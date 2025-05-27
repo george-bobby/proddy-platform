@@ -25,10 +25,7 @@ export async function POST(req: NextRequest) {
 
 		// Route to appropriate assistant module based on type
 		let targetUrl: string;
-		const baseUrl =
-			process.env.NODE_ENV === 'development'
-				? 'http://localhost:3000'
-				: 'https://proddy.tech';
+		const baseUrl = 'https://proddy.tech';
 
 		switch (type.toLowerCase()) {
 			case 'github':
