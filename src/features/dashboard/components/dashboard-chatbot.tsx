@@ -52,10 +52,10 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
   const router = useRouter();
 
   // Get workspace data
-  const workspace = useQuery(api.workspaces.getById, { id: workspaceId });
+  const workspace = useQuery(api.workspaces.getById, { id: workspaceId as any });
 
   // Get chat history from Convex
-  const chatHistory = useQuery(api.chatbot.getChatHistory, { workspaceId });
+  const chatHistory = useQuery(api.chatbot.getChatHistory, { workspaceId: workspaceId as any });
 
   // Convex mutations and actions
   const clearChatHistoryMutation = useMutation(api.chatbot.clearChatHistory);
