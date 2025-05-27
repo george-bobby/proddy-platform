@@ -16,6 +16,7 @@ import {
   Filter,
   Activity,
   Shield,
+  ChevronDown,
 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "convex/react";
@@ -43,6 +44,8 @@ import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { useTrackActivity } from "@/features/reports/hooks/use-track-activity";
 import { useCurrentMember } from "@/features/members/api/use-current-member";
 import { WorkspaceToolbar } from "../toolbar";
+import { exportReportToPDF } from "@/features/reports/utils/pdf-export";
+import { toast } from "sonner";
 
 // Import chart components for the Messages and Tasks tabs
 import {
@@ -67,9 +70,10 @@ const ReportsPage = () => {
   const workspaceId = useWorkspaceId();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
+  const [timeRange, setTimeRange] = useState<"1d" | "7d" | "30d">("7d");
   const [isExporting, setIsExporting] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [exportFormat, setExportFormat] = useState<"json" | "pdf">("pdf");
 
   // Get current member to check permissions
   const { data: member, isLoading: memberLoading } = useCurrentMember({
@@ -80,14 +84,14 @@ const ReportsPage = () => {
   const endDate = useMemo(() => Date.now(), []); // Only calculate once on component mount
   const startDate = useMemo(() => {
     switch (timeRange) {
+      case "1d":
+        return subDays(endDate, 1).getTime();
       case "7d":
         return subDays(endDate, 7).getTime();
       case "30d":
         return subDays(endDate, 30).getTime();
-      case "90d":
-        return subDays(endDate, 90).getTime();
       default:
-        return subDays(endDate, 30).getTime();
+        return subDays(endDate, 7).getTime();
     }
   }, [timeRange, endDate]);
 
@@ -144,7 +148,7 @@ const ReportsPage = () => {
   }
 
   // Handle export
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!overviewData) return;
 
     setIsExporting(true);
@@ -159,20 +163,27 @@ const ReportsPage = () => {
         tasks: taskData,
       };
 
-      // Convert to JSON
-      const jsonData = JSON.stringify(exportData, null, 2);
-
-      // Create download link
-      const blob = new Blob([jsonData], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `reports-export-${format(new Date(), "yyyy-MM-dd")}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (exportFormat === "pdf") {
+        // Export as PDF
+        await exportReportToPDF(exportData);
+        toast.success("Report exported as PDF successfully!");
+      } else {
+        // Export as JSON
+        const jsonData = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([jsonData], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `reports-export-${format(new Date(), "yyyy-MM-dd")}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success("Report exported as JSON successfully!");
+      }
     } catch (error) {
       console.error("Failed to export data:", error);
+      toast.error("Failed to export report. Please try again.");
     } finally {
       setIsExporting(false);
     }
@@ -228,6 +239,14 @@ const ReportsPage = () => {
                   <div className="flex rounded-md border border-input overflow-hidden">
                     <Button
                       type="button"
+                      variant={timeRange === "1d" ? "default" : "ghost"}
+                      className="rounded-none border-0"
+                      onClick={() => setTimeRange("1d")}
+                    >
+                      1 day
+                    </Button>
+                    <Button
+                      type="button"
                       variant={timeRange === "7d" ? "default" : "ghost"}
                       className="rounded-none border-0"
                       onClick={() => setTimeRange("7d")}
@@ -242,27 +261,56 @@ const ReportsPage = () => {
                     >
                       30 days
                     </Button>
-                    <Button
-                      type="button"
-                      variant={timeRange === "90d" ? "default" : "ghost"}
-                      className="rounded-none border-0"
-                      onClick={() => setTimeRange("90d")}
-                    >
-                      90 days
-                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={handleExport}
-                    disabled={isExporting || isOverviewLoading}
-                  >
-                    {isExporting ? (
-                      <Loader className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="mr-2 h-4 w-4" />
-                    )}
-                    Export
-                  </Button>
+                  <div className="flex items-center">
+                    <Button
+                      variant="outline"
+                      onClick={handleExport}
+                      disabled={isExporting || isOverviewLoading}
+                      className="rounded-r-none border-r-0"
+                    >
+                      {isExporting ? (
+                        <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="mr-2 h-4 w-4" />
+                      )}
+                      Export {exportFormat.toUpperCase()}
+                    </Button>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-l-none px-2"
+                          disabled={isExporting || isOverviewLoading}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-2">
+                        <div className="space-y-1">
+                          <Button
+                            variant={exportFormat === "pdf" ? "default" : "ghost"}
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => setExportFormat("pdf")}
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            PDF
+                          </Button>
+                          <Button
+                            variant={exportFormat === "json" ? "default" : "ghost"}
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => setExportFormat("json")}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            JSON
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -365,7 +413,7 @@ const ReportsPage = () => {
               {/* Overview Tab */}
               <TabsContent value="overview">
                 {workspaceId ? (
-                  <OverviewDashboard workspaceId={workspaceId} />
+                  <OverviewDashboard workspaceId={workspaceId} timeRange={timeRange} />
                 ) : (
                   <div className="flex items-center justify-center h-64">
                     <Loader className="h-8 w-8 animate-spin text-secondary" />

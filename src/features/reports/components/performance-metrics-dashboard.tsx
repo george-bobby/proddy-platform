@@ -32,17 +32,17 @@ interface PerformanceMetricsDashboardProps {
 }
 
 export const PerformanceMetricsDashboard = ({ workspaceId }: PerformanceMetricsDashboardProps) => {
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+  const [timeRange, setTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
   const [activeTab, setActiveTab] = useState('tasks');
 
   // Calculate date ranges
   const endDate = useMemo(() => Date.now(), []);
   const startDate = useMemo(() => {
     switch (timeRange) {
+      case '1d': return subDays(endDate, 1).getTime();
       case '7d': return subDays(endDate, 7).getTime();
       case '30d': return subDays(endDate, 30).getTime();
-      case '90d': return subDays(endDate, 90).getTime();
-      default: return subDays(endDate, 30).getTime();
+      default: return subDays(endDate, 7).getTime();
     }
   }, [timeRange, endDate]);
 
@@ -189,6 +189,13 @@ export const PerformanceMetricsDashboard = ({ workspaceId }: PerformanceMetricsD
         <div className="flex rounded-md border border-input overflow-hidden">
           <button
             type="button"
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '1d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
+            onClick={() => setTimeRange('1d')}
+          >
+            1 day
+          </button>
+          <button
+            type="button"
             className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('7d')}
           >
@@ -200,13 +207,6 @@ export const PerformanceMetricsDashboard = ({ workspaceId }: PerformanceMetricsD
             onClick={() => setTimeRange('30d')}
           >
             30 days
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('90d')}
-          >
-            90 days
           </button>
         </div>
       </div>

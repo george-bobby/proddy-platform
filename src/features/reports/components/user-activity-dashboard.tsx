@@ -16,16 +16,16 @@ interface UserActivityDashboardProps {
 }
 
 export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProps) => {
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
+  const [timeRange, setTimeRange] = useState<'1d' | '7d' | '30d'>('7d');
 
   // Calculate date range based on selected time range
   const endDate = useMemo(() => Date.now(), []); // Only calculate once on component mount
   const startDate = useMemo(() => {
     switch (timeRange) {
+      case '1d': return subDays(endDate, 1).getTime();
       case '7d': return subDays(endDate, 7).getTime();
       case '30d': return subDays(endDate, 30).getTime();
-      case '90d': return subDays(endDate, 90).getTime();
-      default: return subDays(endDate, 30).getTime();
+      default: return subDays(endDate, 7).getTime();
     }
   }, [timeRange, endDate]);
 
@@ -39,10 +39,14 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
     } : 'skip'
   );
 
-  // Fetch current active users count (currently logged in users)
+  // Fetch current active users count for the selected time period
   const activeUsersData = useQuery(
     api.analytics.getActiveUsersCount,
-    workspaceId ? { workspaceId } : 'skip'
+    workspaceId ? {
+      workspaceId,
+      startDate,
+      endDate,
+    } : 'skip'
   );
 
   const isLoading = userActivityResult === undefined || activeUsersData === undefined;
@@ -104,6 +108,13 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
         <div className="flex rounded-md border border-input overflow-hidden">
           <button
             type="button"
+            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '1d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
+            onClick={() => setTimeRange('1d')}
+          >
+            1 day
+          </button>
+          <button
+            type="button"
             className={`px-3 py-1.5 text-sm font-medium ${timeRange === '7d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
             onClick={() => setTimeRange('7d')}
           >
@@ -115,13 +126,6 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
             onClick={() => setTimeRange('30d')}
           >
             30 days
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 text-sm font-medium ${timeRange === '90d' ? 'bg-secondary text-white' : 'bg-transparent hover:bg-muted'}`}
-            onClick={() => setTimeRange('90d')}
-          >
-            90 days
           </button>
         </div>
       </div>

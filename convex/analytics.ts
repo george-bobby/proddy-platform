@@ -226,14 +226,20 @@ export const getUserActivitySummary = query({
 	},
 });
 
-// Get current active users count for a workspace
+// Get active users count for a workspace within a time period
 export const getActiveUsersCount = query({
 	args: {
 		workspaceId: v.id('workspaces'),
+		startDate: v.optional(v.number()),
+		endDate: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) throw new Error('Unauthorized');
+
+		// Default to last 7 days if dates not provided
+		const endDate = args.endDate || Date.now();
+		const startDate = args.startDate || endDate - 7 * 24 * 60 * 60 * 1000;
 
 		// Get all members in the workspace
 		const members = await ctx.db
@@ -243,6 +249,70 @@ export const getActiveUsersCount = query({
 			)
 			.collect();
 
+		// Count active users based on activity within the selected time period AND currently logged-in users
+		const activeUserIds = new Set<Id<'members'>>();
+
+		// Add users who sent messages in the time period
+		const messages = await ctx.db
+			.query('messages')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('_creationTime'), startDate),
+					q.lte(q.field('_creationTime'), endDate)
+				)
+			)
+			.collect();
+		messages.forEach((message) => activeUserIds.add(message.memberId));
+
+		// Add users who added reactions in the time period
+		const reactions = await ctx.db
+			.query('reactions')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('_creationTime'), startDate),
+					q.lte(q.field('_creationTime'), endDate)
+				)
+			)
+			.collect();
+		reactions.forEach((reaction) => activeUserIds.add(reaction.memberId));
+
+		// Add users who had channel sessions in the time period
+		const channelSessions = await ctx.db
+			.query('channelSessions')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('startTime'), startDate),
+					q.lte(q.field('startTime'), endDate)
+				)
+			)
+			.collect();
+		channelSessions.forEach((session) => activeUserIds.add(session.memberId));
+
+		// Add users who had any user activities in the time period
+		const userActivities = await ctx.db
+			.query('userActivities')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('timestamp'), startDate),
+					q.lte(q.field('timestamp'), endDate)
+				)
+			)
+			.collect();
+		userActivities.forEach((activity) => activeUserIds.add(activity.memberId));
+
+		// ALSO add currently logged-in users (users who are online right now)
 		// Get all user IDs from workspace members
 		const memberUserIds = members.map(member => member.userId);
 
@@ -254,11 +324,8 @@ export const getActiveUsersCount = query({
 			)
 			.collect();
 
-		// Filter for users who are currently online
-		// Consider users active if they have status 'online' and were seen within the last 2 minutes
+		// Add currently online users to active users
 		const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
-		const activeUserIds = new Set<Id<'users'>>();
-
 		userStatuses.forEach((status) => {
 			// Check if this user is a member of the workspace
 			if (memberUserIds.includes(status.userId)) {
@@ -266,7 +333,11 @@ export const getActiveUsersCount = query({
 				const effectiveStatus = status.status === 'online' && isRecentlyActive ? 'online' : 'offline';
 
 				if (effectiveStatus === 'online') {
-					activeUserIds.add(status.userId);
+					// Find the member ID for this user
+					const member = members.find(m => m.userId === status.userId);
+					if (member) {
+						activeUserIds.add(member._id);
+					}
 				}
 			}
 		});
@@ -274,10 +345,30 @@ export const getActiveUsersCount = query({
 		const activeUserCount = activeUserIds.size;
 		const activeUserPercentage = members.length > 0 ? Math.round((activeUserCount / members.length) * 100) : 0;
 
+		// Get active user details for tooltip
+		const activeUserDetails = await Promise.all(
+			Array.from(activeUserIds).map(async (memberId) => {
+				const member = await ctx.db.get(memberId);
+				if (!member) return null;
+
+				const user = await ctx.db.get(member.userId);
+				return {
+					memberId,
+					userId: member.userId,
+					name: user?.name || 'Unknown User',
+					email: user?.email || '',
+				};
+			})
+		);
+
+		// Filter out null values
+		const validActiveUsers = activeUserDetails.filter(user => user !== null);
+
 		return {
 			totalMembers: members.length,
 			activeUserCount,
 			activeUserPercentage,
+			activeUsers: validActiveUsers,
 		};
 	},
 });
@@ -344,7 +435,58 @@ export const getWorkspaceOverview = query({
 		// Count completed tasks
 		const completedTasks = tasks.filter((task) => task.completed).length;
 
-		// Get current active users count using the dedicated query logic
+		// Count active users based on activity within the selected time period AND currently logged-in users
+		const activeUserIds = new Set<Id<'members'>>();
+
+		// Add users who sent messages in the time period
+		messages.forEach((message) => activeUserIds.add(message.memberId));
+
+		// Add users who added reactions in the time period
+		const reactions = await ctx.db
+			.query('reactions')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('_creationTime'), startDate),
+					q.lte(q.field('_creationTime'), endDate)
+				)
+			)
+			.collect();
+		reactions.forEach((reaction) => activeUserIds.add(reaction.memberId));
+
+		// Add users who had channel sessions in the time period
+		const channelSessions = await ctx.db
+			.query('channelSessions')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('startTime'), startDate),
+					q.lte(q.field('startTime'), endDate)
+				)
+			)
+			.collect();
+		channelSessions.forEach((session) => activeUserIds.add(session.memberId));
+
+		// Add users who had any user activities in the time period
+		const userActivities = await ctx.db
+			.query('userActivities')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('timestamp'), startDate),
+					q.lte(q.field('timestamp'), endDate)
+				)
+			)
+			.collect();
+		userActivities.forEach((activity) => activeUserIds.add(activity.memberId));
+
+		// ALSO add currently logged-in users (users who are online right now)
 		// Get all user IDs from workspace members
 		const memberUserIds = members.map(member => member.userId);
 
@@ -356,11 +498,8 @@ export const getWorkspaceOverview = query({
 			)
 			.collect();
 
-		// Filter for users who are currently online
-		// Consider users active if they have status 'online' and were seen within the last 2 minutes
+		// Add currently online users to active users
 		const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
-		const activeUserIds = new Set<Id<'users'>>();
-
 		userStatuses.forEach((status) => {
 			// Check if this user is a member of the workspace
 			if (memberUserIds.includes(status.userId)) {
@@ -368,13 +507,36 @@ export const getWorkspaceOverview = query({
 				const effectiveStatus = status.status === 'online' && isRecentlyActive ? 'online' : 'offline';
 
 				if (effectiveStatus === 'online') {
-					activeUserIds.add(status.userId);
+					// Find the member ID for this user
+					const member = members.find(m => m.userId === status.userId);
+					if (member) {
+						activeUserIds.add(member._id);
+					}
 				}
 			}
 		});
 
 		const activeUserCount = activeUserIds.size;
 		const activeUserPercentage = members.length > 0 ? Math.round((activeUserCount / members.length) * 100) : 0;
+
+		// Get active user details for tooltip
+		const activeUserDetails = await Promise.all(
+			Array.from(activeUserIds).map(async (memberId) => {
+				const member = await ctx.db.get(memberId);
+				if (!member) return null;
+
+				const user = await ctx.db.get(member.userId);
+				return {
+					memberId,
+					userId: member.userId,
+					name: user?.name || 'Unknown User',
+					email: user?.email || '',
+				};
+			})
+		);
+
+		// Filter out null values
+		const validActiveUsers = activeUserDetails.filter(user => user !== null);
 
 		// Get message activity by day
 		const messagesByDay = Array.from({ length: 7 }, (_, i) => {
@@ -436,6 +598,7 @@ export const getWorkspaceOverview = query({
 			totalMembers: members.length,
 			activeUserCount,
 			activeUserPercentage,
+			activeUsers: validActiveUsers,
 			totalChannels: channels.length,
 			totalMessages: messages.length,
 			totalTasks: tasks.length,
