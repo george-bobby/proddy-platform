@@ -108,7 +108,7 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     const isEmpty =
       quill
         .getText()
-        .replace(/<(.|\n)*?>/g, '')
+        .replace(/<[^>]*>/g, '')
         .trim().length === 0;
 
     setIsEmpty(isEmpty);

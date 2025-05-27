@@ -137,7 +137,7 @@ const Editor = ({
 
                 const addedImage = imageElementRef.current.files?.[0] || null;
 
-                const isEmpty = !addedImage && text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
+                const isEmpty = !addedImage && text.replace(/<[^>]*>/g, '').trim().length === 0;
 
                 if (isEmpty) return;
 
@@ -265,7 +265,7 @@ const Editor = ({
 
   const isIOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);
 
-  const isEmpty = !image && text.replace(/<(.|\n)*?>/g, '').trim().length === 0;
+  const isEmpty = !image && text.replace(/<[^>]*>/g, '').trim().length === 0;
 
   const handleCalendarSelect = (date: Date, time?: string) => {
     const quill = quillRef.current;
