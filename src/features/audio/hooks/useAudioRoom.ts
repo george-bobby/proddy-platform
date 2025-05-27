@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-	StreamVideoClient,
-	User,
-	OwnCapability,
-} from '@stream-io/video-react-sdk';
+import { StreamVideoClient, OwnCapability } from '@stream-io/video-react-sdk';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 
 // Stream API credentials from environment variables

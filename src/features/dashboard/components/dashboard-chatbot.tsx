@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader, Info, AlertCircle, Trash2, Calendar, FileText, Kanban, CheckSquare, MessageSquare, ExternalLink, Github, Mail } from 'lucide-react';
+import { Bot, Send, Loader, Info, Trash2, Calendar, FileText, Kanban, CheckSquare, MessageSquare, ExternalLink, Github, Mail } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useQuery, useMutation, useAction } from 'convex/react';
