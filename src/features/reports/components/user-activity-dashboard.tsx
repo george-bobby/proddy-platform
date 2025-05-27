@@ -39,7 +39,13 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
     } : 'skip'
   );
 
-  const isLoading = userActivityResult === undefined;
+  // Fetch current active users count (currently logged in users)
+  const activeUsersData = useQuery(
+    api.analytics.getActiveUsersCount,
+    workspaceId ? { workspaceId } : 'skip'
+  );
+
+  const isLoading = userActivityResult === undefined || activeUsersData === undefined;
   const userActivity = userActivityResult || [];
 
   if (isLoading) {
@@ -85,7 +91,11 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
   const totalMessages = userActivity.reduce((sum, item) => sum + item.messageCount, 0);
   const totalReactions = userActivity.reduce((sum, item) => sum + item.reactionCount, 0);
   const totalTimeSpent = userActivity.reduce((sum, item) => sum + item.totalTimeSpent, 0);
-  const activeUsers = userActivity.filter(item => item.messageCount > 0).length;
+
+  // Use current active users count from dedicated query (currently logged in users)
+  const activeUsers = activeUsersData?.activeUserCount || 0;
+  const totalMembers = activeUsersData?.totalMembers || userActivity.length;
+  const activeUserPercentage = activeUsersData?.activeUserPercentage || 0;
 
   return (
     <div className="space-y-6">
@@ -128,7 +138,7 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
               <div className="text-2xl font-bold">{activeUsers}</div>
             </div>
             <CardDescription>
-              out of {userActivity.length} total users
+              {activeUserPercentage}% of {totalMembers} total users
             </CardDescription>
           </CardContent>
         </Card>
@@ -143,7 +153,7 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
               <div className="text-2xl font-bold">{totalMessages}</div>
             </div>
             <CardDescription>
-              {(totalMessages / userActivity.length).toFixed(1)} per user
+              {totalMembers > 0 ? (totalMessages / totalMembers).toFixed(1) : '0'} per user
             </CardDescription>
           </CardContent>
         </Card>
@@ -158,7 +168,7 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
               <div className="text-2xl font-bold">{totalReactions}</div>
             </div>
             <CardDescription>
-              {(totalReactions / userActivity.length).toFixed(1)} per user
+              {totalMembers > 0 ? (totalReactions / totalMembers).toFixed(1) : '0'} per user
             </CardDescription>
           </CardContent>
         </Card>
@@ -173,7 +183,7 @@ export const UserActivityDashboard = ({ workspaceId }: UserActivityDashboardProp
               <div className="text-2xl font-bold">{formatDuration(totalTimeSpent, 'short')}</div>
             </div>
             <CardDescription>
-              {formatDuration(totalTimeSpent / activeUsers, 'short')} per active user
+              {activeUsers > 0 ? formatDuration(totalTimeSpent / activeUsers, 'short') : '0s'} per active user
             </CardDescription>
           </CardContent>
         </Card>

@@ -60,6 +60,12 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
     } : 'skip'
   );
 
+  // Fetch current active users count for real-time updates
+  const activeUsersData = useQuery(
+    api.analytics.getActiveUsersCount,
+    workspaceId ? { workspaceId } : 'skip'
+  );
+
   // Fetch previous period data for comparison
   const previousOverviewData = useQuery(
     api.analytics.getWorkspaceOverview,
@@ -90,7 +96,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
     } : 'skip'
   );
 
-  const isLoading = !overviewData || !messageData || !taskData;
+  const isLoading = !overviewData || !messageData || !taskData || !activeUsersData;
 
   // Calculate trends (percentage change from previous period)
   const trends = useMemo(() => {
@@ -192,7 +198,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <Users className="h-5 w-5 text-secondary mr-2" />
-                <div className="text-2xl font-bold">{overviewData.activeUserCount}</div>
+                <div className="text-2xl font-bold">{activeUsersData?.activeUserCount || 0}</div>
               </div>
               {trends && (
                 <div className={`flex items-center text-sm font-medium ${trends.activeUsers >= 0 ? 'text-green-500' : 'text-red-500'}`}>
@@ -202,7 +208,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
               )}
             </div>
             <CardDescription>
-              out of {overviewData.totalMembers} total users
+              {activeUsersData?.activeUserPercentage || 0}% of {activeUsersData?.totalMembers || 0} total users
             </CardDescription>
           </CardContent>
         </Card>

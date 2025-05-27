@@ -226,6 +226,62 @@ export const getUserActivitySummary = query({
 	},
 });
 
+// Get current active users count for a workspace
+export const getActiveUsersCount = query({
+	args: {
+		workspaceId: v.id('workspaces'),
+	},
+	handler: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) throw new Error('Unauthorized');
+
+		// Get all members in the workspace
+		const members = await ctx.db
+			.query('members')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.collect();
+
+		// Get all user IDs from workspace members
+		const memberUserIds = members.map(member => member.userId);
+
+		// Get current login status for all workspace members
+		const userStatuses = await ctx.db
+			.query('history')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.collect();
+
+		// Filter for users who are currently online
+		// Consider users active if they have status 'online' and were seen within the last 2 minutes
+		const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+		const activeUserIds = new Set<Id<'users'>>();
+
+		userStatuses.forEach((status) => {
+			// Check if this user is a member of the workspace
+			if (memberUserIds.includes(status.userId)) {
+				const isRecentlyActive = status.lastSeen > twoMinutesAgo;
+				const effectiveStatus = status.status === 'online' && isRecentlyActive ? 'online' : 'offline';
+
+				if (effectiveStatus === 'online') {
+					activeUserIds.add(status.userId);
+				}
+			}
+		});
+
+		const activeUserCount = activeUserIds.size;
+		const activeUserPercentage = members.length > 0 ? Math.round((activeUserCount / members.length) * 100) : 0;
+
+		return {
+			totalMembers: members.length,
+			activeUserCount,
+			activeUserPercentage,
+		};
+	},
+});
+
 // Get workspace overview stats
 export const getWorkspaceOverview = query({
 	args: {
@@ -288,56 +344,34 @@ export const getWorkspaceOverview = query({
 		// Count completed tasks
 		const completedTasks = tasks.filter((task) => task.completed).length;
 
-		// Count active users (users who have any activity: messages, reactions, channel sessions, or user activities)
-		const activeUserIds = new Set<Id<'members'>>();
+		// Get current active users count using the dedicated query logic
+		// Get all user IDs from workspace members
+		const memberUserIds = members.map(member => member.userId);
 
-		// Add users who sent messages
-		messages.forEach((message) => activeUserIds.add(message.memberId));
-
-		// Add users who added reactions
-		const reactions = await ctx.db
-			.query('reactions')
+		// Get current login status for all workspace members
+		const userStatuses = await ctx.db
+			.query('history')
 			.withIndex('by_workspace_id', (q) =>
 				q.eq('workspaceId', args.workspaceId)
 			)
-			.filter((q) =>
-				q.and(
-					q.gte(q.field('_creationTime'), startDate),
-					q.lte(q.field('_creationTime'), endDate)
-				)
-			)
 			.collect();
-		reactions.forEach((reaction) => activeUserIds.add(reaction.memberId));
 
-		// Add users who had channel sessions
-		const channelSessions = await ctx.db
-			.query('channelSessions')
-			.withIndex('by_workspace_id', (q) =>
-				q.eq('workspaceId', args.workspaceId)
-			)
-			.filter((q) =>
-				q.and(
-					q.gte(q.field('startTime'), startDate),
-					q.lte(q.field('startTime'), endDate)
-				)
-			)
-			.collect();
-		channelSessions.forEach((session) => activeUserIds.add(session.memberId));
+		// Filter for users who are currently online
+		// Consider users active if they have status 'online' and were seen within the last 2 minutes
+		const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+		const activeUserIds = new Set<Id<'users'>>();
 
-		// Add users who had any user activities
-		const userActivities = await ctx.db
-			.query('userActivities')
-			.withIndex('by_workspace_id', (q) =>
-				q.eq('workspaceId', args.workspaceId)
-			)
-			.filter((q) =>
-				q.and(
-					q.gte(q.field('timestamp'), startDate),
-					q.lte(q.field('timestamp'), endDate)
-				)
-			)
-			.collect();
-		userActivities.forEach((activity) => activeUserIds.add(activity.memberId));
+		userStatuses.forEach((status) => {
+			// Check if this user is a member of the workspace
+			if (memberUserIds.includes(status.userId)) {
+				const isRecentlyActive = status.lastSeen > twoMinutesAgo;
+				const effectiveStatus = status.status === 'online' && isRecentlyActive ? 'online' : 'offline';
+
+				if (effectiveStatus === 'online') {
+					activeUserIds.add(status.userId);
+				}
+			}
+		});
 
 		const activeUserCount = activeUserIds.size;
 		const activeUserPercentage = members.length > 0 ? Math.round((activeUserCount / members.length) * 100) : 0;
