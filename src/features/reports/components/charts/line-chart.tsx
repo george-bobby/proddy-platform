@@ -51,10 +51,14 @@ export const LineChart = ({
   const adjustedMinValue = Math.max(0, minValue - range * paddingFactor);
   const adjustedRange = adjustedMaxValue - adjustedMinValue;
 
-  // Create points for the line
+  // Create points for the line with internal margins
+  const chartMargin = 5; // 5% margin on each side
+  const chartWidth = 100 - (chartMargin * 2);
+  const chartHeight = 100 - (chartMargin * 2);
+
   const points = data.map((item, index) => {
-    const x = (index / (data.length - 1)) * 100;
-    const y = 100 - ((item.value - adjustedMinValue) / adjustedRange) * 100;
+    const x = chartMargin + (index / (data.length - 1)) * chartWidth;
+    const y = chartMargin + (100 - chartMargin - ((item.value - adjustedMinValue) / adjustedRange) * chartHeight);
     return { x, y, ...item, index };
   });
 
@@ -67,30 +71,30 @@ export const LineChart = ({
 
   // Create the path for the area under the line
   const areaPath = `
-    ${linePath} 
-    L ${points[points.length - 1].x} 100 
-    L ${points[0].x} 100 
+    ${linePath}
+    L ${points[points.length - 1].x} ${100 - chartMargin}
+    L ${points[0].x} ${100 - chartMargin}
     Z
   `;
 
   return (
     <div className={cn("w-full", className)}>
-      <div className="relative" style={{ height: `${height}px` }}>
+      <div className="relative overflow-hidden px-4 py-2" style={{ height: `${height}px` }}>
         <svg
           viewBox="0 0 100 100"
-          className="w-full h-full overflow-visible"
+          className="w-full h-full"
           preserveAspectRatio="none"
         >
           {/* Grid lines */}
           {showGrid && (
             <>
               {/* Horizontal grid lines */}
-              {[0, 25, 50, 75, 100].map((y) => (
+              {[chartMargin, 25, 50, 75, 100 - chartMargin].map((y) => (
                 <line
                   key={`h-${y}`}
-                  x1="0"
+                  x1={chartMargin}
                   y1={y}
-                  x2="100"
+                  x2={100 - chartMargin}
                   y2={y}
                   className="stroke-muted stroke-[0.5]"
                 />
@@ -101,9 +105,9 @@ export const LineChart = ({
                 <line
                   key={`v-${point.index}`}
                   x1={point.x}
-                  y1="0"
+                  y1={chartMargin}
                   x2={point.x}
-                  y2="100"
+                  y2={100 - chartMargin}
                   className="stroke-muted stroke-[0.5]"
                 />
               ))}
@@ -151,7 +155,7 @@ export const LineChart = ({
                 {isHovered && (
                   <>
                     {/* Tooltip */}
-                    <g transform={`translate(${point.x}, ${point.y - 10})`}>
+                    <g transform={`translate(${Math.max(chartMargin + 15, Math.min(100 - chartMargin - 15, point.x))}, ${Math.max(chartMargin + 20, point.y - 10)})`}>
                       <rect
                         x="-15"
                         y="-20"
@@ -173,9 +177,9 @@ export const LineChart = ({
                     {/* Vertical guide line */}
                     <line
                       x1={point.x}
-                      y1="0"
+                      y1={chartMargin}
                       x2={point.x}
-                      y2="100"
+                      y2={100 - chartMargin}
                       className="stroke-secondary/30 stroke-[0.5] stroke-dashed"
                     />
                   </>
