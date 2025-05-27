@@ -208,6 +208,7 @@ const CalendarPage = () => {
 
   return (
     <div className="flex h-full flex-col">
+      {/* Fixed toolbar at top */}
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -218,164 +219,168 @@ const CalendarPage = () => {
           <span className="truncate">Calendar</span>
         </Button>
       </WorkspaceToolbar>
-      <div className="flex h-full flex-col bg-white">
-        <CalendarHeader
-          currentDate={currentDate}
-          onPreviousMonth={handlePreviousMonth}
-          onNextMonth={handleNextMonth}
-          filterOptions={filterOptions}
-          onFilterChange={handleFilterChange}
-          eventCounts={eventCounts}
-        />
-        <div className="flex-1 overflow-auto p-4">
-          {isLoading ? (
-            <div className="flex h-full items-center justify-center">
-              <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="h-full rounded-md border">
-              {/* Calendar header */}
-              <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">
-                {weekdays.map((day) => (
-                  <div
-                    key={day}
-                    className="bg-background p-2 text-xs font-medium text-muted-foreground"
-                  >
-                    {day}
-                  </div>
-                ))}
+
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-auto">
+        <div className="flex h-full flex-col bg-white">
+          <CalendarHeader
+            currentDate={currentDate}
+            onPreviousMonth={handlePreviousMonth}
+            onNextMonth={handleNextMonth}
+            filterOptions={filterOptions}
+            onFilterChange={handleFilterChange}
+            eventCounts={eventCounts}
+          />
+          <div className="flex-1 overflow-auto p-4">
+            {isLoading ? (
+              <div className="flex h-full items-center justify-center">
+                <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-              {/* Calendar grid */}
-              <div className="grid h-[calc(100%-1rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
-                {weeks.flat().map((dayObj, index) => (
-                  <div
-                    key={index}
-                    className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
-                      }`}
-                  >
-                    {dayObj.day && (
-                      <>
-                        <div className={`absolute right-1 top-1 text-xs ${dayObj.day &&
-                          new Date().getDate() === dayObj.day &&
-                          new Date().getMonth() === currentDate.getMonth() &&
-                          new Date().getFullYear() === currentDate.getFullYear()
-                          ? 'h-5 w-5 flex items-center justify-center rounded-full bg-primary text-white -mt-0.5 -mr-0.5'
-                          : ''
-                          }`}>
-                          {dayObj.day}
-                        </div>
-                        {dayObj.events && dayObj.events.length > 0 && (
-                          <div className="mt-4 flex max-h-[80px] flex-col gap-1 overflow-y-auto">
-                            {dayObj.events.map((event) => (
-                              <Link
-                                href={
-                                  event.type === 'board-card' && event.boardCard
-                                    ? `/workspace/${workspaceId}/channel/${event.boardCard.channelId}/board`
-                                    : event.type === 'task' && event.task
-                                      ? `/workspace/${workspaceId}/tasks`
-                                      : event.message?.channelId
-                                        ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
-                                        : event.message?.conversationId
-                                          ? `/workspace/${workspaceId}/member/${event.memberId}`
-                                          : '#'
-                                }
-                                key={event._id}
-                                className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
-                                  ? 'bg-purple-100 hover:bg-purple-200 border-l-2 border-purple-500'
-                                  : event.type === 'task'
-                                    ? 'bg-green-100 hover:bg-green-200 border-l-2 border-green-500'
-                                    : 'bg-blue-100 hover:bg-blue-200 border-l-2 border-blue-500'
-                                  }`}
-                                title={
-                                  event.type === 'board-card' && event.boardCard
-                                    ? `${event.boardCard.title} (${event.boardCard.listTitle})`
-                                    : event.type === 'task' && event.task
-                                      ? `${event.task.title}${event.task.categoryName ? ` (${event.task.categoryName})` : ''}`
-                                      : event?.message?.body
-                                        ? JSON.parse(event.message.body).ops[0].insert
-                                        : ''
-                                }
-                              >
-                                {event.time && (
-                                  <span className="font-bold">{event.time}</span>
-                                )}
-                                <div className="truncate">
-                                  {event.type === 'board-card' && event.boardCard ? (
-                                    <>
-                                      <div className="font-medium">{event.boardCard.title}</div>
-                                      {event.type === 'board-card' && 'boardCard' in event && event.boardCard && event.boardCard.description && (
-                                        <div className="text-[8px] text-muted-foreground truncate">
-                                          {event.boardCard.description}
-                                        </div>
-                                      )}
-                                    </>
-                                  ) : event.type === 'task' && event.task ? (
-                                    <>
-                                      <div className={`font-medium ${event.task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                                        {event.task.title}
-                                      </div>
-                                      {event.task.description && (
-                                        <div className="text-[8px] text-muted-foreground truncate">
-                                          {event.task.description}
-                                        </div>
-                                      )}
-                                    </>
-                                  ) : event?.message?.body ? (
-                                    <Renderer
-                                      value={event.message.body}
-                                      calendarEvent={event.message.calendarEvent}
-                                    />
-                                  ) : (
-                                    'Event'
-                                  )}
-                                </div>
-                                <div className="text-[8px] text-muted-foreground flex items-center justify-between">
-                                  <span>
-                                    {event.type === 'board-card' ? (
-                                      <>Board Card in {event.boardCard?.listTitle}</>
-                                    ) : event.type === 'task' ? (
-                                      <>Task {event.task?.categoryName ? `in ${event.task.categoryName}` : ''}</>
-                                    ) : (
-                                      <>Calendar Event by {event?.user?.name || 'Unknown'}</>
-                                    )}
-                                  </span>
-                                  {event.type === 'board-card' && event.boardCard?.priority && (
-                                    <span className={`text-[8px] px-1 rounded ${event.boardCard.priority === 'high'
-                                      ? 'bg-purple-200 text-purple-700'
-                                      : event.boardCard.priority === 'medium'
-                                        ? 'bg-purple-100 text-purple-600'
-                                        : 'bg-purple-50 text-purple-500'
-                                      }`}>
-                                      {event.boardCard.priority}
-                                    </span>
-                                  )}
-                                  {event.type === 'task' && event.task?.priority && (
-                                    <span className={`text-[8px] px-1 rounded ${event.task.priority === 'high'
-                                      ? 'bg-green-200 text-green-700'
-                                      : event.task.priority === 'medium'
-                                        ? 'bg-green-100 text-green-600'
-                                        : 'bg-green-50 text-green-500'
-                                      }`}>
-                                      {event.task.priority}
-                                    </span>
-                                  )}
-                                  {event.type === 'task' && event.task?.completed && (
-                                    <span className="text-[8px] px-1 rounded bg-green-200 text-green-700 font-medium">
-                                      Completed
-                                    </span>
-                                  )}
-                                </div>
-                              </Link>
-                            ))}
+            ) : (
+              <div className="h-full rounded-md border">
+                {/* Calendar header */}
+                <div className="grid grid-cols-7 gap-px border-b bg-muted text-center">
+                  {weekdays.map((day) => (
+                    <div
+                      key={day}
+                      className="bg-background p-2 text-xs font-medium text-muted-foreground"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                {/* Calendar grid */}
+                <div className="grid h-[calc(100%-1rem)] grid-cols-7 grid-rows-6 gap-px bg-muted">
+                  {weeks.flat().map((dayObj, index) => (
+                    <div
+                      key={index}
+                      className={`relative bg-background p-1 ${dayObj.isCurrentMonth ? '' : 'text-muted-foreground opacity-50'
+                        }`}
+                    >
+                      {dayObj.day && (
+                        <>
+                          <div className={`absolute right-1 top-1 text-xs ${dayObj.day &&
+                            new Date().getDate() === dayObj.day &&
+                            new Date().getMonth() === currentDate.getMonth() &&
+                            new Date().getFullYear() === currentDate.getFullYear()
+                            ? 'h-5 w-5 flex items-center justify-center rounded-full bg-primary text-white -mt-0.5 -mr-0.5'
+                            : ''
+                            }`}>
+                            {dayObj.day}
                           </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
+                          {dayObj.events && dayObj.events.length > 0 && (
+                            <div className="mt-4 flex max-h-[80px] flex-col gap-1 overflow-y-auto">
+                              {dayObj.events.map((event) => (
+                                <Link
+                                  href={
+                                    event.type === 'board-card' && event.boardCard
+                                      ? `/workspace/${workspaceId}/channel/${event.boardCard.channelId}/board`
+                                      : event.type === 'task' && event.task
+                                        ? `/workspace/${workspaceId}/tasks`
+                                        : event.message?.channelId
+                                          ? `/workspace/${workspaceId}/channel/${event.message.channelId}`
+                                          : event.message?.conversationId
+                                            ? `/workspace/${workspaceId}/member/${event.memberId}`
+                                            : '#'
+                                  }
+                                  key={event._id}
+                                  className={`block rounded-sm p-1 text-[10px] leading-tight transition-colors ${event.type === 'board-card'
+                                    ? 'bg-purple-100 hover:bg-purple-200 border-l-2 border-purple-500'
+                                    : event.type === 'task'
+                                      ? 'bg-green-100 hover:bg-green-200 border-l-2 border-green-500'
+                                      : 'bg-blue-100 hover:bg-blue-200 border-l-2 border-blue-500'
+                                    }`}
+                                  title={
+                                    event.type === 'board-card' && event.boardCard
+                                      ? `${event.boardCard.title} (${event.boardCard.listTitle})`
+                                      : event.type === 'task' && event.task
+                                        ? `${event.task.title}${event.task.categoryName ? ` (${event.task.categoryName})` : ''}`
+                                        : event?.message?.body
+                                          ? JSON.parse(event.message.body).ops[0].insert
+                                          : ''
+                                  }
+                                >
+                                  {event.time && (
+                                    <span className="font-bold">{event.time}</span>
+                                  )}
+                                  <div className="truncate">
+                                    {event.type === 'board-card' && event.boardCard ? (
+                                      <>
+                                        <div className="font-medium">{event.boardCard.title}</div>
+                                        {event.type === 'board-card' && 'boardCard' in event && event.boardCard && event.boardCard.description && (
+                                          <div className="text-[8px] text-muted-foreground truncate">
+                                            {event.boardCard.description}
+                                          </div>
+                                        )}
+                                      </>
+                                    ) : event.type === 'task' && event.task ? (
+                                      <>
+                                        <div className={`font-medium ${event.task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                          {event.task.title}
+                                        </div>
+                                        {event.task.description && (
+                                          <div className="text-[8px] text-muted-foreground truncate">
+                                            {event.task.description}
+                                          </div>
+                                        )}
+                                      </>
+                                    ) : event?.message?.body ? (
+                                      <Renderer
+                                        value={event.message.body}
+                                        calendarEvent={event.message.calendarEvent}
+                                      />
+                                    ) : (
+                                      'Event'
+                                    )}
+                                  </div>
+                                  <div className="text-[8px] text-muted-foreground flex items-center justify-between">
+                                    <span>
+                                      {event.type === 'board-card' ? (
+                                        <>Board Card in {event.boardCard?.listTitle}</>
+                                      ) : event.type === 'task' ? (
+                                        <>Task {event.task?.categoryName ? `in ${event.task.categoryName}` : ''}</>
+                                      ) : (
+                                        <>Calendar Event by {event?.user?.name || 'Unknown'}</>
+                                      )}
+                                    </span>
+                                    {event.type === 'board-card' && event.boardCard?.priority && (
+                                      <span className={`text-[8px] px-1 rounded ${event.boardCard.priority === 'high'
+                                        ? 'bg-purple-200 text-purple-700'
+                                        : event.boardCard.priority === 'medium'
+                                          ? 'bg-purple-100 text-purple-600'
+                                          : 'bg-purple-50 text-purple-500'
+                                        }`}>
+                                        {event.boardCard.priority}
+                                      </span>
+                                    )}
+                                    {event.type === 'task' && event.task?.priority && (
+                                      <span className={`text-[8px] px-1 rounded ${event.task.priority === 'high'
+                                        ? 'bg-green-200 text-green-700'
+                                        : event.task.priority === 'medium'
+                                          ? 'bg-green-100 text-green-600'
+                                          : 'bg-green-50 text-green-500'
+                                        }`}>
+                                        {event.task.priority}
+                                      </span>
+                                    )}
+                                    {event.type === 'task' && event.task?.completed && (
+                                      <span className="text-[8px] px-1 rounded bg-green-200 text-green-700 font-medium">
+                                        Completed
+                                      </span>
+                                    )}
+                                  </div>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
