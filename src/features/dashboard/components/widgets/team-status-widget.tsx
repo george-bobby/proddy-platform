@@ -63,7 +63,7 @@ export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
         ...member,
         status: status?.status || '',
         statusEmoji: '',
-        isOnline: status ? true : false,
+        isOnline: status?.status === 'online',
         lastActive: status?.lastSeen || member?._creationTime || Date.now(),
         // Ensure user object exists
         user: member?.user || { name: 'Unknown User', image: '' }

@@ -288,9 +288,59 @@ export const getWorkspaceOverview = query({
 		// Count completed tasks
 		const completedTasks = tasks.filter((task) => task.completed).length;
 
-		// Count active users (users who sent at least one message)
-		const activeUserIds = new Set(messages.map((message) => message.memberId));
+		// Count active users (users who have any activity: messages, reactions, channel sessions, or user activities)
+		const activeUserIds = new Set<Id<'members'>>();
+
+		// Add users who sent messages
+		messages.forEach((message) => activeUserIds.add(message.memberId));
+
+		// Add users who added reactions
+		const reactions = await ctx.db
+			.query('reactions')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('_creationTime'), startDate),
+					q.lte(q.field('_creationTime'), endDate)
+				)
+			)
+			.collect();
+		reactions.forEach((reaction) => activeUserIds.add(reaction.memberId));
+
+		// Add users who had channel sessions
+		const channelSessions = await ctx.db
+			.query('channelSessions')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('startTime'), startDate),
+					q.lte(q.field('startTime'), endDate)
+				)
+			)
+			.collect();
+		channelSessions.forEach((session) => activeUserIds.add(session.memberId));
+
+		// Add users who had any user activities
+		const userActivities = await ctx.db
+			.query('userActivities')
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.filter((q) =>
+				q.and(
+					q.gte(q.field('timestamp'), startDate),
+					q.lte(q.field('timestamp'), endDate)
+				)
+			)
+			.collect();
+		userActivities.forEach((activity) => activeUserIds.add(activity.memberId));
+
 		const activeUserCount = activeUserIds.size;
+		const activeUserPercentage = members.length > 0 ? Math.round((activeUserCount / members.length) * 100) : 0;
 
 		// Get message activity by day
 		const messagesByDay = Array.from({ length: 7 }, (_, i) => {
@@ -351,6 +401,7 @@ export const getWorkspaceOverview = query({
 		return {
 			totalMembers: members.length,
 			activeUserCount,
+			activeUserPercentage,
 			totalChannels: channels.length,
 			totalMessages: messages.length,
 			totalTasks: tasks.length,

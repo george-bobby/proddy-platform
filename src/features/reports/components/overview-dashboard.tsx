@@ -225,9 +225,7 @@ export const OverviewDashboard = ({ workspaceId }: OverviewDashboardProps) => {
               )}
             </div>
             <CardDescription>
-              {overviewData.activeUserCount > 0
-                ? Math.round(overviewData.totalMessages / overviewData.activeUserCount)
-                : 0} per user
+              {overviewData.activeUserPercentage}% of {overviewData.totalMembers} total users
             </CardDescription>
           </CardContent>
         </Card>
