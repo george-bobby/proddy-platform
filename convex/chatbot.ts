@@ -186,7 +186,7 @@ export const clearChatHistory = mutation({
 	},
 });
 
-// Generate a response using RAG only
+// Generate a response using RAG and external tools (GitHub via Composio)
 export const generateResponse = action({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -201,7 +201,104 @@ export const generateResponse = action({
 				role: 'user',
 			});
 
-			// 2. Search for relevant content
+			// 2. Check if the query is about GitHub actions
+			const isGitHubQuery =
+				/\b(github|issue|issues|create issue|bug report|feature request|repository|repo)\b/i.test(
+					args.message
+				);
+
+			console.log('[Chatbot] Message:', args.message);
+			console.log('[Chatbot] GitHub query test result:', isGitHubQuery);
+
+			// If it's a GitHub query, route to GitHub API
+			if (isGitHubQuery) {
+				console.log('[Chatbot] Detected GitHub query, routing to GitHub API');
+
+				// Get workspace context for GitHub integration
+				const workspace = await ctx.runQuery(api.workspaces.getById, {
+					id: args.workspaceId,
+				});
+
+				// Search for relevant workspace content to provide context
+				const searchResults = await ctx.runQuery(api.search.searchAll, {
+					workspaceId: args.workspaceId,
+					query: args.message,
+					limit: 5,
+				});
+
+				// Prepare workspace context
+				const workspaceContext = `
+Workspace: ${workspace?.name || 'Proddy'}
+Recent relevant content:
+${searchResults.map((result) => `[${result.type.toUpperCase()}] ${result.text.substring(0, 200)}`).join('\n')}
+				`.trim();
+
+				// Call GitHub API
+				const baseUrl =
+					process.env.NODE_ENV === 'development'
+						? 'http://localhost:3000'
+						: 'https://proddy.tech';
+				const githubApiUrl = `${baseUrl}/api/github`;
+
+				try {
+					const githubResponse = await fetch(githubApiUrl, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							message: args.message,
+							workspaceContext,
+						}),
+					});
+
+					if (!githubResponse.ok) {
+						throw new Error(`GitHub API error: ${githubResponse.status}`);
+					}
+
+					const githubData = await githubResponse.json();
+
+					if (githubData.success) {
+						// Add GitHub response to history
+						await ctx.runMutation(api.chatbot.addMessage, {
+							workspaceId: args.workspaceId,
+							content: githubData.response,
+							role: 'assistant',
+							actions: githubData.hasGitHubAction
+								? [
+										{
+											label: 'View on GitHub',
+											type: 'github',
+											url: 'https://github.com',
+										},
+									]
+								: undefined,
+						});
+
+						return {
+							response: githubData.response,
+							sources: [],
+							actions: githubData.hasGitHubAction
+								? [
+										{
+											label: 'View on GitHub',
+											type: 'github',
+											url: 'https://github.com',
+										},
+									]
+								: undefined,
+						};
+					} else {
+						throw new Error(githubData.error || 'GitHub API returned an error');
+					}
+				} catch (githubError) {
+					console.error('[Chatbot] GitHub API error:', githubError);
+					// Fall back to regular RAG response
+					console.log('[Chatbot] Falling back to regular RAG response');
+				}
+			}
+
+			// 3. Search for relevant content
 			// Check if the query is about meetings or events
 			const isMeetingQuery =
 				/\b(meeting|meetings|event|events|calendar|schedule|appointment|appointments|today['']s events)\b/i.test(

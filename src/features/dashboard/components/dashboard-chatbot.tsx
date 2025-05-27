@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, Loader, Info, AlertCircle, Trash2, Calendar, FileText, Kanban, CheckSquare, MessageSquare, ExternalLink } from 'lucide-react';
+import { Bot, Send, Loader, Info, AlertCircle, Trash2, Calendar, FileText, Kanban, CheckSquare, MessageSquare, ExternalLink, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -246,6 +246,8 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
         return <CheckSquare className="h-4 w-4" />;
       case 'message':
         return <MessageSquare className="h-4 w-4" />;
+      case 'github':
+        return <Github className="h-4 w-4" />;
       default:
         return <ExternalLink className="h-4 w-4" />;
     }
