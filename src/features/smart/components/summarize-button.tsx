@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
-import { useMessageSelection } from '@/features/ai/contexts/message-selection-context';
+import { useMessageSelection } from '@/features/smart/contexts/message-selection-context';
 import { api } from "@/../convex/_generated/api";
 import { useQuery } from "convex/react";
 import { SummaryModal } from './summary-modal';

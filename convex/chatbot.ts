@@ -4,6 +4,54 @@ import { api } from './_generated/api';
 import { Id } from './_generated/dataModel';
 import { getAuthUserId } from '@convex-dev/auth/server';
 
+// Helper function to detect assistant type based on message content
+function detectAssistantType(message: string): string {
+	// GitHub-related queries
+	if (
+		/\b(github|create github issue|bug report|feature request|repository|repo)\b/i.test(
+			message
+		)
+	) {
+		return 'github';
+	}
+
+	// Gmail/Email-related queries
+	if (/\b(gmail|email|send email|inbox|draft|compose|mail)\b/i.test(message)) {
+		return 'gmail';
+	}
+
+	// Calendar/meeting-related queries
+	if (
+		/\b(meeting|meetings|event|events|calendar|schedule|appointment|appointments|today['']s events)\b/i.test(
+			message
+		)
+	) {
+		return 'calendar';
+	}
+
+	// Notes-related queries
+	if (
+		/\b(note|notes|document|documentation|write|create note|find note)\b/i.test(
+			message
+		)
+	) {
+		return 'notes';
+	}
+
+	// Tasks-related queries
+	if (/\b(task|tasks|todo|assignment|deadline|project)\b/i.test(message)) {
+		return 'tasks';
+	}
+
+	// Board/cards-related queries
+	if (/\b(board|card|cards|kanban|list|column)\b/i.test(message)) {
+		return 'board';
+	}
+
+	// Default to general chatbot
+	return 'chatbot';
+}
+
 // Define types for chat messages and responses
 type Source = {
 	id: string;
@@ -201,20 +249,17 @@ export const generateResponse = action({
 				role: 'user',
 			});
 
-			// 2. Check if the query is about GitHub actions
-			const isGitHubQuery =
-				/\b(github|issue|issues|create issue|bug report|feature request|repository|repo)\b/i.test(
-					args.message
-				);
+			// 2. Detect assistant type based on query content
+			const assistantType = detectAssistantType(args.message);
 
 			console.log('[Chatbot] Message:', args.message);
-			console.log('[Chatbot] GitHub query test result:', isGitHubQuery);
+			console.log('[Chatbot] Detected assistant type:', assistantType);
 
-			// If it's a GitHub query, route to GitHub API
-			if (isGitHubQuery) {
-				console.log('[Chatbot] Detected GitHub query, routing to GitHub API');
+			// If it's a specialized assistant query, route to assistant API
+			if (assistantType !== 'chatbot') {
+				console.log(`[Chatbot] Routing to ${assistantType} assistant`);
 
-				// Get workspace context for GitHub integration
+				// Get workspace context for assistant integration
 				const workspace = await ctx.runQuery(api.workspaces.getById, {
 					id: args.workspaceId,
 				});
@@ -233,66 +278,51 @@ Recent relevant content:
 ${searchResults.map((result) => `[${result.type.toUpperCase()}] ${result.text.substring(0, 200)}`).join('\n')}
 				`.trim();
 
-				// Call GitHub API
-				const baseUrl =
-					process.env.NODE_ENV === 'development'
-						? 'http://localhost:3000'
-						: 'https://proddy.tech';
-				const githubApiUrl = `${baseUrl}/api/github`;
+				// Call Assistant API
+				const baseUrl = 'https://proddy.tech';
+				const assistantApiUrl = `${baseUrl}/api/assistant`;
 
 				try {
-					const githubResponse = await fetch(githubApiUrl, {
+					const assistantResponse = await fetch(assistantApiUrl, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
 						},
 						body: JSON.stringify({
+							type: assistantType,
 							message: args.message,
 							workspaceContext,
+							workspaceId: args.workspaceId,
 						}),
 					});
 
-					if (!githubResponse.ok) {
-						throw new Error(`GitHub API error: ${githubResponse.status}`);
+					if (!assistantResponse.ok) {
+						throw new Error(`Assistant API error: ${assistantResponse.status}`);
 					}
 
-					const githubData = await githubResponse.json();
+					const assistantData = await assistantResponse.json();
 
-					if (githubData.success) {
-						// Add GitHub response to history
+					if (assistantData.success) {
+						// Add assistant response to history
 						await ctx.runMutation(api.chatbot.addMessage, {
 							workspaceId: args.workspaceId,
-							content: githubData.response,
+							content: assistantData.response,
 							role: 'assistant',
-							actions: githubData.hasGitHubAction
-								? [
-										{
-											label: 'View on GitHub',
-											type: 'github',
-											url: 'https://github.com',
-										},
-									]
-								: undefined,
+							actions: assistantData.actions,
 						});
 
 						return {
-							response: githubData.response,
-							sources: [],
-							actions: githubData.hasGitHubAction
-								? [
-										{
-											label: 'View on GitHub',
-											type: 'github',
-											url: 'https://github.com',
-										},
-									]
-								: undefined,
+							response: assistantData.response,
+							sources: assistantData.sources || [],
+							actions: assistantData.actions,
 						};
 					} else {
-						throw new Error(githubData.error || 'GitHub API returned an error');
+						throw new Error(
+							assistantData.error || 'Assistant API returned an error'
+						);
 					}
-				} catch (githubError) {
-					console.error('[Chatbot] GitHub API error:', githubError);
+				} catch (assistantError) {
+					console.error('[Chatbot] Assistant API error:', assistantError);
 					// Fall back to regular RAG response
 					console.log('[Chatbot] Falling back to regular RAG response');
 				}

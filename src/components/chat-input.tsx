@@ -7,7 +7,7 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import type { Id } from '@/../convex/_generated/dataModel';
-import { Suggestions } from '@/features/ai/components/suggestions';
+import { Suggestions } from '@/features/smart/components/suggestions';
 import { useCreateCalendarEvent } from '@/features/calendar/api/use-create-calendar-event';
 import { useCreateMessage } from '@/features/messages/api/use-create-message';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';

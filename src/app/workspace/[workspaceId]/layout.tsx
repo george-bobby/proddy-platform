@@ -5,10 +5,10 @@ import type { PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
 
 import type { Id } from "@/../convex/_generated/dataModel";
-import { SummarizeButton } from "@/features/ai/components/summarize-button";
+import { SummarizeButton } from "@/features/smart/components/summarize-button";
 import { HotjarAnalytics } from "@/components/hotjar-analytics";
 
-import { MessageSelectionProvider } from "@/features/ai/contexts/message-selection-context";
+import { MessageSelectionProvider } from "@/features/smart/contexts/message-selection-context";
 import { Profile } from "@/features/members/components/profile";
 import { Thread } from "@/features/messages/components/thread";
 import { StatusTracker } from "@/features/status/components/status-tracker";
