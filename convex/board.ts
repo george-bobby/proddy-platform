@@ -3,7 +3,7 @@ import { v } from 'convex/values';
 import type { MutationCtx, QueryCtx, ActionCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { getUserEmailFromMemberId, getUserNameFromMemberId } from './utils';
-import { api } from './_generated/api';
+// import { api } from './_generated/api'; // Commented out to avoid TypeScript circular dependency issues
 
 // LISTS
 export const createList = mutation({
@@ -140,11 +140,15 @@ export const createCard = mutation({
 					});
 
 					// Send email notification
-					await ctx.scheduler.runAfter(0, api.board.sendCardAssignmentEmail, {
-						assigneeId,
-						cardId,
-						assignerId: creator._id,
-					});
+					await (ctx.scheduler.runAfter as any)(
+						0,
+						'board:sendCardAssignmentEmail' as any,
+						{
+							assigneeId,
+							cardId,
+							assignerId: creator._id,
+						}
+					);
 				}
 			} catch (error) {
 				console.error('Error creating mentions for card assignees:', error);
@@ -246,11 +250,15 @@ export const updateCard = mutation({
 					});
 
 					// Send email notification
-					await ctx.scheduler.runAfter(0, api.board.sendCardAssignmentEmail, {
-						assigneeId,
-						cardId,
-						assignerId: updater._id,
-					});
+					await (ctx.scheduler.runAfter as any)(
+						0,
+						'board:sendCardAssignmentEmail' as any,
+						{
+							assigneeId,
+							cardId,
+							assignerId: updater._id,
+						}
+					);
 				}
 			} catch (error) {
 				console.error('Error creating mentions for card assignees:', error);
@@ -512,8 +520,8 @@ export const sendCardAssignmentEmail = action({
 				'Getting card details for email notification, cardId:',
 				cardId
 			);
-			const card: CardDetails | null = await ctx.runQuery(
-				api.board._getCardDetails,
+			const card: CardDetails | null = await (ctx.runQuery as any)(
+				'board:_getCardDetails' as any,
 				{ cardId }
 			);
 			if (!card) {
@@ -528,14 +536,14 @@ export const sendCardAssignmentEmail = action({
 
 			// Get the assignee's email and name
 			console.log('Getting assignee email and name, assigneeId:', assigneeId);
-			const assigneeEmail: string | null = await ctx.runQuery(
-				api.board._getMemberEmail,
+			const assigneeEmail: string | null = await (ctx.runQuery as any)(
+				'board:_getMemberEmail' as any,
 				{
 					memberId: assigneeId,
 				}
 			);
-			const assigneeName: string | null = await ctx.runQuery(
-				api.board._getMemberName,
+			const assigneeName: string | null = await (ctx.runQuery as any)(
+				'board:_getMemberName' as any,
 				{
 					memberId: assigneeId,
 				}
@@ -549,8 +557,8 @@ export const sendCardAssignmentEmail = action({
 
 			// Get the assigner's name
 			console.log('Getting assigner name, assignerId:', assignerId);
-			const assignerName: string | null = await ctx.runQuery(
-				api.board._getMemberName,
+			const assignerName: string | null = await (ctx.runQuery as any)(
+				'board:_getMemberName' as any,
 				{
 					memberId: assignerId,
 				}

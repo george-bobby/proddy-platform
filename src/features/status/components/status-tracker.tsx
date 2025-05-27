@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
 import { useUpdateStatus } from '../api/use-update-status';
@@ -13,6 +13,35 @@ export const StatusTracker = () => {
   const { markOfflineGlobally } = useMarkOfflineGlobally();
   const workspaceId = useWorkspaceId();
   const previousUserRef = useRef(user);
+  const lastUpdateRef = useRef<number>(0);
+  const pendingUpdateRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Debounced status update to prevent race conditions
+  const debouncedUpdateStatus = useCallback((status: string, workspaceId: string) => {
+    const now = Date.now();
+
+    // Clear any pending update
+    if (pendingUpdateRef.current) {
+      clearTimeout(pendingUpdateRef.current);
+    }
+
+    // If we updated recently (within 5 seconds), debounce the update
+    const timeSinceLastUpdate = now - lastUpdateRef.current;
+    if (timeSinceLastUpdate < 5000) {
+      pendingUpdateRef.current = setTimeout(() => {
+        updateStatus({ status, workspaceId: workspaceId as any }).catch(error => {
+          console.error('Failed to update status:', error);
+        });
+        lastUpdateRef.current = Date.now();
+      }, 2000); // Wait 2 seconds before updating
+    } else {
+      // Update immediately if enough time has passed
+      updateStatus({ status, workspaceId: workspaceId as any }).catch(error => {
+        console.error('Failed to update status:', error);
+      });
+      lastUpdateRef.current = now;
+    }
+  }, [updateStatus]);
 
   // Track authentication state changes
   useEffect(() => {
@@ -31,20 +60,29 @@ export const StatusTracker = () => {
   useEffect(() => {
     if (isLoading || !user || !workspaceId) return;
 
-    // Set user as online when component mounts
-    updateStatus({ status: 'online', workspaceId });
+    // Set user as online when component mounts (debounced)
+    debouncedUpdateStatus('online', workspaceId);
 
-    // Set up interval to update status periodically (every 30 seconds)
+    // Set up interval to update status periodically (every 60 seconds instead of 30)
     const interval = setInterval(() => {
-      updateStatus({ status: 'online', workspaceId });
-    }, 30000);
+      debouncedUpdateStatus('online', workspaceId);
+    }, 60000); // Increased from 30s to 60s to reduce frequency
 
     // Set user as offline when component unmounts
     return () => {
       clearInterval(interval);
-      updateStatus({ status: 'offline', workspaceId });
+
+      // Clear any pending debounced updates
+      if (pendingUpdateRef.current) {
+        clearTimeout(pendingUpdateRef.current);
+      }
+
+      // Immediate offline update (no debouncing for offline)
+      updateStatus({ status: 'offline', workspaceId: workspaceId as any }).catch(error => {
+        console.error('Failed to mark user offline:', error);
+      });
     };
-  }, [isLoading, user, workspaceId, updateStatus]);
+  }, [isLoading, user, workspaceId, debouncedUpdateStatus, updateStatus]);
 
   // This component doesn't render anything
   return null;
