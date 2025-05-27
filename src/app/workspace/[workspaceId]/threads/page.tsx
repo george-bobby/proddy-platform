@@ -119,7 +119,7 @@ export default function ThreadsPage() {
 
   // We'll use a consistent structure with conditional rendering for the content
   return (
-    <div className="flex h-full flex-col">
+    <>
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -133,21 +133,21 @@ export default function ThreadsPage() {
 
       {!threads ? (
         // Loading state
-        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
+        <div className="flex flex-1 w-full flex-col items-center justify-center gap-y-2 bg-white">
           <Loader className="size-12 animate-spin text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Loading threads...</p>
         </div>
       ) : !threads.length ? (
         // Empty state
-        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
+        <div className="flex flex-1 w-full flex-col items-center justify-center gap-y-2 bg-white">
           <MessageSquareText className="size-12 text-muted-foreground" />
           <h2 className="text-2xl font-semibold">Threads</h2>
           <p className="text-sm text-muted-foreground">No threads yet.</p>
         </div>
       ) : (
         // Threads loaded state
-        <div className="flex h-full flex-col bg-white">
-          <div className="border-b p-4">
+        <div className="flex flex-1 flex-col bg-white overflow-hidden">
+          <div className="border-b p-4 flex-shrink-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Your Threads</h2>
               <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ export default function ThreadsPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 
   function renderThreadCard(thread: ThreadMessage) {

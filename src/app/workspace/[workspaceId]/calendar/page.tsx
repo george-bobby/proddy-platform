@@ -207,7 +207,7 @@ const CalendarPage = () => {
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="flex h-full flex-col">
+    <>
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -218,7 +218,7 @@ const CalendarPage = () => {
           <span className="truncate">Calendar</span>
         </Button>
       </WorkspaceToolbar>
-      <div className="flex h-full flex-col bg-white">
+      <div className="flex flex-1 flex-col bg-white overflow-hidden">
         <CalendarHeader
           currentDate={currentDate}
           onPreviousMonth={handlePreviousMonth}
@@ -378,7 +378,7 @@ const CalendarPage = () => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

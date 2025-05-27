@@ -214,7 +214,7 @@ const ReportsPage = () => {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <>
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -225,9 +225,9 @@ const ReportsPage = () => {
           <span className="truncate">Reports</span>
         </Button>
       </WorkspaceToolbar>
-      <div className="flex h-full flex-col bg-white">
+      <div className="flex flex-1 flex-col bg-white overflow-hidden">
         {/* Header with filters */}
-        <div className="border-b border-border/30 bg-white px-4 py-4">
+        <div className="border-b border-border/30 bg-white px-4 py-4 flex-shrink-0">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Reports & Analytics</h1>
@@ -812,7 +812,7 @@ const ReportsPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -103,7 +103,7 @@ export default function OutboxPage() {
 
   // Always render the same outer structure to maintain toolbar visibility
   return (
-    <div className="flex h-full flex-col">
+    <>
       <WorkspaceToolbar>
         <Button
           variant="ghost"
@@ -118,21 +118,21 @@ export default function OutboxPage() {
       {/* Content area - changes based on state */}
       {!messages ? (
         // Loading state
-        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
+        <div className="flex flex-1 w-full flex-col items-center justify-center gap-y-2 bg-white">
           <Loader className="size-12 animate-spin text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Loading messages...</p>
         </div>
       ) : !messages.length ? (
         // Empty state
-        <div className="flex h-full w-full flex-col items-center justify-center gap-y-2 bg-white">
+        <div className="flex flex-1 w-full flex-col items-center justify-center gap-y-2 bg-white">
           <Mail className="size-12 text-muted-foreground" />
           <h2 className="text-2xl font-semibold">Outbox</h2>
           <p className="text-sm text-muted-foreground">No messages sent yet.</p>
         </div>
       ) : (
         // Messages loaded state
-        <div className="flex h-full flex-col bg-white">
-          <div className="border-b p-4">
+        <div className="flex flex-1 flex-col bg-white overflow-hidden">
+          <div className="border-b p-4 flex-shrink-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Your Messages</h2>
               <div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ export default function OutboxPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 
   function renderMessageCard(message: Message) {

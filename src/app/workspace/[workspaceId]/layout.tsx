@@ -73,7 +73,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
       {/* Add Hotjar Analytics to all workspace pages */}
       <HotjarAnalytics />
       <StatusTracker />
-      <div className="h-full">
+      <div className="h-full flex flex-col">
         <div className="flex h-full">
           {/* Fixed-width sidebar with collapse/expand functionality */}
           <div
@@ -89,8 +89,8 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
             />
           </div>
 
-          {/* Main content area */}
-          <div className="flex-1 h-full overflow-auto">{children}</div>
+          {/* Main content area - remove overflow-auto to prevent toolbar scrolling */}
+          <div className="flex-1 h-full flex flex-col">{children}</div>
 
           {/* Right panel for threads and profiles */}
           {showPanel && (
