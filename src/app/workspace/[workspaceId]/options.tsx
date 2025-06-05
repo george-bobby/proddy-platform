@@ -129,7 +129,7 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
                 <AvatarImage alt={label} src={image} />
                 <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
               </Avatar>
-              {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+              {member && <StatusIndicator status={status as 'online' | 'offline' | 'recently_online' | 'privacy'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
             </div>
             <span className="truncate min-w-0 text-sm flex-1">{label}</span>
           </>

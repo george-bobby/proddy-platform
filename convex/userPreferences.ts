@@ -150,6 +150,7 @@ export const updateUserPreferences = mutation({
 			v.object({
 				theme: v.optional(v.string()),
 				notifications: v.optional(v.boolean()),
+				statusTracking: v.optional(v.boolean()),
 			})
 		),
 	},
@@ -167,9 +168,12 @@ export const updateUserPreferences = mutation({
 			.unique();
 
 		if (existingPrefs) {
-			// Update existing preferences
+			// Update existing preferences, merging with existing settings
 			await ctx.db.patch(existingPrefs._id, {
-				settings: args.settings,
+				settings: {
+					...existingPrefs.settings,
+					...args.settings,
+				},
 			});
 		} else {
 			// Create new preferences
@@ -180,6 +184,25 @@ export const updateUserPreferences = mutation({
 		}
 
 		return { success: true };
+	},
+});
+
+/**
+ * Check if user has status tracking enabled (default: true)
+ */
+export const isStatusTrackingEnabled = query({
+	args: {},
+	handler: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) return false;
+
+		const preferences = await ctx.db
+			.query('userPreferences')
+			.withIndex('by_user_id', (q) => q.eq('userId', userId))
+			.unique();
+
+		// Default to true if no preference is set
+		return preferences?.settings?.statusTracking ?? true;
 	},
 });
 

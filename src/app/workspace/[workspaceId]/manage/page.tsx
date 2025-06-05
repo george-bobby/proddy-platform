@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, Users, Hash, Shield, Loader } from "lucide-react";
+import { Settings, Users, Hash, Shield, Loader, Plug } from "lucide-react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { useCurrentMember } from "@/features/members/api/use-current-member";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { WorkspaceManagement } from "@/features/manage/components/workspace-management";
 import { ChannelsManagement } from "@/features/manage/components/channels-management";
 import { MembersManagement } from "@/features/manage/components/members-management";
+import { IntegrationsManagement } from "@/features/manage/components/integrations-management";
 import { useRouter } from "next/navigation";
 import { WorkspaceToolbar } from "../toolbar";
 
@@ -72,7 +73,7 @@ const ManagePage = () => {
       <div className="flex-1 overflow-auto p-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="workspace" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="workspace">
                 <Settings className="h-4 w-4 mr-2" />
                 Workspace
@@ -84,6 +85,10 @@ const ManagePage = () => {
               <TabsTrigger value="members">
                 <Users className="h-4 w-4 mr-2" />
                 Members
+              </TabsTrigger>
+              <TabsTrigger value="integrations">
+                <Plug className="h-4 w-4 mr-2" />
+                Integrations
               </TabsTrigger>
             </TabsList>
 
@@ -112,6 +117,16 @@ const ManagePage = () => {
               className="bg-background rounded-lg p-6 shadow-sm border"
             >
               <MembersManagement
+                workspaceId={workspaceId}
+                currentMember={member}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value="integrations"
+              className="bg-background rounded-lg p-6 shadow-sm border"
+            >
+              <IntegrationsManagement
                 workspaceId={workspaceId}
                 currentMember={member}
               />

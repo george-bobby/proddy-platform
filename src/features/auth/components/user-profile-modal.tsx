@@ -14,6 +14,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PrivacySettings } from '@/features/preferences/components/privacy-settings';
 
 interface UserProfileModalProps {
   open: boolean;
@@ -61,112 +63,126 @@ export const UserProfileModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-col items-center justify-center p-4">
-            <Avatar className="size-32">
-              <AvatarImage src={image} />
-              <AvatarFallback className="text-2xl">{avatarFallback}</AvatarFallback>
-            </Avatar>
-            {isEditMode && (
-              <Button
-                type="button"
-                variant="link"
-                className="mt-2 text-sm"
-                disabled={isUpdating}
-              >
-                Change avatar
-              </Button>
-            )}
-          </div>
+        {isEditMode ? (
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="privacy">Privacy</TabsTrigger>
+            </TabsList>
 
-          {isEditMode ? (
-            <div className="space-y-4 p-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Display Name</Label>
-                <Input
-                  id="name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  disabled={isUpdating}
-                  required
-                />
-              </div>
+            <TabsContent value="profile" className="space-y-4">
+              <form onSubmit={handleSubmit}>
+                <div className="flex flex-col items-center justify-center p-4">
+                  <Avatar className="size-32">
+                    <AvatarImage src={image} />
+                    <AvatarFallback className="text-2xl">{avatarFallback}</AvatarFallback>
+                  </Avatar>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="mt-2 text-sm"
+                    disabled={isUpdating}
+                  >
+                    Change avatar
+                  </Button>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  value={email}
-                  disabled
-                  readOnly
-                />
-                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex flex-col p-4">
-                <p className="text-xl font-bold">{name}</p>
-              </div>
-
-              <Separator />
-
-              <div className="flex flex-col p-4">
-                <p className="mb-4 text-sm font-bold">Contact information</p>
-
-                <div className="flex items-center gap-2">
-                  <div className="flex size-9 items-center justify-center rounded-md bg-muted">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="size-4"
-                    >
-                      <rect width="20" height="16" x="2" y="4" rx="2" />
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                    </svg>
+                <div className="space-y-4 p-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Display Name</Label>
+                    <Input
+                      id="name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      disabled={isUpdating}
+                      required
+                    />
                   </div>
 
-                  <div className="flex flex-col">
-                    <p className="text-[13px] font-semibold text-muted-foreground">Email Address</p>
-                    {email ? (
-                      <a href={`mailto:${email}`} className="text-sm text-[#1264a3] hover:underline">
-                        {email}
-                      </a>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No email available</p>
-                    )}
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      value={email}
+                      disabled
+                      readOnly
+                    />
+                    <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
 
-          {isEditMode && (
-            <>
-              <Separator />
-              <div className="flex justify-end p-4">
-                <Button
-                  type="submit"
-                  disabled={isUpdating || displayName === name}
-                >
-                  {isUpdating ? 'Saving...' : 'Save Changes'}
-                </Button>
+                <Separator />
+                <div className="flex justify-end p-4">
+                  <Button
+                    type="submit"
+                    disabled={isUpdating || displayName === name}
+                  >
+                    {isUpdating ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="privacy" className="space-y-4">
+              <PrivacySettings />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <>
+            <div className="flex flex-col items-center justify-center p-4">
+              <Avatar className="size-32">
+                <AvatarImage src={image} />
+                <AvatarFallback className="text-2xl">{avatarFallback}</AvatarFallback>
+              </Avatar>
+            </div>
+
+            <div className="flex flex-col p-4">
+              <p className="text-xl font-bold">{name}</p>
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col p-4">
+              <p className="mb-4 text-sm font-bold">Contact information</p>
+
+              <div className="flex items-center gap-2">
+                <div className="flex size-9 items-center justify-center rounded-md bg-muted">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="size-4"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </div>
+
+                <div className="flex flex-col">
+                  <p className="text-[13px] font-semibold text-muted-foreground">Email Address</p>
+                  {email ? (
+                    <a href={`mailto:${email}`} className="text-sm text-[#1264a3] hover:underline">
+                      {email}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No email available</p>
+                  )}
+                </div>
               </div>
-            </>
-          )}
-        </form>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

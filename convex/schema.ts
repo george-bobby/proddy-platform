@@ -81,12 +81,15 @@ const schema = defineSchema({
 	history: defineTable({
 		userId: v.id('users'),
 		workspaceId: v.id('workspaces'),
-		status: v.string(), // "online" or "offline"
+		channelId: v.optional(v.id('channels')), // Optional for channel-specific presence
+		status: v.string(), // "online", "offline", "active", "inactive"
 		lastSeen: v.number(), // timestamp
 	})
 		.index('by_user_id', ['userId'])
 		.index('by_workspace_id', ['workspaceId'])
-		.index('by_workspace_id_user_id', ['workspaceId', 'userId']),
+		.index('by_workspace_id_user_id', ['workspaceId', 'userId'])
+		.index('by_channel_id', ['channelId'])
+		.index('by_workspace_channel', ['workspaceId', 'channelId']),
 	lists: defineTable({
 		channelId: v.id('channels'),
 		title: v.string(),
@@ -255,6 +258,7 @@ const schema = defineSchema({
 			v.object({
 				theme: v.optional(v.string()),
 				notifications: v.optional(v.boolean()),
+				statusTracking: v.optional(v.boolean()), // Enable/disable status tracking
 				// Add more user preferences as needed
 			})
 		),
@@ -321,19 +325,6 @@ const schema = defineSchema({
 			filterFields: ['workspaceId', 'channelId'],
 		}),
 
-	presence: defineTable({
-		userId: v.id('users'),
-		workspaceId: v.id('workspaces'),
-		channelId: v.id('channels'),
-		status: v.union(v.literal('active'), v.literal('inactive')),
-		lastUpdated: v.number(),
-	})
-		.index('by_user_id', ['userId'])
-		.index('by_workspace_id', ['workspaceId'])
-		.index('by_channel_id', ['channelId'])
-		.index('by_user_channel', ['userId', 'channelId'])
-		.index('by_channel_status', ['channelId', 'status']),
-
 	chatHistory: defineTable({
 		workspaceId: v.id('workspaces'),
 		memberId: v.id('members'),
@@ -369,6 +360,33 @@ const schema = defineSchema({
 		.index('by_workspace_id', ['workspaceId'])
 		.index('by_member_id', ['memberId'])
 		.index('by_workspace_id_member_id', ['workspaceId', 'memberId']),
+
+	integrations: defineTable({
+		workspaceId: v.id('workspaces'),
+		service: v.union(
+			v.literal('github'),
+			v.literal('gmail'),
+			v.literal('slack'),
+			v.literal('jira'),
+			v.literal('notion'),
+			v.literal('clickup')
+		),
+		connectedAccountId: v.string(), // Composio connected account ID
+		entityId: v.string(), // Composio entity ID
+		status: v.union(
+			v.literal('connected'),
+			v.literal('disconnected'),
+			v.literal('error')
+		),
+		metadata: v.optional(v.any()), // Service-specific metadata
+		connectedAt: v.number(),
+		connectedBy: v.id('members'),
+		lastUsed: v.optional(v.number()),
+	})
+		.index('by_workspace_id', ['workspaceId'])
+		.index('by_workspace_service', ['workspaceId', 'service'])
+		.index('by_connected_account_id', ['connectedAccountId'])
+		.index('by_entity_id', ['entityId']),
 });
 
 export default schema;

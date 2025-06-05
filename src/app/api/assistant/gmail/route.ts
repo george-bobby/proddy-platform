@@ -3,13 +3,9 @@ import { openai } from '@ai-sdk/openai';
 import { VercelAIToolSet } from 'composio-core';
 import { generateText } from 'ai';
 
-const toolset = new VercelAIToolSet({
-	apiKey: process.env.COMPOSIO_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
 	try {
-		const { message, workspaceContext } = await req.json();
+		const { message, workspaceContext, workspaceId } = await req.json();
 
 		if (!message) {
 			return NextResponse.json(
@@ -18,26 +14,81 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
+		if (!workspaceId) {
+			return NextResponse.json(
+				{ error: 'Workspace ID is required' },
+				{ status: 400 }
+			);
+		}
+
 		console.log('[Gmail Assistant] Processing request:', message);
 
-		// Get Gmail tools from Composio
-		const tools = await toolset.getTools({
-			apps: ['gmail'],
-			actions: [
-				'GMAIL_SEND_EMAIL',
-				'GMAIL_LIST_MESSAGES',
-				'GMAIL_GET_MESSAGE',
-				'GMAIL_SEARCH_MESSAGES',
-				'GMAIL_CREATE_DRAFT',
-				'GMAIL_SEND_DRAFT',
-				'GMAIL_DELETE_MESSAGE',
-				'GMAIL_MARK_AS_READ',
-				'GMAIL_MARK_AS_UNREAD',
-				'GMAIL_ADD_LABEL',
-				'GMAIL_REMOVE_LABEL',
-				'GMAIL_GET_LABELS',
-			],
+		// Fetch workspace Gmail integration
+		let gmailIntegration = null;
+
+		try {
+			const integrationResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_APP_URL}/api/integrations`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ workspaceId, service: 'gmail' }),
+				}
+			);
+
+			if (integrationResponse.ok) {
+				gmailIntegration = await integrationResponse.json();
+			}
+		} catch (error) {
+			console.error(
+				'[Gmail Assistant] Error fetching Gmail integration:',
+				error
+			);
+		}
+
+		if (!gmailIntegration) {
+			return NextResponse.json({
+				success: false,
+				error:
+					'No Gmail integration found for this workspace. Please connect Gmail in workspace settings.',
+				actions: [
+					{
+						label: 'Connect Gmail',
+						type: 'navigation',
+						url: `/workspace/${workspaceId}/manage?tab=workspace`,
+					},
+				],
+			});
+		}
+
+		// Initialize toolset with entity ID from Gmail integration
+		const toolset = new VercelAIToolSet({
+			apiKey: process.env.COMPOSIO_API_KEY,
 		});
+
+		// Get Gmail tools from Composio with entity ID
+		const tools = await toolset.getTools(
+			{
+				apps: ['gmail'],
+				actions: [
+					'GMAIL_SEND_EMAIL',
+					'GMAIL_LIST_MESSAGES',
+					'GMAIL_GET_MESSAGE',
+					'GMAIL_SEARCH_MESSAGES',
+					'GMAIL_CREATE_DRAFT',
+					'GMAIL_SEND_DRAFT',
+					'GMAIL_DELETE_MESSAGE',
+					'GMAIL_MARK_AS_READ',
+					'GMAIL_MARK_AS_UNREAD',
+					'GMAIL_ADD_LABEL',
+					'GMAIL_REMOVE_LABEL',
+					'GMAIL_GET_LABELS',
+				],
+			},
+			gmailIntegration.entityId // Pass entity ID as second parameter
+		);
 
 		console.log('[Gmail Assistant] Available tools:', tools.length);
 

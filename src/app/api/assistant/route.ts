@@ -29,11 +29,23 @@ export async function POST(req: NextRequest) {
 
 		switch (type.toLowerCase()) {
 			case 'github':
-				targetUrl = `${baseUrl}/api/assistant/github`;
+				targetUrl = `${baseUrl}/api/assistant/old-github`;
 				break;
 			case 'gmail':
 			case 'email':
 				targetUrl = `${baseUrl}/api/assistant/gmail`;
+				break;
+			case 'slack':
+				targetUrl = `${baseUrl}/api/assistant/slack`;
+				break;
+			case 'jira':
+				targetUrl = `${baseUrl}/api/assistant/jira`;
+				break;
+			case 'notion':
+				targetUrl = `${baseUrl}/api/assistant/notion`;
+				break;
+			case 'clickup':
+				targetUrl = `${baseUrl}/api/assistant/clickup`;
 				break;
 			case 'chatbot':
 			case 'chat':
@@ -63,6 +75,10 @@ export async function POST(req: NextRequest) {
 						availableTypes: [
 							'github',
 							'gmail',
+							'slack',
+							'jira',
+							'notion',
+							'clickup',
 							'chatbot',
 							'calendar',
 							'notes',
@@ -142,7 +158,50 @@ export async function GET() {
 					'manage_labels',
 				],
 			},
-
+			{
+				type: 'slack',
+				description: 'Send messages, manage channels, team communication',
+				capabilities: [
+					'send_message',
+					'list_channels',
+					'create_channel',
+					'invite_users',
+					'get_user_info',
+				],
+			},
+			{
+				type: 'jira',
+				description: 'Create issues, manage projects, track progress',
+				capabilities: [
+					'create_issue',
+					'list_issues',
+					'update_issue',
+					'add_comment',
+					'manage_projects',
+				],
+			},
+			{
+				type: 'notion',
+				description: 'Create pages, manage databases, collaborate on documents',
+				capabilities: [
+					'create_page',
+					'list_pages',
+					'update_page',
+					'create_database',
+					'query_database',
+				],
+			},
+			{
+				type: 'clickup',
+				description: 'Create tasks, manage projects, track productivity',
+				capabilities: [
+					'create_task',
+					'list_tasks',
+					'update_task',
+					'add_comment',
+					'manage_spaces',
+				],
+			},
 			{
 				type: 'chatbot',
 				description: 'General workspace assistant with RAG capabilities',

@@ -11,13 +11,19 @@ import {
   Eye,
   EyeOff,
   UserPlus,
+  Users,
+  Hash,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteModal } from "@/app/workspace/[workspaceId]/invitation";
 import { useUpdateWorkspace } from "@/features/workspaces/api/use-update-workspace";
+import { useGetMembers } from "@/features/members/api/use-get-members";
+import { useGetChannels } from "@/features/channels/api/use-get-channels";
 import { useRemoveWorkspace } from "@/features/workspaces/api/use-remove-workspace";
 import { useNewJoinCode } from "@/features/workspaces/api/use-new-join-code";
 import {
@@ -53,6 +59,10 @@ export const WorkspaceManagement = ({
   const updateWorkspace = useUpdateWorkspace();
   const removeWorkspace = useRemoveWorkspace();
   const newJoinCode = useNewJoinCode();
+
+  // Fetch workspace data for overview
+  const { data: members } = useGetMembers({ workspaceId: workspace._id });
+  const { data: channels } = useGetChannels({ workspaceId: workspace._id });
 
   const isOwner = currentMember.role === "owner";
 
@@ -125,14 +135,76 @@ export const WorkspaceManagement = ({
         joinCode={workspace.joinCode}
       />
       <div className="space-y-6">
+        {/* Workspace Overview */}
+        <div>
+          <h3 className="text-lg font-medium">Workspace Overview</h3>
+          <p className="text-sm text-muted-foreground">
+            Quick overview of your workspace
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                <Calendar className="h-4 w-4 mr-2" />
+                Created
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold">
+                {new Date(workspace._creationTime).toLocaleDateString()}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {Math.floor((Date.now() - workspace._creationTime) / (1000 * 60 * 60 * 24))} days ago
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                <Users className="h-4 w-4 mr-2" />
+                Members
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold">
+                {members?.length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Total workspace members
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                <Hash className="h-4 w-4 mr-2" />
+                Channels
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold">
+                {channels?.length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Active channels
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Separator />
+
+        {/* Workspace Settings */}
         <div>
           <h3 className="text-lg font-medium">Workspace Settings</h3>
           <p className="text-sm text-muted-foreground">
             Manage your workspace name and other settings
           </p>
         </div>
-
-        <Separator />
 
         <div className="flex justify-between items-start">
           {/* Left side - Edit name */}
@@ -202,6 +274,7 @@ export const WorkspaceManagement = ({
             </div>
           )}
         </div>
+
       </div>
     </>
   );

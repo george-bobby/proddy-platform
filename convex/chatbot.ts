@@ -8,7 +8,7 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 function detectAssistantType(message: string): string {
 	// GitHub-related queries
 	if (
-		/\b(github|create github issue|bug report|feature request|repository|repo)\b/i.test(
+		/\b(github|create github issue|bug report|feature request|repository|repo|pull request|pr|commit|branch)\b/i.test(
 			message
 		)
 	) {
@@ -16,8 +16,48 @@ function detectAssistantType(message: string): string {
 	}
 
 	// Gmail/Email-related queries
-	if (/\b(gmail|email|send email|inbox|draft|compose|mail)\b/i.test(message)) {
+	if (
+		/\b(gmail|email|send email|inbox|draft|compose|mail|message)\b/i.test(
+			message
+		)
+	) {
 		return 'gmail';
+	}
+
+	// Slack-related queries
+	if (
+		/\b(slack|send slack message|slack channel|direct message|dm|workspace|team chat|notification)\b/i.test(
+			message
+		)
+	) {
+		return 'slack';
+	}
+
+	// Jira-related queries
+	if (
+		/\b(jira|create jira ticket|jira issue|ticket|story|epic|sprint|backlog|bug|subtask)\b/i.test(
+			message
+		)
+	) {
+		return 'jira';
+	}
+
+	// ClickUp-related queries
+	if (
+		/\b(clickup|click up|create clickup task|clickup project|space|folder|list|status|priority)\b/i.test(
+			message
+		)
+	) {
+		return 'clickup';
+	}
+
+	// Notion-related queries
+	if (
+		/\b(notion|create notion page|notion database|page|block|property|template|workspace)\b/i.test(
+			message
+		)
+	) {
+		return 'notion';
 	}
 
 	// Calendar/meeting-related queries
