@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
 		});
 
 		// Define your target repository
-		const GITHUB_OWNER = process.env.GITHUB_OWNER || 'george-bobby';
-		const GITHUB_REPO = process.env.GITHUB_REPO || 'proddy-platform';
+		const GITHUB_OWNER = 'george-bobby';
+		const GITHUB_REPO = 'proddy-test';
 
 		console.log('[GitHub Assistant] Available tools:', tools.length);
 		console.log(
