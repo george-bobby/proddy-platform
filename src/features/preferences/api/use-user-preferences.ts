@@ -6,13 +6,29 @@ import { api } from '@/../convex/_generated/api';
 
 export const useUserPreferences = () => {
 	const data = useQuery(api.userPreferences.getUserPreferences);
-	const updatePreferences = useMutation(api.userPreferences.updateUserPreferences);
+	const updatePreferences = useMutation(
+		api.userPreferences.updateUserPreferences
+	);
 
 	const updateSettings = useCallback(
 		async (settings: {
 			theme?: string;
-			notifications?: boolean;
 			statusTracking?: boolean;
+			notifications?: {
+				mentions?: boolean;
+				assignee?: boolean;
+				threadReply?: boolean;
+				directMessage?: boolean;
+				weeklyDigest?: boolean;
+				weeklyDigestDay?:
+					| 'monday'
+					| 'tuesday'
+					| 'wednesday'
+					| 'thursday'
+					| 'friday'
+					| 'saturday'
+					| 'sunday';
+			};
 		}) => {
 			try {
 				await updatePreferences({ settings });
@@ -36,6 +52,14 @@ export const useStatusTrackingEnabled = () => {
 	const data = useQuery(api.userPreferences.isStatusTrackingEnabled);
 	return {
 		isEnabled: data ?? true, // Default to true
+		isLoading: data === undefined,
+	};
+};
+
+export const useNotificationPreferences = () => {
+	const data = useQuery(api.userPreferences.getNotificationPreferences);
+	return {
+		data,
 		isLoading: data === undefined,
 	};
 };

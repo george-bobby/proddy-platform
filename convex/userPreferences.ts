@@ -149,8 +149,27 @@ export const updateUserPreferences = mutation({
 		settings: v.optional(
 			v.object({
 				theme: v.optional(v.string()),
-				notifications: v.optional(v.boolean()),
 				statusTracking: v.optional(v.boolean()),
+				notifications: v.optional(
+					v.object({
+						mentions: v.optional(v.boolean()),
+						assignee: v.optional(v.boolean()),
+						threadReply: v.optional(v.boolean()),
+						directMessage: v.optional(v.boolean()),
+						weeklyDigest: v.optional(v.boolean()),
+						weeklyDigestDay: v.optional(
+							v.union(
+								v.literal('monday'),
+								v.literal('tuesday'),
+								v.literal('wednesday'),
+								v.literal('thursday'),
+								v.literal('friday'),
+								v.literal('saturday'),
+								v.literal('sunday')
+							)
+						),
+					})
+				),
 			})
 		),
 	},
@@ -207,6 +226,34 @@ export const isStatusTrackingEnabled = query({
 });
 
 /**
+ * Get user notification preferences with defaults
+ */
+export const getNotificationPreferences = query({
+	args: {},
+	handler: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) return null;
+
+		const preferences = await ctx.db
+			.query('userPreferences')
+			.withIndex('by_user_id', (q) => q.eq('userId', userId))
+			.unique();
+
+		const notifications = preferences?.settings?.notifications;
+
+		// Return with defaults
+		return {
+			mentions: notifications?.mentions ?? true,
+			assignee: notifications?.assignee ?? true,
+			threadReply: notifications?.threadReply ?? true,
+			directMessage: notifications?.directMessage ?? true,
+			weeklyDigest: notifications?.weeklyDigest ?? false,
+			weeklyDigestDay: notifications?.weeklyDigestDay ?? 'monday',
+		};
+	},
+});
+
+/**
  * Get workspace preferences for a specific workspace
  */
 export const getWorkspacePreferences = query({
@@ -235,6 +282,111 @@ export const getWorkspacePreferences = query({
 
 		// Return the preferences for this specific workspace
 		return userPrefs.workspacePreferences[workspaceIdStr] || null;
+	},
+});
+
+/**
+ * Fix userPreferences documents where notifications is a boolean instead of an object
+ * This fixes the schema validation error where some documents have notifications: true instead of the expected object structure
+ */
+export const fixNotificationsSchema = mutation({
+	args: {},
+	handler: async (ctx) => {
+		console.log('Starting migration to fix userPreferences notifications...');
+
+		// Get all userPreferences documents
+		const allPreferences = await ctx.db.query('userPreferences').collect();
+
+		let fixedCount = 0;
+		let skippedCount = 0;
+
+		for (const pref of allPreferences) {
+			// Check if settings.notifications is a boolean (the problematic case)
+			// Use type assertion to bypass TypeScript checking since we know the data might be inconsistent
+			const notifications = pref.settings?.notifications as any;
+
+			if (notifications === true || notifications === false) {
+				console.log(
+					`Fixing userPreferences document ${pref._id} - notifications was boolean: ${notifications}`
+				);
+
+				// Convert boolean to proper object structure with defaults
+				const newSettings = {
+					...pref.settings,
+					notifications: {
+						mentions: true, // Default values
+						assignee: true,
+						threadReply: true,
+						directMessage: true,
+						weeklyDigest: notifications === true ? true : false, // Preserve the original boolean intent
+						weeklyDigestDay: 'monday' as const,
+					},
+				};
+
+				await ctx.db.patch(pref._id, {
+					settings: newSettings,
+				});
+
+				fixedCount++;
+			} else {
+				skippedCount++;
+			}
+		}
+
+		console.log(
+			`Migration completed. Fixed: ${fixedCount}, Skipped: ${skippedCount}, Total: ${allPreferences.length}`
+		);
+
+		return {
+			success: true,
+			totalDocuments: allPreferences.length,
+			fixedCount,
+			skippedCount,
+			message: `Migration completed successfully. Fixed ${fixedCount} documents, skipped ${skippedCount} documents.`,
+		};
+	},
+});
+
+/**
+ * Check current state of userPreferences documents for schema issues
+ */
+export const checkNotificationsSchema = mutation({
+	args: {},
+	handler: async (ctx) => {
+		// Get all userPreferences documents to check the current state
+		const allPreferences = await ctx.db.query('userPreferences').collect();
+
+		console.log(`Found ${allPreferences.length} userPreferences documents`);
+
+		let problematicDocs = [];
+		let validDocs = 0;
+
+		for (const pref of allPreferences) {
+			const notifications = pref.settings?.notifications as any;
+
+			if (notifications === true || notifications === false) {
+				problematicDocs.push({
+					id: pref._id,
+					userId: pref.userId,
+					notificationsValue: notifications,
+				});
+			} else if (notifications && typeof notifications === 'object') {
+				validDocs++;
+			}
+		}
+
+		console.log(
+			`Found ${problematicDocs.length} documents with boolean notifications`
+		);
+		console.log(`Found ${validDocs} documents with valid object notifications`);
+
+		return {
+			totalDocuments: allPreferences.length,
+			problematicDocuments: problematicDocs.length,
+			validDocuments: validDocs,
+			problematicDocs: problematicDocs.slice(0, 5), // Show first 5 for inspection
+			needsMigration: problematicDocs.length > 0,
+		};
 	},
 });
 

@@ -257,9 +257,28 @@ const schema = defineSchema({
 		settings: v.optional(
 			v.object({
 				theme: v.optional(v.string()),
-				notifications: v.optional(v.boolean()),
 				statusTracking: v.optional(v.boolean()), // Enable/disable status tracking
-				// Add more user preferences as needed
+				// Notification preferences
+				notifications: v.optional(
+					v.object({
+						mentions: v.optional(v.boolean()), // Default: true
+						assignee: v.optional(v.boolean()), // Default: true
+						threadReply: v.optional(v.boolean()), // Default: true
+						directMessage: v.optional(v.boolean()), // Default: true
+						weeklyDigest: v.optional(v.boolean()), // Default: false
+						weeklyDigestDay: v.optional(
+							v.union(
+								v.literal('monday'),
+								v.literal('tuesday'),
+								v.literal('wednesday'),
+								v.literal('thursday'),
+								v.literal('friday'),
+								v.literal('saturday'),
+								v.literal('sunday')
+							)
+						), // Default: 'monday'
+					})
+				),
 			})
 		),
 		// Workspace-specific preferences stored as a record

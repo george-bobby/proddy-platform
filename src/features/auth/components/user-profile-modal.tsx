@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PrivacySettings } from '@/features/preferences/components/privacy-settings';
+import { NotificationSettings } from '@/features/preferences/components/notification-settings';
+import { StatusTrackingSettings } from '@/features/preferences/components/status-tracking-settings';
 
 interface UserProfileModalProps {
   open: boolean;
@@ -72,7 +73,7 @@ export const UserProfileModal = ({
           <Tabs defaultValue="profile" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="privacy">Privacy</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-4">
@@ -117,6 +118,13 @@ export const UserProfileModal = ({
                 </div>
 
                 <Separator />
+
+                {/* Status Tracking Settings */}
+                <div className="p-4">
+                  <StatusTrackingSettings />
+                </div>
+
+                <Separator />
                 <div className="flex justify-end p-4">
                   <Button
                     type="submit"
@@ -128,8 +136,8 @@ export const UserProfileModal = ({
               </form>
             </TabsContent>
 
-            <TabsContent value="privacy" className="space-y-4">
-              <PrivacySettings />
+            <TabsContent value="notifications" className="space-y-4">
+              <NotificationSettings />
             </TabsContent>
           </Tabs>
         ) : (

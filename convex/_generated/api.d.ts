@@ -39,6 +39,7 @@ import type * as upload from "../upload.js";
 import type * as userPreferences from "../userPreferences.js";
 import type * as users from "../users.js";
 import type * as utils from "../utils.js";
+import type * as weeklyDigest from "../weeklyDigest.js";
 import type * as workspaces from "../workspaces.js";
 
 /**
@@ -76,6 +77,7 @@ declare const fullApi: ApiFromModules<{
   userPreferences: typeof userPreferences;
   users: typeof users;
   utils: typeof utils;
+  weeklyDigest: typeof weeklyDigest;
   workspaces: typeof workspaces;
 }>;
 export declare const api: FilterApi<
