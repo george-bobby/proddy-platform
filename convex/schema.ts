@@ -4,6 +4,20 @@ import { v } from 'convex/values';
 
 const schema = defineSchema({
 	...authTables,
+	// Extend the users table with additional profile fields
+	users: defineTable({
+		name: v.optional(v.string()),
+		image: v.optional(v.string()),
+		email: v.optional(v.string()),
+		emailVerificationTime: v.optional(v.number()),
+		phone: v.optional(v.string()),
+		phoneVerificationTime: v.optional(v.number()),
+		isAnonymous: v.optional(v.boolean()),
+		// Additional profile fields
+		bio: v.optional(v.string()),
+		location: v.optional(v.string()),
+		website: v.optional(v.string()),
+	}),
 	workspaces: defineTable({
 		name: v.string(),
 		userId: v.id('users'),

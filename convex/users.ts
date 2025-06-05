@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 
-import { query } from './_generated/server';
+import { query, mutation } from './_generated/server';
 
 export const current = query({
 	args: {},
@@ -32,5 +32,55 @@ export const getUserById = query({
 
 		// Return the user data
 		return user;
+	},
+});
+
+/**
+ * Update user profile information
+ */
+export const updateProfile = mutation({
+	args: {
+		name: v.optional(v.string()),
+		bio: v.optional(v.string()),
+		location: v.optional(v.string()),
+		website: v.optional(v.string()),
+		phone: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const userId = await getAuthUserId(ctx);
+
+		if (!userId) {
+			throw new Error('Unauthorized');
+		}
+
+		// Get current user to verify it exists
+		const currentUser = await ctx.db.get(userId);
+		if (!currentUser) {
+			throw new Error('User not found');
+		}
+
+		// Prepare update data, filtering out undefined values
+		const updateData: Record<string, any> = {};
+
+		if (args.name !== undefined) {
+			updateData.name = args.name.trim();
+		}
+		if (args.bio !== undefined) {
+			updateData.bio = args.bio.trim() || undefined;
+		}
+		if (args.location !== undefined) {
+			updateData.location = args.location.trim() || undefined;
+		}
+		if (args.website !== undefined) {
+			updateData.website = args.website.trim() || undefined;
+		}
+		if (args.phone !== undefined) {
+			updateData.phone = args.phone.trim() || undefined;
+		}
+
+		// Update the user
+		await ctx.db.patch(userId, updateData);
+
+		return { success: true };
 	},
 });
