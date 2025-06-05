@@ -127,7 +127,7 @@ export const TidioChat = () => {
       {currentUser && currentUser._id && (
         <Script
           id="tidio-identify"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               // Define visitor identification data

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/../convex/_generated/api';
+import type { Id } from '@/../convex/_generated/dataModel';
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -24,14 +25,20 @@ export async function POST(req: NextRequest) {
 
 		try {
 			// Query the integration for this workspace and service
-			const integration = await convex.query(api.integrations.getByWorkspaceAndService, {
-				workspaceId,
-				service,
-			});
+			const integration = await convex.query(
+				api.integrations.getByWorkspaceAndService,
+				{
+					workspaceId: workspaceId as Id<'workspaces'>,
+					service,
+				}
+			);
 
 			return NextResponse.json(integration);
 		} catch (convexError) {
-			console.log(`No ${service} integration found for workspace:`, workspaceId);
+			console.log(
+				`No ${service} integration found for workspace:`,
+				workspaceId
+			);
 			// Return null if no integration is connected
 			return NextResponse.json(null);
 		}
@@ -59,9 +66,12 @@ export async function GET(req: NextRequest) {
 
 		try {
 			// Query all integrations for this workspace
-			const integrations = await convex.query(api.integrations.getByWorkspaceId, {
-				workspaceId,
-			});
+			const integrations = await convex.query(
+				api.integrations.getByWorkspaceId,
+				{
+					workspaceId: workspaceId as Id<'workspaces'>,
+				}
+			);
 
 			return NextResponse.json(integrations);
 		} catch (convexError) {
