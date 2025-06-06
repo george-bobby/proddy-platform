@@ -143,7 +143,7 @@ export const UserProfileModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[90vh] p-0">
+      <DialogContent className="max-w-6xl h-[90vh] p-0 overflow-hidden">
         <div className="flex h-full overflow-hidden">
           {/* Left Panel - Profile Overview */}
           <div className="w-80 bg-gradient-to-b from-primary/5 to-primary/10 p-6 border-r flex-shrink-0">
@@ -186,6 +186,32 @@ export const UserProfileModal = ({
                       <Edit3 className="size-4" />
                       Edit Profile
                     </Button>
+                  )}
+
+                  {isEditMode && isEditing && (
+                    <div className="flex flex-col gap-2 mt-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancel}
+                        disabled={isUpdating}
+                        className="gap-2 w-full"
+                        size="sm"
+                      >
+                        <X className="size-4" />
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={isUpdating || !hasChanges}
+                        className="gap-2 w-full"
+                        size="sm"
+                        form="profile-form"
+                      >
+                        <Save className="size-4" />
+                        {isUpdating ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -237,7 +263,7 @@ export const UserProfileModal = ({
               </DialogTitle>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-w-0">
               {isEditMode ? (
                 <div className="h-full flex flex-col">
                   <Tabs defaultValue="profile" className="w-full h-full flex flex-col">
@@ -252,10 +278,10 @@ export const UserProfileModal = ({
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="profile" className="flex-1 overflow-y-auto" data-state="active">
-                      <div className="p-6 space-y-6">
+                    <TabsContent value="profile" className="flex-1 overflow-y-auto min-w-0 px-6" data-state="active">
+                      <div className="py-6 space-y-6 max-w-none">
                         {isEditing ? (
-                          <form onSubmit={handleSubmit} className="space-y-6">
+                          <form id="profile-form" onSubmit={handleSubmit} className="space-y-6">
                             <Card>
                               <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
@@ -356,27 +382,6 @@ export const UserProfileModal = ({
                                 <StatusTrackingSettings />
                               </CardContent>
                             </Card>
-
-                            <div className="flex justify-end gap-3 pt-4 border-t">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleCancel}
-                                disabled={isUpdating}
-                                className="gap-2"
-                              >
-                                <X className="size-4" />
-                                Cancel
-                              </Button>
-                              <Button
-                                type="submit"
-                                disabled={isUpdating || !hasChanges}
-                                className="gap-2"
-                              >
-                                <Save className="size-4" />
-                                {isUpdating ? 'Saving...' : 'Save Changes'}
-                              </Button>
-                            </div>
                           </form>
                         ) : (
                           <div className="space-y-6">
@@ -469,15 +474,15 @@ export const UserProfileModal = ({
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="notifications" className="flex-1 overflow-y-auto" data-state="inactive">
-                      <div className="p-6">
+                    <TabsContent value="notifications" className="flex-1 overflow-y-auto min-w-0 px-6" data-state="inactive">
+                      <div className="py-6">
                         <NotificationSettings />
                       </div>
                     </TabsContent>
                   </Tabs>
                 </div>
               ) : (
-                <div className="p-6 h-full overflow-y-auto">
+                <div className="p-6 h-full overflow-y-auto min-w-0">
                   <Card>
                     <CardHeader>
                       <CardTitle>Contact Information</CardTitle>
