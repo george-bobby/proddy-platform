@@ -8,10 +8,10 @@ import { useGetWorkspace } from "@/features/workspaces/api/use-get-workspace";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
-import { WorkspaceManagement } from "@/features/manage/components/workspace-management";
-import { ChannelsManagement } from "@/features/manage/components/channels-management";
-import { MembersManagement } from "@/features/manage/components/members-management";
-import { IntegrationsManagement } from "@/features/manage/components/integrations-management";
+import { WorkspaceManagement } from "@/features/manage/workspace-management";
+import { ChannelsManagement } from "@/features/manage/channels-management";
+import { MembersManagement } from "@/features/manage/members-management";
+import { IntegrationsManagement } from "@/features/manage/integrations-management";
 import { useRouter } from "next/navigation";
 import { WorkspaceToolbar } from "../toolbar";
 
