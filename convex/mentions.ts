@@ -630,7 +630,7 @@ export const sendMentionEmail = action({
 			}
 
 			// Send the email
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.DEPLOY_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${mention.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/mention`;
 			console.log(

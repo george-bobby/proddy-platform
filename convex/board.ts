@@ -559,7 +559,7 @@ export const sendCardAssignmentEmail = action({
 
 			// Send the email
 			// Make sure we're using the correct URL format for the API endpoint
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.DEPLOY_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
 			const apiUrl = `${baseUrl}/api/email/assignee`;
 			console.log('Sending email notification to:', assigneeEmail);

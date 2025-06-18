@@ -30,7 +30,7 @@ export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> =
   originalMessagePreview,
   replyMessagePreview,
   channelName = 'a channel',
-  workspaceUrl = 'https://proddy.tech',
+  workspaceUrl = process.env.NEXT_PUBLIC_DEPLOY_URL,
   workspaceName = 'Proddy',
 }) => {
   const previewText = `${replierName} replied to your message in ${channelName}`;

@@ -135,7 +135,7 @@ export const sendThreadReplyEmail = action({
 			}
 
 			// Send the email
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.DEPLOY_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${replyMessage.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/thread-reply`;
 			console.log(

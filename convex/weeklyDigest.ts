@@ -38,7 +38,7 @@ export const getUserWeeklyDigest = query({
 			if (workspaceStats) {
 				workspaceDigests.push({
 					workspaceName: workspace.name,
-					workspaceUrl: `https://proddy.tech/workspace/${workspace._id}`,
+					workspaceUrl: `${process.env.DEPLOY_URL}/workspace/${workspace._id}`,
 					stats: workspaceStats.stats,
 					topChannels: workspaceStats.topChannels,
 					recentTasks: workspaceStats.recentTasks,
@@ -268,7 +268,7 @@ async function getUserWeeklyDigestInternal(
 		if (workspaceStats) {
 			workspaceDigests.push({
 				workspaceName: workspace.name,
-				workspaceUrl: `https://proddy.tech/workspace/${workspace._id}`,
+				workspaceUrl: `${process.env.DEPLOY_URL}/workspace/${workspace._id}`,
 				stats: workspaceStats.stats,
 				topChannels: workspaceStats.topChannels,
 				recentTasks: workspaceStats.recentTasks,
@@ -424,7 +424,7 @@ export const testWeeklyDigest = mutation({
 			workspaces: [
 				{
 					workspaceName: 'Test Workspace',
-					workspaceUrl: 'https://proddy.tech/workspace/test',
+					workspaceUrl: `${process.env.DEPLOY_URL}/workspace/test`,
 					stats: {
 						totalMessages: 25,
 						totalTasks: 8,

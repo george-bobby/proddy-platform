@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
 		// Route to appropriate assistant module based on type
 		let targetUrl: string;
-		const baseUrl = 'https://proddy.tech';
+		const baseUrl = process.env.NEXT_PUBLIC_DEPLOY_URL;
 
 		switch (type.toLowerCase()) {
 			case 'github':

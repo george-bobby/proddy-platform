@@ -36,7 +36,7 @@ export const CardAssignmentTemplate: React.FC<Readonly<CardAssignmentTemplatePro
   listName,
   channelName,
   assignedBy = 'A team member',
-  workspaceUrl = 'https://proddy.tech',
+  workspaceUrl = process.env.NEXT_PUBLIC_DEPLOY_URL,
   workspaceName = 'Proddy',
 }) => {
   const previewText = `${assignedBy} assigned you to "${cardTitle}"`;

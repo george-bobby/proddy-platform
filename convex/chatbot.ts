@@ -319,7 +319,7 @@ ${searchResults.map((result) => `[${result.type.toUpperCase()}] ${result.text.su
 				`.trim();
 
 				// Call Assistant API
-				const baseUrl = 'https://proddy.tech';
+				const baseUrl = process.env.DEPLOY_URL;
 				const assistantApiUrl = `${baseUrl}/api/assistant`;
 
 				try {
@@ -775,7 +775,7 @@ CRITICAL INSTRUCTIONS FOR MEETING/EVENT QUERIES:
 Remember: Only answer based on the context provided. If the context doesn't contain relevant information, say "I don't have information about that in your workspace."`;
 
 			// 10. Generate response using the Next.js API route
-			const baseUrl = 'https://proddy.tech';
+			const baseUrl = process.env.DEPLOY_URL;
 			const apiUrl = `${baseUrl}/api/assistant`;
 
 			console.log(`[Chatbot] Calling assistant API at: ${apiUrl}`);
