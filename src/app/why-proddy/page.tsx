@@ -124,10 +124,7 @@ export default function WhyProddyPage() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-xl text-gray-600 mb-8"
                 >
-                  Proddy brings together the best of communication, task
-                  management, and planning tools in one seamless platform,
-                  enhanced by AI-powered daily recaps, smart summarization, and
-                  a collaborative canvas for visual thinking.
+                  Proddy brings together the best tools for student groups and small projects — messaging, tasks, planning, and more with an easy learning curve.
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
