@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 
 export async function POST(req: NextRequest) {
 	try {
-		const { type, message, workspaceContext, ...otherData } = await req.json();
-
-		if (!type) {
-			return NextResponse.json(
-				{ error: 'Assistant type is required' },
-				{ status: 400 }
-			);
-		}
+		const { message, workspaceContext, ...otherData } = await req.json();
 
 		if (!message) {
 			return NextResponse.json(
@@ -18,81 +13,48 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		console.log('[Assistant Router] Processing request:', {
-			type,
-			message: message.substring(0, 100),
+		const assistantTypes = [
+			'github',
+			'gmail',
+			'slack',
+			'jira',
+			'notion',
+			'clickup',
+			'chatbot',
+			'calendar',
+			'notes',
+			'tasks',
+			'board',
+		];
+
+		const systemPrompt = `You are an intent classification AI for a workspace assistant platform. Your job is to classify the user's message into one of the following assistant types: ${assistantTypes.join(', ')}.\n\nReply ONLY with the type (one word, lowercase, no extra text).\n\nUser message: ${message}`;
+
+		const result = await generateText({
+			model: openai('gpt-4o-mini'),
+			messages: [
+				{ role: 'system', content: systemPrompt },
+				{ role: 'user', content: message },
+			],
+			temperature: 0,
+			maxTokens: 10,
 		});
 
-		// Route to appropriate assistant module based on type
-		let targetUrl: string;
-		const baseUrl = process.env.NEXT_PUBLIC_DEPLOY_URL;
+		const predictedType = result.text.trim().toLowerCase();
 
-		switch (type.toLowerCase()) {
-			case 'github':
-				targetUrl = `${baseUrl}/api/assistant/old-github`;
-				break;
-			case 'gmail':
-			case 'email':
-				targetUrl = `${baseUrl}/api/assistant/gmail`;
-				break;
-			case 'slack':
-				targetUrl = `${baseUrl}/api/assistant/slack`;
-				break;
-			case 'jira':
-				targetUrl = `${baseUrl}/api/assistant/jira`;
-				break;
-			case 'notion':
-				targetUrl = `${baseUrl}/api/assistant/notion`;
-				break;
-			case 'clickup':
-				targetUrl = `${baseUrl}/api/assistant/clickup`;
-				break;
-			case 'chatbot':
-			case 'chat':
-				targetUrl = `${baseUrl}/api/assistant/chatbot`;
-				break;
-			case 'calendar':
-			case 'meeting':
-			case 'event':
-				targetUrl = `${baseUrl}/api/assistant/calendar`;
-				break;
-			case 'notes':
-			case 'note':
-				targetUrl = `${baseUrl}/api/assistant/notes`;
-				break;
-			case 'tasks':
-			case 'task':
-				targetUrl = `${baseUrl}/api/assistant/tasks`;
-				break;
-			case 'board':
-			case 'cards':
-				targetUrl = `${baseUrl}/api/assistant/board`;
-				break;
-			default:
-				return NextResponse.json(
-					{
-						error: `Unknown assistant type: ${type}`,
-						availableTypes: [
-							'github',
-							'gmail',
-							'slack',
-							'jira',
-							'notion',
-							'clickup',
-							'chatbot',
-							'calendar',
-							'notes',
-							'tasks',
-							'board',
-						],
-					},
-					{ status: 400 }
-				);
+		if (!assistantTypes.includes(predictedType)) {
+			return NextResponse.json(
+				{
+					error: `Could not classify message to a valid assistant type.`,
+					availableTypes: assistantTypes,
+					llmOutput: result.text,
+				},
+				{ status: 400 }
+			);
 		}
 
-		console.log('[Assistant Router] Routing to:', targetUrl);
+		const baseUrl = process.env.NEXT_PUBLIC_DEPLOY_URL;
+		const targetUrl = `${baseUrl}/api/assistant/${predictedType === 'github' ? 'old-github' : predictedType}`;
 
-		// Forward the request to the appropriate assistant module
 		const response = await fetch(targetUrl, {
 			method: 'POST',
 			headers: {
@@ -113,10 +75,9 @@ export async function POST(req: NextRequest) {
 
 		const data = await response.json();
 
-		// Add metadata about which assistant handled the request
 		return NextResponse.json({
 			...data,
-			assistantType: type,
+			assistantType: predictedType,
 			handledBy: targetUrl.split('/').pop(),
 		});
 	} catch (error) {
@@ -130,133 +91,4 @@ export async function POST(req: NextRequest) {
 			{ status: 500 }
 		);
 	}
-}
-
-// GET endpoint to list available assistant types
-export async function GET() {
-	return NextResponse.json({
-		availableAssistants: [
-			{
-				type: 'github',
-				description:
-					'Create issues, list repositories, manage GitHub workflows',
-				capabilities: [
-					'create_issue',
-					'list_issues',
-					'update_issue',
-					'get_issue',
-				],
-			},
-			{
-				type: 'gmail',
-				description: 'Send emails, manage inbox, search messages',
-				capabilities: [
-					'send_email',
-					'list_messages',
-					'search_messages',
-					'create_draft',
-					'manage_labels',
-				],
-			},
-			{
-				type: 'slack',
-				description: 'Send messages, manage channels, team communication',
-				capabilities: [
-					'send_message',
-					'list_channels',
-					'create_channel',
-					'invite_users',
-					'get_user_info',
-				],
-			},
-			{
-				type: 'jira',
-				description: 'Create issues, manage projects, track progress',
-				capabilities: [
-					'create_issue',
-					'list_issues',
-					'update_issue',
-					'add_comment',
-					'manage_projects',
-				],
-			},
-			{
-				type: 'notion',
-				description: 'Create pages, manage databases, collaborate on documents',
-				capabilities: [
-					'create_page',
-					'list_pages',
-					'update_page',
-					'create_database',
-					'query_database',
-				],
-			},
-			{
-				type: 'clickup',
-				description: 'Create tasks, manage projects, track productivity',
-				capabilities: [
-					'create_task',
-					'list_tasks',
-					'update_task',
-					'add_comment',
-					'manage_spaces',
-				],
-			},
-			{
-				type: 'chatbot',
-				description: 'General workspace assistant with RAG capabilities',
-				capabilities: [
-					'search_workspace',
-					'answer_questions',
-					'provide_context',
-				],
-			},
-			{
-				type: 'calendar',
-				description: 'Manage calendar events and meetings',
-				capabilities: [
-					'create_event',
-					'list_events',
-					'update_event',
-					'delete_event',
-				],
-			},
-			{
-				type: 'notes',
-				description: 'Create and manage workspace notes',
-				capabilities: [
-					'create_note',
-					'search_notes',
-					'update_note',
-					'organize_notes',
-				],
-			},
-			{
-				type: 'tasks',
-				description: 'Task and project management',
-				capabilities: [
-					'create_task',
-					'update_task',
-					'assign_task',
-					'track_progress',
-				],
-			},
-			{
-				type: 'board',
-				description: 'Kanban board and card management',
-				capabilities: [
-					'create_card',
-					'move_card',
-					'update_card',
-					'manage_lists',
-				],
-			},
-		],
-		usage: {
-			endpoint: '/api/assistant',
-			method: 'POST',
-			requiredFields: ['type', 'message'],
-			optionalFields: ['workspaceContext', 'userId', 'workspaceId'],
-		},
-	});
 }
