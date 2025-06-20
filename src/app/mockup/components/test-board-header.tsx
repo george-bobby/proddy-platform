@@ -60,29 +60,6 @@ export const TestBoardHeader = ({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Left side - Board info and stats */}
           <div className="flex flex-col gap-2">
-            {/* Breadcrumb Navigation */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToDashboard}
-                className="h-auto p-1 text-muted-foreground hover:text-foreground"
-              >
-                Dashboard
-              </Button>
-              <span>→</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToCalendar}
-                className="h-auto p-1 text-muted-foreground hover:text-foreground"
-              >
-                Calendar
-              </Button>
-              <span>→</span>
-              <span className="text-foreground font-medium">Project Board</span>
-            </div>
-
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-semibold">Project Management Board</h1>
