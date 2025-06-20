@@ -78,7 +78,7 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4 max-w-4xl"
           >
-            Your Startup's{" "}
+            Your Teams's{" "}
             <span className="text-primary relative">
               Second Brain
               <span className="absolute bottom-1 left-0 w-full h-3 bg-secondary/20 -z-10 rounded-full"></span>
