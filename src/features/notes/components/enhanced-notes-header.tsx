@@ -9,6 +9,7 @@ import { Note } from '../types';
 import { useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
+import { useRoom, useOthers } from '@/../liveblocks.config';
 
 interface EnhancedNotesHeaderProps {
   selectedNote?: Note | null;
@@ -25,22 +26,16 @@ export const EnhancedNotesHeader = ({
   searchQuery,
   onSearchChange,
 }: EnhancedNotesHeaderProps) => {
-  // Get workspace members for collaborators display
   const members = useQuery(api.members.get, { workspaceId }) || [];
+  const room = useRoom();
+  const others = useOthers();
 
-  // Get the note creator's member info
-  const noteCreator = selectedNote 
-    ? members.find(member => member._id === selectedNote.memberId)
-    : null;
-
-  // For demo purposes, show some collaborators (in real app, this would come from note data)
-  const collaborators = selectedNote ? [
-    { name: 'Alex Rodriguez', avatar: null },
-    { name: 'Sarah Johnson', avatar: null },
-    { name: 'Maya Patel', avatar: null },
-  ] : [];
+  // Optionally, filter members to only those present in the room (by userId)
+  // const presentUserIds = new Set(others.map(o => o.id));
+  // const presentMembers = members.filter(m => presentUserIds.has(m.user._id));  // For now, show all members
 
   const getInitials = (name: string) => {
+    if (!name) return '??';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
@@ -56,7 +51,7 @@ export const EnhancedNotesHeader = ({
   return (
     <div className="border-b bg-muted/30">
       {/* Collaborators Section */}
-      {collaborators.length > 0 && (
+      {members.length > 0 && (
         <div className="px-4 py-3 border-b">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
@@ -64,22 +59,22 @@ export const EnhancedNotesHeader = ({
               <span className="text-sm font-medium">Collaborators</span>
             </div>
             <div className="flex items-center gap-2">
-              {collaborators.slice(0, 4).map((collaborator, index) => (
+              {members.slice(0, 4).map((member: any, index: number) => (
                 <div key={index} className="flex items-center gap-1">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={collaborator.avatar || undefined} />
+                    <AvatarImage src={member.avatar || undefined} />
                     <AvatarFallback className="text-xs">
-                      {getInitials(collaborator.name)}
+                      {getInitials(member.name)}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-xs text-muted-foreground">
-                    {collaborator.name}
+                    {member.name}
                   </span>
                 </div>
               ))}
-              {collaborators.length > 4 && (
+              {members.length > 4 && (
                 <Badge variant="outline" className="text-xs">
-                  +{collaborators.length - 4} more
+                  +{members.length - 4} more
                 </Badge>
               )}
             </div>
@@ -102,7 +97,7 @@ export const EnhancedNotesHeader = ({
                   <div className="flex items-center gap-1">
                     <Tag className="h-3 w-3 text-muted-foreground" />
                     <div className="flex gap-1">
-                      {selectedNote.tags.slice(0, 2).map(tag => (
+                      {selectedNote.tags.slice(0, 2).map((tag: string) => (
                         <Badge key={tag} variant="outline" className="text-xs px-2 py-0 h-5">
                           {tag}
                         </Badge>

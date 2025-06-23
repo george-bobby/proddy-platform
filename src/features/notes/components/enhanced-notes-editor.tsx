@@ -83,11 +83,11 @@ export const EnhancedNotesEditor = ({
   // Check if content contains brainstorming keywords to show canvas link
   const shouldShowCanvasLink = () => {
     const content = note.content.toLowerCase();
-    return content.includes('brainstorm') || 
-           content.includes('canvas') || 
-           content.includes('diagram') ||
-           content.includes('visual') ||
-           tags.some(tag => ['brainstorm', 'canvas', 'visual', 'diagram'].includes(tag.toLowerCase()));
+    return content.includes('brainstorm') ||
+      content.includes('canvas') ||
+      content.includes('diagram') ||
+      content.includes('visual') ||
+      tags.some(tag => ['brainstorm', 'canvas', 'visual', 'diagram'].includes(tag.toLowerCase()));
   };
 
   return (

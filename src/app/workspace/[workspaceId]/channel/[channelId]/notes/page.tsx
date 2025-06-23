@@ -138,60 +138,59 @@ const NotesPage = () => {
     );
   }
 
+  // Wrap the entire notes UI in NotesRoom for Liveblocks presence
   return (
-    <div className="flex h-full flex-col">
-      {/* Enhanced Header with collaborators and search */}
-      <EnhancedNotesHeader
-        selectedNote={activeNote}
-        onCreateNote={() => handleCreateNote()}
-        workspaceId={workspaceId}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Enhanced Sidebar with categories */}
-        <EnhancedNotesSidebar
-          notes={notes}
-          folders={folders}
-          selectedNoteId={activeNoteId}
-          onNoteSelect={handleNoteSelect}
-          collapsed={sidebarCollapsed}
-          onCreateNote={handleCreateNote}
-          onCreateFolder={handleCreateFolder}
+    <NotesRoom noteId={activeNote?._id || channelId}>
+      <div className="flex h-full flex-col">
+        {/* Enhanced Header with collaborators and search */}
+        <EnhancedNotesHeader
+          selectedNote={activeNote}
+          onCreateNote={() => handleCreateNote()}
+          workspaceId={workspaceId}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-hidden">
-          {activeNote ? (
-            <NotesRoom noteId={activeNote._id}>
+        <div className="flex flex-1 overflow-hidden">
+          {/* Enhanced Sidebar with categories */}
+          <EnhancedNotesSidebar
+            workspaceId={workspaceId}
+            channelId={channelId}
+            selectedNoteId={activeNoteId}
+            onNoteSelect={handleNoteSelect}
+            collapsed={sidebarCollapsed}
+            onCreateNote={handleCreateNote}
+            onCreateFolder={handleCreateFolder}
+          />
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-hidden">
+            {activeNote ? (
               <EnhancedNotesEditor
                 note={activeNote}
                 onUpdate={handleNoteUpdate}
                 onTitleChange={handleTitleChange}
                 onContentChange={handleContentChange}
-                onSaveNote={() => {}}
+                onSaveNote={() => { }}
                 isLoading={isEditing}
                 workspaceId={workspaceId}
                 channelId={channelId}
               />
-            </NotesRoom>
-          ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">No note selected</h3>
-                <p className="text-sm mb-4">Select a note from the sidebar or create a new one</p>
-                <Button onClick={() => handleCreateNote()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Note
-                </Button>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <div className="text-center">
+                  <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-2">No note selected</h3>
+                  <p className="text-sm mb-4">Select a note from the sidebar or create a new one</p>
+                  <Button onClick={() => handleCreateNote()}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Note
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </NotesRoom>
   );
 };
 

@@ -13,7 +13,7 @@ import { Id } from "@/../convex/_generated/dataModel";
 
 interface NotesRoomProps {
     children: ReactNode;
-    noteId: Id<'notes'>;
+    noteId: Id<'notes'> | string;
     fallback?: ReactNode;
 }
 
