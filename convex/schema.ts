@@ -18,11 +18,13 @@ const schema = defineSchema({
 		location: v.optional(v.string()),
 		website: v.optional(v.string()),
 	}),
+
 	workspaces: defineTable({
 		name: v.string(),
 		userId: v.id('users'),
 		joinCode: v.string(),
 	}),
+
 	members: defineTable({
 		userId: v.id('users'),
 		workspaceId: v.id('workspaces'),
@@ -31,16 +33,19 @@ const schema = defineSchema({
 		.index('by_user_id', ['userId'])
 		.index('by_workspace_id', ['workspaceId'])
 		.index('by_workspace_id_user_id', ['workspaceId', 'userId']),
+
 	channels: defineTable({
 		name: v.string(),
 		workspaceId: v.id('workspaces'),
 		icon: v.optional(v.string()), // Store emoji as string
 	}).index('by_workspace_id', ['workspaceId']),
+
 	conversations: defineTable({
 		workspaceId: v.id('workspaces'),
 		memberOneId: v.id('members'),
 		memberTwoId: v.id('members'),
 	}).index('by_workspace_id', ['workspaceId']),
+
 	messages: defineTable({
 		body: v.string(),
 		image: v.optional(v.id('_storage')),
@@ -71,6 +76,7 @@ const schema = defineSchema({
 			searchField: 'body',
 			filterFields: ['workspaceId', 'channelId', 'conversationId'],
 		}),
+
 	events: defineTable({
 		title: v.string(),
 		date: v.number(), // timestamp for the event date
@@ -83,6 +89,7 @@ const schema = defineSchema({
 		.index('by_date', ['date'])
 		.index('by_message_id', ['messageId'])
 		.index('by_member_id', ['memberId']),
+
 	reactions: defineTable({
 		workspaceId: v.id('workspaces'),
 		messageId: v.id('messages'),
@@ -92,6 +99,8 @@ const schema = defineSchema({
 		.index('by_workspace_id', ['workspaceId'])
 		.index('by_message_id', ['messageId'])
 		.index('by_member_id', ['memberId']),
+
+	// Combined history and presence tables
 	history: defineTable({
 		userId: v.id('users'),
 		workspaceId: v.id('workspaces'),
@@ -104,6 +113,7 @@ const schema = defineSchema({
 		.index('by_workspace_id_user_id', ['workspaceId', 'userId'])
 		.index('by_channel_id', ['channelId'])
 		.index('by_workspace_channel', ['workspaceId', 'channelId']),
+
 	lists: defineTable({
 		channelId: v.id('channels'),
 		title: v.string(),
@@ -111,6 +121,7 @@ const schema = defineSchema({
 	})
 		.index('by_channel_id', ['channelId'])
 		.index('by_channel_id_order', ['channelId', 'order']),
+
 	cards: defineTable({
 		listId: v.id('lists'),
 		title: v.string(),
@@ -320,6 +331,7 @@ const schema = defineSchema({
 			)
 		),
 	}).index('by_user_id', ['userId']),
+
 	noteFolders: defineTable({
 		name: v.string(),
 		memberId: v.id('members'),
@@ -345,6 +357,7 @@ const schema = defineSchema({
 		folderId: v.optional(v.id('noteFolders')), // Reference to parent folder
 		coverImage: v.optional(v.id('_storage')),
 		icon: v.optional(v.string()),
+		tags: v.optional(v.array(v.string())), // Added from new schema
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	})
@@ -394,6 +407,7 @@ const schema = defineSchema({
 		.index('by_member_id', ['memberId'])
 		.index('by_workspace_id_member_id', ['workspaceId', 'memberId']),
 
+	// Keep the integrations table from old schema
 	integrations: defineTable({
 		workspaceId: v.id('workspaces'),
 		service: v.union(
