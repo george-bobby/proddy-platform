@@ -12,7 +12,7 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import { NotePage } from './note-page';
 
-interface EnhancedNotesEditorProps {
+interface NotesEditorProps {
   note: Note;
   onUpdate: (updates: Partial<Note>) => void;
   onTitleChange: (title: string) => void;
@@ -23,7 +23,7 @@ interface EnhancedNotesEditorProps {
   channelId: Id<'channels'>;
 }
 
-export const EnhancedNotesEditor = ({
+export const NotesEditor = ({
   note,
   onUpdate,
   onTitleChange,
@@ -32,7 +32,7 @@ export const EnhancedNotesEditor = ({
   isLoading = false,
   workspaceId,
   channelId,
-}: EnhancedNotesEditorProps) => {
+}: NotesEditorProps) => {
   const [title, setTitle] = useState(note.title);
   const [tags, setTags] = useState<string[]>(note.tags || []);
   const [isEditing, setIsEditing] = useState(false);

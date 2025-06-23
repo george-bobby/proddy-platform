@@ -15,7 +15,7 @@ import { useRoom, useOthers } from '@/../liveblocks.config';
 import { useDeleteNote } from '../api/use-delete-note';
 import { toast } from 'sonner';
 
-interface EnhancedNotesSidebarProps {
+interface NotesSidebarProps {
   workspaceId: Id<'workspaces'>;
   channelId: Id<'channels'>;
   selectedNoteId: string | null;
@@ -25,7 +25,7 @@ interface EnhancedNotesSidebarProps {
   onCreateFolder: () => void;
 }
 
-export const EnhancedNotesSidebar = ({
+export const NotesSidebar = ({
   workspaceId,
   channelId,
   selectedNoteId,
@@ -33,7 +33,7 @@ export const EnhancedNotesSidebar = ({
   collapsed,
   onCreateNote,
   onCreateFolder,
-}: EnhancedNotesSidebarProps) => {
+}: NotesSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: notes = [] } = useGetNotes(workspaceId, channelId);
   const { data: folders = [] } = useGetNoteFolders(workspaceId, channelId);

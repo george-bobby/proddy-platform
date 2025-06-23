@@ -11,7 +11,7 @@ import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useRoom, useOthers } from '@/../liveblocks.config';
 
-interface EnhancedNotesHeaderProps {
+interface NotesHeaderProps {
   selectedNote?: Note | null;
   onCreateNote: () => void;
   workspaceId: Id<'workspaces'>;
@@ -19,13 +19,13 @@ interface EnhancedNotesHeaderProps {
   onSearchChange: (query: string) => void;
 }
 
-export const EnhancedNotesHeader = ({
+export const NotesHeader = ({
   selectedNote,
   onCreateNote,
   workspaceId,
   searchQuery,
   onSearchChange,
-}: EnhancedNotesHeaderProps) => {
+}: NotesHeaderProps) => {
   const members = useQuery(api.members.get, { workspaceId }) || [];
   const room = useRoom();
   const others = useOthers();

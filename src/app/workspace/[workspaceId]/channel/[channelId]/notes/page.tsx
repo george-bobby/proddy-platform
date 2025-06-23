@@ -8,9 +8,9 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
-import { EnhancedNotesSidebar } from '@/features/notes/components/enhanced-notes-sidebar';
-import { EnhancedNotesHeader } from '@/features/notes/components/enhanced-notes-header';
-import { EnhancedNotesEditor } from '@/features/notes/components/enhanced-notes-editor';
+import { NotesSidebar } from '@/features/notes/components/notes-sidebar';
+import { NotesHeader } from '@/features/notes/components/notes-header';
+import { NotesEditor } from '@/features/notes/components/notes-editor';
 import { NotesRoom } from '@/features/notes/components/notes-room';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 import { Note } from '@/features/notes/types';
@@ -143,7 +143,7 @@ const NotesPage = () => {
     <NotesRoom noteId={activeNote?._id || channelId}>
       <div className="flex h-full flex-col">
         {/* Enhanced Header with collaborators and search */}
-        <EnhancedNotesHeader
+        <NotesHeader
           selectedNote={activeNote}
           onCreateNote={() => handleCreateNote()}
           workspaceId={workspaceId}
@@ -152,7 +152,7 @@ const NotesPage = () => {
         />
         <div className="flex flex-1 overflow-hidden">
           {/* Enhanced Sidebar with categories */}
-          <EnhancedNotesSidebar
+          <NotesSidebar
             workspaceId={workspaceId}
             channelId={channelId}
             selectedNoteId={activeNoteId}
@@ -164,7 +164,7 @@ const NotesPage = () => {
           {/* Main Content Area */}
           <div className="flex-1 overflow-hidden">
             {activeNote ? (
-              <EnhancedNotesEditor
+              <NotesEditor
                 note={activeNote}
                 onUpdate={handleNoteUpdate}
                 onTitleChange={handleTitleChange}
