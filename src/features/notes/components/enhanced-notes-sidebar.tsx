@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, Plus, Folder, FileText, Users, Lock, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, Plus, Folder, FileText, Users, Lock, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,6 +12,8 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { useGetNotes } from '../api/use-get-notes';
 import { useGetNoteFolders } from '../api/use-note-folders';
 import { useRoom, useOthers } from '@/../liveblocks.config';
+import { useDeleteNote } from '../api/use-delete-note';
+import { toast } from 'sonner';
 
 interface EnhancedNotesSidebarProps {
   workspaceId: Id<'workspaces'>;
@@ -36,6 +38,8 @@ export const EnhancedNotesSidebar = ({
   const { data: notes = [] } = useGetNotes(workspaceId, channelId);
   const { data: folders = [] } = useGetNoteFolders(workspaceId, channelId);
   const others = useOthers();
+  const { mutate: deleteNote } = useDeleteNote();
+  const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
 
   // Group notes by folder
   const notesByFolder = useMemo(() => {
@@ -89,6 +93,14 @@ export const EnhancedNotesSidebar = ({
       return date.toLocaleDateString([], { weekday: 'short' });
     } else {
       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
+  // Helper for delete with confirmation
+  const handleDeleteNote = async (noteId: string) => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      await deleteNote(noteId);
+      toast.success('Note deleted');
     }
   };
 
@@ -160,51 +172,69 @@ export const EnhancedNotesSidebar = ({
                   </div>
                 ) : (
                   folderNotes.map((note: Note) => (
-                    <button
+                    <div
                       key={note._id}
-                      onClick={() => onNoteSelect(note._id)}
-                      className={cn(
-                        "w-full text-left p-3 rounded-lg border transition-colors",
-                        selectedNoteId === note._id
-                          ? "bg-primary/10 border-primary/20"
-                          : "bg-background hover:bg-muted/50 border-transparent"
-                      )}
+                      className="relative group"
+                      onMouseEnter={() => setHoveredNoteId(note._id)}
+                      onMouseLeave={() => setHoveredNoteId(null)}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                          <span className="font-medium text-sm truncate">
-                            {note.title}
+                      <button
+                        onClick={() => onNoteSelect(note._id)}
+                        className={cn(
+                          "w-full text-left p-3 rounded-lg border transition-colors",
+                          selectedNoteId === note._id
+                            ? "bg-primary/10 border-primary/20"
+                            : "bg-background hover:bg-muted/50 border-transparent"
+                        )}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="font-medium text-sm truncate">
+                              {note.title}
+                            </span>
+                          </div>
+                          <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                            {formatDate(note.updatedAt)}
                           </span>
                         </div>
-                        <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                          {formatDate(note.updatedAt)}
-                        </span>
-                      </div>
-                      {/* Note preview */}
-                      <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                        {getPreviewText(note.content)}
-                      </div>
-                      {/* Tags */}
-                      {note.tags && note.tags.length > 0 && (
-                        <div className="flex gap-1 flex-wrap">
-                          {note.tags.slice(0, 2).map((tag: string) => (
-                            <Badge
-                              key={tag}
-                              variant="outline"
-                              className="text-xs px-1 py-0 h-4"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                          {note.tags.length > 2 && (
-                            <Badge variant="outline" className="text-xs px-1 py-0 h-4">
-                              +{note.tags.length - 2}
-                            </Badge>
-                          )}
+                        {/* Note preview */}
+                        <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                          {getPreviewText(note.content)}
                         </div>
+                        {/* Tags */}
+                        {note.tags && note.tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {note.tags.slice(0, 2).map((tag: string) => (
+                              <Badge
+                                key={tag}
+                                variant="outline"
+                                className="text-xs px-1 py-0 h-4"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                            {note.tags.length > 2 && (
+                              <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                                +{note.tags.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </button>
+                      {hoveredNoteId === note._id && (
+                        <button
+                          className="absolute top-2 right-2 p-1 rounded hover:bg-red-100 text-red-600 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNote(note._id);
+                          }}
+                          title="Delete note"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       )}
-                    </button>
+                    </div>
                   ))
                 )}
               </div>
@@ -221,51 +251,69 @@ export const EnhancedNotesSidebar = ({
                 </Badge>
               </div>
               {notesByFolder['General'].map((note: Note) => (
-                <button
+                <div
                   key={note._id}
-                  onClick={() => onNoteSelect(note._id)}
-                  className={cn(
-                    "w-full text-left p-3 rounded-lg border transition-colors",
-                    selectedNoteId === note._id
-                      ? "bg-primary/10 border-primary/20"
-                      : "bg-background hover:bg-muted/50 border-transparent"
-                  )}
+                  className="relative group"
+                  onMouseEnter={() => setHoveredNoteId(note._id)}
+                  onMouseLeave={() => setHoveredNoteId(null)}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                      <span className="font-medium text-sm truncate">
-                        {note.title}
+                  <button
+                    onClick={() => onNoteSelect(note._id)}
+                    className={cn(
+                      "w-full text-left p-3 rounded-lg border transition-colors",
+                      selectedNoteId === note._id
+                        ? "bg-primary/10 border-primary/20"
+                        : "bg-background hover:bg-muted/50 border-transparent"
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                        <span className="font-medium text-sm truncate">
+                          {note.title}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                        {formatDate(note.updatedAt)}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                      {formatDate(note.updatedAt)}
-                    </span>
-                  </div>
-                  {/* Note preview */}
-                  <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                    {getPreviewText(note.content)}
-                  </div>
-                  {/* Tags */}
-                  {note.tags && note.tags.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                      {note.tags.slice(0, 2).map((tag: string) => (
-                        <Badge
-                          key={tag}
-                          variant="outline"
-                          className="text-xs px-1 py-0 h-4"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                      {note.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs px-1 py-0 h-4">
-                          +{note.tags.length - 2}
-                        </Badge>
-                      )}
+                    {/* Note preview */}
+                    <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                      {getPreviewText(note.content)}
                     </div>
+                    {/* Tags */}
+                    {note.tags && note.tags.length > 0 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {note.tags.slice(0, 2).map((tag: string) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs px-1 py-0 h-4"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                        {note.tags.length > 2 && (
+                          <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                            +{note.tags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                  {hoveredNoteId === note._id && (
+                    <button
+                      className="absolute top-2 right-2 p-1 rounded hover:bg-red-100 text-red-600 z-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteNote(note._id);
+                      }}
+                      title="Delete note"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   )}
-                </button>
+                </div>
               ))}
             </div>
           )}

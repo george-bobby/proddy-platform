@@ -62,13 +62,13 @@ export const EnhancedNotesHeader = ({
               {members.slice(0, 4).map((member: any, index: number) => (
                 <div key={index} className="flex items-center gap-1">
                   <Avatar className="h-6 w-6">
-                    <AvatarImage src={member.avatar || undefined} />
+                    <AvatarImage src={member.user?.image || undefined} />
                     <AvatarFallback className="text-xs">
-                      {getInitials(member.name)}
+                      {getInitials(member.user?.name || '')}
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-xs text-muted-foreground">
-                    {member.name}
+                    {member.user?.name || 'Unknown'}
                   </span>
                 </div>
               ))}
