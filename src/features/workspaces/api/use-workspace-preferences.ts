@@ -6,7 +6,7 @@ import {
 	WorkspacePreference,
 	DashboardWidget,
 	WidgetSize,
-} from '@/../convex/userPreferences';
+} from '../../../../convex/preferences';
 
 /**
  * Hook to get workspace preferences for a specific workspace
@@ -16,7 +16,7 @@ export const useWorkspacePreferences = ({
 }: {
 	workspaceId: Id<'workspaces'>;
 }) => {
-	const data = useQuery(api.userPreferences.getWorkspacePreferences, {
+	const data = useQuery(api.preferences.getWorkspacePreferences, {
 		workspaceId,
 	});
 	const isLoading = data === undefined;
@@ -28,7 +28,7 @@ export const useWorkspacePreferences = ({
  * Hook to update workspace preferences for a specific workspace
  */
 export const useUpdateWorkspacePreferences = () => {
-	return useMutation(api.userPreferences.updateWorkspacePreferences);
+	return useMutation(api.preferences.updateWorkspacePreferences);
 };
 
 /**
@@ -49,7 +49,7 @@ export const useSidebarCollapsed = ({
 
 	// Mutation to update the collapsed state in Convex
 	const updateSidebarCollapsed = useMutation(
-		api.userPreferences.updateSidebarCollapsed
+		api.preferences.updateSidebarCollapsed
 	);
 
 	// Initialize local state from Convex when data is loaded
@@ -142,7 +142,7 @@ export const useDashboardWidgets = ({
 
 	// Mutation to update widgets in Convex
 	const updateDashboardWidgets = useMutation(
-		api.userPreferences.updateDashboardWidgets
+		api.preferences.updateDashboardWidgets
 	);
 
 	// Initialize local state from Convex when data is loaded

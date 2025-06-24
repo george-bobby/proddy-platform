@@ -51,7 +51,7 @@ export const updateLastActiveWorkspace = mutation({
 
 		// Check if user preferences already exist
 		const existingPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -65,7 +65,7 @@ export const updateLastActiveWorkspace = mutation({
 			});
 		} else {
 			// Create new preferences
-			await ctx.db.insert('userPreferences', {
+			await ctx.db.insert('preferences', {
 				userId,
 				lastActiveWorkspaceId: args.workspaceId,
 				lastActiveTimestamp: timestamp,
@@ -90,7 +90,7 @@ export const getLastActiveWorkspace = query({
 
 		// Get user preferences
 		const userPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -135,7 +135,7 @@ export const getUserPreferences = query({
 		}
 
 		return await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 	},
@@ -182,7 +182,7 @@ export const updateUserPreferences = mutation({
 
 		// Check if user preferences already exist
 		const existingPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -196,7 +196,7 @@ export const updateUserPreferences = mutation({
 			});
 		} else {
 			// Create new preferences
-			await ctx.db.insert('userPreferences', {
+			await ctx.db.insert('preferences', {
 				userId,
 				settings: args.settings,
 			});
@@ -216,7 +216,7 @@ export const isStatusTrackingEnabled = query({
 		if (!userId) return false;
 
 		const preferences = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -235,7 +235,7 @@ export const getNotificationPreferences = query({
 		if (!userId) return null;
 
 		const preferences = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -269,7 +269,7 @@ export const getWorkspacePreferences = query({
 
 		// Get user preferences
 		const userPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -286,16 +286,16 @@ export const getWorkspacePreferences = query({
 });
 
 /**
- * Fix userPreferences documents where notifications is a boolean instead of an object
+ * Fix preferences documents where notifications is a boolean instead of an object
  * This fixes the schema validation error where some documents have notifications: true instead of the expected object structure
  */
 export const fixNotificationsSchema = mutation({
 	args: {},
 	handler: async (ctx) => {
-		console.log('Starting migration to fix userPreferences notifications...');
+		console.log('Starting migration to fix preferences notifications...');
 
-		// Get all userPreferences documents
-		const allPreferences = await ctx.db.query('userPreferences').collect();
+		// Get all preferences documents
+		const allPreferences = await ctx.db.query('preferences').collect();
 
 		let fixedCount = 0;
 		let skippedCount = 0;
@@ -307,7 +307,7 @@ export const fixNotificationsSchema = mutation({
 
 			if (notifications === true || notifications === false) {
 				console.log(
-					`Fixing userPreferences document ${pref._id} - notifications was boolean: ${notifications}`
+					`Fixing preferences document ${pref._id} - notifications was boolean: ${notifications}`
 				);
 
 				// Convert boolean to proper object structure with defaults
@@ -348,15 +348,15 @@ export const fixNotificationsSchema = mutation({
 });
 
 /**
- * Check current state of userPreferences documents for schema issues
+ * Check current state of preferences documents for schema issues
  */
 export const checkNotificationsSchema = mutation({
 	args: {},
 	handler: async (ctx) => {
-		// Get all userPreferences documents to check the current state
-		const allPreferences = await ctx.db.query('userPreferences').collect();
+		// Get all preferences documents to check the current state
+		const allPreferences = await ctx.db.query('preferences').collect();
 
-		console.log(`Found ${allPreferences.length} userPreferences documents`);
+		console.log(`Found ${allPreferences.length} preferences documents`);
 
 		let problematicDocs = [];
 		let validDocs = 0;
@@ -421,7 +421,7 @@ export const updateWorkspacePreferences = mutation({
 
 		// Check if user preferences already exist
 		const existingPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -447,7 +447,7 @@ export const updateWorkspacePreferences = mutation({
 			});
 		} else {
 			// Create new preferences with workspace preferences
-			await ctx.db.insert('userPreferences', {
+			await ctx.db.insert('preferences', {
 				userId,
 				workspacePreferences: {
 					[workspaceIdStr]: args.preferences,
@@ -476,7 +476,7 @@ export const updateSidebarCollapsed = mutation({
 
 		// Check if user preferences already exist
 		const existingPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -505,7 +505,7 @@ export const updateSidebarCollapsed = mutation({
 			});
 		} else {
 			// Create new preferences with workspace preferences
-			await ctx.db.insert('userPreferences', {
+			await ctx.db.insert('preferences', {
 				userId,
 				workspacePreferences: {
 					[workspaceIdStr]: {
@@ -544,7 +544,7 @@ export const updateDashboardWidgets = mutation({
 
 		// Check if user preferences already exist
 		const existingPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -573,7 +573,7 @@ export const updateDashboardWidgets = mutation({
 			});
 		} else {
 			// Create new preferences with workspace preferences
-			await ctx.db.insert('userPreferences', {
+			await ctx.db.insert('preferences', {
 				userId,
 				workspacePreferences: {
 					[workspaceIdStr]: {

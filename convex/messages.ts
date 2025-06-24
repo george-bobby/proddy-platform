@@ -318,7 +318,7 @@ export const create = mutation({
 
 		// If this is a reply to a thread, send an email notification
 		if (args.parentMessageId) {
-			await ctx.scheduler.runAfter(0, api.threadReplies.sendThreadReplyEmail, {
+			await ctx.scheduler.runAfter(0, api.email.sendThreadReplyEmail, {
 				messageId,
 				parentMessageId: args.parentMessageId,
 			});
@@ -328,7 +328,7 @@ export const create = mutation({
 		if (args.conversationId) {
 			await ctx.scheduler.runAfter(
 				0,
-				api.directMessageEmails.sendDirectMessageEmail,
+				api.email.sendDirectMessageEmail,
 				{
 					messageId,
 				}
@@ -437,7 +437,7 @@ export const create = mutation({
 				});
 
 				// Schedule an email notification for the mention
-				await ctx.scheduler.runAfter(0, api.mentions.sendMentionEmail, {
+				await ctx.scheduler.runAfter(0, api.email.sendMentionEmail, {
 					mentionId,
 				});
 			}
@@ -958,6 +958,7 @@ export const getMessageBodies = query({
 					body: message.body,
 					authorName: user.name,
 					creationTime: message._creationTime,
+					memberId: message.memberId,
 				};
 			});
 
@@ -1227,72 +1228,6 @@ export const getMentionedMessages = query({
 		} catch (error) {
 			console.error('Error in getMentionedMessages:', error);
 			return [];
-		}
-	},
-});
-
-export const createTestMentionMessage = mutation({
-	args: {
-		workspaceId: v.id('workspaces'),
-		channelId: v.id('channels'),
-	},
-	handler: async (ctx, args) => {
-		try {
-			const userId = await getAuthUserId(ctx);
-			if (!userId) {
-				throw new Error('Unauthorized');
-			}
-
-			// Get the current member
-			const currentMember = await ctx.db
-				.query('members')
-				.withIndex('by_workspace_id_user_id', (q) =>
-					q
-						.eq('workspaceId', args.workspaceId)
-						.eq('userId', userId as Id<'users'>)
-				)
-				.unique();
-
-			if (!currentMember) {
-				throw new Error('Member not found');
-			}
-
-			// Get the user associated with the member
-			const user = await populateUser(ctx, currentMember.userId);
-			if (!user) {
-				throw new Error('User not found');
-			}
-
-			// Create a mention HTML element - this is the format used in the actual app
-			const mentionHtml = `<a href="/workspace/${args.workspaceId}/member/${currentMember._id}" id="mention-test-${Date.now()}" class="user-mention" data-member-id="${currentMember._id}" data-workspace-id="${args.workspaceId}" target="_self" style="color: #6366f1; font-weight: bold; cursor: pointer; text-decoration: none;">@${user.name}</a>`;
-
-			// Create a message body with the mention in Quill Delta format
-			// This is the format that the editor uses and the renderer expects
-			const messageBody = JSON.stringify({
-				ops: [
-					{ insert: 'This is a test message with a mention: ' },
-					{ insert: mentionHtml, attributes: { html: true } },
-					{ insert: '\n' },
-				],
-			});
-
-			console.log(
-				'createTestMentionMessage - created message body:',
-				messageBody
-			);
-
-			// Insert the message
-			const messageId = await ctx.db.insert('messages', {
-				memberId: currentMember._id,
-				body: messageBody,
-				workspaceId: args.workspaceId,
-				channelId: args.channelId,
-			});
-
-			return messageId;
-		} catch (error) {
-			console.error('Error in createTestMentionMessage:', error);
-			throw error;
 		}
 	},
 });

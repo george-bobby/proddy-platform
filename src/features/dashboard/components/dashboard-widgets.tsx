@@ -49,7 +49,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
-import { DashboardWidget, WidgetSize } from '@/../convex/userPreferences';
+import { DashboardWidget, WidgetSize } from '../../../../convex/preferences';
 
 interface DashboardWidgetsProps {
   workspaceId: Id<'workspaces'>;

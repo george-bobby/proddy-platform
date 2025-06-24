@@ -15,7 +15,7 @@ export const useOptimizedStatus = ({
 }: UseOptimizedStatusProps) => {
 	// Get user's status tracking preference
 	const isStatusTrackingEnabled = useQuery(
-		api.userPreferences.isStatusTrackingEnabled
+		api.preferences.isStatusTrackingEnabled
 	);
 
 	// Get status data (this will be null if status tracking is disabled)
@@ -67,7 +67,7 @@ export const useMultipleUserStatuses = (
 	userIds: Id<'users'>[]
 ) => {
 	const isStatusTrackingEnabled = useQuery(
-		api.userPreferences.isStatusTrackingEnabled
+		api.preferences.isStatusTrackingEnabled
 	);
 	const workspaceStatuses = useQuery(
 		api.status.getForWorkspace,
@@ -132,7 +132,7 @@ export const useMultipleUserStatuses = (
 // Hook for workspace-wide status summary
 export const useWorkspaceStatusSummary = (workspaceId: Id<'workspaces'>) => {
 	const isStatusTrackingEnabled = useQuery(
-		api.userPreferences.isStatusTrackingEnabled
+		api.preferences.isStatusTrackingEnabled
 	);
 	const workspaceStatuses = useQuery(
 		api.status.getForWorkspace,

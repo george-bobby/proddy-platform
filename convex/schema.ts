@@ -275,7 +275,7 @@ const schema = defineSchema({
 		.index('by_member_id', ['memberId'])
 		.index('by_message_id_member_id', ['messageId', 'memberId']),
 
-	userPreferences: defineTable({
+	preferences: defineTable({
 		userId: v.id('users'),
 		lastActiveWorkspaceId: v.optional(v.id('workspaces')),
 		lastActiveTimestamp: v.optional(v.number()),

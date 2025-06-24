@@ -23,7 +23,7 @@ export const update = mutation({
 
 		// Check if user has status tracking enabled
 		const userPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -145,10 +145,10 @@ export const getForWorkspace = query({
 
 		// Get all user preferences to check who has status tracking enabled
 		const userIds = statusEntries.map((s) => s.userId);
-		const userPreferences = await Promise.all(
+		const preferences = await Promise.all(
 			userIds.map(async (uid) => {
 				const prefs = await ctx.db
-					.query('userPreferences')
+					.query('preferences')
 					.withIndex('by_user_id', (q) => q.eq('userId', uid))
 					.unique();
 				return {
@@ -158,7 +158,7 @@ export const getForWorkspace = query({
 			})
 		);
 
-		const prefsMap = userPreferences.reduce(
+		const prefsMap = preferences.reduce(
 			(acc, pref) => {
 				acc[pref.userId] = pref.statusTrackingEnabled;
 				return acc;
@@ -229,7 +229,7 @@ export const getUserStatus = query({
 		// Check if the target user has status tracking enabled
 		const userId = args.userId;
 		const userPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 
@@ -319,7 +319,7 @@ export const getChannelPresence = query({
 		const results = [];
 		for (const presence of channelPresences) {
 			const userPrefs = await ctx.db
-				.query('userPreferences')
+				.query('preferences')
 				.withIndex('by_user_id', (q) => q.eq('userId', presence.userId))
 				.unique();
 
@@ -350,7 +350,7 @@ export const updateChannelPresence = mutation({
 
 		// Check if user has status tracking enabled
 		const userPrefs = await ctx.db
-			.query('userPreferences')
+			.query('preferences')
 			.withIndex('by_user_id', (q) => q.eq('userId', userId))
 			.unique();
 

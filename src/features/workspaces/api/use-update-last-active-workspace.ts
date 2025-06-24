@@ -8,5 +8,5 @@ interface UseUpdateLastActiveWorkspaceProps {
 }
 
 export const useUpdateLastActiveWorkspace = () => {
-  return useMutation(api.userPreferences.updateLastActiveWorkspace);
+  return useMutation(api.preferences.updateLastActiveWorkspace);
 };

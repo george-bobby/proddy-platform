@@ -1,6 +1,6 @@
-import { mutation, query, action } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import type { MutationCtx, QueryCtx, ActionCtx } from './_generated/server';
+import type { MutationCtx, QueryCtx } from './_generated/server';
 import type { Id } from './_generated/dataModel';
 import { getUserEmailFromMemberId, getUserNameFromMemberId } from './utils';
 import { api } from './_generated/api';
@@ -140,7 +140,7 @@ export const createCard = mutation({
 					});
 
 					// Send email notification
-					await ctx.scheduler.runAfter(0, api.board.sendCardAssignmentEmail, {
+					await ctx.scheduler.runAfter(0, api.email.sendCardAssignmentEmail, {
 						assigneeId,
 						cardId,
 						assignerId: creator._id,
@@ -246,7 +246,7 @@ export const updateCard = mutation({
 					});
 
 					// Send email notification
-					await ctx.scheduler.runAfter(0, api.board.sendCardAssignmentEmail, {
+					await ctx.scheduler.runAfter(0, api.email.sendCardAssignmentEmail, {
 						assigneeId,
 						cardId,
 						assignerId: updater._id,
@@ -464,161 +464,7 @@ export const getMembersForChannel = query({
 	},
 });
 
-// Define the return type for the email notification action
-type EmailNotificationResult = {
-	success: boolean;
-	error?: string;
-	partialSuccess?: boolean;
-};
-
-// Define the card details type based on the _getCardDetails query
-type CardDetails = {
-	title: string;
-	description?: string;
-	dueDate?: number | string;
-	priority?: string;
-	listName: string;
-	channelName: string;
-	channelId: Id<'channels'>;
-	workspaceId: Id<'workspaces'>;
-	listId: Id<'lists'>;
-	_id: Id<'cards'>;
-	_creationTime: number;
-	[key: string]: any; // For other properties from the card
-};
-
-// Action to send email notification for card assignment
-export const sendCardAssignmentEmail = action({
-	args: {
-		assigneeId: v.id('members'),
-		cardId: v.id('cards'),
-		assignerId: v.id('members'),
-	},
-	handler: async (
-		ctx: ActionCtx,
-		{
-			assigneeId,
-			cardId,
-			assignerId,
-		}: {
-			assigneeId: Id<'members'>;
-			cardId: Id<'cards'>;
-			assignerId: Id<'members'>;
-		}
-	): Promise<EmailNotificationResult> => {
-		try {
-			// Get the card details
-			console.log(
-				'Getting card details for email notification, cardId:',
-				cardId
-			);
-			const card: CardDetails | null = await ctx.runQuery(
-				api.board._getCardDetails,
-				{ cardId }
-			);
-			if (!card) {
-				console.error('Card not found for email notification:', cardId);
-				return { success: false, error: 'Card not found' };
-			}
-			console.log('Card details retrieved:', {
-				title: card.title,
-				listName: card.listName,
-				channelName: card.channelName,
-			});
-
-			// Get the assignee's email and name
-			console.log('Getting assignee email and name, assigneeId:', assigneeId);
-			const assigneeEmail: string | null = await ctx.runQuery(
-				api.board._getMemberEmail,
-				{
-					memberId: assigneeId,
-				}
-			);
-			const assigneeName: string | null = await ctx.runQuery(
-				api.board._getMemberName,
-				{
-					memberId: assigneeId,
-				}
-			);
-			console.log('Assignee info:', { assigneeEmail, assigneeName });
-
-			if (!assigneeEmail) {
-				console.error('Assignee email not found:', assigneeId);
-				return { success: false, error: 'Assignee email not found' };
-			}
-
-			// Get the assigner's name
-			console.log('Getting assigner name, assignerId:', assignerId);
-			const assignerName: string | null = await ctx.runQuery(
-				api.board._getMemberName,
-				{
-					memberId: assignerId,
-				}
-			);
-			console.log('Assigner name:', assignerName);
-
-			// Send the email
-			// Make sure we're using the correct URL format for the API endpoint
-			const baseUrl = process.env.DEPLOY_URL;
-			const workspaceUrl = `${baseUrl}/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
-			const apiUrl = `${baseUrl}/api/email/assignee`;
-			console.log('Sending email notification to:', assigneeEmail);
-			console.log('Using API URL:', apiUrl);
-
-			try {
-				const response: Response = await fetch(apiUrl, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						to: assigneeEmail,
-						firstName: assigneeName || 'User',
-						type: 'card_assignment',
-						cardTitle: card.title,
-						cardDescription: card.description,
-						dueDate: card.dueDate,
-						priority: card.priority,
-						listName: card.listName,
-						channelName: card.channelName,
-						assignedBy: assignerName || 'A team member',
-						workspaceUrl,
-						workspaceName: 'Proddy',
-					}),
-				});
-
-				// Log the response status
-				console.log('Email API response status:', response.status);
-
-				// If we can't reach the email API, log it but don't fail the whole operation
-				if (!response.ok) {
-					console.error(`Email API returned status ${response.status}`);
-					// We'll continue and handle this in the next section
-					return {
-						success: false,
-						error: `Email API returned status ${response.status}`,
-						// We still created the mention, so it's a partial success
-						partialSuccess: true,
-					};
-				}
-
-				return { success: true };
-			} catch (fetchError: unknown) {
-				// If we can't reach the email API at all, log it but don't fail the whole operation
-				console.error('Failed to reach email API:', fetchError);
-				return {
-					success: false,
-					error: `Failed to reach email API: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`,
-					// We still created the mention, so it's a partial success
-					partialSuccess: true,
-				};
-			}
-		} catch (error) {
-			console.error('Error sending card assignment email:', error);
-			return { success: false, error: String(error) };
-		}
-	},
-});
+// NOTE: Email functions have been moved to convex/email.ts
 
 // Helper query to get card details for email
 export const _getCardDetails = query({

@@ -19,7 +19,7 @@ export const StatusTracker = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if user has status tracking enabled
-  const isStatusTrackingEnabled = useQuery(api.userPreferences.isStatusTrackingEnabled);
+  const isStatusTrackingEnabled = useQuery(api.preferences.isStatusTrackingEnabled);
 
   // Track authentication state changes
   useEffect(() => {

@@ -28,7 +28,7 @@ crons.daily(
 crons.weekly(
 	'weekly-digest-monday',
 	{ dayOfWeek: 'monday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'monday' }
 );
 
@@ -36,7 +36,7 @@ crons.weekly(
 crons.weekly(
 	'weekly-digest-tuesday',
 	{ dayOfWeek: 'tuesday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'tuesday' }
 );
 
@@ -44,7 +44,7 @@ crons.weekly(
 crons.weekly(
 	'weekly-digest-wednesday',
 	{ dayOfWeek: 'wednesday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'wednesday' }
 );
 
@@ -52,7 +52,7 @@ crons.weekly(
 crons.weekly(
 	'weekly-digest-thursday',
 	{ dayOfWeek: 'thursday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'thursday' }
 );
 
@@ -60,7 +60,7 @@ crons.weekly(
 crons.weekly(
 	'weekly-digest-friday',
 	{ dayOfWeek: 'friday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'friday' }
 );
 
@@ -68,7 +68,7 @@ crons.weekly(
 crons.weekly(
 	'weekly-digest-saturday',
 	{ dayOfWeek: 'saturday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'saturday' }
 );
 
@@ -76,7 +76,7 @@ crons.weekly(
 crons.weekly(
 	'weekly-digest-sunday',
 	{ dayOfWeek: 'sunday', hourUTC: 9, minuteUTC: 0 },
-	internal.weeklyDigest.sendWeeklyDigests,
+	internal.email.sendWeeklyDigests,
 	{ dayOfWeek: 'sunday' }
 );
 

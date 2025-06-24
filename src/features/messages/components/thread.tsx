@@ -27,7 +27,7 @@ const Editor = dynamic(() => import('@/components/editor'), {
   ),
 });
 
-const TIME_THRESHOLD = 5;
+const TIME_THRESHOLD = 15;
 
 const formatDateLabel = (dateStr: string) => {
   const date = new Date(dateStr);
