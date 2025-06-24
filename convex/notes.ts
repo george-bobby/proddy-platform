@@ -10,7 +10,6 @@ export const create = mutation({
     content: v.string(),
     workspaceId: v.id("workspaces"),
     channelId: v.id("channels"),
-    folderId: v.optional(v.id("noteFolders")),
     icon: v.optional(v.string()),
     coverImage: v.optional(v.id("_storage")),
     tags: v.optional(v.array(v.string())),
@@ -33,15 +32,6 @@ export const create = mutation({
       throw new Error("Unauthorized");
     }
 
-    // If folderId is provided, verify it exists and belongs to the same channel
-    if (args.folderId) {
-      const folder = await ctx.db.get(args.folderId);
-
-      if (!folder || folder.channelId !== args.channelId) {
-        throw new Error("Invalid folder");
-      }
-    }
-
     const now = Date.now();
 
     const noteId = await ctx.db.insert("notes", {
@@ -50,7 +40,6 @@ export const create = mutation({
       workspaceId: args.workspaceId,
       channelId: args.channelId,
       memberId: member._id,
-      folderId: args.folderId,
       icon: args.icon,
       coverImage: args.coverImage,
       tags: args.tags,
@@ -166,43 +155,6 @@ export const get = query({
   },
 });
 
-// Get notes by folder
-export const getByFolder = query({
-  args: {
-    folderId: v.id("noteFolders"),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (!userId) {
-      throw new Error("Unauthorized");
-    }
-
-    const folder = await ctx.db.get(args.folderId);
-
-    if (!folder) {
-      throw new Error("Folder not found");
-    }
-
-    const member = await ctx.db
-      .query("members")
-      .withIndex("by_workspace_id_user_id", (q) =>
-        q.eq("workspaceId", folder.workspaceId).eq("userId", userId)
-      )
-      .first();
-
-    if (!member) {
-      throw new Error("Unauthorized");
-    }
-
-    const notes = await ctx.db
-      .query("notes")
-      .withIndex("by_folder_id", (q) => q.eq("folderId", args.folderId))
-      .collect();
-
-    return notes;
-  },
-});
 
 // Get a single note by ID with noteId parameter
 export const getById = query({
@@ -243,7 +195,6 @@ export const update = mutation({
     id: v.id("notes"),
     title: v.optional(v.string()),
     content: v.optional(v.string()),
-    folderId: v.optional(v.union(v.id("noteFolders"), v.null())),
     icon: v.optional(v.union(v.string(), v.null())),
     coverImage: v.optional(v.union(v.id("_storage"), v.null())),
     tags: v.optional(v.array(v.string())),
@@ -272,15 +223,6 @@ export const update = mutation({
       throw new Error("Unauthorized");
     }
 
-    // If folderId is provided and not null, verify it exists and belongs to the same channel
-    if (args.folderId && args.folderId !== null) {
-      const folder = await ctx.db.get(args.folderId);
-
-      if (!folder || folder.channelId !== existingNote.channelId) {
-        throw new Error("Invalid folder");
-      }
-    }
-
     const now = Date.now();
 
     // Prepare update object
@@ -293,11 +235,6 @@ export const update = mutation({
 
     if (args.content !== undefined) {
       updateObj.content = args.content;
-    }
-
-    if (args.folderId !== undefined) {
-      // If null, set to undefined to remove the field
-      updateObj.folderId = args.folderId === null ? undefined : args.folderId;
     }
 
     if (args.icon !== undefined) {

@@ -28,7 +28,6 @@ import type * as integrations from "../integrations.js";
 import type * as members from "../members.js";
 import type * as mentions from "../mentions.js";
 import type * as messages from "../messages.js";
-import type * as noteFolders from "../noteFolders.js";
 import type * as notes from "../notes.js";
 import type * as reactions from "../reactions.js";
 import type * as search from "../search.js";
@@ -66,7 +65,6 @@ declare const fullApi: ApiFromModules<{
   members: typeof members;
   mentions: typeof mentions;
   messages: typeof messages;
-  noteFolders: typeof noteFolders;
   notes: typeof notes;
   reactions: typeof reactions;
   search: typeof search;

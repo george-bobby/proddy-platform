@@ -34,7 +34,6 @@ const NotesPage = () => {
 
   // Convex queries
   const notes = useQuery(api.notes.list, { workspaceId, channelId }) || [];
-  const folders = useQuery(api.noteFolders.list, { workspaceId, channelId }) || [];
 
   // Get active note
   const activeNote = useQuery(
@@ -122,7 +121,7 @@ const NotesPage = () => {
   };
 
   // Show empty state if no notes and no folders
-  if (notes.length === 0 && folders.length === 0) {
+  if (notes.length === 0) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
         <div className="text-center">

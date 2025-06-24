@@ -332,21 +332,7 @@ const schema = defineSchema({
 		),
 	}).index('by_user_id', ['userId']),
 
-	noteFolders: defineTable({
-		name: v.string(),
-		memberId: v.id('members'),
-		workspaceId: v.id('workspaces'),
-		channelId: v.id('channels'),
-		icon: v.optional(v.string()),
-		parentFolderId: v.optional(v.id('noteFolders')), // For nested folders
-		createdAt: v.number(),
-		updatedAt: v.number(),
-	})
-		.index('by_workspace_id', ['workspaceId'])
-		.index('by_channel_id', ['channelId'])
-		.index('by_member_id', ['memberId'])
-		.index('by_workspace_id_channel_id', ['workspaceId', 'channelId'])
-		.index('by_parent_folder_id', ['parentFolderId']),
+
 
 	notes: defineTable({
 		title: v.string(),
@@ -354,7 +340,6 @@ const schema = defineSchema({
 		memberId: v.id('members'),
 		workspaceId: v.id('workspaces'),
 		channelId: v.id('channels'),
-		folderId: v.optional(v.id('noteFolders')), // Reference to parent folder
 		coverImage: v.optional(v.id('_storage')),
 		icon: v.optional(v.string()),
 		tags: v.optional(v.array(v.string())), // Added from new schema
@@ -365,7 +350,6 @@ const schema = defineSchema({
 		.index('by_channel_id', ['channelId'])
 		.index('by_member_id', ['memberId'])
 		.index('by_workspace_id_channel_id', ['workspaceId', 'channelId'])
-		.index('by_folder_id', ['folderId'])
 		.searchIndex('search_title_content', {
 			searchField: 'title',
 			filterFields: ['workspaceId', 'channelId'],

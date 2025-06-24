@@ -7,10 +7,9 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Note, NoteFolder } from '../types';
+import { Note } from '../types';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useGetNotes } from '../api/use-get-notes';
-import { useGetNoteFolders } from '../api/use-note-folders';
 import { useRoom, useOthers } from '@/../liveblocks.config';
 import { useDeleteNote } from '../api/use-delete-note';
 import { toast } from 'sonner';
@@ -21,8 +20,7 @@ interface NotesSidebarProps {
   selectedNoteId: string | null;
   onNoteSelect: (noteId: string) => void;
   collapsed: boolean;
-  onCreateNote: (folderId?: Id<'noteFolders'>) => void;
-  onCreateFolder: () => void;
+  onCreateNote: () => void;
 }
 
 export const NotesSidebar = ({
@@ -32,37 +30,22 @@ export const NotesSidebar = ({
   onNoteSelect,
   collapsed,
   onCreateNote,
-  onCreateFolder,
 }: NotesSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: notes = [] } = useGetNotes(workspaceId, channelId);
-  const { data: folders = [] } = useGetNoteFolders(workspaceId, channelId);
   const others = useOthers();
   const { mutate: deleteNote } = useDeleteNote();
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
 
-  // Group notes by folder
-  const notesByFolder = useMemo(() => {
-    const filteredNotes = notes.filter((note: Note) => {
+  // Filter notes based on search query
+  const filteredNotes = useMemo(() => {
+    return notes.filter((note: Note) => {
       const matchesSearch = note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (note.tags && note.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase())));
       return matchesSearch;
     });
-    const byFolder: Record<string, Note[]> = {};
-    folders.forEach((folder: NoteFolder) => {
-      byFolder[folder._id] = [];
-    });
-    byFolder['General'] = [];
-    filteredNotes.forEach((note: Note) => {
-      if (note.folderId && byFolder[note.folderId]) {
-        byFolder[note.folderId].push(note);
-      } else {
-        byFolder['General'].push(note);
-      }
-    });
-    return byFolder;
-  }, [notes, folders, searchQuery]);
+  }, [notes, searchQuery]);
 
   const getPreviewText = (content: string) => {
     try {
@@ -149,108 +132,19 @@ export const NotesSidebar = ({
           </Button>
         </div>
       </div>
-      {/* Folders and Notes List */}
+      {/* Notes List */}
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {folders.map((folder: NoteFolder) => {
-            const folderNotes = notesByFolder[folder._id] || [];
-            return (
-              <div key={folder._id} className="mb-4">
-                <button
-                  onClick={() => onNoteSelect(folder._id)}
-                  className="flex items-center gap-2 w-full px-2 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Folder className="h-3 w-3" />
-                  <span>{folder.name}</span>
-                  <Badge variant="secondary" className="ml-auto text-xs">
-                    {folderNotes.length}
-                  </Badge>
-                </button>
-                {folderNotes.length === 0 ? (
-                  <div className="text-xs text-muted-foreground px-2 py-2">
-                    No notes in this folder
-                  </div>
-                ) : (
-                  folderNotes.map((note: Note) => (
-                    <div
-                      key={note._id}
-                      className="relative group"
-                      onMouseEnter={() => setHoveredNoteId(note._id)}
-                      onMouseLeave={() => setHoveredNoteId(null)}
-                    >
-                      <button
-                        onClick={() => onNoteSelect(note._id)}
-                        className={cn(
-                          "w-full text-left p-3 rounded-lg border transition-colors",
-                          selectedNoteId === note._id
-                            ? "bg-primary/10 border-primary/20"
-                            : "bg-background hover:bg-muted/50 border-transparent"
-                        )}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <FileText className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                            <span className="font-medium text-sm truncate">
-                              {note.title}
-                            </span>
-                          </div>
-                          <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                            {formatDate(note.updatedAt)}
-                          </span>
-                        </div>
-                        {/* Note preview */}
-                        <div className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                          {getPreviewText(note.content)}
-                        </div>
-                        {/* Tags */}
-                        {note.tags && note.tags.length > 0 && (
-                          <div className="flex gap-1 flex-wrap">
-                            {note.tags.slice(0, 2).map((tag: string) => (
-                              <Badge
-                                key={tag}
-                                variant="outline"
-                                className="text-xs px-1 py-0 h-4"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                            {note.tags.length > 2 && (
-                              <Badge variant="outline" className="text-xs px-1 py-0 h-4">
-                                +{note.tags.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-                      </button>
-                      {hoveredNoteId === note._id && (
-                        <button
-                          className="absolute top-2 right-2 p-1 rounded hover:bg-red-100 text-red-600 z-10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNote(note._id);
-                          }}
-                          title="Delete note"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            );
-          })}
-          {/* General notes (not in any folder) */}
-          {notesByFolder['General'] && notesByFolder['General'].length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center gap-2 w-full px-2 py-2 text-sm font-medium text-muted-foreground">
-                <Folder className="h-3 w-3" />
-                <span>General</span>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  {notesByFolder['General'].length}
-                </Badge>
-              </div>
-              {notesByFolder['General'].map((note: Note) => (
+          {filteredNotes.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm text-muted-foreground">
+                {searchQuery ? 'No notes match your search' : 'No notes yet'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredNotes.map((note: Note) => (
                 <div
                   key={note._id}
                   className="relative group"

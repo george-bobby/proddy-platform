@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
-import { FileText, Plus, FolderPlus, Save } from 'lucide-react';
+import { FileText, Plus, Save } from 'lucide-react';
 import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { EmptyNotes } from '@/features/notes/components/empty-notes';
 import { NoteEditor } from '@/features/notes/components/note-editor';
-import { FolderDialog } from '@/features/notes/components/folder-dialog';
+
 
 const NotesPage = () => {
   const params = useParams();
@@ -21,7 +21,7 @@ const NotesPage = () => {
   const [activeNoteId, setActiveNoteId] = useState<Id<'notes'> | null>(null);
   const [title, setTitle] = useState('Untitled');
   const [content, setContent] = useState(JSON.stringify({ ops: [{ insert: '\n' }] }));
-  const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
+
 
   // Convex queries
   const notes = useQuery(api.notes.list, {
@@ -29,10 +29,7 @@ const NotesPage = () => {
     channelId,
   }) || [];
 
-  const folders = useQuery(api.noteFolders.list, {
-    workspaceId,
-    channelId,
-  }) || [];
+
 
   // Get active note
   const activeNote = useQuery(
@@ -43,7 +40,6 @@ const NotesPage = () => {
   // Convex mutations
   const createNote = useMutation(api.notes.create);
   const updateNote = useMutation(api.notes.update);
-  const createFolder = useMutation(api.noteFolders.create);
 
   // Update title and content when active note changes
   useEffect(() => {
@@ -83,27 +79,7 @@ const NotesPage = () => {
     }
   };
 
-  // Handle folder creation
-  const handleCreateFolder = async (name: string) => {
-    try {
-      const folderName = name && name.trim() !== '' ? name : 'New Folder';
 
-      // Close the dialog
-      setIsFolderDialogOpen(false);
-
-      // Create the folder in Convex
-      await createFolder({
-        name: folderName,
-        workspaceId,
-        channelId,
-      });
-
-      toast.success(`Folder "${folderName}" created`);
-    } catch (error) {
-      console.error('Failed to create folder:', error);
-      toast.error('Failed to create folder');
-    }
-  };
 
   // Handle note selection
   const handleNoteSelect = (noteId: Id<'notes'>) => {
@@ -138,22 +114,12 @@ const NotesPage = () => {
     }
   };
 
-  // Show empty state if no notes and no folders
-  if (notes.length === 0 && folders.length === 0) {
+  // Show empty state if no notes
+  if (notes.length === 0) {
     return (
-      <>
-        <EmptyNotes
-          onCreate={handleCreateNote}
-          onCreateFolder={() => setIsFolderDialogOpen(true)}
-        />
-        <FolderDialog
-          isOpen={isFolderDialogOpen}
-          onClose={() => setIsFolderDialogOpen(false)}
-          onSubmit={handleCreateFolder}
-          title="Create Folder"
-          description="Enter a name for your new folder"
-        />
-      </>
+      <EmptyNotes
+        onCreate={handleCreateNote}
+      />
     );
   }
 
@@ -161,38 +127,7 @@ const NotesPage = () => {
     <div className="flex h-full bg-white">
       {/* Sidebar */}
       <div className="w-64 h-full border-r overflow-y-auto p-4">
-        {/* Folders section */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-muted-foreground">FOLDERS</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-5 w-5"
-              onClick={() => setIsFolderDialogOpen(true)}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
 
-          {folders.length > 0 ? (
-            <div className="space-y-1">
-              {folders.map((folder) => (
-                <div
-                  key={folder._id}
-                  className="flex items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"
-                >
-                  <FolderPlus className="h-4 w-4 mr-2 text-blue-500" />
-                  <span className="truncate">{folder.name}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground p-2">
-              No folders yet - Click + to create one
-            </div>
-          )}
-        </div>
 
         {/* Notes section */}
         <div>
@@ -277,13 +212,7 @@ const NotesPage = () => {
         </div>
       )}
 
-      <FolderDialog
-        isOpen={isFolderDialogOpen}
-        onClose={() => setIsFolderDialogOpen(false)}
-        onSubmit={handleCreateFolder}
-        title="Create Folder"
-        description="Enter a name for your new folder"
-      />
+
     </div>
   );
 };

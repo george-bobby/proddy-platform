@@ -8,7 +8,6 @@ export interface Note {
   memberId: Id<"members">;
   workspaceId: Id<"workspaces">;
   channelId: Id<"channels">;
-  folderId?: Id<"noteFolders">;
   coverImage?: Id<"_storage">;
   icon?: string;
   tags?: string[];
@@ -16,26 +15,9 @@ export interface Note {
   updatedAt: number;
 }
 
-export interface NoteFolder {
-  _id: Id<"noteFolders">;
-  _creationTime: number;
-  name: string;
-  memberId: Id<"members">;
-  workspaceId: Id<"workspaces">;
-  channelId: Id<"channels">;
-  parentFolderId?: Id<"noteFolders">;
-  icon?: string;
-  createdAt: number;
-  updatedAt: number;
-}
 
-export interface FolderWithNotes extends NoteFolder {
-  notes: Note[];
-  subfolders: FolderWithNotes[];
-}
 
 export interface FolderTreeItem {
-  folder: NoteFolder;
   notes: Note[];
   subfolders: FolderTreeItem[];
   isOpen: boolean;
