@@ -1,8 +1,9 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useContextMenu } from '../contexts/context-menu-context';
+import { useMessageSelection } from '@/features/smart/contexts/message-selection-context';
 import type { Id } from '../../../../convex/_generated/dataModel';
 
 interface MessageContextMenuProps {
@@ -21,6 +22,7 @@ export const MessageContextMenu = ({
   onAction,
 }: MessageContextMenuProps) => {
   const { contextMenu, closeContextMenu } = useContextMenu();
+  const { selectedMessages } = useMessageSelection();
 
   if (!contextMenu.show || contextMenu.messageId !== messageId) {
     return null;
@@ -55,6 +57,15 @@ export const MessageContextMenu = ({
       >
         Copy Message
       </button>
+      {selectedMessages.length > 0 && (
+        <button
+          className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+          onClick={() => handleAction('summarize')}
+        >
+          <Sparkles className="h-4 w-4" />
+          Summarize Selected
+        </button>
+      )}
       <hr className="my-1" />
       <button
         className="w-full px-3 py-2 text-left text-sm bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 font-medium"

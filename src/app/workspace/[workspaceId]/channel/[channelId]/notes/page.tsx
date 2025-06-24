@@ -13,6 +13,7 @@ import { NotesHeader } from '@/features/notes/components/notes-header';
 import { NotesEditor } from '@/features/notes/components/notes-editor';
 import { NotesRoom } from '@/features/notes/components/notes-room';
 import { useDocumentTitle } from '@/hooks/use-document-title';
+import { useNoteContent } from '@/hooks/use-note-content';
 import { Note } from '@/features/notes/types';
 
 const NotesPage = () => {
@@ -24,7 +25,6 @@ const NotesPage = () => {
   const [activeNoteId, setActiveNoteId] = useState<Id<"notes"> | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
 
   // Get channel information for the title
   const channel = useQuery(api.channels.getById, { id: channelId });
@@ -44,6 +44,36 @@ const NotesPage = () => {
   // Convex mutations
   const createNote = useMutation(api.notes.create);
   const updateNote = useMutation(api.notes.update);
+
+  // Handle note updates
+  const handleNoteUpdate = async (updates: Partial<Note>) => {
+    if (!activeNoteId) return;
+
+    try {
+      await updateNote({
+        id: activeNoteId,
+        ...updates,
+      });
+      // Removed toast notification for better UX
+    } catch (error) {
+      console.error("Failed to update note:", error);
+      toast.error("Failed to update note");
+    }
+  };
+
+  // Use the note content hook for better conflict resolution
+  const {
+    localContent,
+    localTitle,
+    isTyping,
+    handleContentChange,
+    handleTitleChange,
+    hasUnsavedChanges,
+  } = useNoteContent({
+    note: activeNote,
+    onUpdate: handleNoteUpdate,
+    debounceMs: 1000,
+  });
 
   // Handle note selection
   const handleNoteSelect = (noteId: string) => {
@@ -75,33 +105,6 @@ const NotesPage = () => {
     }
   };
 
-
-
-  // Handle note updates
-  const handleNoteUpdate = async (updates: Partial<Note>) => {
-    if (!activeNoteId) return;
-
-    try {
-      await updateNote({
-        id: activeNoteId,
-        ...updates,
-      });
-      setIsEditing(false);
-      toast.success("Note updated");
-    } catch (error) {
-      console.error("Failed to update note:", error);
-      toast.error("Failed to update note");
-    }
-  };
-
-  const handleTitleChange = (title: string) => {
-    handleNoteUpdate({ title });
-  };
-
-  const handleContentChange = (content: string) => {
-    handleNoteUpdate({ content });
-  };
-
   // Show empty state if no notes and no folders
   if (notes.length === 0) {
     return (
@@ -130,6 +133,7 @@ const NotesPage = () => {
           workspaceId={workspaceId}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          hasUnsavedChanges={hasUnsavedChanges}
         />
         <div className="flex flex-1 overflow-hidden">
           {/* Enhanced Sidebar with categories */}
@@ -145,12 +149,16 @@ const NotesPage = () => {
           <div className="flex-1 overflow-hidden">
             {activeNote ? (
               <NotesEditor
-                note={activeNote}
+                note={{
+                  ...activeNote,
+                  title: isTyping ? localTitle : activeNote.title,
+                  content: isTyping ? localContent : activeNote.content,
+                }}
                 onUpdate={handleNoteUpdate}
                 onTitleChange={handleTitleChange}
                 onContentChange={handleContentChange}
                 onSaveNote={() => { }}
-                isLoading={isEditing}
+                isLoading={isTyping || hasUnsavedChanges}
                 workspaceId={workspaceId}
                 channelId={channelId}
               />

@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { Id } from '../../../../convex/_generated/dataModel';
 
 interface MessageSelectionContextType {
@@ -14,6 +15,13 @@ const MessageSelectionContext = createContext<MessageSelectionContextType | unde
 
 export const MessageSelectionProvider = ({ children }: { children: ReactNode }) => {
   const [selectedMessages, setSelectedMessages] = useState<Id<'messages'>[]>([]);
+  const pathname = usePathname();
+
+  // Clear selected messages when navigating away from chat pages
+  useEffect(() => {
+    // Clear selections when path changes (navigating to different pages)
+    setSelectedMessages([]);
+  }, [pathname]);
 
   const toggleMessageSelection = (id: Id<'messages'>) => {
     setSelectedMessages((prev) => {
@@ -27,6 +35,10 @@ export const MessageSelectionProvider = ({ children }: { children: ReactNode }) 
 
   const clearSelectedMessages = () => {
     setSelectedMessages([]);
+    // Also close any open context menus when clearing selections
+    if (typeof window !== 'undefined') {
+      document.dispatchEvent(new CustomEvent('clearContextMenu'));
+    }
   };
 
   const isMessageSelected = (id: Id<'messages'>) => {

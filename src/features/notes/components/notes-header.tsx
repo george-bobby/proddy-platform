@@ -17,6 +17,7 @@ interface NotesHeaderProps {
   workspaceId: Id<'workspaces'>;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  hasUnsavedChanges?: boolean;
 }
 
 export const NotesHeader = ({
@@ -25,6 +26,7 @@ export const NotesHeader = ({
   workspaceId,
   searchQuery,
   onSearchChange,
+  hasUnsavedChanges = false,
 }: NotesHeaderProps) => {
   const members = useQuery(api.members.get, { workspaceId }) || [];
   const room = useRoom();
@@ -89,8 +91,14 @@ export const NotesHeader = ({
           <div className="flex items-center gap-4 flex-1">
             {selectedNote ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground">{selectedNote.title}</span>
+                  {hasUnsavedChanges && (
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-yellow-600 font-medium">Saving...</span>
+                    </div>
+                  )}
                 </div>
 
                 {selectedNote.tags && selectedNote.tags.length > 0 && (

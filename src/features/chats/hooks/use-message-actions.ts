@@ -141,6 +141,11 @@ export const useMessageActions = ({
         navigator.clipboard.writeText(extractTextFromBody(body));
         toast.success('Message copied to clipboard');
         break;
+      case 'summarize':
+        // The summarize functionality is handled by the SummarizeButton component
+        // This action just triggers the summarize process for selected messages
+        console.log('Summarize action triggered for selected messages');
+        break;
       case 'addToTask':
         handleAddToTask();
         break;

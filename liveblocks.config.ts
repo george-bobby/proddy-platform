@@ -39,6 +39,14 @@ type Presence = {
 	lastActivity?: number;
 };
 
+// Collaborative note data structure
+type CollaborativeNoteData = {
+	content: string;
+	title: string;
+	lastModified: number;
+	lastModifiedBy: string;
+};
+
 // Optionally, Storage represents the shared document that persists in the
 // Room, even after all users leave. Fields under Storage typically are
 // LiveList, LiveMap, LiveObject instances, for which updates are
@@ -46,6 +54,7 @@ type Presence = {
 type Storage = {
 	layers: LiveMap<string, LiveObject<Layer>>;
 	layerIds: LiveList<string>;
+	collaborativeNotes: LiveMap<string, LiveObject<CollaborativeNoteData>>;
 	lastUpdate?: number; // Timestamp to force storage updates
 };
 
