@@ -498,7 +498,7 @@ a.user-mention:hover {
 
 .ql-editor {
   padding: 1rem;
-  min-height: 50px;
+  min-height: 30px;
   font-size: 0.875rem;
   line-height: 1.5;
 }
