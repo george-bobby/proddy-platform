@@ -204,8 +204,8 @@ export const SummarizeButton = () => {
       )}
 
       <div className="fixed bottom-6 right-6 z-50">
-        <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-lg dark:bg-zinc-800">
-          <span className="text-sm font-medium">
+        <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-lg dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700">
+          <span className="text-sm font-medium pl-2">
             {selectedMessages.length} {selectedMessages.length === 1 ? 'message' : 'messages'} selected
           </span>
 

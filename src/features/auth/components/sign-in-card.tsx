@@ -106,12 +106,12 @@ export const SignInCard = ({ setState, isStandalone = false }: SignInCardProps) 
           </Button>
         </div>
 
-        <p className="text-center text-xs text-secondary">
+        <p className="text-center text-xs text-primary">
           Don&apos;t have an account?{' '}
           {isStandalone ? (
             <Link
               href="/signup"
-              className="cursor-pointer font-medium text-primary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
+              className="cursor-pointer font-medium text-secondary hover:underline disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:text-secondary/80"
             >
               Sign up
             </Link>
