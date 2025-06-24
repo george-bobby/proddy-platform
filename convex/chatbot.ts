@@ -184,3 +184,22 @@ export const clearChatHistory = mutation({
 		return null;
 	},
 });
+
+// DEPRECATED: This function is no longer used.
+// All chat functionality has been moved to the main assistant router.
+// This is kept for backward compatibility but should not be called.
+export const generateResponse = action({
+	args: {
+		workspaceId: v.id('workspaces'),
+		message: v.string(),
+	},
+	handler: async (_ctx, _args): Promise<GenerateResponseResult> => {
+		// This function is deprecated - all logic moved to /api/assistant router
+		return {
+			response:
+				'This function is deprecated. Please use the main assistant router.',
+			sources: [],
+			actions: [],
+		};
+	},
+});
