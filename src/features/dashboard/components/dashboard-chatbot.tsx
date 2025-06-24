@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
 import { Id } from '@/../convex/_generated/dataModel';
-import { useQuery, useMutation, useAction } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -57,9 +57,9 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
   // Get chat history from Convex
   const chatHistory = useQuery(api.chatbot.getChatHistory, { workspaceId });
 
-  // Convex mutations and actions
+  // Convex mutations
   const clearChatHistoryMutation = useMutation(api.chatbot.clearChatHistory);
-  const generateResponseAction = useAction(api.chatbot.generateResponse);
+  const addMessageMutation = useMutation(api.chatbot.addMessage);
 
   // Initialize messages from chat history
   useEffect(() => {
@@ -124,11 +124,27 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
     try {
       console.log('Sending message to assistant:', userQuery);
 
-      // Call the Convex action to generate a response
-      const result = await generateResponseAction({
-        workspaceId,
-        message: userQuery,
+      // Get workspace context for assistant integration
+      const workspaceContext = workspace ? `Workspace: ${workspace.name}` : '';
+
+      // Call the main assistant router API
+      const response = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userQuery,
+          workspaceContext,
+          workspaceId,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Assistant API error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
 
       // Validate response
       if (!result) {
@@ -145,6 +161,22 @@ export const DashboardChatbot = ({ workspaceId, member }: DashboardChatbotProps)
       }
 
       console.log('Received response from assistant');
+
+      // Save user message to Convex
+      await addMessageMutation({
+        workspaceId,
+        content: userQuery,
+        role: 'user',
+      });
+
+      // Save assistant response to Convex
+      await addMessageMutation({
+        workspaceId,
+        content: result.response,
+        role: 'assistant',
+        sources: result.sources,
+        actions: result.actions,
+      });
 
       // Add assistant response to UI
       const assistantMessage: Message = {
