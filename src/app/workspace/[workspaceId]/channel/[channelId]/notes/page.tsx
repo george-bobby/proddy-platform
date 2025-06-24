@@ -44,7 +44,6 @@ const NotesPage = () => {
   // Convex mutations
   const createNote = useMutation(api.notes.create);
   const updateNote = useMutation(api.notes.update);
-  const createFolder = useMutation(api.noteFolders.create);
 
   // Handle note selection
   const handleNoteSelect = (noteId: string) => {
@@ -52,7 +51,7 @@ const NotesPage = () => {
   };
 
   // Handle note creation
-  const handleCreateNote = async (folderId?: Id<"noteFolders">) => {
+  const handleCreateNote = async () => {
     try {
       const defaultTitle = "Untitled";
       const defaultContent = JSON.stringify({ ops: [{ insert: "\n" }] });
@@ -63,7 +62,6 @@ const NotesPage = () => {
         content: defaultContent,
         workspaceId,
         channelId,
-        folderId,
         tags: [], // Initialize with empty tags
       });
 
@@ -77,23 +75,7 @@ const NotesPage = () => {
     }
   };
 
-  // Handle folder creation
-  const handleCreateFolder = async () => {
-    try {
-      const folderName = "New Category";
 
-      await createFolder({
-        name: folderName,
-        workspaceId,
-        channelId,
-      });
-
-      toast.success(`Category "${folderName}" created`);
-    } catch (error) {
-      console.error("Failed to create category:", error);
-      toast.error("Failed to create category");
-    }
-  };
 
   // Handle note updates
   const handleNoteUpdate = async (updates: Partial<Note>) => {
@@ -158,7 +140,6 @@ const NotesPage = () => {
             onNoteSelect={handleNoteSelect}
             collapsed={sidebarCollapsed}
             onCreateNote={handleCreateNote}
-            onCreateFolder={handleCreateFolder}
           />
           {/* Main Content Area */}
           <div className="flex-1 overflow-hidden">

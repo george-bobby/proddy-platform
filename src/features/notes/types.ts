@@ -17,8 +17,4 @@ export interface Note {
 
 
 
-export interface FolderTreeItem {
-  notes: Note[];
-  subfolders: FolderTreeItem[];
-  isOpen: boolean;
-}
+

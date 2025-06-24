@@ -34,7 +34,6 @@ INSTRUCTIONS FOR NOTES QUERIES:
 4. Suggest related notes when appropriate
 5. Use emojis to make responses more engaging:
    - 📝 for notes
-   - 📁 for folders/organization
    - 🔍 for search results
    - 💡 for insights or key points
    - 📅 for dates

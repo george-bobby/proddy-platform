@@ -39,7 +39,6 @@ export const useGetNote = (noteId?: Id<'notes'>) => {
 				memberId: member._id,
 				workspaceId: workspaceId as Id<'workspaces'>,
 				channelId: channelId as Id<'channels'>,
-				folderId: undefined,
 				coverImage: undefined,
 				icon: undefined,
 				createdAt: now,
