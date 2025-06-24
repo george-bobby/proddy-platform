@@ -5,7 +5,7 @@ import type { PropsWithChildren } from "react";
 import { useEffect, useState } from "react";
 
 import type { Id } from "@/../convex/_generated/dataModel";
-import { SummarizeButton } from "@/features/smart/components/summarize-button";
+import { SelectionModal } from "@/features/chats/components/selection-modal";
 import { HotjarAnalytics } from "@/components/hotjar-analytics";
 
 import { MessageSelectionProvider } from "@/features/smart/contexts/message-selection-context";
@@ -113,7 +113,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
             </div>
           )}
         </div>
-        <SummarizeButton />
+        <SelectionModal />
       </div>
     </MessageSelectionProvider>
   );

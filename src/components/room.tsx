@@ -76,12 +76,15 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
                     cursor: null,
                     selection: [],
                     pencilDraft: null,
-                    penColor: { r: 0, g: 0, b: 0 }, // Default to black
-                    strokeWidth: 16 // Default stroke width
+                    penColor: null, // Start with null, will be set when user selects a color
+                    strokeWidth: 1, // Default stroke width
+                    isEditing: false,
+                    lastActivity: Date.now()
                 }}
                 initialStorage={{
                     layers: new LiveMap(),
                     layerIds: new LiveList([]),
+                    collaborativeNotes: new LiveMap(),
                     lastUpdate: Date.now()
                 }}
             >
