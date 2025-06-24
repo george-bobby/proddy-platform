@@ -91,6 +91,7 @@ export const NotesRoom = ({ children, noteId, fallback }: NotesRoomProps) => {
                 initialStorage={{
                     layers: new LiveMap(),
                     layerIds: new LiveList([]),
+                    collaborativeNotes: new LiveMap(),
                     lastUpdate: Date.now()
                 }}
             >
