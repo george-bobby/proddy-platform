@@ -57,15 +57,6 @@ export const MessageContextMenu = ({
       >
         Copy Message
       </button>
-      {selectedMessages.length > 0 && (
-        <button
-          className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
-          onClick={() => handleAction('summarize')}
-        >
-          <Sparkles className="h-4 w-4" />
-          Summarize Selected
-        </button>
-      )}
       <hr className="my-1" />
       <button
         className="w-full px-3 py-2 text-left text-sm bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2 font-medium"
