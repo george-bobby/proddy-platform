@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils';
 
 // Import Quill styles
 import 'quill/dist/quill.snow.css';
-import '../styles/quill-custom.css';
 
 interface NotePageProps {
   content: string;

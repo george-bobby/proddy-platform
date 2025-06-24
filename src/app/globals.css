@@ -392,3 +392,118 @@ a.user-mention:hover {
 .editor-container {
 	position: relative;
 }
+/* Custom styles for Quill editor */
+
+/* Placeholder styling */
+.ql-editor.ql-blank::before {
+  font-style: normal;
+  font-family: 'Poppins', sans-serif;
+  color: #9ca3af; /* Gray-400 */
+  font-size: 0.875rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Highlight the slash character for better visibility */
+.ql-editor p:not(.ql-blank) span.slash-highlight {
+  background-color: rgba(59, 130, 246, 0.1); /* Light blue background */
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Styling for headings */
+.ql-editor h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.ql-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.ql-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Styling for lists */
+.ql-editor ul, .ql-editor ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ql-editor li {
+  margin-bottom: 0.25rem;
+}
+
+/* Styling for blockquotes */
+.ql-editor blockquote {
+  border-left: 4px solid #e5e7eb; /* Gray-200 */
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+  color: #4b5563; /* Gray-600 */
+}
+
+/* Styling for code blocks */
+.ql-editor pre {
+  background-color: #f3f4f6; /* Gray-100 */
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+/* Styling for inline code */
+.ql-editor code {
+  background-color: #f3f4f6; /* Gray-100 */
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-family: monospace;
+}
+
+/* Styling for images */
+.ql-editor img {
+  max-width: 100%;
+  border-radius: 0.375rem;
+  margin: 0.5rem 0;
+}
+
+/* Styling for to-do lists */
+.ql-editor .todo-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.ql-editor .todo-checkbox {
+  margin-right: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* Styling for the editor itself */
+.ql-container.ql-snow {
+  border: none;
+  font-family: 'Poppins', sans-serif;
+}
+
+.ql-editor {
+  padding: 1rem;
+  min-height: 50px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Remove default Quill border */
+.ql-container.ql-snow, .ql-toolbar.ql-snow {
+  border: none;
+}
