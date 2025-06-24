@@ -61,12 +61,19 @@ export const useCollaborativeNote = ({
     const currentData = collaborativeNotes.get(noteKey);
 
     if (currentData) {
-      // Update existing note
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value !== undefined) {
-          currentData.set(key, value);
-        }
-      });
+      // Update existing note with type-safe approach
+      if (updates.content !== undefined) {
+        currentData.set('content', updates.content);
+      }
+      if (updates.title !== undefined) {
+        currentData.set('title', updates.title);
+      }
+      if (updates.lastModified !== undefined) {
+        currentData.set('lastModified', updates.lastModified);
+      }
+      if (updates.lastModifiedBy !== undefined) {
+        currentData.set('lastModifiedBy', updates.lastModifiedBy);
+      }
     } else {
       // Create new collaborative note
       const newNoteData = new LiveObject({
