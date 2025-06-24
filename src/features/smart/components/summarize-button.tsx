@@ -70,7 +70,7 @@ export const SummarizeButton = () => {
         duration: 10000,
       });
 
-      const response = await fetch('/api/summarize', {
+      const response = await fetch('/api/smart/summarize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

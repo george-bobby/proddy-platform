@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useCurrentMember } from '@/features/members/api/use-current-member';
 import type { GetMessagesReturnType } from '@/features/messages/api/use-get-messages';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { ContextMenuProvider } from '@/features/chats/contexts/context-menu-context';
 
 import { Id } from '../../convex/_generated/dataModel';
 import { ChannelHero } from './channel-hero';
@@ -94,7 +95,7 @@ export const MessageList = ({
       }));
 
       // Send request to the API
-      const response = await fetch('/api/dailyrecap', {
+      const response = await fetch('/api/smart/dailyrecap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -136,19 +137,20 @@ export const MessageList = ({
   };
 
   return (
-    <div className="messages-scrollbar flex flex-1 flex-col-reverse overflow-y-auto pb-4">
-      {recapData && (
-        <DailyRecapModal
-          isOpen={isRecapModalOpen}
-          onClose={() => setIsRecapModalOpen(false)}
-          recap={recapData.recap}
-          date={recapData.date}
-          messageCount={recapData.messageCount}
-          isCached={recapData.isCached}
-        />
-      )}
+    <ContextMenuProvider>
+      <div className="messages-scrollbar flex flex-1 flex-col-reverse overflow-y-auto pb-4">
+        {recapData && (
+          <DailyRecapModal
+            isOpen={isRecapModalOpen}
+            onClose={() => setIsRecapModalOpen(false)}
+            recap={recapData.recap}
+            date={recapData.date}
+            messageCount={recapData.messageCount}
+            isCached={recapData.isCached}
+          />
+        )}
 
-      {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
+        {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
         <div key={dateKey}>
           <div className="relative my-2 text-center">
             <hr className="absolute left-0 right-0 top-1/2 border-t border-gray-300" />
@@ -243,6 +245,7 @@ export const MessageList = ({
         <ChannelHero name={channelName} creationTime={channelCreationTime} />
       )}
       {variant === 'conversation' && <ConversationHero name={memberName} image={memberImage} />}
-    </div>
+      </div>
+    </ContextMenuProvider>
   );
 };

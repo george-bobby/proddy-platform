@@ -17,6 +17,7 @@ import { useGetMessages } from '@/features/messages/api/use-get-messages';
 import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
 import { useChannelId } from '@/hooks/use-channel-id';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
+import { ContextMenuProvider } from '@/features/chats/contexts/context-menu-context';
 
 const Editor = dynamic(() => import('@/components/editor'), {
   ssr: false,
@@ -175,14 +176,15 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
   }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-[49px] items-center justify-between border-b px-4">
-        <p className="text-lg font-bold">Thread</p>
+    <ContextMenuProvider>
+      <div className="flex h-full flex-col">
+        <div className="flex h-[49px] items-center justify-between border-b px-4">
+          <p className="text-lg font-bold">Thread</p>
 
-        <Button onClick={onClose} size="iconSm" variant="ghost">
-          <XIcon className="size-5 stroke-[1.5]" />
-        </Button>
-      </div>
+          <Button onClick={onClose} size="iconSm" variant="ghost">
+            <XIcon className="size-5 stroke-[1.5]" />
+          </Button>
+        </div>
 
       <div className="messages-scrollbar flex flex-1 flex-col-reverse overflow-y-auto pb-4">
         {Object.entries(groupedMessages || {}).map(([dateKey, messages]) => (
@@ -286,6 +288,7 @@ export const Thread = ({ messageId, onClose }: ThreadProps) => {
           placeholder="Reply..."
         />
       </div>
-    </div>
+      </div>
+    </ContextMenuProvider>
   );
 };

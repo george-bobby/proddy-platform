@@ -69,7 +69,7 @@ export const Suggestions = ({
       };
 
       try {
-        const response = await fetch('/api/suggestions', {
+        const response = await fetch('/api/smart/suggestions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
