@@ -8,6 +8,7 @@ import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-
 import { Id } from '@/../convex/_generated/dataModel';
 import { CommandMenu } from './command-menu';
 import { cn } from '@/lib/utils';
+import { useUpdateMyPresence } from '@/../liveblocks.config';
 
 // Import Quill styles
 import 'quill/dist/quill.snow.css';
@@ -40,6 +41,9 @@ export const NotePage = ({
 
   // API hooks
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
+
+  // Liveblocks presence
+  const updateMyPresence = useUpdateMyPresence();
 
   // Set mounted state
   useEffect(() => {
@@ -125,6 +129,12 @@ export const NotePage = ({
     editor.on('text-change', function (delta, oldContents, source) {
       if (source !== 'user') return;
 
+      // Update presence to show user is editing
+      updateMyPresence({
+        isEditing: true,
+        lastActivity: Date.now()
+      });
+
       // Get the current content
       const editorContent = editor.getContents();
 
@@ -181,6 +191,22 @@ export const NotePage = ({
         // Return true to prevent default handling
         return true;
       }
+    });
+
+    // Add blur event listener to stop editing presence
+    editor.root.addEventListener('blur', function () {
+      updateMyPresence({
+        isEditing: false,
+        lastActivity: Date.now()
+      });
+    });
+
+    // Add focus event listener to start editing presence
+    editor.root.addEventListener('focus', function () {
+      updateMyPresence({
+        isEditing: true,
+        lastActivity: Date.now()
+      });
     });
 
     // Add a keydown event listener to the editor element

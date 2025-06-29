@@ -4,7 +4,7 @@ import { useQuery } from 'convex/react';
 import { useEffect, useState } from 'react';
 
 import { api } from '@/../convex/_generated/api';
-import { useWorkspaceId } from './use-workspace-id';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { useOthers, useSelf, useRoom } from '@/../liveblocks.config';
 
 export const useNotesParticipants = () => {

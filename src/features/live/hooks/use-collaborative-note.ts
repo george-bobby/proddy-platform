@@ -58,7 +58,7 @@ export const useCollaborativeNote = ({
     }
 
     const noteKey = `note-${noteId}`;
-    const currentData = collaborativeNotes.get(noteKey);
+    let currentData = collaborativeNotes.get(noteKey);
 
     if (currentData) {
       // Update existing note with type-safe approach
@@ -89,88 +89,94 @@ export const useCollaborativeNote = ({
 
   // Initialize the collaborative note if it doesn't exist
   useEffect(() => {
-    if (initialNote && !noteData) {
+    if (!noteData && initialNote) {
       updateNoteData({
-        content: initialNote.content || '',
-        title: initialNote.title || 'Untitled',
+        content: initialNote.content,
+        title: initialNote.title,
         lastModified: Date.now(),
         lastModifiedBy: 'current-user',
       });
     }
     setIsLoading(false);
-  }, [initialNote, noteData, updateNoteData]);
+  }, [noteData, initialNote, updateNoteData]);
 
-  // Update content in Liveblocks (real-time)
+  // Auto-save to database
+  const saveToDatabase = useCallback(async () => {
+    if (!noteData || !onDatabaseSave) return;
+
+    const currentContent = JSON.stringify({
+      content: noteData.content,
+      title: noteData.title,
+    });
+
+    // Only save if content has changed since last database save
+    if (currentContent === lastDatabaseSaveRef.current) {
+      return;
+    }
+
+    try {
+      await onDatabaseSave({
+        content: noteData.content,
+        title: noteData.title,
+        updatedAt: Date.now(),
+      });
+      
+      lastDatabaseSaveRef.current = currentContent;
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Failed to save to database:', error);
+    }
+  }, [noteData, onDatabaseSave]);
+
+  // Set up auto-save
+  useEffect(() => {
+    if (!noteData) return;
+
+    const currentContent = JSON.stringify({
+      content: noteData.content,
+      title: noteData.title,
+    });
+
+    // Check if content has changed
+    if (currentContent !== lastDatabaseSaveRef.current) {
+      setHasUnsavedChanges(true);
+
+      // Clear existing timeout
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+
+      // Set new timeout for auto-save
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        saveToDatabase();
+      }, autoSaveInterval);
+    }
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [noteData?.content, noteData?.title, saveToDatabase, autoSaveInterval]);
+
+  // Update content
   const updateContent = useCallback((content: string) => {
     updateNoteData({
       content,
       lastModified: Date.now(),
       lastModifiedBy: 'current-user',
     });
-    setHasUnsavedChanges(true);
-    
-    // Reset auto-save timer
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-    
-    // Set new auto-save timer
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      saveToDatabase();
-    }, autoSaveInterval);
-  }, [updateNoteData, autoSaveInterval]);
+  }, [updateNoteData]);
 
-  // Update title in Liveblocks (real-time)
+  // Update title
   const updateTitle = useCallback((title: string) => {
     updateNoteData({
       title,
       lastModified: Date.now(),
       lastModifiedBy: 'current-user',
     });
-    setHasUnsavedChanges(true);
-    
-    // Reset auto-save timer
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-    
-    // Set new auto-save timer
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      saveToDatabase();
-    }, autoSaveInterval);
-  }, [updateNoteData, autoSaveInterval]);
-
-  // Save to database (debounced)
-  const saveToDatabase = useCallback(async () => {
-    if (!noteData || !onDatabaseSave) return;
-    
-    const currentContent = noteData.content + noteData.title; // Simple hash
-    if (currentContent === lastDatabaseSaveRef.current) {
-      return; // No changes to save
-    }
-    
-    try {
-      await onDatabaseSave({
-        content: noteData.content,
-        title: noteData.title,
-      });
-      
-      lastDatabaseSaveRef.current = currentContent;
-      setHasUnsavedChanges(false);
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error('Failed to save to database:', error);
-    }
-  }, [noteData, onDatabaseSave]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, []);
+  }, [updateNoteData]);
 
   return {
     content: noteData?.content || initialNote?.content || '',

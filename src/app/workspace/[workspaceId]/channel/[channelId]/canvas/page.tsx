@@ -9,10 +9,10 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { toast } from 'sonner';
 import {
     CanvasCanvas,
-    CanvasToolbar,
-    CanvasLiveblocksProvider,
-    CanvasActiveUsers
+    CanvasToolbar
 } from '@/features/canvas';
+import { CanvasSidebar } from '@/features/canvas/components/canvas-sidebar';
+import { LiveblocksRoom, LiveParticipants } from '@/features/live';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
@@ -37,6 +37,7 @@ const CanvasPage = () => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const [isCreatingCanvas, setIsCreatingCanvas] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [roomId, setRoomId] = useState<string | null>(null);
     const [canvasName, setCanvasName] = useState<string | null>(null);
     const [liveMessageId, setLiveMessageId] = useState<Id<"messages"> | null>(null);
@@ -78,6 +79,18 @@ const CanvasPage = () => {
     const updateMessage = useMutation(api.messages.update);
     const createMessage = useMutation(api.messages.create);
 
+    // Handle canvas selection from sidebar
+    const handleCanvasSelect = useCallback((canvasId: string, roomId: string, canvasName: string) => {
+        setRoomId(roomId);
+        setCanvasName(canvasName);
+
+        // Update URL to reflect the selected canvas
+        if (workspaceId && channelId) {
+            const newUrl = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&canvasName=${encodeURIComponent(canvasName)}&t=${Date.now()}`;
+            window.history.replaceState({}, '', newUrl);
+        }
+    }, [workspaceId, channelId]);
+
     // Check if a specific roomId is provided in the URL (for saved canvases)
     const roomIdParam = searchParams.get('roomId');
 
@@ -111,9 +124,9 @@ const CanvasPage = () => {
             // Show loading state
             setIsCreatingCanvas(true);
 
-            // Generate a unique room ID for the canvas
-            const timestamp = Date.now();
-            const roomId = `canvas-${channelId}-${timestamp}`;
+            // Generate a unique canvas ID and room ID
+            const canvasId = `${channelId}-${Date.now()}`;
+            const roomId = `canvas-${canvasId}`;
 
             // Create a live message in the channel
             await createMessage({
@@ -122,12 +135,13 @@ const CanvasPage = () => {
                 body: JSON.stringify({
                     type: "canvas-live",
                     roomId: roomId,
+                    canvasId: canvasId,
                     participants: [currentUser._id],
                 }),
             });
 
             // Navigate to the canvas page with the room ID and explicitly set new=true
-            const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${timestamp}`;
+            const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${roomId}&new=true&t=${Date.now()}`;
             router.push(url);
         } catch (error) {
             console.error("Error creating canvas session:", error);
@@ -178,8 +192,9 @@ const CanvasPage = () => {
         // If explicitly requesting a new canvas but no roomId is provided, generate one
         if (isNewCanvas) {
             const timestamp = Date.now();
-            const newRoomId = `canvas-${channelId}-${timestamp}`;
-            console.log(`Creating new canvas with generated roomId: ${newRoomId}`);
+            const newCanvasId = `${channelId}-${timestamp}`;
+            const newRoomId = `canvas-${newCanvasId}`;
+            console.log(`Creating new canvas with generated roomId: ${newRoomId}, canvasId: ${newCanvasId}`);
             setRoomId(newRoomId);
             setCanvasName(null);
             setIsLoading(false);
@@ -340,25 +355,43 @@ const CanvasPage = () => {
     }
 
     return (
-        <CanvasLiveblocksProvider roomId={roomId}>
-            <div ref={pageContainerRef} className="flex flex-col h-full">
-                <CanvasActiveUsers isFullScreen={isFullScreen} />
-                {liveMessageId && currentUser && (
-                    <CanvasParticipantsTracker
-                        roomId={roomId}
-                        liveMessageId={liveMessageId}
-                        currentUserId={currentUser._id}
+        <LiveblocksRoom roomId={roomId} roomType="canvas">
+            <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
+                {/* Canvas Sidebar - hidden in fullscreen */}
+                {!isFullScreen && (
+                    <CanvasSidebar
+                        selectedCanvasId={roomId}
+                        onCanvasSelect={handleCanvasSelect}
+                        collapsed={sidebarCollapsed}
+                        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        onCreateCanvas={handleCreateCanvas}
                     />
                 )}
-                <div className="flex flex-1 overflow-hidden">
-                    <CanvasToolbar />
-                    <div className="flex-1">
-                        <CanvasCanvas
-                            canvasId={channelId}
-                            savedCanvasName={canvasName}
-                            toggleFullScreen={toggleFullScreen}
-                            isFullScreen={isFullScreen}
+
+                <div className="flex flex-col flex-1 overflow-hidden relative">
+                    {/* Participants - always visible, positioned absolutely */}
+                    <LiveParticipants variant="canvas" isFullScreen={isFullScreen} />
+
+                    {liveMessageId && currentUser && (
+                        <CanvasParticipantsTracker
+                            roomId={roomId}
+                            liveMessageId={liveMessageId}
+                            currentUserId={currentUser._id}
                         />
+                    )}
+
+                    <div className="flex flex-1 overflow-hidden">
+                        {/* Toolbar - hidden in fullscreen */}
+                        {!isFullScreen && <CanvasToolbar />}
+
+                        <div className="flex-1">
+                            <CanvasCanvas
+                                canvasId={channelId}
+                                savedCanvasName={canvasName}
+                                toggleFullScreen={toggleFullScreen}
+                                isFullScreen={isFullScreen}
+                            />
+                        </div>
                     </div>
                 </div>
                 {/* Audio Room Component */}
@@ -372,7 +405,7 @@ const CanvasPage = () => {
                     />
                 )}
             </div>
-        </CanvasLiveblocksProvider>
+        </LiveblocksRoom>
     );
 };
 

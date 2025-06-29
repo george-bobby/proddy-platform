@@ -11,6 +11,7 @@ import { Note } from '../types';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useGetNotes } from '../api/use-get-notes';
 import { useRoom, useOthers } from '@/../liveblocks.config';
+
 import { useDeleteNote } from '../api/use-delete-note';
 import { toast } from 'sonner';
 
@@ -102,19 +103,7 @@ export const NotesSidebar = ({
 
   return (
     <div className="w-80 border-r bg-muted/30 flex flex-col">
-      {/* Presence Avatars */}
-      <div className="flex items-center gap-2 p-2 border-b bg-muted/40">
-        {others.map((other) => (
-          <div key={other.connectionId} title={other.info?.name || 'User'}>
-            <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold border">
-              {other.info?.name ? other.info.name[0].toUpperCase() : '?'}
-            </div>
-          </div>
-        ))}
-        {others.length === 0 && (
-          <span className="text-xs text-muted-foreground">No one else here</span>
-        )}
-      </div>
+
       {/* Search and Create */}
       <div className="p-4 border-b">
         <div className="flex gap-2 mb-3">

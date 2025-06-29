@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useMyPresence, useUpdateMyPresence } from '@/../liveblocks.config';
+import { LiveCursorsPresence, LiveParticipants } from '@/features/live';
 
 interface Page {
   id: string;
@@ -53,6 +54,31 @@ export const NoteEditor = ({
 
   // Use Liveblocks presence to track user activity in the note
   const [myPresence, updateMyPresence] = useMyPresence();
+
+  // Handle mouse movement for live cursors
+  const handleMouseMove = (e: React.MouseEvent) => {
+    updateMyPresence({
+      cursor: { x: e.clientX, y: e.clientY },
+      lastActivity: Date.now()
+    });
+  };
+
+  // Handle mouse leave
+  const handleMouseLeave = () => {
+    updateMyPresence({
+      cursor: null,
+      lastActivity: Date.now()
+    });
+  };
+
+  // Handle editing state changes
+  const handleEditingChange = (editing: boolean) => {
+    setIsEditing(editing);
+    updateMyPresence({
+      isEditing: editing,
+      lastActivity: Date.now()
+    });
+  };
 
   // Initialize single page with the content
   useEffect(() => {
@@ -249,14 +275,14 @@ export const NoteEditor = ({
     return null;
   }
 
-  // Simplified pointer event handlers - temporarily disabled for basic functionality
+  // Pointer event handlers for live cursors
   const handlePointerMove = (e: React.PointerEvent) => {
-    // Temporarily disabled to focus on basic typing functionality
+    handleMouseMove(e as any);
   };
 
-  // Simplified pointer leave handler - temporarily disabled for basic functionality
+  // Pointer leave handler for live cursors
   const handlePointerLeave = () => {
-    // Temporarily disabled to focus on basic typing functionality
+    handleMouseLeave();
   };
 
   return (
@@ -291,7 +317,7 @@ export const NoteEditor = ({
               {/* Activity status component positioned next to Save button */}
               {noteId && (
                 <div className="border rounded-md px-2 py-1" style={{ minWidth: '150px' }}>
-                  <NotesParticipants className="h-7" />
+                  <LiveParticipants variant="notes" className="h-7" />
                 </div>
               )}
             </div>
@@ -330,6 +356,13 @@ export const NoteEditor = ({
           <Loader className="h-6 w-6 animate-spin text-primary" />
         </div>
       )}
+
+      {/* Live Cursors Overlay */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg className="w-full h-full">
+          <LiveCursorsPresence variant="notes" showDrawingPaths={false} />
+        </svg>
+      </div>
     </div>
   );
 };

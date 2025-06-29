@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, ExternalLink, Users } from 'lucide-react';
+import { Save, ExternalLink, Users, Maximize, Minimize } from 'lucide-react';
+import { LiveParticipants } from '@/features/live/components/live-participants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,6 +22,8 @@ interface NotesEditorProps {
   isLoading?: boolean;
   workspaceId: Id<'workspaces'>;
   channelId: Id<'channels'>;
+  toggleFullScreen?: () => void;
+  isFullScreen?: boolean;
 }
 
 export const NotesEditor = ({
@@ -32,6 +35,8 @@ export const NotesEditor = ({
   isLoading = false,
   workspaceId,
   channelId,
+  toggleFullScreen,
+  isFullScreen = false,
 }: NotesEditorProps) => {
   const [title, setTitle] = useState(note.title);
   const [tags, setTags] = useState<string[]>(note.tags || []);
@@ -91,7 +96,34 @@ export const NotesEditor = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Live Participants - positioned like canvas participants */}
+      <LiveParticipants
+        variant="notes"
+        isFullScreen={isFullScreen}
+        className={`absolute ${isFullScreen ? 'top-8' : 'top-32'} right-8 z-50`}
+      />
+
+      {/* Fullscreen Button - positioned in top center like canvas TopToolbar */}
+      {toggleFullScreen && (
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50">
+          <div className="bg-white rounded-md p-1.5 shadow-md">
+            <Button
+              onClick={toggleFullScreen}
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              {isFullScreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Editor Header */}
       <div className="border-b p-4">
         <div className="flex items-center justify-between mb-3">

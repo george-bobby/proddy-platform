@@ -32,9 +32,9 @@ import {
   useSelection,
 } from "../hooks";
 
-import { CursorsPresence } from "./cursors-presence";
+import { LiveCursorsPresence } from "@/features/live";
 import { LayerPreview } from "./layer-preview";
-import { Participants } from "./participants";
+
 import { Path } from "./path";
 import { SelectionBox } from "./selection-box";
 import { Toolbar } from "./toolbar";
@@ -374,7 +374,6 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
 
   return (
     <main className="h-full w-full relative bg-neutral-100 touch-none">
-      <Participants isFullScreen={isFullScreen} />
       <CanvasName savedCanvasName={savedCanvasName} />
       <TopToolbar
         canvasState={canvasState}
@@ -451,7 +450,7 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
                 height={Math.abs(canvasState.origin.y - canvasState.current.y)}
               />
             )}
-          <CursorsPresence />
+          <LiveCursorsPresence variant="canvas" showDrawingPaths={true} />
           {pencilDraft != null && pencilDraft.length > 0 && (
             <Path
               points={pencilDraft}
