@@ -253,7 +253,7 @@ export const initiateConnection = action({
 						integrationId: args.service,
 						entityId: entityId,
 						data: {
-							redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${args.workspaceId}/manage?tab=workspace&service=${args.service}&connected=true`,
+							redirectUri: `${process.env.SITE_URL}/workspace/${args.workspaceId}/manage?tab=workspace&service=${args.service}&connected=true`,
 						},
 					}),
 				}
@@ -516,7 +516,7 @@ export const initiateGitHubConnection = action({
 						integrationId: 'github',
 						entityId: entityId,
 						data: {
-							redirectUri: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${args.workspaceId}/manage?tab=workspace&service=github&connected=true`,
+							redirectUri: `${process.env.SITE_URL}/workspace/${args.workspaceId}/manage?tab=workspace&service=github&connected=true`,
 						},
 					}),
 				}

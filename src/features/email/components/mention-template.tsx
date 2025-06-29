@@ -28,7 +28,7 @@ export const MentionTemplate: React.FC<Readonly<MentionTemplateProps>> = ({
   mentionerName,
   messagePreview,
   channelName = 'a channel',
-  workspaceUrl = process.env.NEXT_PUBLIC_DEPLOY_URL,
+  workspaceUrl = process.env.NEXT_PUBLIC_APP_URL,
   workspaceName = 'Proddy',
 }) => {
   const previewText = `${mentionerName} mentioned you in ${channelName}`;

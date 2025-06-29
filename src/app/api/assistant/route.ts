@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const baseUrl = process.env.NEXT_PUBLIC_DEPLOY_URL;
+		const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 		const targetUrl = `${baseUrl}/api/assistant/${predictedType === 'github' ? 'old-github' : predictedType}`;
 
 		const response = await fetch(targetUrl, {

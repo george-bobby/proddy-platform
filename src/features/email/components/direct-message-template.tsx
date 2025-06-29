@@ -26,7 +26,7 @@ export const DirectMessageTemplate: React.FC<Readonly<DirectMessageTemplateProps
   firstName,
   senderName,
   messagePreview,
-  workspaceUrl = process.env.NEXT_PUBLIC_DEPLOY_URL,
+  workspaceUrl = process.env.NEXT_PUBLIC_APP_URL,
   workspaceName = 'Proddy',
 }) => {
   const previewText = `New direct message from ${senderName}`;

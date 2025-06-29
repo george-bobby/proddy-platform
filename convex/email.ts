@@ -2,7 +2,14 @@ import { getAuthUserId } from '@convex-dev/auth/server';
 import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
-import { type QueryCtx, type ActionCtx, action, query, mutation, internalMutation } from './_generated/server';
+import {
+	type QueryCtx,
+	type ActionCtx,
+	action,
+	query,
+	mutation,
+	internalMutation,
+} from './_generated/server';
 import { api } from './_generated/api';
 
 // Get weekly digest data for a user across all their workspaces
@@ -37,7 +44,7 @@ export const getUserWeeklyDigest = query({
 			if (workspaceStats) {
 				workspaceDigests.push({
 					workspaceName: workspace.name,
-					workspaceUrl: `${process.env.DEPLOY_URL}/workspace/${workspace._id}`,
+					workspaceUrl: `${process.env.SITE_URL}/workspace/${workspace._id}`,
 					stats: workspaceStats.stats,
 					topChannels: workspaceStats.topChannels,
 					recentTasks: workspaceStats.recentTasks,
@@ -205,17 +212,18 @@ type EmailNotificationResult = {
 };
 
 // Helper function to extract message preview from body
-const extractMessagePreview = (body: string | undefined, defaultText: string): string => {
+const extractMessagePreview = (
+	body: string | undefined,
+	defaultText: string
+): string => {
 	if (!body) return defaultText;
-	
+
 	try {
 		// Try to parse as JSON (Quill Delta format)
 		const parsedBody = JSON.parse(body);
 		if (parsedBody.ops) {
 			return parsedBody.ops
-				.map((op: any) =>
-					typeof op.insert === 'string' ? op.insert : ''
-				)
+				.map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
 				.join('')
 				.trim();
 		}
@@ -225,7 +233,7 @@ const extractMessagePreview = (body: string | undefined, defaultText: string): s
 			.replace(/<[^>]*>/g, '') // Remove HTML tags
 			.trim();
 	}
-	
+
 	return defaultText;
 };
 
@@ -247,14 +255,19 @@ export const sendDirectMessageEmail = action({
 
 			// Only process direct messages (messages with conversationId)
 			if (!message.conversationId) {
-				console.log('Message is not a direct message, skipping email notification');
+				console.log(
+					'Message is not a direct message, skipping email notification'
+				);
 				return { success: true, skipped: true };
 			}
 
 			// Get the conversation using the existing query
-			const conversation = await ctx.runQuery(api.conversations._getConversationById, {
-				conversationId: message.conversationId,
-			});
+			const conversation = await ctx.runQuery(
+				api.conversations._getConversationById,
+				{
+					conversationId: message.conversationId,
+				}
+			);
 			if (!conversation) {
 				console.error('Conversation not found:', message.conversationId);
 				return { success: false, error: 'Conversation not found' };
@@ -270,9 +283,10 @@ export const sendDirectMessageEmail = action({
 			}
 
 			// Find the recipient (the other member in the conversation)
-			const recipientMemberId = conversation.memberOneId === message.memberId
-				? conversation.memberTwoId
-				: conversation.memberOneId;
+			const recipientMemberId =
+				conversation.memberOneId === message.memberId
+					? conversation.memberTwoId
+					: conversation.memberOneId;
 
 			const recipient = await ctx.runQuery(api.members._getMemberById, {
 				memberId: recipientMemberId,
@@ -284,15 +298,20 @@ export const sendDirectMessageEmail = action({
 
 			// Don't send email to the sender
 			if (sender.userId === recipient.userId) {
-				console.log('Sender and recipient are the same, skipping email notification');
+				console.log(
+					'Sender and recipient are the same, skipping email notification'
+				);
 				return { success: true, skipped: true };
 			}
 
 			// Extract message preview
-			const messagePreview = extractMessagePreview(message.body, 'You have a new direct message');
+			const messagePreview = extractMessagePreview(
+				message.body,
+				'You have a new direct message'
+			);
 
 			// Send the email
-			const baseUrl = process.env.DEPLOY_URL;
+			const baseUrl = process.env.SITE_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${message.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/direct-message`;
 			console.log(
@@ -366,7 +385,11 @@ export const sendMentionEmail = action({
 			const mentionedMember = await ctx.runQuery(api.members._getMemberById, {
 				memberId: mention.mentionedMemberId,
 			});
-			if (!mentionedMember || !mentionedMember.user || !mentionedMember.user.email) {
+			if (
+				!mentionedMember ||
+				!mentionedMember.user ||
+				!mentionedMember.user.email
+			) {
 				console.log('Mentioned user has no email, skipping notification');
 				return { success: true, skipped: true };
 			}
@@ -382,7 +405,9 @@ export const sendMentionEmail = action({
 
 			// Don't send email to the mentioner themselves
 			if (mentioner.userId === mentionedMember.userId) {
-				console.log('Mentioner and mentioned user are the same, skipping email notification');
+				console.log(
+					'Mentioner and mentioned user are the same, skipping email notification'
+				);
 				return { success: true, skipped: true };
 			}
 
@@ -393,7 +418,10 @@ export const sendMentionEmail = action({
 					messageId: mention.messageId,
 				});
 				if (message) {
-					messagePreview = extractMessagePreview(message.body, 'You were mentioned in a message');
+					messagePreview = extractMessagePreview(
+						message.body,
+						'You were mentioned in a message'
+					);
 				}
 			}
 
@@ -409,7 +437,7 @@ export const sendMentionEmail = action({
 			}
 
 			// Send the email
-			const baseUrl = process.env.DEPLOY_URL;
+			const baseUrl = process.env.SITE_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${mention.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/mention`;
 			console.log(
@@ -494,7 +522,11 @@ export const sendThreadReplyEmail = action({
 			const originalAuthor = await ctx.runQuery(api.members._getMemberById, {
 				memberId: parentMessage.memberId,
 			});
-			if (!originalAuthor || !originalAuthor.user || !originalAuthor.user.email) {
+			if (
+				!originalAuthor ||
+				!originalAuthor.user ||
+				!originalAuthor.user.email
+			) {
 				console.log('Original author has no email, skipping notification');
 				return { success: true, skipped: true };
 			}
@@ -510,13 +542,21 @@ export const sendThreadReplyEmail = action({
 
 			// Don't send email if the replier is the same as the original author
 			if (replier.userId === originalAuthor.userId) {
-				console.log('Replier and original author are the same, skipping email notification');
+				console.log(
+					'Replier and original author are the same, skipping email notification'
+				);
 				return { success: true, skipped: true };
 			}
 
 			// Extract message previews
-			const originalMessagePreview = extractMessagePreview(parentMessage.body, 'Original message');
-			const replyMessagePreview = extractMessagePreview(replyMessage.body, 'Reply message');
+			const originalMessagePreview = extractMessagePreview(
+				parentMessage.body,
+				'Original message'
+			);
+			const replyMessagePreview = extractMessagePreview(
+				replyMessage.body,
+				'Reply message'
+			);
 
 			// Get channel name if it exists
 			let channelName = 'a channel';
@@ -530,7 +570,7 @@ export const sendThreadReplyEmail = action({
 			}
 
 			// Send the email
-			const baseUrl = process.env.DEPLOY_URL;
+			const baseUrl = process.env.SITE_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${replyMessage.workspaceId}`;
 			const apiUrl = `${baseUrl}/api/email/thread-reply`;
 			console.log(
@@ -625,10 +665,19 @@ export const sendWeeklyDigestEmails = action({
 		try {
 			// Get users who have weekly digest enabled for this day
 			const users = await ctx.runQuery(api.email.getUsersForWeeklyDigest, {
-				dayOfWeek: args.dayOfWeek as "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday",
+				dayOfWeek: args.dayOfWeek as
+					| 'monday'
+					| 'tuesday'
+					| 'wednesday'
+					| 'thursday'
+					| 'friday'
+					| 'saturday'
+					| 'sunday',
 			});
 
-			console.log(`Found ${users.length} users for weekly digest on ${args.dayOfWeek}`);
+			console.log(
+				`Found ${users.length} users for weekly digest on ${args.dayOfWeek}`
+			);
 
 			const results = [];
 			const weekRange = getWeekRange();
@@ -664,7 +713,7 @@ export const sendWeeklyDigestEmails = action({
 					) {
 						// Call the email API
 						const emailResponse = await fetch(
-							`${process.env.NEXT_PUBLIC_APP_URL}/api/email/weekly-digest`,
+							`${process.env.SITE_URL}/api/email/weekly-digest`,
 							{
 								method: 'POST',
 								headers: {
@@ -700,10 +749,15 @@ export const sendWeeklyDigestEmails = action({
 							skipped: true,
 							reason: 'No activity',
 						});
-						console.log(`Skipped weekly digest for ${user.email} - no activity`);
+						console.log(
+							`Skipped weekly digest for ${user.email} - no activity`
+						);
 					}
 				} catch (error) {
-					console.error(`Error processing weekly digest for user ${user.email}:`, error);
+					console.error(
+						`Error processing weekly digest for user ${user.email}:`,
+						error
+					);
 					results.push({
 						userId: user.userId,
 						email: user.email,
@@ -740,7 +794,7 @@ function getWeekRange(): string {
 	const formatDate = (date: Date) => {
 		return date.toLocaleDateString('en-US', {
 			month: 'short',
-			day: 'numeric'
+			day: 'numeric',
 		});
 	};
 
@@ -811,7 +865,7 @@ async function getUserWeeklyDigestInternal(
 		if (workspaceStats) {
 			workspaceDigests.push({
 				workspaceName: workspace.name,
-				workspaceUrl: `${process.env.DEPLOY_URL}/workspace/${workspace._id}`,
+				workspaceUrl: `${process.env.SITE_URL}/workspace/${workspace._id}`,
 				stats: workspaceStats.stats,
 				topChannels: workspaceStats.topChannels,
 				recentTasks: workspaceStats.recentTasks,
@@ -884,7 +938,7 @@ export const sendWeeklyDigests = internalMutation({
 				) {
 					// Call the email API
 					const emailResponse = await fetch(
-						`${process.env.NEXT_PUBLIC_APP_URL}/api/email/weekly-digest`,
+						`${process.env.SITE_URL}/api/email/weekly-digest`,
 						{
 							method: 'POST',
 							headers: {
@@ -1025,7 +1079,7 @@ export const sendCardAssignmentEmail = action({
 
 			// Send the email
 			// Make sure we're using the correct URL format for the API endpoint
-			const baseUrl = process.env.DEPLOY_URL;
+			const baseUrl = process.env.SITE_URL;
 			const workspaceUrl = `${baseUrl}/workspace/${card.workspaceId}/channel/${card.channelId}/board`;
 			const apiUrl = `${baseUrl}/api/email/assignee`;
 			console.log('Sending email notification to:', assigneeEmail);
