@@ -7,15 +7,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 interface NotesAudioControlsProps {}
 
-export const NotesAudioControls = ({}: NotesAudioControlsProps) => {
+// Inner component that uses Stream hooks - only rendered when call is available
+const AudioControlsInner = () => {
   const call = useCall();
-  const { useMicrophoneState, useHasPermissions } = useCallStateHooks();
-  const { microphone, isMute } = useMicrophoneState();
   const [micPermissionError, setMicPermissionError] = useState(false);
-  const hasAudioPermission = useHasPermissions(OwnCapability.SEND_AUDIO);
-
-  // Speaker state (audio output)
   const [speakerMuted, setSpeakerMuted] = useState(false);
+
+  // These hooks are safe to call here because we know call exists
+  const { useMicrophoneState, useHasPermissions } = useCallStateHooks();
+  const microphoneState = useMicrophoneState();
+  const hasAudioPermission = useHasPermissions(OwnCapability.SEND_AUDIO);
 
   // Check for microphone permission on mount
   useEffect(() => {
@@ -32,6 +33,13 @@ export const NotesAudioControls = ({}: NotesAudioControlsProps) => {
 
     checkMicPermission();
   }, []);
+
+  // Don't render if microphone state is not available yet
+  if (!microphoneState || !microphoneState.microphone) {
+    return null;
+  }
+
+  const { microphone, isMute } = microphoneState;
 
   const toggleSpeaker = () => {
     setSpeakerMuted(!speakerMuted);
@@ -81,11 +89,6 @@ export const NotesAudioControls = ({}: NotesAudioControlsProps) => {
       toast.error('Failed to toggle microphone');
     }
   };
-
-  // Don't render if no call is available
-  if (!call) {
-    return null;
-  }
 
   return (
     <TooltipProvider>
@@ -148,4 +151,17 @@ export const NotesAudioControls = ({}: NotesAudioControlsProps) => {
       </div>
     </TooltipProvider>
   );
+};
+
+// Outer component that checks for call availability
+export const NotesAudioControls = ({}: NotesAudioControlsProps) => {
+  const call = useCall();
+
+  // Don't render if no call is available
+  if (!call) {
+    return null;
+  }
+
+  // Render the inner component that uses Stream hooks
+  return <AudioControlsInner />;
 };

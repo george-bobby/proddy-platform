@@ -175,12 +175,12 @@ const NotesPage = () => {
             title={activeNote?.title}
             onTitleChange={(newTitle) => {
               if (activeNote) {
-                handleNoteUpdate(activeNote._id, { title: newTitle });
+                handleNoteUpdate({ title: newTitle });
               }
             }}
             onSave={() => {
               if (activeNote && hasUnsavedChanges) {
-                handleSaveNote();
+                handleNoteUpdate({ title: localTitle, content: localContent });
               }
             }}
             onCreateItem={() => handleCreateNote()}
