@@ -11,7 +11,7 @@ import {
     CanvasCanvas,
     CanvasToolbar
 } from '@/features/canvas';
-import { LiveblocksRoom, LiveParticipants, LiveHeader, LiveSidebar } from '@/features/live';
+import { LiveblocksRoom, LiveParticipants, LiveSidebar } from '@/features/live';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
@@ -181,30 +181,48 @@ const CanvasPage = () => {
         }
     };
 
-    // Show empty state if no canvas is selected (like notes page)
+    // Show empty state with sidebar if no canvas is selected (like notes page)
     if (!activeCanvas) {
         return (
-            <div className="h-full flex flex-col items-center justify-center gap-y-6 bg-white">
-                <PaintBucket className="size-16 text-secondary" />
-                <h2 className="text-2xl font-semibold">Canvas</h2>
-                <p className="text-sm text-muted-foreground mb-2">Create a new canvas to start drawing and collaborating</p>
-                <Button
-                    onClick={handleCreateCanvas}
-                    disabled={isCreatingCanvas}
-                    className="flex items-center gap-2"
-                >
-                    {isCreatingCanvas ? (
-                        <>
-                            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                            Creating Canvas...
-                        </>
-                    ) : (
-                        <>
-                            <PaintBucket className="h-4 w-4" />
-                            Create New Canvas
-                        </>
-                    )}
-                </Button>
+            <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
+                {/* Canvas Sidebar - always show even when no canvas selected */}
+                {!isFullScreen && (
+                    <LiveSidebar
+                        type="canvas"
+                        items={canvasItems}
+                        selectedItemId={activeCanvasId}
+                        onItemSelect={(canvasId) => handleCanvasSelect(canvasId)}
+                        collapsed={sidebarCollapsed}
+                        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        onCreateItem={handleCreateCanvas}
+                        onDeleteItem={handleDeleteCanvas}
+                        workspaceId={workspaceId}
+                        channelId={channelId}
+                    />
+                )}
+
+                <div className="flex-1 flex flex-col items-center justify-center gap-y-6 bg-white">
+                    <PaintBucket className="size-16 text-secondary" />
+                    <h2 className="text-2xl font-semibold">Canvas</h2>
+                    <p className="text-sm text-muted-foreground mb-2">Create a new canvas to start drawing and collaborating</p>
+                    <Button
+                        onClick={handleCreateCanvas}
+                        disabled={isCreatingCanvas}
+                        className="flex items-center gap-2"
+                    >
+                        {isCreatingCanvas ? (
+                            <>
+                                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                Creating Canvas...
+                            </>
+                        ) : (
+                            <>
+                                <PaintBucket className="h-4 w-4" />
+                                Create New Canvas
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
         );
     }

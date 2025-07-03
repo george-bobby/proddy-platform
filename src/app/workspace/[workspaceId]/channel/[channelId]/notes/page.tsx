@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { NotesEditor } from '@/features/notes/components/notes-editor';
-import { LiveblocksRoom, LiveHeader, LiveSidebar } from '@/features/live';
+import { LiveblocksRoom, LiveSidebar, LiveParticipants } from '@/features/live';
 import { StreamAudioRoom } from '@/features/audio';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useNoteContent } from '@/hooks/use-note-content';
@@ -168,29 +168,7 @@ const NotesPage = () => {
   return (
     <LiveblocksRoom roomId={`note-${activeNote?._id || channelId}`} roomType="note">
       <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
-        {/* Enhanced Header with collaborators and search - hidden in fullscreen */}
-        {!isFullScreen && (
-          <LiveHeader
-            type="notes"
-            title={activeNote?.title}
-            onTitleChange={(newTitle) => {
-              if (activeNote) {
-                handleNoteUpdate({ title: newTitle });
-              }
-            }}
-            onSave={() => {
-              if (activeNote && hasUnsavedChanges) {
-                handleNoteUpdate({ title: localTitle, content: localContent });
-              }
-            }}
-            onCreateItem={() => handleCreateNote()}
-            hasUnsavedChanges={hasUnsavedChanges}
-            showSearch={false}
-            toggleFullScreen={toggleFullScreen}
-            isFullScreen={isFullScreen}
-            showFullScreenToggle={true}
-          />
-        )}
+
         <div className="flex flex-1 overflow-hidden">
           {/* Enhanced Sidebar with categories - hidden in fullscreen */}
           {!isFullScreen && (
@@ -229,7 +207,10 @@ const NotesPage = () => {
             />
           )}
           {/* Main Content Area */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden relative">
+            {/* Live Participants - always visible, positioned absolutely */}
+            <LiveParticipants variant="notes" isFullScreen={isFullScreen} className="absolute top-2 right-2 z-10" />
+
             {activeNote ? (
               <NotesEditor
                 note={{
