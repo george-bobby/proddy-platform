@@ -396,7 +396,7 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
       />
 
       <svg
-        className={`h-[100vh] w-[100vw] ${getCursorStyle()}`}
+        className={`h-full w-full ${getCursorStyle()}`}
         onWheel={onWheel}
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}

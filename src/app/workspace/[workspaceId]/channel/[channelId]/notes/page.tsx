@@ -8,10 +8,9 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
-import { NotesSidebar } from '@/features/notes/components/notes-sidebar';
-import { NotesHeader } from '@/features/notes/components/notes-header';
 import { NotesEditor } from '@/features/notes/components/notes-editor';
-import { LiveblocksRoom } from '@/features/live';
+import { LiveblocksRoom, LiveHeader, LiveSidebar } from '@/features/live';
+import { StreamAudioRoom } from '@/features/audio';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useNoteContent } from '@/hooks/use-note-content';
 import { Note } from '@/features/notes/types';
@@ -48,6 +47,7 @@ const NotesPage = () => {
   // Convex mutations
   const createNote = useMutation(api.notes.create);
   const updateNote = useMutation(api.notes.update);
+  const deleteNote = useMutation(api.notes.remove);
 
   // Handle note updates
   const handleNoteUpdate = async (updates: Partial<Note>) => {
@@ -170,25 +170,62 @@ const NotesPage = () => {
       <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
         {/* Enhanced Header with collaborators and search - hidden in fullscreen */}
         {!isFullScreen && (
-          <NotesHeader
-            selectedNote={activeNote}
-            onCreateNote={() => handleCreateNote()}
-            workspaceId={workspaceId}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+          <LiveHeader
+            type="notes"
+            title={activeNote?.title}
+            onTitleChange={(newTitle) => {
+              if (activeNote) {
+                handleNoteUpdate(activeNote._id, { title: newTitle });
+              }
+            }}
+            onSave={() => {
+              if (activeNote && hasUnsavedChanges) {
+                handleSaveNote();
+              }
+            }}
+            onCreateItem={() => handleCreateNote()}
             hasUnsavedChanges={hasUnsavedChanges}
+            showSearch={false}
+            toggleFullScreen={toggleFullScreen}
+            isFullScreen={isFullScreen}
+            showFullScreenToggle={true}
           />
         )}
         <div className="flex flex-1 overflow-hidden">
           {/* Enhanced Sidebar with categories - hidden in fullscreen */}
           {!isFullScreen && (
-            <NotesSidebar
+            <LiveSidebar
+              type="notes"
+              items={notes.map(note => ({
+                _id: note._id,
+                title: note.title,
+                content: note.content,
+                tags: note.tags,
+                createdAt: note.createdAt,
+                updatedAt: note.updatedAt
+              }))}
+              selectedItemId={activeNoteId}
+              onItemSelect={(noteId) => handleNoteSelect(noteId as Id<"notes">)}
+              collapsed={sidebarCollapsed}
+              onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+              onCreateItem={handleCreateNote}
+              onDeleteItem={async (noteId) => {
+                if (window.confirm('Are you sure you want to delete this note?')) {
+                  try {
+                    await deleteNote({ id: noteId as Id<"notes"> });
+                    toast.success('Note deleted successfully');
+                    // If the deleted note was active, clear the selection
+                    if (activeNoteId === noteId) {
+                      setActiveNoteId(null);
+                    }
+                  } catch (error) {
+                    toast.error('Failed to delete note');
+                    console.error('Error deleting note:', error);
+                  }
+                }
+              }}
               workspaceId={workspaceId}
               channelId={channelId}
-              selectedNoteId={activeNoteId}
-              onNoteSelect={handleNoteSelect}
-              collapsed={sidebarCollapsed}
-              onCreateNote={handleCreateNote}
             />
           )}
           {/* Main Content Area */}
@@ -226,6 +263,16 @@ const NotesPage = () => {
           </div>
         </div>
       </div>
+      {/* Audio Room Component */}
+      {activeNote && (
+        <StreamAudioRoom
+          roomId={activeNote._id}
+          workspaceId={workspaceId}
+          channelId={channelId}
+          canvasName={activeNote.title || 'Notes Audio Room'}
+          isFullScreen={isFullScreen}
+        />
+      )}
     </LiveblocksRoom>
   );
 };

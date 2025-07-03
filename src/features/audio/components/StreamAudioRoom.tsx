@@ -79,8 +79,7 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
     console.error('Audio room error:', error);
 
     // Check if this is a WebSocket connection issue
-    const isWSError = error.isWSFailure ||
-      (error.message && typeof error.message === 'string' && error.message.includes('WS connection'));
+    const isWSError = typeof error === 'string' && error.includes('WS connection');
 
     return (
       <div className="fixed bottom-4 right-4 z-50 bg-white p-3 rounded-md shadow-md max-w-xs">
@@ -88,33 +87,13 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
           {isWSError ? 'Network Connection Failed' : 'Audio Connection Failed'}
         </h4>
         <p className="text-xs text-gray-600 mb-2">
-          {typeof error === 'string'
-            ? error
-            : (error.message || 'Unknown error')}
+          {error}
         </p>
 
         {isWSError && (
           <p className="text-xs text-gray-600 mb-2">
             This may be due to network issues or firewall settings. Try using a different network or check your firewall settings.
           </p>
-        )}
-
-        {error && typeof error === 'object' && (
-          <>
-            {error.code && (
-              <p className="text-xs text-gray-500 mb-1">
-                Error code: {error.code}
-              </p>
-            )}
-            {error.details && Object.keys(error.details).length > 0 && (
-              <div className="text-xs text-gray-500 mb-2 max-h-20 overflow-y-auto">
-                <p className="font-medium">Details:</p>
-                <pre className="whitespace-pre-wrap text-xs">
-                  {JSON.stringify(error.details, null, 2)}
-                </pre>
-              </div>
-            )}
-          </>
         )}
 
         <div className="flex gap-2">

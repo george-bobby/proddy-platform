@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUserId } from '@convex-dev/auth/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/../convex/_generated/api';
+import { StreamClient } from '@stream-io/node-sdk';
 
 // Stream API credentials from environment variables
 const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY;
@@ -34,9 +32,12 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    // Generate a token for Stream authentication
-    const token = createDemoToken(userId);
-    console.log('Token generated successfully');
+    // Initialize Stream client
+    const streamClient = new StreamClient(apiKey, apiSecret);
+
+    // Generate a token for Stream authentication using the official SDK
+    const token = streamClient.generateUserToken({ user_id: userId });
+    console.log('Token generated successfully using Stream SDK');
 
     return NextResponse.json({ token });
   } catch (error) {
@@ -46,60 +47,4 @@ export async function POST(req: NextRequest) {
       details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }
-}
-
-// Create a token for Stream API authentication
-function createDemoToken(userId: string) {
-  if (!apiSecret) {
-    throw new Error('STREAM_API_SECRET environment variable is not set');
-  }
-
-  // Create a JWT token with the necessary claims
-  const header = {
-    alg: 'HS256',
-    typ: 'JWT'
-  };
-
-  // Current timestamp in seconds
-  const currentTime = Math.floor(Date.now() / 1000);
-
-  // Token valid for 24 hours
-  const expiryTime = currentTime + 86400;
-
-  // Create payload according to Stream's requirements
-  const payload = {
-    user_id: userId,
-    exp: expiryTime,
-    iat: currentTime
-  };
-
-  console.log('Creating token for user:', userId);
-  console.log('Using API key:', apiKey);
-  console.log('Using API secret:', apiSecret?.substring(0, 5) + '...');
-
-  // Encode header and payload
-  const encodedHeader = Buffer.from(JSON.stringify(header)).toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-
-  // Create signature using HMAC SHA256
-  const crypto = require('crypto');
-  const signature = crypto.createHmac('sha256', apiSecret)
-    .update(`${encodedHeader}.${encodedPayload}`)
-    .digest('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-
-  const token = `${encodedHeader}.${encodedPayload}.${signature}`;
-  console.log('Generated token:', token.substring(0, 20) + '...');
-
-  // Return the complete JWT token
-  return token;
 }

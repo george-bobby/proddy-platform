@@ -1,17 +1,17 @@
 import * as React from 'react';
 import {
-  Body,
-  Button,
-  Container,
-  Head,
-  Heading,
-  Hr,
-  Html,
-  Img,
-  Link,
-  Preview,
-  Section,
-  Text,
+    Body,
+    Button,
+    Container,
+    Head,
+    Heading,
+    Hr,
+    Html,
+    Img,
+    Link,
+    Preview,
+    Section,
+    Text,
 } from '@react-email/components';
 
 interface WorkspaceDigest {
@@ -60,9 +60,11 @@ export const WeeklyDigestTemplate: React.FC<Readonly<WeeklyDigestTemplateProps>>
     const previewText = `Your weekly Proddy digest for ${weekRange}`;
 
     // Generate unsubscribe URL with proper parameters
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
     const unsubscribeUrl = userId && unsubscribeToken && workspaces.length > 0
-        ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://proddy.tech'}/unsubscribe?token=${unsubscribeToken}&userId=${userId}&workspaceId=${workspaces[0].workspaceUrl.split('/').pop()}&email=${encodeURIComponent(email || '')}`
-        : 'https://proddy.tech/unsubscribe';
+        ? `${baseUrl}/unsubscribe?token=${unsubscribeToken}&userId=${userId}&workspaceId=${workspaces[0].workspaceUrl.split('/').pop()}&email=${encodeURIComponent(email || '')}`
+        : `${baseUrl}/unsubscribe`;
+
 
     return (
         <Html>

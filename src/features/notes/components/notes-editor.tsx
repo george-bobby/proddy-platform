@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Save, ExternalLink, Users, Maximize, Minimize } from 'lucide-react';
-import { LiveParticipants } from '@/features/live/components/live-participants';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -12,6 +12,7 @@ import { Note } from '../types';
 import { Id } from '@/../convex/_generated/dataModel';
 import { useRouter } from 'next/navigation';
 import { NotePage } from './note-page';
+import { NotesAudioControls } from '@/features/audio';
 
 interface NotesEditorProps {
   note: Note;
@@ -97,12 +98,6 @@ export const NotesEditor = ({
 
   return (
     <div className="flex flex-col h-full relative">
-      {/* Live Participants - positioned like canvas participants */}
-      <LiveParticipants
-        variant="notes"
-        isFullScreen={isFullScreen}
-        className={`absolute ${isFullScreen ? 'top-8' : 'top-32'} right-8 z-50`}
-      />
 
       {/* Fullscreen Button - positioned in top center like canvas TopToolbar */}
       {toggleFullScreen && (
@@ -134,12 +129,17 @@ export const NotesEditor = ({
             placeholder="Note title..."
           />
 
-          {isEditing && (
-            <Button onClick={handleSave} size="sm" disabled={isLoading}>
-              <Save className="h-4 w-4 mr-2" />
-              {isLoading ? 'Saving...' : 'Save'}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Audio Controls */}
+            <NotesAudioControls />
+
+            {isEditing && (
+              <Button onClick={handleSave} size="sm" disabled={isLoading}>
+                <Save className="h-4 w-4 mr-2" />
+                {isLoading ? 'Saving...' : 'Save'}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Metadata row */}
