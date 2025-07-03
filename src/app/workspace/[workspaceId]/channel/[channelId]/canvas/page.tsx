@@ -11,7 +11,7 @@ import {
     CanvasCanvas,
     CanvasToolbar
 } from '@/features/canvas';
-import { LiveblocksRoom, LiveParticipants, LiveSidebar } from '@/features/live';
+import { LiveblocksRoom, LiveParticipants, LiveHeader, LiveSidebar } from '@/features/live';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
