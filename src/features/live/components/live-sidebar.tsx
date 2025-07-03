@@ -65,6 +65,7 @@ export const LiveSidebar = ({
 }: LiveSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   // Filter items based on search query
   const filteredItems = useMemo(() => {
@@ -219,7 +220,12 @@ export const LiveSidebar = ({
                   key={item._id}
                   onClick={() => handleItemClick(item)}
                   onMouseEnter={() => setHoveredItemId(item._id)}
-                  onMouseLeave={() => setHoveredItemId(null)}
+                  onMouseLeave={() => {
+                    // Don't hide if dropdown is open for this item
+                    if (openDropdownId !== item._id) {
+                      setHoveredItemId(null);
+                    }
+                  }}
                   className={cn(
                     "p-3 rounded-lg cursor-pointer transition-colors group",
                     selectedItemId === item._id
@@ -261,7 +267,16 @@ export const LiveSidebar = ({
 
                     {/* Actions - Always show delete for both notes and canvas */}
                     {hoveredItemId === item._id && (
-                      <DropdownMenu>
+                      <DropdownMenu
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setOpenDropdownId(item._id);
+                          } else {
+                            setOpenDropdownId(null);
+                            setHoveredItemId(null);
+                          }
+                        }}
+                      >
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
