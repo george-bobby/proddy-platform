@@ -10,9 +10,10 @@ import {
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Phone, PhoneOff } from 'lucide-react';
+import { Phone, PhoneOff, Loader2 } from 'lucide-react';
 import { useAudioRoom } from '../'; // Import from index to get the new implementation
 import { AudioToolbarButton } from './AudioToolbarButton';
+import { AudioControlButton } from './AudioControlButton';
 
 interface StreamAudioRoomProps {
   roomId: string;
@@ -52,8 +53,14 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
 
   // Function to leave audio room
   const handleLeaveAudio = async () => {
-    await disconnectFromAudioRoom();
-    setShouldConnect(false);
+    console.log('Leave audio button clicked');
+    try {
+      await disconnectFromAudioRoom();
+      setShouldConnect(false);
+      console.log('Successfully left audio room');
+    } catch (error) {
+      console.error('Error leaving audio room:', error);
+    }
   };
 
   // Function to force a retry by changing the key
@@ -155,14 +162,13 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
   if (!isConnected && !isConnecting) {
     return (
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-        <Button
+        <AudioControlButton
+          icon={Phone}
+          label="Join Audio Room"
           onClick={handleJoinAudio}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
-        >
-          <Phone className="h-5 w-5" />
-          Join Audio Room
-          {/* You can add participant count here if needed */}
-        </Button>
+          variant="action"
+          className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+        />
       </div>
     );
   }
@@ -171,13 +177,14 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
   if (isConnecting) {
     return (
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-        <Button
-          disabled
-          className="bg-gray-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
-        >
-          <Phone className="h-5 w-5 animate-pulse" />
-          Connecting...
-        </Button>
+        <AudioControlButton
+          icon={Loader2}
+          label="Connecting..."
+          onClick={() => {}}
+          variant="action"
+          disabled={true}
+          className="bg-gray-600 text-white border-gray-600 animate-pulse"
+        />
       </div>
     );
   }
@@ -230,22 +237,27 @@ const AudioRoomUI = ({ isFullScreen, onLeaveAudio }: AudioRoomUIProps) => {
       {/* Audio elements for all participants */}
       <ParticipantsAudio participants={participants} />
 
-      {/* Audio controls */}
-      <div className={`fixed ${isFullScreen ? 'bottom-8 right-8' : 'bottom-4 right-4'} z-50 bg-white rounded-md p-3 shadow-md flex flex-col gap-2`}>
-        <AudioToolbarButton />
+      {/* Audio controls container */}
+      <div className={`fixed ${isFullScreen ? 'bottom-8 right-8' : 'bottom-4 right-4'} z-50`}>
+        <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+          {/* Main audio controls */}
+          <div className="flex items-center justify-center mb-3">
+            <AudioToolbarButton />
+          </div>
 
-        {/* Leave audio button */}
-        {onLeaveAudio && (
-          <Button
-            onClick={onLeaveAudio}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <PhoneOff className="h-4 w-4" />
-            Leave
-          </Button>
-        )}
+          {/* Leave audio button */}
+          {onLeaveAudio && (
+            <div className="flex justify-center">
+              <AudioControlButton
+                icon={PhoneOff}
+                label="Leave Audio"
+                onClick={onLeaveAudio}
+                variant="action"
+                className="bg-red-500 hover:bg-red-600 text-white border-red-500 text-xs px-3 py-1.5"
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
-import { NotesEditor } from '@/features/notes/components/notes-editor';
+import { BlockNoteNotesEditor } from '@/features/notes/components/blocknote-notes-editor';
 import { LiveblocksRoom, LiveSidebar, LiveParticipants, LiveHeader } from '@/features/live';
 import { StreamAudioRoom } from '@/features/audio';
 import { useDocumentTitle } from '@/hooks/use-document-title';
@@ -135,7 +135,7 @@ const NotesPage = () => {
   const handleCreateNote = async () => {
     try {
       const defaultTitle = "Untitled";
-      const defaultContent = JSON.stringify({ ops: [{ insert: "\n" }] });
+      const defaultContent = ""; // Empty content for BlockNote
 
       // Create the note in Convex
       const noteId = await createNote({
@@ -245,7 +245,7 @@ const NotesPage = () => {
                 )}
 
                 <div className="flex-1 overflow-hidden">{/* Wrapper for editor */}
-              <NotesEditor
+              <BlockNoteNotesEditor
                 note={{
                   ...activeNote,
                   title: isTyping ? localTitle : activeNote.title,

@@ -109,18 +109,36 @@ export const useAudioRoom = ({ roomId, workspaceId, channelId, canvasName, shoul
 
   const disconnectFromAudioRoom = async () => {
     try {
+      console.log('Starting audio room disconnection...');
+
+      // First, leave the call
       if (call) {
+        console.log('Leaving call...');
         await call.leave();
         setCall(null);
       }
+
+      // Then disconnect the client
       if (client) {
+        console.log('Disconnecting client...');
         await client.disconnectUser();
         setClient(null);
       }
+
+      // Reset all states
       setIsConnected(false);
-      console.log('Disconnected from audio room');
+      setIsConnecting(false);
+      setError(null);
+
+      console.log('Successfully disconnected from audio room');
     } catch (error) {
       console.error('Failed to disconnect from audio room:', error);
+      // Even if there's an error, reset the states to allow reconnection
+      setCall(null);
+      setClient(null);
+      setIsConnected(false);
+      setIsConnecting(false);
+      setError('Failed to disconnect properly');
     }
   };
 

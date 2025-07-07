@@ -1,5 +1,7 @@
 // Notes components
 export { NotesEditor } from './components/notes-editor';
+export { BlockNoteNotesEditor } from './components/blocknote-notes-editor';
+export { BlockNoteEditor } from './components/blocknote-editor';
 export { NotePage } from './components/note-page';
 export { NoteEditor } from './components/note-editor';
 export { NoteItem } from './components/note-item';

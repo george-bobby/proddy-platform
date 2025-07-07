@@ -2,7 +2,7 @@ import { Mic, MicOff, AlertCircle, Volume2, VolumeX } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useCallStateHooks, useCall, OwnCapability } from '@stream-io/video-react-sdk';
 import { toast } from 'sonner';
-import { ToolButton } from '@/features/canvas/components/tool-button';
+import { AudioControlButton } from './AudioControlButton';
 
 interface AudioToolbarButtonProps { }
 
@@ -150,42 +150,33 @@ export const AudioToolbarButton = ({ }: AudioToolbarButtonProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-y-1">
+    <div className="flex items-center gap-3">
       {/* Speaker (audio output) control */}
-      <div className="relative">
-        <ToolButton
-          label={speakerMuted ? 'Unmute speaker' : 'Mute speaker'}
-          icon={speakerMuted ? VolumeX : Volume2}
-          onClick={toggleSpeaker}
-          isActive={!speakerMuted}
-        />
-        {speakerMuted && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
-            title="Speaker is muted. Click to unmute and hear others." />
-        )}
-      </div>
+      <AudioControlButton
+        icon={speakerMuted ? VolumeX : Volume2}
+        label={speakerMuted ? 'Unmute speaker' : 'Mute speaker'}
+        onClick={toggleSpeaker}
+        variant="speaker"
+        isMuted={speakerMuted}
+      />
 
       {/* Microphone control */}
       {micPermissionError ? (
-        <ToolButton
-          label="Mic Permission Denied"
+        <AudioControlButton
           icon={AlertCircle}
+          label="Mic Permission Denied"
           onClick={() => console.error('Microphone access denied')}
-          isActive={false}
+          variant="mic"
+          disabled={true}
         />
       ) : (
-        <div className="relative">
-          <ToolButton
-            label={isMute ? 'Unmute to speak' : 'Mute microphone'}
-            icon={isMute ? MicOff : Mic}
-            onClick={toggleMicrophone}
-            isActive={!isMute}
-          />
-          {isMute && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"
-              title="Microphone is muted. Click to unmute and speak." />
-          )}
-        </div>
+        <AudioControlButton
+          icon={isMute ? MicOff : Mic}
+          label={isMute ? 'Unmute to speak' : 'Mute microphone'}
+          onClick={toggleMicrophone}
+          variant="mic"
+          isMuted={isMute}
+        />
       )}
     </div>
   );

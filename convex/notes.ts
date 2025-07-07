@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { prosemirrorSync } from "./prosemirror";
 
 // Create a new note
 export const create = mutation({
@@ -46,6 +47,9 @@ export const create = mutation({
       createdAt: now,
       updatedAt: now,
     });
+
+    // Create the prosemirror document for collaborative editing
+    await prosemirrorSync.create(ctx, noteId, { type: "doc", content: [] });
 
     return noteId;
   },
