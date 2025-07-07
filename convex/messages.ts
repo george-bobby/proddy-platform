@@ -266,6 +266,7 @@ export const create = mutation({
 		channelId: v.optional(v.id('channels')),
 		conversationId: v.optional(v.id('conversations')),
 		parentMessageId: v.optional(v.id('messages')),
+		tags: v.optional(v.array(v.string())),
 		calendarEvent: v.optional(
 			v.object({
 				date: v.number(),
@@ -314,6 +315,7 @@ export const create = mutation({
 			conversationId: _conversationId,
 			parentMessageId: args.parentMessageId,
 			calendarEvent: args.calendarEvent,
+			tags: args.tags,
 		});
 
 		// If this is a reply to a thread, send an email notification
@@ -454,6 +456,7 @@ export const update = mutation({
 	args: {
 		id: v.id('messages'),
 		body: v.string(),
+		tags: v.optional(v.array(v.string())),
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
@@ -473,10 +476,16 @@ export const update = mutation({
 		if (!member || member._id !== message.memberId)
 			throw new Error('Unauthorized.');
 
-		await ctx.db.patch(args.id, {
+		const updateData: any = {
 			body: args.body,
 			updatedAt: Date.now(),
-		});
+		};
+
+		if (args.tags !== undefined) {
+			updateData.tags = args.tags;
+		}
+
+		await ctx.db.patch(args.id, updateData);
 
 		return args.id;
 	},

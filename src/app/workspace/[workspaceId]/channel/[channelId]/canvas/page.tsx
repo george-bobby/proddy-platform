@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useChannelId } from '@/hooks/use-channel-id';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
@@ -8,10 +8,10 @@ import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
 import { toast } from 'sonner';
 import {
-    CanvasCanvas,
+    Canvas as CanvasCanvas,
     CanvasToolbar
 } from '@/features/canvas';
-import { LiveblocksRoom, LiveParticipants, LiveHeader, LiveSidebar } from '@/features/live';
+import { LiveblocksRoom, LiveParticipants, LiveSidebar, LiveHeader } from '@/features/live';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { Loader, PaintBucket } from 'lucide-react';
 import { useCurrentUser } from '@/features/auth/api/use-current-user';
@@ -73,14 +73,18 @@ const CanvasPage = () => {
                 try {
                     const body = JSON.parse(message.body);
                     if (body.type === "canvas" && body.canvasName && body.roomId) {
-                        canvasMessages.push({
+                        const canvasItem = {
                             _id: message._id,
+                            body: message.body,
                             canvasName: body.canvasName,
                             roomId: body.roomId,
                             savedCanvasId: body.savedCanvasId,
                             createdAt: message._creationTime,
-                            updatedAt: message._creationTime
-                        });
+                            updatedAt: message._creationTime,
+                            tags: message.tags || body.tags || []
+                        };
+                        console.log('Canvas item parsed:', canvasItem);
+                        canvasMessages.push(canvasItem);
                     }
                 } catch (error) {
                     // Skip invalid JSON
@@ -117,8 +121,8 @@ const CanvasPage = () => {
     }, [pageContainerRef]);
 
     // Mutations for updating and creating messages
-    const updateMessage = useMutation(api.messages.update);
     const createMessage = useMutation(api.messages.create);
+    const updateMessage = useMutation(api.messages.update);
     const deleteMessage = useMutation(api.messages.remove);
 
     // Handle canvas selection from sidebar - simplified like notes
@@ -168,6 +172,7 @@ const CanvasPage = () => {
                     canvasName: canvasName,
                     savedCanvasId: canvasId,
                 }),
+                tags: [], // Initialize with empty tags
             });
 
             // Set the new canvas as active
@@ -178,6 +183,24 @@ const CanvasPage = () => {
             toast.error("Failed to create canvas");
         } finally {
             setIsCreatingCanvas(false);
+        }
+    };
+
+    const handleUpdateCanvasTags = async (messageId: Id<"messages">, newTags: string[]) => {
+        try {
+            const canvasData = JSON.parse(activeCanvas.body);
+            await updateMessage({
+                id: messageId,
+                body: JSON.stringify({
+                    ...canvasData,
+                    tags: newTags,
+                }),
+                tags: newTags,
+            });
+            toast.success("Tags updated successfully");
+        } catch (error) {
+            console.error("Error updating canvas tags:", error);
+            toast.error("Failed to update tags");
         }
     };
 
@@ -227,11 +250,9 @@ const CanvasPage = () => {
         );
     }
 
-    // Main render - canvas is selected
     return (
         <LiveblocksRoom roomId={activeCanvas.roomId} roomType="canvas">
             <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
-                {/* Canvas Sidebar - hidden in fullscreen */}
                 {!isFullScreen && (
                     <LiveSidebar
                         type="canvas"
@@ -258,32 +279,54 @@ const CanvasPage = () => {
                                 console.log('Title changed to:', newTitle);
                                 // You can implement canvas title update here
                             }}
-                            onSave={() => {
-                                // Implement canvas save functionality
-                                console.log('Save canvas');
-                                toast.success("Canvas saved successfully");
-                            }}
                             onCreateItem={handleCreateCanvas}
-                            hasUnsavedChanges={false} // You can track canvas changes here
                             toggleFullScreen={toggleFullScreen}
                             isFullScreen={isFullScreen}
                             showFullScreenToggle={true}
+                            createdAt={activeCanvas.createdAt}
+                            updatedAt={activeCanvas.updatedAt}
+                            onSave={() => {
+                                console.log('Save canvas');
+                                // Implement canvas save functionality
+                            }}
+                            hasUnsavedChanges={false} // You can track canvas changes here
+                            autoSaveStatus="saved"
+                            lastSaved={activeCanvas.updatedAt}
+                            tags={activeCanvas.tags || []}
+                            onTagsChange={(newTags) => {
+                                console.log('Canvas tags changing:', newTags);
+                                handleUpdateCanvasTags(activeCanvas._id, newTags);
+                            }}
+                            showTags={true}
                         />
                     )}
-
-                    {/* Live Participants - always visible, positioned absolutely */}
-                    <LiveParticipants variant="canvas" isFullScreen={isFullScreen} />
 
                     <div className="flex flex-1 overflow-hidden">
                         {/* Toolbar - hidden in fullscreen */}
                         {!isFullScreen && <CanvasToolbar />}
 
-                        <div className="flex-1">
+                        <div className="flex-1 relative">
                             <CanvasCanvas
                                 canvasId={channelId}
                                 savedCanvasName={activeCanvas.canvasName}
                                 toggleFullScreen={toggleFullScreen}
                                 isFullScreen={isFullScreen}
+                                onTitleChange={(newTitle: string) => {
+                                    // Update canvas name
+                                    console.log('Title changed to:', newTitle);
+                                    // You can implement canvas title update here
+                                }}
+                                onSave={() => {
+                                    // Implement canvas save functionality
+                                    console.log('Save canvas');
+                                    toast.success("Canvas saved successfully");
+                                }}
+                                onCreateCanvas={handleCreateCanvas}
+                                hasUnsavedChanges={false} // You can track canvas changes here
+                                workspaceId={workspaceId as Id<"workspaces">}
+                                channelId={channelId as Id<"channels">}
+                                createdAt={activeCanvas.createdAt}
+                                updatedAt={activeCanvas.updatedAt}
                             />
                         </div>
                     </div>

@@ -2,8 +2,8 @@
 import { Canvas } from './components/canvas';
 import { Toolbar } from './components/toolbar';
 
+
 // Export renamed components for canvas feature
-export const CanvasHeader = () => null; // Replace with empty component
 export const CanvasCanvas = Canvas;
 export const CanvasToolbar = Toolbar;
 

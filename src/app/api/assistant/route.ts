@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 			'notes',
 			'tasks',
 			'board',
+			'chats',
 		];
 
 		const systemPrompt = `You are an intent classification AI for a workspace assistant platform. Your job is to classify the user's message into one of the following assistant types: ${assistantTypes.join(', ')}.\n\nReply ONLY with the type (one word, lowercase, no extra text).\n\nUser message: ${message}`;

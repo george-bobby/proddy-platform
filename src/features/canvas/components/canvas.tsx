@@ -41,6 +41,7 @@ import { Toolbar } from "./toolbar";
 import { CanvasName } from "./canvas-name";
 import { TopToolbar } from "./top-toolbar";
 
+
 // Constants are now defined in the hooks
 
 // Props type definition
@@ -50,9 +51,31 @@ type CanvasProps = {
   savedCanvasName?: string | null;
   toggleFullScreen?: () => void;
   isFullScreen?: boolean;
+  onTitleChange?: (title: string) => void;
+  onSave?: () => void;
+  onCreateCanvas?: () => void;
+  hasUnsavedChanges?: boolean;
+  workspaceId?: string;
+  channelId?: string;
+  createdAt?: number;
+  updatedAt?: number;
 };
 
-export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, isFullScreen }: CanvasProps) => {
+export const Canvas = ({
+  boardId,
+  canvasId,
+  savedCanvasName,
+  toggleFullScreen,
+  isFullScreen,
+  onTitleChange,
+  onSave,
+  onCreateCanvas,
+  hasUnsavedChanges,
+  workspaceId,
+  channelId,
+  createdAt,
+  updatedAt
+}: CanvasProps) => {
   // Use canvasId if provided, otherwise fall back to boardId for backward compatibility
   const effectiveId = canvasId || boardId;
   // Get the room instance
@@ -373,9 +396,10 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
   };
 
   return (
-    <main className="h-full w-full relative bg-neutral-100 touch-none">
-      <CanvasName savedCanvasName={savedCanvasName} />
-      <TopToolbar
+    <div className="flex flex-col h-full relative">
+      <main className="flex-1 w-full relative bg-neutral-100 touch-none">
+        <CanvasName savedCanvasName={savedCanvasName} />
+        <TopToolbar
         canvasState={canvasState}
         setCanvasState={setCanvasState}
         onColorChange={setLastUsedColor}
@@ -462,6 +486,7 @@ export const Canvas = ({ boardId, canvasId, savedCanvasName, toggleFullScreen, i
           )}
         </g>
       </svg>
-    </main>
+      </main>
+    </div>
   );
 };

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 import { FaChevronDown } from 'react-icons/fa';
 import { Loader, Trash, TriangleAlert } from 'lucide-react';

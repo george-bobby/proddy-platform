@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
 import { FileText, Plus } from 'lucide-react';
@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { NotesEditor } from '@/features/notes/components/notes-editor';
-import { LiveblocksRoom, LiveSidebar, LiveParticipants } from '@/features/live';
+import { LiveblocksRoom, LiveSidebar, LiveParticipants, LiveHeader } from '@/features/live';
 import { StreamAudioRoom } from '@/features/audio';
 import { useDocumentTitle } from '@/hooks/use-document-title';
 import { useNoteContent } from '@/hooks/use-note-content';
@@ -78,6 +78,15 @@ const NotesPage = () => {
     onUpdate: handleNoteUpdate,
     debounceMs: 1000,
   });
+
+  const handleUpdateNote = (updates: Partial<{ title: string; content: string; tags: string[] }>) => {
+    if (activeNote) {
+      updateNote({
+        id: activeNote._id,
+        ...updates,
+      });
+    }
+  };
 
   // Handle note selection
   const handleNoteSelect = (noteId: string) => {
@@ -207,11 +216,35 @@ const NotesPage = () => {
             />
           )}
           {/* Main Content Area */}
-          <div className="flex-1 overflow-hidden relative">
-            {/* Live Participants - always visible, positioned absolutely */}
-            <LiveParticipants variant="notes" isFullScreen={isFullScreen} className="absolute top-2 right-2 z-10" />
-
+          <div className="flex-1 overflow-hidden relative flex flex-col">
             {activeNote ? (
+              <>
+                {/* Notes Header - hidden in fullscreen */}
+                {!isFullScreen && (
+                  <LiveHeader
+                    type="notes"
+                    title={activeNote.title}
+                    onTitleChange={(newTitle) => {
+                      handleTitleChange(newTitle);
+                    }}
+                    onCreateItem={handleCreateNote}
+                    toggleFullScreen={toggleFullScreen}
+                    isFullScreen={isFullScreen}
+                    showFullScreenToggle={true}
+                    hasUnsavedChanges={hasUnsavedChanges}
+                    createdAt={activeNote.createdAt}
+                    updatedAt={activeNote.updatedAt}
+                    tags={activeNote.tags || []}
+                    onTagsChange={(newTags) => {
+                      handleUpdateNote({ tags: newTags });
+                    }}
+                    showTags={true}
+                    autoSaveStatus={hasUnsavedChanges ? 'saving' : 'saved'}
+                    lastSaved={activeNote.updatedAt}
+                  />
+                )}
+
+                <div className="flex-1 overflow-hidden">{/* Wrapper for editor */}
               <NotesEditor
                 note={{
                   ...activeNote,
@@ -228,6 +261,8 @@ const NotesPage = () => {
                 toggleFullScreen={toggleFullScreen}
                 isFullScreen={isFullScreen}
               />
+                </div>
+              </>
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">

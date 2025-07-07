@@ -172,16 +172,7 @@ export const TopToolbar = ({
           isActive={canvasState?.mode === CanvasMode.Eraser}
         />
 
-        {/* Divider */}
-        <div className="h-6 w-px bg-neutral-200 mx-1" />
 
-        {/* Full Screen Toggle */}
-        <ToolButton
-          label={isFullScreen ? "Exit Full Screen" : "Full Screen"}
-          icon={isFullScreen ? Minimize2 : Maximize2}
-          onClick={() => toggleFullScreen?.()}
-          isActive={isFullScreen}
-        />
       </div>
 
       {/* Stroke Width Slider - Only visible when pen is active */}

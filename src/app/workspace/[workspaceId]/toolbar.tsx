@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {Activity, Bell, HeartPulse, HelpCircle, Map, Search} from 'lucide-react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {ReactNode, useEffect, useState} from 'react';

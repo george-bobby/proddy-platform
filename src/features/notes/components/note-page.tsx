@@ -19,6 +19,7 @@ interface NotePageProps {
   onImageUpload?: (storageId: Id<'_storage'>) => void;
   isActive: boolean;
   pageIndex: number;
+  quillRef?: React.MutableRefObject<any>;
 }
 
 export const NotePage = ({
@@ -27,6 +28,7 @@ export const NotePage = ({
   onImageUpload,
   isActive,
   pageIndex,
+  quillRef: externalQuillRef,
 }: NotePageProps) => {
   // Basic state
   const [isMounted, setIsMounted] = useState(false);
@@ -34,10 +36,13 @@ export const NotePage = ({
   const [commandMenuPosition, setCommandMenuPosition] = useState({ top: 0, left: 0 });
 
   // Refs
-  const quillRef = useRef<Quill | null>(null);
+  const internalQuillRef = useRef<Quill | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const isTypingRef = useRef(false);
+
+  // Use internal ref for all operations
+  const quillRef = internalQuillRef;
 
   // API hooks
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
@@ -63,6 +68,11 @@ export const NotePage = ({
     const options = {
       modules: {
         toolbar: false,
+        history: {
+          delay: 1000,
+          maxStack: 100,
+          userOnly: true
+        },
         keyboard: {
           bindings: {
             slash: {
@@ -88,7 +98,12 @@ export const NotePage = ({
 
     // Create editor
     const editor = new Quill(containerRef.current, options);
-    quillRef.current = editor;
+    internalQuillRef.current = editor;
+
+    // Also set the external ref if provided
+    if (externalQuillRef) {
+      externalQuillRef.current = editor;
+    }
 
     // Set initial content with proper cursor positioning
     if (content) {

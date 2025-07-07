@@ -15,99 +15,123 @@ interface UseAudioRoomProps {
   workspaceId: string;
   channelId: string;
   canvasName?: string;
+  shouldConnect?: boolean;
 }
 
-export const useAudioRoom = ({ roomId, workspaceId, channelId, canvasName }: UseAudioRoomProps) => {
+export const useAudioRoom = ({ roomId, workspaceId, channelId, canvasName, shouldConnect = false }: UseAudioRoomProps) => {
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get current user from Convex
   const currentUser = useQuery(api.users.current);
 
-  useEffect(() => {
+  const connectToAudioRoom = async () => {
     if (!currentUser || !roomId || !workspaceId || !channelId || !apiKey) return;
 
-    const setupAudioRoom = async () => {
-      try {
-        setIsConnecting(true);
-        setError(null);
+    try {
+      setIsConnecting(true);
+      setError(null);
 
-        const userId = currentUser._id;
+      const userId = currentUser._id;
 
-        // Create user object for Stream
-        const user: User = {
-          id: userId,
-          name: currentUser.name || 'Anonymous',
-          image: currentUser.image || `https://getstream.io/random_svg/?id=${userId}&name=${currentUser.name}`,
-        };
+      // Create user object for Stream
+      const user: User = {
+        id: userId,
+        name: currentUser.name || 'Anonymous',
+        image: currentUser.image || `https://getstream.io/random_svg/?id=${userId}&name=${currentUser.name}`,
+      };
 
-        // Fetch token from our API
-        console.log('Fetching Stream token for user:', userId);
-        const response = await fetch('/api/stream-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId,
-            userName: currentUser.name,
-            userImage: currentUser.image
-          }),
-        });
+      // Fetch token from our API
+      console.log('Fetching Stream token for user:', userId);
+      const response = await fetch('/api/stream-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          userName: currentUser.name,
+          userImage: currentUser.image
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error(`Failed to get Stream token: ${response.status}`);
-        }
-
-        const { token } = await response.json();
-        console.log('Token received successfully');
-
-        // Initialize Stream client
-        const videoClient = new StreamVideoClient({
-          apiKey,
-          user,
-          token,
-        });
-
-        console.log('Stream client initialized successfully');
-        setClient(videoClient);
-
-        // Create unique room ID (keeping it under 64 characters)
-        const uniqueRoomId = `audio-${workspaceId.slice(-8)}-${channelId.slice(-8)}-${roomId.slice(-8)}`.substring(0, 63);
-        console.log('Creating audio room with ID:', uniqueRoomId);
-
-        // Create and join the call
-        const audioCall = videoClient.call('audio_room', uniqueRoomId);
-
-        await audioCall.join({
-          create: true,
-          data: {
-            custom: {
-              title: canvasName || 'Canvas Audio Room',
-              description: 'Collaborate on canvas with audio',
-              workspaceId,
-              channelId,
-              canvasId: roomId
-            }
-          },
-        });
-
-        console.log('Successfully joined audio room');
-        setCall(audioCall);
-        setIsConnecting(false);
-
-      } catch (error: any) {
-        console.error('Failed to setup audio room:', error);
-        setError(error.message || 'Failed to connect to audio room');
-        setIsConnecting(false);
+      if (!response.ok) {
+        throw new Error(`Failed to get Stream token: ${response.status}`);
       }
-    };
 
-    setupAudioRoom();
+      const { token } = await response.json();
+      console.log('Token received successfully');
 
-    // Cleanup on unmount
+      // Initialize Stream client
+      const videoClient = new StreamVideoClient({
+        apiKey,
+        user,
+        token,
+      });
+
+      console.log('Stream client initialized successfully');
+      setClient(videoClient);
+
+      // Create unique room ID (keeping it under 64 characters)
+      const uniqueRoomId = `audio-${workspaceId.slice(-8)}-${channelId.slice(-8)}-${roomId.slice(-8)}`.substring(0, 63);
+      console.log('Creating audio room with ID:', uniqueRoomId);
+
+      // Create and join the call
+      const audioCall = videoClient.call('audio_room', uniqueRoomId);
+
+      await audioCall.join({
+        create: true,
+        data: {
+          custom: {
+            title: canvasName || 'Audio Room',
+            description: 'Collaborate with audio',
+            workspaceId,
+            channelId,
+            roomId: roomId
+          }
+        },
+      });
+
+      console.log('Successfully joined audio room');
+      setCall(audioCall);
+      setIsConnected(true);
+      setIsConnecting(false);
+
+    } catch (error: any) {
+      console.error('Failed to setup audio room:', error);
+      setError(error.message || 'Failed to connect to audio room');
+      setIsConnecting(false);
+    }
+  };
+
+  const disconnectFromAudioRoom = async () => {
+    try {
+      if (call) {
+        await call.leave();
+        setCall(null);
+      }
+      if (client) {
+        await client.disconnectUser();
+        setClient(null);
+      }
+      setIsConnected(false);
+      console.log('Disconnected from audio room');
+    } catch (error) {
+      console.error('Failed to disconnect from audio room:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (shouldConnect && !isConnected && !isConnecting) {
+      connectToAudioRoom();
+    }
+  }, [shouldConnect, currentUser, roomId, workspaceId, channelId, apiKey, isConnected, isConnecting]);
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       if (call) {
         call.leave().catch(console.error);
@@ -116,13 +140,16 @@ export const useAudioRoom = ({ roomId, workspaceId, channelId, canvasName }: Use
         client.disconnectUser().catch(console.error);
       }
     };
-  }, [currentUser, roomId, workspaceId, channelId, canvasName, apiKey]);
+  }, [call, client]);
 
   return {
     client,
     call,
     currentUser,
     isConnecting,
-    error
+    isConnected,
+    error,
+    connectToAudioRoom,
+    disconnectFromAudioRoom
   };
 };

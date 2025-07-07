@@ -55,6 +55,7 @@ const schema = defineSchema({
 		parentMessageId: v.optional(v.id('messages')),
 		conversationId: v.optional(v.id('conversations')),
 		updatedAt: v.optional(v.number()),
+		tags: v.optional(v.array(v.string())), // Added tags support for canvas messages
 		calendarEvent: v.optional(
 			v.object({
 				date: v.number(), // timestamp for the event date

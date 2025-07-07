@@ -9,6 +9,8 @@ import {
 } from '@stream-io/video-react-sdk';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Phone, PhoneOff } from 'lucide-react';
 import { useAudioRoom } from '../'; // Import from index to get the new implementation
 import { AudioToolbarButton } from './AudioToolbarButton';
 
@@ -23,14 +25,36 @@ interface StreamAudioRoomProps {
 export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, isFullScreen }: StreamAudioRoomProps) => {
   const [retryKey, setRetryKey] = useState(0);
   const [showFallbackUI, setShowFallbackUI] = useState(false);
+  const [shouldConnect, setShouldConnect] = useState(false);
 
   // Use our custom hook to manage the audio room
-  const { client, call, currentUser, isConnecting, error } = useAudioRoom({
+  const {
+    client,
+    call,
+    currentUser,
+    isConnecting,
+    isConnected,
+    error,
+    connectToAudioRoom,
+    disconnectFromAudioRoom
+  } = useAudioRoom({
     roomId,
     workspaceId,
     channelId,
-    canvasName
+    canvasName,
+    shouldConnect
   });
+
+  // Function to join audio room
+  const handleJoinAudio = () => {
+    setShouldConnect(true);
+  };
+
+  // Function to leave audio room
+  const handleLeaveAudio = async () => {
+    await disconnectFromAudioRoom();
+    setShouldConnect(false);
+  };
 
   // Function to force a retry by changing the key
   const handleRetry = () => {
@@ -127,17 +151,48 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
     );
   }
 
-  // Always render something, even if client/call/currentUser are not available
+  // Show join button if not connected
+  if (!isConnected && !isConnecting) {
+    return (
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+        <Button
+          onClick={handleJoinAudio}
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
+        >
+          <Phone className="h-5 w-5" />
+          Join Audio Room
+          {/* You can add participant count here if needed */}
+        </Button>
+      </div>
+    );
+  }
+
+  // Show connecting state
+  if (isConnecting) {
+    return (
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+        <Button
+          disabled
+          className="bg-gray-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
+        >
+          <Phone className="h-5 w-5 animate-pulse" />
+          Connecting...
+        </Button>
+      </div>
+    );
+  }
+
+  // Show audio room UI when connected
   return (
     <>
-      {client && call && currentUser ? (
+      {client && call && currentUser && isConnected ? (
         <StreamVideo client={client}>
           <StreamCall call={call}>
-            <AudioRoomUI isFullScreen={isFullScreen} />
+            <AudioRoomUI isFullScreen={isFullScreen} onLeaveAudio={handleLeaveAudio} />
           </StreamCall>
         </StreamVideo>
       ) : (
-        // Render an empty div when not ready instead of returning null
+        // Render an empty div when not ready
         <div className="hidden"></div>
       )}
     </>
@@ -146,9 +201,10 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
 
 interface AudioRoomUIProps {
   isFullScreen?: boolean;
+  onLeaveAudio?: () => void;
 }
 
-const AudioRoomUI = ({ isFullScreen }: AudioRoomUIProps) => {
+const AudioRoomUI = ({ isFullScreen, onLeaveAudio }: AudioRoomUIProps) => {
   const { useParticipants, useLocalParticipant } = useCallStateHooks();
   const participants = useParticipants();
   const localParticipant = useLocalParticipant();
@@ -175,8 +231,21 @@ const AudioRoomUI = ({ isFullScreen }: AudioRoomUIProps) => {
       <ParticipantsAudio participants={participants} />
 
       {/* Audio controls */}
-      <div className={`fixed ${isFullScreen ? 'bottom-8 right-8' : 'bottom-4 right-4'} z-50 bg-white rounded-md p-3 shadow-md`}>
+      <div className={`fixed ${isFullScreen ? 'bottom-8 right-8' : 'bottom-4 right-4'} z-50 bg-white rounded-md p-3 shadow-md flex flex-col gap-2`}>
         <AudioToolbarButton />
+
+        {/* Leave audio button */}
+        {onLeaveAudio && (
+          <Button
+            onClick={onLeaveAudio}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <PhoneOff className="h-4 w-4" />
+            Leave
+          </Button>
+        )}
       </div>
     </div>
   );
