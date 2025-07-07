@@ -13,7 +13,7 @@ import { useQuery } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { formatDistanceToNow } from 'date-fns';
 import { useGetMembers } from '@/features/members/api/use-get-members';
-import { useGetWorkspaceStatuses } from '@/features/status/api/use-get-workspace-statuses';
+import { useWorkspacePresence } from '@/features/presence/hooks/use-workspace-presence';
 
 interface TeamStatusWidgetProps {
   workspaceId: Id<'workspaces'>;
@@ -47,24 +47,24 @@ interface TeamMember {
 export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
   const router = useRouter();
   const { data: members, isLoading: membersLoading } = useGetMembers({ workspaceId });
-  const { data: statuses, isLoading: statusesLoading } = useGetWorkspaceStatuses({ workspaceId });
+  const { presenceState, onlineCount } = useWorkspacePresence({ workspaceId });
 
-  // Combine member data with status data
+  // Combine member data with presence data
   const teamMembers = useMemo(() => {
     if (!members) return [];
 
-    // Use empty array as fallback if statuses is undefined
-    const statusesData = statuses || [];
+    // Create a map of online users for quick lookup
+    const onlineUsers = new Set(presenceState.filter(p => p.online).map(p => p.userId));
 
     return members.map(member => {
-      const status = statusesData.find(s => s?.userId === member?.userId);
+      const isOnline = onlineUsers.has(member.userId);
 
       return {
         ...member,
-        status: status?.status || '',
+        status: isOnline ? 'online' : 'offline',
         statusEmoji: '',
-        isOnline: status?.status === 'online',
-        lastActive: status?.lastSeen || member?._creationTime || Date.now(),
+        isOnline,
+        lastActive: member._creationTime || Date.now(),
         // Ensure user object exists
         user: member?.user || { name: 'Unknown User', image: '' }
       };
@@ -76,14 +76,14 @@ export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
 
       return (a.user?.name || '').localeCompare(b.user?.name || '') || 0;
     });
-  }, [members, statuses]);
+  }, [members, presenceState]);
 
   const handleStartChat = (userId: string) => {
     router.push(`/workspace/${workspaceId}/direct/${userId}`);
   };
 
 
-  if (membersLoading || statusesLoading) {
+  if (membersLoading) {
     return (
       <div className="flex h-[300px] items-center justify-center">
         <Loader className="size-6 animate-spin text-muted-foreground" />
@@ -97,9 +97,9 @@ export const TeamStatusWidget = ({ workspaceId }: TeamStatusWidgetProps) => {
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
           <h3 className="font-medium">Team Status</h3>
-          {teamMembers.filter(m => m.isOnline).length > 0 && (
+          {onlineCount > 0 && (
             <Badge variant="default" className="ml-2">
-              {teamMembers.filter(m => m.isOnline).length} online
+              {onlineCount} online
             </Badge>
           )}
         </div>

@@ -8,9 +8,9 @@ import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { StatusIndicator } from '@/components/status-indicator';
+import { PresenceIndicator } from '@/features/presence/components/presence-indicator';
 import { useGetMembers } from '@/features/members/api/use-get-members';
-import { useGetUserStatus } from '@/features/status/api/use-get-user-status';
+import { useMultipleUserPresence } from '@/features/presence/hooks/use-workspace-presence';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
@@ -26,21 +26,25 @@ interface MentionPickerProps {
   searchQuery: string;
 }
 
-interface MemberWithStatus {
+interface MemberWithPresence {
   _id: Id<'members'>;
   user: {
     name: string;
     image?: string;
   };
-  status: 'online' | 'offline';
+  isOnline: boolean;
 }
 
 export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionPickerProps) => {
   const workspaceId = useWorkspaceId();
   const { data: members, isLoading } = useGetMembers({ workspaceId });
-  const [filteredMembers, setFilteredMembers] = useState<MemberWithStatus[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState<MemberWithPresence[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Get presence information for all users
+  const userIds = members?.map(m => m.userId) || [];
+  const { isUserOnline } = useMultipleUserPresence(userIds);
 
   // Debug the component state
   useEffect(() => {
@@ -80,21 +84,21 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
     debug('Processing members', { memberCount: members.length });
 
     const processMembers = async () => {
-      const membersWithStatus: MemberWithStatus[] = members.map((member) => ({
+      const membersWithPresence: MemberWithPresence[] = members.map((member) => ({
         _id: member._id,
         user: {
           name: member.user.name || '', // Add fallback to empty string
           image: member.user.image,
         },
-        status: 'offline', // Default status
+        isOnline: isUserOnline(member.userId), // Use presence data
       }));
 
-      debug('Members with status', { count: membersWithStatus.length });
+      debug('Members with presence', { count: membersWithPresence.length });
 
       // Always show all members when first opened or when search is empty
       const filtered = searchTerm.trim() === ''
-        ? membersWithStatus
-        : membersWithStatus.filter((member) =>
+        ? membersWithPresence
+        : membersWithPresence.filter((member) =>
           member.user.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
@@ -108,7 +112,7 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
     };
 
     processMembers();
-  }, [members, searchTerm]);
+  }, [members, searchTerm, isUserOnline]);
 
   const handleSelect = (memberId: Id<'members'>, memberName: string) => {
     onSelect(memberId, memberName);
@@ -170,7 +174,7 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
                         {member.user.name.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <StatusIndicator status={member.status} />
+                    <PresenceIndicator isOnline={member.isOnline} />
                   </div>
                   <span className="text-sm">{member.user.name}</span>
                 </div>

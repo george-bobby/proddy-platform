@@ -11,7 +11,7 @@ import { HotjarAnalytics } from "@/components/hotjar-analytics";
 import { MessageSelectionProvider } from "@/features/smart/contexts/message-selection-context";
 import { Profile } from "@/features/members/components/profile";
 import { Thread } from "@/features/messages/components/thread";
-import { RealTimeStatusTracker } from "@/features/status/components/real-time-status-tracker";
+import { WorkspacePresenceTracker } from "@/features/presence/components/workspace-presence-tracker";
 import { useUpdateLastActiveWorkspace } from "@/features/workspaces/api/use-update-last-active-workspace";
 import { useSidebarCollapsed } from "@/features/workspaces/api/use-workspace-preferences";
 import { usePanel } from "@/hooks/use-panel";
@@ -72,7 +72,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
     <MessageSelectionProvider>
       {/* Add Hotjar Analytics to all workspace pages */}
       <HotjarAnalytics />
-      <RealTimeStatusTracker />
+      <WorkspacePresenceTracker workspaceId={workspaceId}>
       <div className="h-full flex flex-col">
         <div className="flex h-full">
           {/* Fixed-width sidebar with collapse/expand functionality */}
@@ -115,6 +115,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
         </div>
         <SelectionModal />
       </div>
+      </WorkspacePresenceTracker>
     </MessageSelectionProvider>
   );
 };

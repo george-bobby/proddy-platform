@@ -7,6 +7,7 @@ import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
 import { useChannelId } from './use-channel-id';
 import { useWorkspaceId } from './use-workspace-id';
+import { useWorkspacePresence } from '@/features/presence/hooks/use-workspace-presence';
 
 import { useOthers, useSelf, useRoom } from '../../liveblocks.config';
 
@@ -25,15 +26,15 @@ export const useChannelParticipants = () => {
   // Get the current user's member info
   const currentMember = useQuery(api.members.current, { workspaceId });
 
-  // Get all user statuses for the workspace
-  const statuses = useQuery(api.status.getForWorkspace, { workspaceId });
+  // Get presence data using the new presence system
+  const { presenceState } = useWorkspacePresence({ workspaceId });
 
   // Get Liveblocks participants (users currently in the canvas)
   const others = useOthers();
   const self = useSelf();
 
   // Check if data is still loading
-  const isLoading = members === undefined || currentMember === undefined || statuses === undefined;
+  const isLoading = members === undefined || currentMember === undefined;
 
   // Create a map of Convex users by their ID for quick lookup
   const userMap = new Map();
@@ -79,9 +80,9 @@ export const useChannelParticipants = () => {
 
   // Create a status map for quick lookup
   const statusMap: Record<string, string> = {};
-  if (statuses) {
-    for (const status of statuses) {
-      statusMap[status.userId as string] = status.status;
+  if (presenceState) {
+    for (const presence of presenceState) {
+      statusMap[presence.userId as string] = presence.online ? 'online' : 'offline';
     }
   }
 

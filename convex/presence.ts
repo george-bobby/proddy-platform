@@ -7,11 +7,11 @@ import { Presence } from "@convex-dev/presence";
 export const presence = new Presence(components.presence);
 
 export const heartbeat = mutation({
-  args: { 
-    roomId: v.string(), 
-    userId: v.string(), 
-    sessionId: v.string(), 
-    interval: v.number() 
+  args: {
+    roomId: v.string(),
+    userId: v.string(),
+    sessionId: v.string(),
+    interval: v.number()
   },
   handler: async (ctx, { roomId, userId, sessionId, interval }) => {
     // Check authentication
@@ -20,25 +20,24 @@ export const heartbeat = mutation({
       throw new Error('Unauthorized');
     }
 
-    // Verify the userId matches the authenticated user
-    if (authUserId !== userId) {
-      throw new Error('User ID mismatch');
-    }
+    // Use the authenticated user ID instead of the passed userId for security
+    const actualUserId = authUserId;
 
     // Check if user has status tracking enabled
     const userPrefs = await ctx.db
       .query('preferences')
-      .withIndex('by_user_id', (q) => q.eq('userId', authUserId))
+      .withIndex('by_user_id', (q) => q.eq('userId', actualUserId))
       .unique();
 
     const statusTrackingEnabled = userPrefs?.settings?.statusTracking ?? true;
 
-    // If status tracking is disabled, don't update presence
+    // If status tracking is disabled, return the expected format
     if (!statusTrackingEnabled) {
-      return { success: false, reason: 'Status tracking disabled' };
+      // Return a dummy session token for compatibility
+      return { roomToken: roomId, sessionToken: sessionId };
     }
 
-    return await presence.heartbeat(ctx, roomId, userId, sessionId, interval);
+    return await presence.heartbeat(ctx, roomId, actualUserId, sessionId, interval);
   },
 });
 
@@ -87,7 +86,7 @@ export const listWorkspacePresence = query({
 });
 
 export const listUserPresence = query({
-  args: { userId: v.string() },
+  args: { userId: v.id('users') },
   handler: async (ctx, { userId }) => {
     const authUserId = await getAuthUserId(ctx);
     if (!authUserId) {
@@ -112,10 +111,10 @@ export const listUserPresence = query({
 
 // Workspace heartbeat for general workspace presence
 export const workspaceHeartbeat = mutation({
-  args: { 
+  args: {
     workspaceId: v.id('workspaces'),
-    sessionId: v.string(), 
-    interval: v.number() 
+    sessionId: v.string(),
+    interval: v.number()
   },
   handler: async (ctx, { workspaceId, sessionId, interval }) => {
     const authUserId = await getAuthUserId(ctx);
@@ -142,12 +141,13 @@ export const workspaceHeartbeat = mutation({
       .unique();
 
     const statusTrackingEnabled = userPrefs?.settings?.statusTracking ?? true;
+    const roomId = `workspace-${workspaceId}`;
 
     if (!statusTrackingEnabled) {
-      return { success: false, reason: 'Status tracking disabled' };
+      // Return the expected format for compatibility
+      return { roomToken: roomId, sessionToken: sessionId };
     }
 
-    const roomId = `workspace-${workspaceId}`;
     return await presence.heartbeat(ctx, roomId, authUserId, sessionId, interval);
   },
 });

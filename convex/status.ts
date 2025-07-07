@@ -99,3 +99,22 @@ export const cleanupOldStatusEntries = internalMutation({
 		return { cleaned: 0 };
 	},
 });
+
+export const cleanupOldPresenceData = internalMutation({
+	args: {},
+	handler: async (ctx) => {
+		// Legacy function - no longer needed
+		// Presence component handles cleanup automatically
+		return { cleaned: 0 };
+	},
+});
+
+// Legacy function for marking user offline globally
+export const markUserOfflineGlobally = mutation({
+	args: {},
+	handler: async (ctx) => {
+		// Legacy function - no longer needed
+		// Presence component handles disconnection automatically
+		return { success: true };
+	},
+});

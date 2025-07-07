@@ -8,11 +8,6 @@
  * @module
  */
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
 import type * as analytics from "../analytics.js";
 import type * as auth from "../auth.js";
 import type * as board from "../board.js";
@@ -30,6 +25,7 @@ import type * as mentions from "../mentions.js";
 import type * as messages from "../messages.js";
 import type * as notes from "../notes.js";
 import type * as preferences from "../preferences.js";
+import type * as presence from "../presence.js";
 import type * as reactions from "../reactions.js";
 import type * as search from "../search.js";
 import type * as status from "../status.js";
@@ -38,6 +34,12 @@ import type * as upload from "../upload.js";
 import type * as users from "../users.js";
 import type * as utils from "../utils.js";
 import type * as workspaces from "../workspaces.js";
+
+import type {
+  ApiFromModules,
+  FilterApi,
+  FunctionReference,
+} from "convex/server";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -65,6 +67,7 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   notes: typeof notes;
   preferences: typeof preferences;
+  presence: typeof presence;
   reactions: typeof reactions;
   search: typeof search;
   status: typeof status;
@@ -74,11 +77,67 @@ declare const fullApi: ApiFromModules<{
   utils: typeof utils;
   workspaces: typeof workspaces;
 }>;
+declare const fullApiWithMounts: typeof fullApi;
+
 export declare const api: FilterApi<
-  typeof fullApi,
+  typeof fullApiWithMounts,
   FunctionReference<any, "public">
 >;
 export declare const internal: FilterApi<
-  typeof fullApi,
+  typeof fullApiWithMounts,
   FunctionReference<any, "internal">
 >;
+
+export declare const components: {
+  presence: {
+    public: {
+      disconnect: FunctionReference<
+        "mutation",
+        "internal",
+        { sessionToken: string },
+        null
+      >;
+      heartbeat: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          interval?: number;
+          roomId: string;
+          sessionId: string;
+          userId: string;
+        },
+        { roomToken: string; sessionToken: string }
+      >;
+      list: FunctionReference<
+        "query",
+        "internal",
+        { limit?: number; roomToken: string },
+        Array<{ lastDisconnected: number; online: boolean; userId: string }>
+      >;
+      listRoom: FunctionReference<
+        "query",
+        "internal",
+        { limit?: number; onlineOnly?: boolean; roomId: string },
+        Array<{ lastDisconnected: number; online: boolean; userId: string }>
+      >;
+      listUser: FunctionReference<
+        "query",
+        "internal",
+        { limit?: number; onlineOnly?: boolean; userId: string },
+        Array<{ lastDisconnected: number; online: boolean; roomId: string }>
+      >;
+      removeRoom: FunctionReference<
+        "mutation",
+        "internal",
+        { roomId: string },
+        null
+      >;
+      removeRoomUser: FunctionReference<
+        "mutation",
+        "internal",
+        { roomId: string; userId: string },
+        null
+      >;
+    };
+  };
+};

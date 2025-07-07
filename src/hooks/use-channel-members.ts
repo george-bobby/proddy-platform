@@ -4,6 +4,7 @@ import { useQuery } from 'convex/react';
 
 import { api } from '../../convex/_generated/api';
 import type { Id } from '../../convex/_generated/dataModel';
+import { useWorkspacePresence } from '@/features/presence/hooks/use-workspace-presence';
 
 export const useChannelMembers = (
   workspaceId: Id<'workspaces'>,
@@ -15,11 +16,11 @@ export const useChannelMembers = (
   // Get the current user's member info
   const currentMember = useQuery(api.members.current, { workspaceId });
 
-  // Get all user statuses for the workspace
-  const statuses = useQuery(api.status.getForWorkspace, { workspaceId });
+  // Get presence data using the new presence system
+  const { presenceState } = useWorkspacePresence({ workspaceId });
 
   // Check if data is still loading
-  const isLoading = members === undefined || currentMember === undefined || statuses === undefined;
+  const isLoading = members === undefined || currentMember === undefined;
 
   // Return early if data is still loading
   if (isLoading) {
@@ -29,10 +30,10 @@ export const useChannelMembers = (
   // Create a stable reference to the status map
   const statusMap: Record<string, string> = {};
 
-  // Only process statuses if they exist
-  if (statuses && statuses.length > 0) {
-    for (const status of statuses) {
-      statusMap[status.userId] = status.status;
+  // Only process presence data if it exists
+  if (presenceState && presenceState.length > 0) {
+    for (const presence of presenceState) {
+      statusMap[presence.userId] = presence.online ? 'online' : 'offline';
     }
   }
 

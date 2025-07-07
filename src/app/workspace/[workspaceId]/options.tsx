@@ -7,10 +7,10 @@ import Link from 'next/link';
 import type { Id } from '@/../convex/_generated/dataModel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { StatusIndicator } from '@/components/status-indicator';
+import { PresenceIndicator } from '@/features/presence/components/presence-indicator';
 import { Hint } from '@/components/hint';
 import { useGetMember } from '@/features/members/api/use-get-member';
-import { useGetUserStatus } from '@/features/status/api/use-get-user-status';
+import { useUserPresence } from '@/features/presence/hooks/use-workspace-presence';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
@@ -88,14 +88,8 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
   // Get the member data to access the userId
   const { data: member } = useGetMember({ id });
 
-  // Get the user's status, passing userId only if available
-  const { data: history } = useGetUserStatus({
-    workspaceId,
-    userId: member?.userId || null,
-  });
-
-  // Default to offline if status data is not available
-  const status = history?.status || 'offline';
+  // Get the user's presence status using the new presence system
+  const { isOnline } = useUserPresence(member?.userId);
 
   return (
     <Button
@@ -118,7 +112,7 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
                   <AvatarImage alt={label} src={image} />
                   <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
                 </Avatar>
-                {member && <StatusIndicator status={status as 'online' | 'offline'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+                {member && <PresenceIndicator isOnline={isOnline} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
               </div>
             </Hint>
           </div>
@@ -129,7 +123,7 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
                 <AvatarImage alt={label} src={image} />
                 <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
               </Avatar>
-              {member && <StatusIndicator status={status as 'online' | 'offline' | 'recently_online' | 'privacy'} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
+              {member && <PresenceIndicator isOnline={isOnline} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
             </div>
             <span className="truncate min-w-0 text-sm flex-1">{label}</span>
           </>

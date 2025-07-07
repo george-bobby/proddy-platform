@@ -6,26 +6,25 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {
 	try {
-		const { workspaceId } = await req.json();
+		const { sessionToken } = await req.json();
 
-		if (!workspaceId) {
+		if (!sessionToken) {
 			return NextResponse.json(
-				{ error: 'Workspace ID is required' },
+				{ error: 'Session token is required' },
 				{ status: 400 }
 			);
 		}
 
-		// Update user status to offline
-		await convex.mutation(api.status.update, {
-			status: 'offline',
-			workspaceId,
+		// Disconnect from presence system
+		await convex.mutation(api.presence.disconnect, {
+			sessionToken,
 		});
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error('Error updating offline status:', error);
+		console.error('Error disconnecting from presence:', error);
 		return NextResponse.json(
-			{ error: 'Failed to update status' },
+			{ error: 'Failed to disconnect' },
 			{ status: 500 }
 		);
 	}

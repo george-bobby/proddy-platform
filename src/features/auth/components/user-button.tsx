@@ -25,7 +25,7 @@ import {
 import {UserProfileModal} from './user-profile-modal';
 import {useDeleteAccount} from '../api/use-delete-account';
 import {useCurrentUser} from '../api/use-current-user';
-import {useMarkOfflineGlobally} from '@/features/status/api/use-mark-offline-globally';
+// Removed useMarkOfflineGlobally - now handled by presence system
 
 interface UserButtonProps {
     forceOpenSettings?: boolean;
@@ -45,7 +45,6 @@ export const UserButton = ({
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const deleteAccount = useDeleteAccount();
-    const {markOfflineGlobally} = useMarkOfflineGlobally();
 
     // Handle external control for opening settings modal
     useEffect(() => {
@@ -74,14 +73,7 @@ export const UserButton = ({
     const avatarFallback = name?.charAt(0).toUpperCase();
 
     const handleSignOut = async () => {
-        try {
-            // Mark user as offline across all workspaces before signing out
-            await markOfflineGlobally();
-        } catch (error) {
-            console.error('Failed to mark user offline:', error);
-            // Continue with logout even if marking offline fails
-        }
-
+        // Presence system handles disconnection automatically
         await signOut();
         router.replace('/'); // Redirect to homepage after logout
     };
@@ -90,13 +82,7 @@ export const UserButton = ({
         try {
             setIsDeleting(true);
 
-            // Mark user as offline before deleting account
-            try {
-                await markOfflineGlobally();
-            } catch (error) {
-                console.error('Failed to mark user offline:', error);
-                // Continue with account deletion even if marking offline fails
-            }
+            // Presence system handles disconnection automatically
 
             await deleteAccount();
             await signOut();
