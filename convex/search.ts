@@ -98,8 +98,10 @@ export const indexContent = action({
 	},
 	handler: async (ctx, args) => {
 		// Check if Gemini API key is configured for embeddings
-		if (!process.env.GEMINI_API_KEY) {
-			console.warn('GEMINI_API_KEY not configured, skipping content indexing');
+		if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+			console.warn(
+				'GOOGLE_GENERATIVE_AI_API_KEY not configured, skipping content indexing'
+			);
 			return;
 		}
 
@@ -150,9 +152,9 @@ export const semanticSearch = action({
 	},
 	handler: async (ctx, args) => {
 		// Check if Gemini API key is configured for embeddings
-		if (!process.env.GEMINI_API_KEY) {
+		if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
 			console.warn(
-				'GEMINI_API_KEY not configured, falling back to empty results'
+				'GOOGLE_GENERATIVE_AI_API_KEY not configured, falling back to empty results'
 			);
 			return [];
 		}
@@ -583,8 +585,6 @@ export const autoIndexCard = action({
 		}
 	},
 });
-
-
 
 // Main semantic search action for chatbot integration
 export const searchAllSemantic = action({

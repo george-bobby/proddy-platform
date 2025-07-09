@@ -17,6 +17,7 @@ import { useSidebarCollapsed } from "@/features/workspaces/api/use-workspace-pre
 import { usePanel } from "@/hooks/use-panel";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { setupGlobalMentionHandler } from "@/lib/mention-handler";
+import { NavigationListener } from "@/components/navigation-listener";
 
 import { cn } from "@/lib/utils";
 
@@ -114,6 +115,7 @@ const WorkspaceIdLayout = ({ children }: Readonly<PropsWithChildren>) => {
           )}
         </div>
         <SelectionModal />
+        <NavigationListener />
       </div>
       </WorkspacePresenceTracker>
     </MessageSelectionProvider>
