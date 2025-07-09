@@ -97,11 +97,18 @@ export const indexContent = action({
 		metadata: v.any(),
 	},
 	handler: async (ctx, args) => {
+		console.log(`Indexing ${args.contentType} ${args.contentId} for workspace ${args.workspaceId}`);
+		console.log(`Text to index: "${args.text.substring(0, 100)}..."`);
+
+		// Skip indexing if text is empty or too short
+		if (!args.text || args.text.trim().length < 3) {
+			console.log('Skipping indexing: text too short');
+			return;
+		}
+
 		// Check if Gemini API key is configured for embeddings
 		if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-			console.warn(
-				'GOOGLE_GENERATIVE_AI_API_KEY not configured, skipping content indexing'
-			);
+			console.error('GOOGLE_GENERATIVE_AI_API_KEY not configured, skipping content indexing');
 			return;
 		}
 
@@ -121,15 +128,22 @@ export const indexContent = action({
 				});
 			}
 
-			await rag.add(ctx, {
+			console.log('Filter values:', filterValues);
+
+			const result = await rag.add(ctx, {
 				namespace: args.workspaceId,
 				key: args.contentId,
 				text: args.text,
 				filterValues,
 			});
+
+			console.log('RAG add result:', result);
+			console.log(`Successfully indexed ${args.contentType} ${args.contentId}`);
 		} catch (error) {
-			console.error('Content indexing error:', error);
-			// Silently fail to avoid breaking the main functionality
+			console.error(`Content indexing error for ${args.contentType} ${args.contentId}:`, error);
+			console.error('Error details:', JSON.stringify(error, null, 2));
+			// Re-throw the error so we can see what's happening
+			throw error;
 		}
 	},
 });
@@ -586,6 +600,163 @@ export const autoIndexCard = action({
 	},
 });
 
+// Helper queries for bulk indexing
+export const getWorkspaceMessages = query({
+	args: {
+		workspaceId: v.id('workspaces'),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const limit = args.limit || 100;
+		return await ctx.db
+			.query('messages')
+			.withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
+			.take(limit);
+	},
+});
+
+export const getWorkspaceNotes = query({
+	args: {
+		workspaceId: v.id('workspaces'),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const limit = args.limit || 100;
+		return await ctx.db
+			.query('notes')
+			.withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
+			.take(limit);
+	},
+});
+
+export const getWorkspaceTasks = query({
+	args: {
+		workspaceId: v.id('workspaces'),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const limit = args.limit || 100;
+		return await ctx.db
+			.query('tasks')
+			.withIndex('by_workspace_id', (q) => q.eq('workspaceId', args.workspaceId))
+			.take(limit);
+	},
+});
+
+// Bulk indexing function for existing content
+export const bulkIndexWorkspace = action({
+	args: {
+		workspaceId: v.id('workspaces'),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args): Promise<{
+		success: boolean;
+		indexed: {
+			messages: number;
+			notes: number;
+			tasks: number;
+		};
+	}> => {
+		const limit = args.limit || 100;
+		console.log(`Starting bulk indexing for workspace ${args.workspaceId} with limit ${limit}`);
+
+		try {
+			// Index messages
+			const messages: any[] = await ctx.runQuery(api.search.getWorkspaceMessages, {
+				workspaceId: args.workspaceId,
+				limit,
+			});
+
+			console.log(`Found ${messages.length} messages to index`);
+
+			for (const message of messages) {
+				try {
+					await ctx.runAction(api.search.indexContent, {
+						workspaceId: message.workspaceId,
+						contentId: message._id,
+						contentType: 'message',
+						text: extractTextFromRichText(message.body),
+						metadata: {
+							channelId: message.channelId,
+							memberId: message.memberId,
+							conversationId: message.conversationId,
+						},
+					});
+					console.log(`Indexed message: ${message._id}`);
+				} catch (error) {
+					console.error(`Failed to index message ${message._id}:`, error);
+				}
+			}
+
+			// Index notes
+			const notes: any[] = await ctx.runQuery(api.search.getWorkspaceNotes, {
+				workspaceId: args.workspaceId,
+				limit,
+			});
+
+			console.log(`Found ${notes.length} notes to index`);
+
+			for (const note of notes) {
+				try {
+					await ctx.runAction(api.search.indexContent, {
+						workspaceId: note.workspaceId,
+						contentId: note._id,
+						contentType: 'note',
+						text: note.title + ': ' + extractTextFromRichText(note.content),
+						metadata: {
+							channelId: note.channelId,
+							memberId: note.memberId,
+						},
+					});
+					console.log(`Indexed note: ${note._id}`);
+				} catch (error) {
+					console.error(`Failed to index note ${note._id}:`, error);
+				}
+			}
+
+			// Index tasks
+			const tasks: any[] = await ctx.runQuery(api.search.getWorkspaceTasks, {
+				workspaceId: args.workspaceId,
+				limit,
+			});
+
+			console.log(`Found ${tasks.length} tasks to index`);
+
+			for (const task of tasks) {
+				try {
+					await ctx.runAction(api.search.indexContent, {
+						workspaceId: task.workspaceId,
+						contentId: task._id,
+						contentType: 'task',
+						text: task.title + (task.description ? `: ${task.description}` : ''),
+						metadata: {
+							userId: task.userId,
+							status: task.status,
+							completed: task.completed,
+						},
+					});
+					console.log(`Indexed task: ${task._id}`);
+				} catch (error) {
+					console.error(`Failed to index task ${task._id}:`, error);
+				}
+			}
+
+			console.log('Bulk indexing completed successfully');
+			return {
+				success: true,
+				indexed: {
+					messages: messages.length,
+					notes: notes.length,
+					tasks: tasks.length,
+				},
+			};
+		} catch (error) {
+			console.error('Bulk indexing failed:', error);
+			throw error;
+		}
+	},
+});
+
 // Main semantic search action for chatbot integration
 export const searchAllSemantic = action({
 	args: {
@@ -611,80 +782,21 @@ export const searchAllSemantic = action({
 
 			for (const result of semanticResults) {
 				try {
-					// Determine content type from metadata
-					const contentType = result.metadata.contentType;
+					// For now, create a simplified result from the semantic search
+					// The result._id is the RAG entry ID, but we can use the text and metadata
+					const contentType = result.metadata?.find((m: any) => m.name === 'contentType')?.value || 'message';
 
-					if (contentType === 'message') {
-						const message = await ctx.runQuery(api.messages.getById, {
-							id: result._id as Id<'messages'>,
-						});
-						if (message) {
-							processedResults.push({
-								_id: message._id,
-								_creationTime: message._creationTime,
-								type: 'message',
-								text: extractTextFromRichText(message.body),
-								channelId: message.channelId,
-								memberId: message.memberId,
-								workspaceId: message.workspaceId,
-							});
-						}
-					} else if (contentType === 'task') {
-						const task = await ctx.runQuery(api.search.getTaskForIndexing, {
-							taskId: result._id as Id<'tasks'>,
-						});
-						if (task) {
-							processedResults.push({
-								_id: task._id,
-								_creationTime: task._creationTime,
-								type: 'task',
-								text:
-									task.title +
-									(task.description ? `: ${task.description}` : ''),
-								status: task.status || 'not_started',
-								completed: task.completed,
-								workspaceId: task.workspaceId,
-								userId: task.userId,
-							});
-						}
-					} else if (contentType === 'note') {
-						const note = await ctx.runQuery(api.notes.getById, {
-							noteId: result._id as Id<'notes'>,
-						});
-						if (note) {
-							processedResults.push({
-								_id: note._id,
-								_creationTime: note._creationTime,
-								type: 'note',
-								text: note.title + ': ' + extractTextFromRichText(note.content),
-								channelId: note.channelId,
-								memberId: note.memberId,
-								workspaceId: note.workspaceId,
-							});
-						}
-					} else if (contentType === 'card') {
-						const cardData = await ctx.runQuery(api.search.getCardForIndexing, {
-							cardId: result._id as Id<'cards'>,
-						});
-						if (cardData) {
-							const { card, list, channel } = cardData;
-							processedResults.push({
-								_id: card._id,
-								_creationTime: card._creationTime,
-								type: 'card',
-								text:
-									card.title +
-									(card.description ? `: ${card.description}` : ''),
-								listId: card.listId,
-								listName: list.title,
-								channelId: channel._id,
-								channelName: channel.name,
-								workspaceId: channel.workspaceId,
-							});
-						}
-					}
+					processedResults.push({
+						_id: result._id as any, // Using RAG entry ID for now
+						_creationTime: Date.now(), // Placeholder
+						type: contentType,
+						text: result.text,
+						score: result.score,
+						workspaceId: args.workspaceId,
+					});
 				} catch (error) {
 					// Skip invalid results
+					console.error('Error processing semantic result:', error);
 					continue;
 				}
 			}
