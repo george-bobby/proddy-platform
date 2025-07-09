@@ -3,6 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { prosemirrorSync } from "./prosemirror";
+import { api } from "./_generated/api";
 
 // Create a new note
 export const create = mutation({
@@ -50,6 +51,11 @@ export const create = mutation({
 
     // Create the prosemirror document for collaborative editing
     await prosemirrorSync.create(ctx, noteId, { type: "doc", content: [] });
+
+    // Schedule RAG indexing for the new note
+    await ctx.scheduler.runAfter(0, api.search.autoIndexNote, {
+      noteId,
+    });
 
     return noteId;
   },
@@ -257,6 +263,11 @@ export const update = mutation({
     }
 
     const updatedNote = await ctx.db.patch(args.id, updateObj);
+
+    // Schedule RAG re-indexing for the updated note
+    await ctx.scheduler.runAfter(0, api.search.autoIndexNote, {
+      noteId: args.id,
+    });
 
     return updatedNote;
   },

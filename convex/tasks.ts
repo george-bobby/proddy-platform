@@ -3,6 +3,7 @@ import { v } from 'convex/values';
 
 import type { Id } from './_generated/dataModel';
 import { type QueryCtx, type MutationCtx, mutation, query } from './_generated/server';
+import { api } from './_generated/api';
 
 // Helper function to get the current member
 const getMember = async (ctx: QueryCtx, workspaceId: Id<'workspaces'>, userId: Id<'users'>) => {
@@ -157,6 +158,11 @@ export const createTask = mutation({
       workspaceId: args.workspaceId,
     });
 
+    // Schedule RAG indexing for the new task
+    await ctx.scheduler.runAfter(0, api.search.autoIndexTask, {
+      taskId,
+    });
+
     return taskId;
   },
 });
@@ -217,6 +223,11 @@ export const updateTask = mutation({
     await ctx.db.patch(id, {
       ...updates,
       updatedAt: Date.now()
+    });
+
+    // Schedule RAG re-indexing for the updated task
+    await ctx.scheduler.runAfter(0, api.search.autoIndexTask, {
+      taskId: id,
     });
 
     return id;
@@ -500,6 +511,11 @@ export const createTaskFromMessage = mutation({
       updatedAt: now,
       userId,
       workspaceId: args.workspaceId,
+    });
+
+    // Schedule RAG indexing for the new task
+    await ctx.scheduler.runAfter(0, api.search.autoIndexTask, {
+      taskId,
     });
 
     return taskId;

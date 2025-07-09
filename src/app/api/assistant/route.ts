@@ -1,95 +1,83 @@
-import {NextRequest, NextResponse} from 'next/server';
-import {openai} from '@ai-sdk/openai';
-import {generateText} from 'ai';
+import { NextRequest, NextResponse } from 'next/server';
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 
 export async function POST(req: NextRequest) {
-    try {
-        const {message, workspaceContext, ...otherData} = await req.json();
+	try {
+		const { message, workspaceContext, workspaceId } = await req.json();
 
-        if (!message) {
-            return NextResponse.json(
-                {error: 'Message is required'},
-                {status: 400}
-            );
-        }
+		if (!message) {
+			return NextResponse.json(
+				{ error: 'Message is required' },
+				{ status: 400 }
+			);
+		}
 
-        const assistantTypes = [
-            'github',
-            'gmail',
-            'slack',
-            'jira',
-            'notion',
-            'clickup',
-            'chatbot',
-            'calendar',
-            'notes',
-            'tasks',
-            'board',
-            'chats',
-        ];
+		console.log('[Assistant Router] Processing request:', message);
 
-        const systemPrompt = `You are an intent classification AI for a workspace assistant platform. Your job is to classify the user's message into one of the following assistant types: ${assistantTypes.join(', ')}.\n\nReply ONLY with the type (one word, lowercase, no extra text).\n\nUser message: ${message}`;
+		// Check if this is an external integration request
+		const externalIntegrations = ['github', 'gmail', 'slack', 'jira', 'notion', 'clickup'];
+		const lowerMessage = message.toLowerCase();
 
-        const result = await generateText({
-            model: openai('gpt-4o-mini'),
-            messages: [
-                {role: 'system', content: systemPrompt},
-                {role: 'user', content: message},
-            ],
-            temperature: 0,
-            maxTokens: 10,
-        });
+		for (const integration of externalIntegrations) {
+			if (lowerMessage.includes(integration)) {
+				console.log(`[Assistant Router] Routing to ${integration} integration`);
+				const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+				const targetUrl = `${baseUrl}/api/assistant/${integration}`;
 
-        const predictedType = result.text.trim().toLowerCase();
+				const response = await fetch(targetUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						message,
+						workspaceContext,
+						workspaceId,
+					}),
+				});
 
-        if (!assistantTypes.includes(predictedType)) {
-            return NextResponse.json(
-                {
-                    error: `Could not classify message to a valid assistant type.`,
-                    availableTypes: assistantTypes,
-                    llmOutput: result.text,
-                },
-                {status: 400}
-            );
-        }
+				if (response.ok) {
+					const data = await response.json();
+					return NextResponse.json(data);
+				}
+			}
+		}
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-        const targetUrl = `${baseUrl}/api/assistant/${predictedType}`;
+		// Route all workspace content queries to chatbot
+		console.log('[Assistant Router] Routing to chatbot for workspace content');
+		const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+		const targetUrl = `${baseUrl}/api/assistant/chatbot`;
 
-        const response = await fetch(targetUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message,
-                workspaceContext,
-                ...otherData,
-            }),
-        });
+		const response = await fetch(targetUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				message,
+				workspaceContext,
+				workspaceId,
+			}),
+		});
 
-        if (!response.ok) {
-            throw new Error(
-                `Assistant module error: ${response.status} ${response.statusText}`
-            );
-        }
+		if (!response.ok) {
+			throw new Error(
+				`Chatbot assistant error: ${response.status} ${response.statusText}`
+			);
+		}
 
-        const data = await response.json();
+		const data = await response.json();
+		return NextResponse.json(data);
 
-        return NextResponse.json({
-            ...data,
-            assistantType: predictedType,
-            handledBy: targetUrl.split('/').pop(),
-        });
-    } catch (error) {
-        console.error('[Assistant Router] Error:', error);
-        return NextResponse.json(
-            {
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error',
-                assistantType: 'router',
-            },
-            {status: 500}
-        );
-    }
+	} catch (error) {
+		console.error('[Assistant Router] Error:', error);
+		return NextResponse.json(
+			{
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			},
+			{ status: 500 }
+		);
+	}
 }

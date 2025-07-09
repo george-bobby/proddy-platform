@@ -152,6 +152,11 @@ export const createCard = mutation({
 			}
 		}
 
+		// Schedule RAG indexing for the new card
+		await ctx.scheduler.runAfter(0, api.search.autoIndexCard, {
+			cardId,
+		});
+
 		return cardId;
 	},
 });
@@ -257,6 +262,11 @@ export const updateCard = mutation({
 				// Don't throw the error, as we still want to return the card ID
 			}
 		}
+
+		// Schedule RAG re-indexing for the updated card
+		await ctx.scheduler.runAfter(0, api.search.autoIndexCard, {
+			cardId,
+		});
 
 		return cardId;
 	},

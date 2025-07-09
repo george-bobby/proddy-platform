@@ -2,8 +2,11 @@ import { action, query } from './_generated/server';
 import { v } from 'convex/values';
 import { api } from './_generated/api';
 import { Id } from './_generated/dataModel';
+import { components } from './_generated/api';
+import { RAG } from '@convex-dev/rag';
+import { google } from '@ai-sdk/google';
 
-// Define result types
+// Define result types (maintaining compatibility with existing API)
 type SearchResult = {
 	_id: Id<any>;
 	_creationTime: number;
@@ -65,7 +68,136 @@ function extractTextFromRichText(body: string): string {
 	return body.trim();
 }
 
-// Search messages in a workspace
+// Define filter types for workspace isolation and content type filtering
+type FilterTypes = {
+	workspaceId: string;
+	contentType: string;
+	channelId: string;
+};
+
+// Initialize RAG component with workspace and content type filters
+const rag = new RAG<FilterTypes>(components.rag, {
+	filterNames: ['workspaceId', 'contentType', 'channelId'],
+	textEmbeddingModel: google.textEmbeddingModel('text-embedding-004'),
+	embeddingDimension: 768, // Gemini text-embedding-004 uses 768 dimensions
+});
+
+// Index content for RAG search
+export const indexContent = action({
+	args: {
+		workspaceId: v.id('workspaces'),
+		contentId: v.string(),
+		contentType: v.union(
+			v.literal('message'),
+			v.literal('task'),
+			v.literal('note'),
+			v.literal('card')
+		),
+		text: v.string(),
+		metadata: v.any(),
+	},
+	handler: async (ctx, args) => {
+		// Check if Gemini API key is configured for embeddings
+		if (!process.env.GEMINI_API_KEY) {
+			console.warn('GEMINI_API_KEY not configured, skipping content indexing');
+			return;
+		}
+
+		try {
+			const filterValues: Array<{
+				name: 'workspaceId' | 'contentType' | 'channelId';
+				value: string;
+			}> = [
+				{ name: 'workspaceId', value: args.workspaceId as string },
+				{ name: 'contentType', value: args.contentType },
+			];
+
+			if (args.metadata.channelId) {
+				filterValues.push({
+					name: 'channelId',
+					value: args.metadata.channelId as string,
+				});
+			}
+
+			await rag.add(ctx, {
+				namespace: args.workspaceId,
+				key: args.contentId,
+				text: args.text,
+				filterValues,
+			});
+		} catch (error) {
+			console.error('Content indexing error:', error);
+			// Silently fail to avoid breaking the main functionality
+		}
+	},
+});
+
+// Semantic search using RAG
+export const semanticSearch = action({
+	args: {
+		workspaceId: v.id('workspaces'),
+		query: v.string(),
+		contentType: v.optional(
+			v.union(
+				v.literal('message'),
+				v.literal('task'),
+				v.literal('note'),
+				v.literal('card')
+			)
+		),
+		channelId: v.optional(v.id('channels')),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		// Check if Gemini API key is configured for embeddings
+		if (!process.env.GEMINI_API_KEY) {
+			console.warn(
+				'GEMINI_API_KEY not configured, falling back to empty results'
+			);
+			return [];
+		}
+
+		const limit = args.limit || 10;
+
+		try {
+			// Create filters for workspace isolation and content type filtering
+			const filters: Array<
+				| { name: 'workspaceId'; value: string }
+				| { name: 'contentType'; value: string }
+				| { name: 'channelId'; value: string }
+			> = [{ name: 'workspaceId', value: args.workspaceId as string }];
+
+			if (args.contentType) {
+				filters.push({ name: 'contentType', value: args.contentType });
+			}
+
+			if (args.channelId) {
+				filters.push({ name: 'channelId', value: args.channelId as string });
+			}
+
+			const { results } = await rag.search(ctx, {
+				namespace: args.workspaceId,
+				query: args.query,
+				filters,
+				limit,
+				vectorScoreThreshold: 0.3, // Only return results with reasonable similarity
+			});
+
+			return results.map((result: any) => ({
+				_id: result.entryId,
+				text: result.content.map((c: any) => c.text).join(' '),
+				score: result.score,
+				metadata: result.filterValues,
+			}));
+		} catch (error) {
+			console.error('RAG search error:', error);
+			// Fall back to empty results if RAG fails
+			return [];
+		}
+	},
+});
+
+// Search messages in a workspace (maintaining API compatibility)
 export const searchMessages = query({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -76,36 +208,43 @@ export const searchMessages = query({
 	handler: async (ctx, args): Promise<MessageResult[]> => {
 		const limit = args.limit || 5;
 
+		// Fallback to basic text search (RAG search will be called separately from actions)
 		let messagesQuery = ctx.db
 			.query('messages')
-			.withSearchIndex('search_body', (q) => {
-				let query = q
-					.search('body', args.query)
-					.eq('workspaceId', args.workspaceId);
-				if (args.channelId) {
-					query = query.eq('channelId', args.channelId);
-				}
-				return query;
-			});
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			);
 
-		const messages = await messagesQuery.take(limit);
+		if (args.channelId) {
+			messagesQuery = ctx.db
+				.query('messages')
+				.withIndex('by_channel_id', (q) => q.eq('channelId', args.channelId))
+				.filter((q) => q.eq(q.field('workspaceId'), args.workspaceId));
+		}
 
-		// Process messages to extract plain text and add metadata
-		return messages.map((message) => {
-			return {
-				_id: message._id,
-				_creationTime: message._creationTime,
-				type: 'message',
-				text: extractTextFromRichText(message.body),
-				channelId: message.channelId,
-				memberId: message.memberId,
-				workspaceId: message.workspaceId,
-			};
-		});
+		const messages = await messagesQuery.take(limit * 3); // Take more to filter
+
+		// Basic text filtering
+		const filteredMessages = messages
+			.filter((message) => {
+				const text = extractTextFromRichText(message.body).toLowerCase();
+				return text.includes(args.query.toLowerCase());
+			})
+			.slice(0, limit);
+
+		return filteredMessages.map((message) => ({
+			_id: message._id,
+			_creationTime: message._creationTime,
+			type: 'message',
+			text: extractTextFromRichText(message.body),
+			channelId: message.channelId,
+			memberId: message.memberId,
+			workspaceId: message.workspaceId,
+		}));
 	},
 });
 
-// Search tasks in a workspace
+// Search tasks in a workspace (maintaining API compatibility)
 export const searchTasks = query({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -115,33 +254,38 @@ export const searchTasks = query({
 	handler: async (ctx, args): Promise<TaskResult[]> => {
 		const limit = args.limit || 5;
 
-		let tasksQuery = ctx.db
+		// Fallback to basic text search (RAG search will be called separately from actions)
+		const tasks = await ctx.db
 			.query('tasks')
-			.withSearchIndex('search_title_description', (q) => {
-				return q
-					.search('title', args.query)
-					.eq('workspaceId', args.workspaceId);
-			});
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			)
+			.take(limit * 3); // Take more to filter
 
-		const tasks = await tasksQuery.take(limit);
+		// Basic text filtering
+		const filteredTasks = tasks
+			.filter((task) => {
+				const text = (
+					task.title + (task.description ? `: ${task.description}` : '')
+				).toLowerCase();
+				return text.includes(args.query.toLowerCase());
+			})
+			.slice(0, limit);
 
-		// Process tasks to add metadata
-		return tasks.map((task) => {
-			return {
-				_id: task._id,
-				_creationTime: task._creationTime,
-				type: 'task',
-				text: task.title + (task.description ? `: ${task.description}` : ''),
-				status: task.status || 'not_started',
-				completed: task.completed,
-				workspaceId: task.workspaceId,
-				userId: task.userId,
-			};
-		});
+		return filteredTasks.map((task) => ({
+			_id: task._id,
+			_creationTime: task._creationTime,
+			type: 'task',
+			text: task.title + (task.description ? `: ${task.description}` : ''),
+			status: task.status || 'not_started',
+			completed: task.completed,
+			workspaceId: task.workspaceId,
+			userId: task.userId,
+		}));
 	},
 });
 
-// Search notes in a workspace
+// Search notes in a workspace (maintaining API compatibility)
 export const searchNotes = query({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -152,36 +296,48 @@ export const searchNotes = query({
 	handler: async (ctx, args): Promise<NoteResult[]> => {
 		const limit = args.limit || 5;
 
+		// Fallback to basic text search (RAG search will be called separately from actions)
 		let notesQuery = ctx.db
 			.query('notes')
-			.withSearchIndex('search_title_content', (q) => {
-				let query = q
-					.search('title', args.query)
-					.eq('workspaceId', args.workspaceId);
-				if (args.channelId) {
-					query = query.eq('channelId', args.channelId);
-				}
-				return query;
-			});
+			.withIndex('by_workspace_id', (q) =>
+				q.eq('workspaceId', args.workspaceId)
+			);
 
-		const notes = await notesQuery.take(limit);
+		if (args.channelId) {
+			notesQuery = ctx.db
+				.query('notes')
+				.withIndex('by_workspace_id_channel_id', (q) =>
+					q.eq('workspaceId', args.workspaceId).eq('channelId', args.channelId!)
+				);
+		}
 
-		// Process notes to extract plain text and add metadata
-		return notes.map((note) => {
-			return {
-				_id: note._id,
-				_creationTime: note._creationTime,
-				type: 'note',
-				text: note.title + ': ' + extractTextFromRichText(note.content),
-				channelId: note.channelId,
-				memberId: note.memberId,
-				workspaceId: note.workspaceId,
-			};
-		});
+		const notes = await notesQuery.take(limit * 3); // Take more to filter
+
+		// Basic text filtering
+		const filteredNotes = notes
+			.filter((note) => {
+				const text = (
+					note.title +
+					': ' +
+					extractTextFromRichText(note.content)
+				).toLowerCase();
+				return text.includes(args.query.toLowerCase());
+			})
+			.slice(0, limit);
+
+		return filteredNotes.map((note) => ({
+			_id: note._id,
+			_creationTime: note._creationTime,
+			type: 'note',
+			text: note.title + ': ' + extractTextFromRichText(note.content),
+			channelId: note.channelId,
+			memberId: note.memberId,
+			workspaceId: note.workspaceId,
+		}));
 	},
 });
 
-// Search cards in a workspace
+// Search cards in a workspace (maintaining API compatibility)
 export const searchCards = query({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -191,7 +347,8 @@ export const searchCards = query({
 	handler: async (ctx, args): Promise<CardResult[]> => {
 		const limit = args.limit || 5;
 
-		// First, get all lists in the workspace
+		// Fallback to basic text search (RAG search will be called separately from actions)
+		// First, get all channels in the workspace
 		const channels = await ctx.db
 			.query('channels')
 			.withIndex('by_workspace_id', (q) =>
@@ -213,22 +370,29 @@ export const searchCards = query({
 
 		const listIds = lists.map((list) => list._id);
 
-		// Now search cards in these lists
-		// Use search index for each list
+		// Get cards from these lists
 		const cards = await Promise.all(
 			listIds.map((listId) =>
 				ctx.db
 					.query('cards')
-					.withSearchIndex('search_title_description', (q) =>
-						q.search('title', args.query).eq('listId', listId)
-					)
+					.withIndex('by_list_id', (q) => q.eq('listId', listId))
 					.take(Math.ceil(limit / listIds.length))
 			)
-		).then((results) => results.flat().slice(0, limit));
+		).then((results) => results.flat().slice(0, limit * 3));
+
+		// Basic text filtering
+		const filteredCards = cards
+			.filter((card) => {
+				const text = (
+					card.title + (card.description ? `: ${card.description}` : '')
+				).toLowerCase();
+				return text.includes(args.query.toLowerCase());
+			})
+			.slice(0, limit);
 
 		// Process cards to add metadata
 		return await Promise.all(
-			cards.map(async (card) => {
+			filteredCards.map(async (card) => {
 				const list = lists.find((l) => l._id === card.listId);
 				const channel = list
 					? channels.find((c) => c._id === list.channelId)
@@ -250,7 +414,7 @@ export const searchCards = query({
 	},
 });
 
-// Comprehensive search across all content types
+// Comprehensive search across all content types (maintaining API compatibility)
 export const searchAll = query({
 	args: {
 		workspaceId: v.id('workspaces'),
@@ -294,5 +458,338 @@ export const searchAll = query({
 			.slice(0, totalLimit);
 
 		return allResults;
+	},
+});
+
+// Auto-indexing functions for new content
+export const autoIndexMessage = action({
+	args: {
+		messageId: v.id('messages'),
+	},
+	handler: async (ctx, args) => {
+		const message = await ctx.runQuery(api.messages.getById, {
+			id: args.messageId,
+		});
+		if (message) {
+			await ctx.runAction(api.search.indexContent, {
+				workspaceId: message.workspaceId,
+				contentId: message._id,
+				contentType: 'message',
+				text: extractTextFromRichText(message.body),
+				metadata: {
+					channelId: message.channelId,
+					memberId: message.memberId,
+					conversationId: message.conversationId,
+				},
+			});
+		}
+	},
+});
+
+export const autoIndexNote = action({
+	args: {
+		noteId: v.id('notes'),
+	},
+	handler: async (ctx, args) => {
+		const note = await ctx.runQuery(api.notes.getById, { noteId: args.noteId });
+		if (note) {
+			await ctx.runAction(api.search.indexContent, {
+				workspaceId: note.workspaceId,
+				contentId: note._id,
+				contentType: 'note',
+				text: note.title + ': ' + extractTextFromRichText(note.content),
+				metadata: {
+					channelId: note.channelId,
+					memberId: note.memberId,
+				},
+			});
+		}
+	},
+});
+
+// Helper queries for auto-indexing
+export const getTaskForIndexing = query({
+	args: { taskId: v.id('tasks') },
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.taskId);
+	},
+});
+
+export const getCardForIndexing = query({
+	args: { cardId: v.id('cards') },
+	handler: async (ctx, args) => {
+		const card = await ctx.db.get(args.cardId);
+		if (!card) return null;
+
+		const list = await ctx.db.get(card.listId);
+		if (!list) return null;
+
+		const channel = await ctx.db.get(list.channelId);
+		if (!channel) return null;
+
+		return {
+			card,
+			list,
+			channel,
+		};
+	},
+});
+
+// Auto-indexing actions using queries
+export const autoIndexTask = action({
+	args: {
+		taskId: v.id('tasks'),
+	},
+	handler: async (ctx, args) => {
+		const task = await ctx.runQuery(api.search.getTaskForIndexing, {
+			taskId: args.taskId,
+		});
+		if (task) {
+			await ctx.runAction(api.search.indexContent, {
+				workspaceId: task.workspaceId,
+				contentId: task._id,
+				contentType: 'task',
+				text: task.title + (task.description ? `: ${task.description}` : ''),
+				metadata: {
+					userId: task.userId,
+					status: task.status,
+					completed: task.completed,
+				},
+			});
+		}
+	},
+});
+
+export const autoIndexCard = action({
+	args: {
+		cardId: v.id('cards'),
+	},
+	handler: async (ctx, args) => {
+		const result = await ctx.runQuery(api.search.getCardForIndexing, {
+			cardId: args.cardId,
+		});
+		if (result) {
+			const { card, list, channel } = result;
+			await ctx.runAction(api.search.indexContent, {
+				workspaceId: channel.workspaceId,
+				contentId: card._id,
+				contentType: 'card',
+				text: card.title + (card.description ? `: ${card.description}` : ''),
+				metadata: {
+					listId: card.listId,
+					channelId: list.channelId,
+				},
+			});
+		}
+	},
+});
+
+// Bulk indexing function for existing content
+export const bulkIndexWorkspace = action({
+	args: {
+		workspaceId: v.id('workspaces'),
+		limit: v.optional(v.number()),
+	},
+	handler: async (
+		ctx,
+		args
+	): Promise<{
+		messagesIndexed: number;
+		notesIndexed: number;
+		tasksIndexed: number;
+	}> => {
+		const limit = args.limit || 100;
+
+		console.log(
+			`[Bulk Index] Starting bulk indexing for workspace ${args.workspaceId}`
+		);
+
+		// Index messages - using getAllWorkspaceMessages which exists
+		const messageData = await ctx.runQuery(
+			api.messages.getAllWorkspaceMessages,
+			{
+				workspaceId: args.workspaceId,
+			}
+		);
+		const messages = messageData.messages || [];
+
+		for (const message of messages.slice(0, limit)) {
+			try {
+				await ctx.runAction(api.search.autoIndexMessage, {
+					messageId: message._id,
+				});
+			} catch (error) {
+				console.error(`Failed to index message ${message._id}:`, error);
+			}
+		}
+
+		// Index notes - we need to get all channels first, then get notes by channel
+		const channels = await ctx.runQuery(api.channels.get, {
+			workspaceId: args.workspaceId,
+		});
+
+		let allNotes: any[] = [];
+		for (const channel of channels) {
+			try {
+				const channelNotes = await ctx.runQuery(api.notes.getByChannel, {
+					workspaceId: args.workspaceId,
+					channelId: channel._id,
+				});
+				allNotes = allNotes.concat(channelNotes);
+			} catch (error) {
+				console.error(`Failed to get notes for channel ${channel._id}:`, error);
+			}
+		}
+
+		for (const note of allNotes.slice(0, limit)) {
+			try {
+				await ctx.runAction(api.search.autoIndexNote, {
+					noteId: note._id,
+				});
+			} catch (error) {
+				console.error(`Failed to index note ${note._id}:`, error);
+			}
+		}
+
+		// Index tasks - using getTasks which exists
+		const tasks = await ctx.runQuery(api.tasks.getTasks, {
+			workspaceId: args.workspaceId,
+		});
+
+		for (const task of tasks.slice(0, limit)) {
+			try {
+				await ctx.runAction(api.search.autoIndexTask, {
+					taskId: task._id,
+				});
+			} catch (error) {
+				console.error(`Failed to index task ${task._id}:`, error);
+			}
+		}
+
+		console.log(
+			`[Bulk Index] Completed bulk indexing for workspace ${args.workspaceId}`
+		);
+
+		return {
+			messagesIndexed: Math.min(messages.length, limit),
+			notesIndexed: Math.min(allNotes.length, limit),
+			tasksIndexed: Math.min(tasks.length, limit),
+		};
+	},
+});
+
+// Main semantic search action for chatbot integration
+export const searchAllSemantic = action({
+	args: {
+		workspaceId: v.id('workspaces'),
+		channelId: v.optional(v.id('channels')),
+		query: v.string(),
+		limit: v.optional(v.number()),
+	},
+	handler: async (ctx, args): Promise<SearchResult[]> => {
+		const totalLimit = args.limit || 10;
+
+		// Try semantic search first
+		const semanticResults = await ctx.runAction(api.search.semanticSearch, {
+			workspaceId: args.workspaceId,
+			query: args.query,
+			channelId: args.channelId,
+			limit: totalLimit,
+		});
+
+		// If we have semantic results, process them
+		if (semanticResults.length > 0) {
+			const processedResults: SearchResult[] = [];
+
+			for (const result of semanticResults) {
+				try {
+					// Determine content type from metadata
+					const contentType = result.metadata.contentType;
+
+					if (contentType === 'message') {
+						const message = await ctx.runQuery(api.messages.getById, {
+							id: result._id as Id<'messages'>,
+						});
+						if (message) {
+							processedResults.push({
+								_id: message._id,
+								_creationTime: message._creationTime,
+								type: 'message',
+								text: extractTextFromRichText(message.body),
+								channelId: message.channelId,
+								memberId: message.memberId,
+								workspaceId: message.workspaceId,
+							});
+						}
+					} else if (contentType === 'task') {
+						const task = await ctx.runQuery(api.search.getTaskForIndexing, {
+							taskId: result._id as Id<'tasks'>,
+						});
+						if (task) {
+							processedResults.push({
+								_id: task._id,
+								_creationTime: task._creationTime,
+								type: 'task',
+								text:
+									task.title +
+									(task.description ? `: ${task.description}` : ''),
+								status: task.status || 'not_started',
+								completed: task.completed,
+								workspaceId: task.workspaceId,
+								userId: task.userId,
+							});
+						}
+					} else if (contentType === 'note') {
+						const note = await ctx.runQuery(api.notes.getById, {
+							noteId: result._id as Id<'notes'>,
+						});
+						if (note) {
+							processedResults.push({
+								_id: note._id,
+								_creationTime: note._creationTime,
+								type: 'note',
+								text: note.title + ': ' + extractTextFromRichText(note.content),
+								channelId: note.channelId,
+								memberId: note.memberId,
+								workspaceId: note.workspaceId,
+							});
+						}
+					} else if (contentType === 'card') {
+						const cardData = await ctx.runQuery(api.search.getCardForIndexing, {
+							cardId: result._id as Id<'cards'>,
+						});
+						if (cardData) {
+							const { card, list, channel } = cardData;
+							processedResults.push({
+								_id: card._id,
+								_creationTime: card._creationTime,
+								type: 'card',
+								text:
+									card.title +
+									(card.description ? `: ${card.description}` : ''),
+								listId: card.listId,
+								listName: list.title,
+								channelId: channel._id,
+								channelName: channel.name,
+								workspaceId: channel.workspaceId,
+							});
+						}
+					}
+				} catch (error) {
+					// Skip invalid results
+					continue;
+				}
+			}
+
+			return processedResults.slice(0, totalLimit);
+		}
+
+		// Fallback to basic search if semantic search fails or returns no results
+		return await ctx.runQuery(api.search.searchAll, {
+			workspaceId: args.workspaceId,
+			channelId: args.channelId,
+			query: args.query,
+			limit: totalLimit,
+		});
 	},
 });
