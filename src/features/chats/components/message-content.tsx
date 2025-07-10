@@ -76,18 +76,24 @@ export const MessageContent = ({
   onOpenMessage,
   onContextMenu,
 }: MessageContentProps) => {
+  // Check if this contains a custom message component
+  const hasCustomMessageComponent = body && typeof body === 'string' &&
+    (body.includes('"type":"canvas"') || body.includes('"type":"note"') ||
+     body.includes('"type":"canvas-live"') || body.includes('"type":"note-live"') ||
+     body.includes('"type":"canvas-export"') || body.includes('"type":"note-export"'));
+
   return (
     <div className={cn("relative group/message", isAuthor && "flex justify-end")}>
       <div
         className={cn(
-          "rounded-lg px-3 py-2 text-sm cursor-pointer",
-          // Apply max-width and background only to non-custom message components
-          "[&:not(:has([data-message-component='true']))]:max-w-md",
-          isAuthor
-            ? "[&:not(:has([data-message-component='true']))]:bg-primary [&:not(:has([data-message-component='true']))]:text-primary-foreground"
-            : "[&:not(:has([data-message-component='true']))]:bg-muted",
-          // For custom message components, remove all styling constraints
-          "[&:has([data-message-component='true'])]:p-0 [&:has([data-message-component='true'])]:bg-transparent [&:has([data-message-component='true'])]:rounded-none"
+          "rounded-lg text-sm cursor-pointer",
+          // Apply different styling based on whether it's a custom message component
+          hasCustomMessageComponent
+            ? "p-0 bg-transparent" // No padding, no background for custom components
+            : cn(
+                "max-w-md px-3 py-2", // Normal styling for regular messages
+                isAuthor ? "bg-primary text-primary-foreground" : "bg-muted"
+              )
         )}
         onContextMenu={onContextMenu}
       >

@@ -5,12 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { addMentionClickHandlers } from '@/lib/mention-handler';
 import { useGetMembers } from '@/features/members/api/use-get-members';
-import { CanvasMessage } from '@/features/messages/components/canvas-message';
-import { CanvasLiveMessage } from '@/features/messages/components/canvas-live-message';
-import { CanvasExportMessage } from '@/features/messages/components/canvas-export-message';
-import { NoteMessage } from '@/features/messages/components/note-message';
-import { NoteLiveMessage } from '@/features/messages/components/note-live-message';
-import { NoteExportMessage } from '@/features/messages/components/note-export-message';
+import { UnifiedMessage } from '@/features/messages/components/unified-message';
 
 interface RendererProps {
   value: string;
@@ -26,69 +21,29 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
   const workspaceId = useWorkspaceId();
   const { data: members } = useGetMembers({ workspaceId });
 
-  // Check if this is a canvas message
-  const isCanvasMessage = () => {
+  // Check if this is a unified message (canvas or note type)
+  const isUnifiedMessage = () => {
     try {
       const parsed = JSON.parse(value);
-      return typeof parsed === 'object' && parsed.type === 'canvas';
+      return typeof parsed === 'object' &&
+        ['canvas', 'canvas-live', 'canvas-export', 'note', 'note-live', 'note-export'].includes(parsed.type);
     } catch (e) {
       return false;
     }
   };
 
-  // Check if this is a live canvas message
-  const isCanvasLiveMessage = () => {
+  // Get parsed message data
+  const getMessageData = () => {
     try {
-      const parsed = JSON.parse(value);
-      return typeof parsed === 'object' && parsed.type === 'canvas-live';
+      return JSON.parse(value);
     } catch (e) {
-      return false;
-    }
-  };
-
-  // Check if this is a canvas export message
-  const isCanvasExportMessage = () => {
-    try {
-      const parsed = JSON.parse(value);
-      return typeof parsed === 'object' && parsed.type === 'canvas-export';
-    } catch (e) {
-      return false;
-    }
-  };
-
-  // Check if this is a note message
-  const isNoteMessage = () => {
-    try {
-      const parsed = JSON.parse(value);
-      return typeof parsed === 'object' && parsed.type === 'note';
-    } catch (e) {
-      return false;
-    }
-  };
-
-  // Check if this is a live note message
-  const isNoteLiveMessage = () => {
-    try {
-      const parsed = JSON.parse(value);
-      return typeof parsed === 'object' && parsed.type === 'note-live';
-    } catch (e) {
-      return false;
-    }
-  };
-
-  // Check if this is a note export message
-  const isNoteExportMessage = () => {
-    try {
-      const parsed = JSON.parse(value);
-      return typeof parsed === 'object' && parsed.type === 'note-export';
-    } catch (e) {
-      return false;
+      return null;
     }
   };
 
   useEffect(() => {
-    // If this is a canvas message, live canvas message, canvas export message, note message, live note message, or note export message, don't process with Quill
-    if (isCanvasMessage() || isCanvasLiveMessage() || isCanvasExportMessage() || isNoteMessage() || isNoteLiveMessage() || isNoteExportMessage()) {
+    // If this is a unified message (canvas or note type), don't process with Quill
+    if (isUnifiedMessage()) {
       setIsEmpty(false);
       return;
     }
@@ -199,69 +154,14 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     };
   }, [value, calendarEvent, workspaceId, members]);
 
-  // If this is a canvas message, render the CanvasMessage component
-  if (isCanvasMessage()) {
-    try {
-      const canvasData = JSON.parse(value);
-      return <CanvasMessage data={canvasData} />;
-    } catch (e) {
-      console.error("Error parsing canvas data:", e);
-      return <div>Error displaying canvas</div>;
-    }
-  }
-
-  // If this is a live canvas message, render the CanvasLiveMessage component
-  if (isCanvasLiveMessage()) {
-    try {
-      const canvasLiveData = JSON.parse(value);
-      return <CanvasLiveMessage data={canvasLiveData} />;
-    } catch (e) {
-      console.error("Error parsing live canvas data:", e);
-      return <div>Error displaying live canvas</div>;
-    }
-  }
-
-  // If this is a canvas export message, render the CanvasExportMessage component
-  if (isCanvasExportMessage()) {
-    try {
-      const canvasExportData = JSON.parse(value);
-      return <CanvasExportMessage data={canvasExportData} />;
-    } catch (e) {
-      console.error("Error parsing canvas export data:", e);
-      return <div>Error displaying canvas export</div>;
-    }
-  }
-
-  // If this is a note message, render the NoteMessage component
-  if (isNoteMessage()) {
-    try {
-      const noteData = JSON.parse(value);
-      return <NoteMessage data={noteData} />;
-    } catch (e) {
-      console.error("Error parsing note data:", e);
-      return <div>Error displaying note</div>;
-    }
-  }
-
-  // If this is a live note message, render the NoteLiveMessage component
-  if (isNoteLiveMessage()) {
-    try {
-      const noteLiveData = JSON.parse(value);
-      return <NoteLiveMessage data={noteLiveData} />;
-    } catch (e) {
-      console.error("Error parsing live note data:", e);
-      return <div>Error displaying live note</div>;
-    }
-  }
-
-  // If this is a note export message, render the NoteExportMessage component
-  if (isNoteExportMessage()) {
-    try {
-      const noteExportData = JSON.parse(value);
-      return <NoteExportMessage data={noteExportData} />;
-    } catch (e) {
-      console.error("Error parsing note export data:", e);
-      return <div>Error displaying note export</div>;
+  // If this is a unified message (canvas or note type), render the UnifiedMessage component
+  if (isUnifiedMessage()) {
+    const messageData = getMessageData();
+    if (messageData) {
+      return <UnifiedMessage data={messageData} />;
+    } else {
+      console.error("Error parsing unified message data:", value);
+      return <div>Error displaying message</div>;
     }
   }
 
