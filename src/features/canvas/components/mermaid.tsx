@@ -23,6 +23,7 @@ export const Mermaid = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [renderedSvg, setRenderedSvg] = useState<string>("");
+  const [isMounted, setIsMounted] = useState(false);
 
   // Update layer content
   const updateMermaidCode = useMutation(
@@ -31,16 +32,35 @@ export const Mermaid = ({
       if (liveLayers) {
         const layer = liveLayers.get(id);
         if (layer) {
-          layer.set("mermaidCode", newCode);
+          // Type assertion to ensure we can access mermaidCode property
+          (layer as any).set("mermaidCode", newCode);
         }
       }
     },
     [id]
   );
 
+  // Handle client-side mounting
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const renderMermaid = async () => {
-      if (!mermaidCode || !containerRef.current) return;
+      if (!mermaidCode) {
+        console.log('No mermaid code provided');
+        return;
+      }
+
+      // Check if we're in browser environment
+      if (typeof window === 'undefined') {
+        console.log('Not in browser environment');
+        return;
+      }
+
+      console.log('Starting mermaid rendering for:', id, 'with code:', mermaidCode);
 
       try {
         setIsLoading(true);
@@ -48,7 +68,8 @@ export const Mermaid = ({
 
         // Dynamic import of mermaid to avoid SSR issues
         const mermaid = (await import('mermaid')).default;
-        
+        console.log('Mermaid imported successfully');
+
         // Initialize mermaid with configuration
         mermaid.initialize({
           startOnLoad: false,
@@ -57,35 +78,75 @@ export const Mermaid = ({
           fontFamily: 'Arial, sans-serif',
           fontSize: 12,
           flowchart: {
-            useMaxWidth: true,
+            useMaxWidth: false,
             htmlLabels: true,
             curve: 'basis',
           },
         });
+        console.log('Mermaid initialized');
 
         // Generate unique ID for this diagram
         const diagramId = `mermaid-${id}-${Date.now()}`;
-        
+        console.log('Rendering with ID:', diagramId);
+
         // Render the mermaid diagram
         const { svg } = await mermaid.render(diagramId, mermaidCode);
-        
-        setRenderedSvg(svg);
+        console.log('Mermaid rendered successfully, SVG length:', svg.length);
+
+        // Clean up the SVG to make it responsive
+        const cleanedSvg = svg
+          .replace(/width="[^"]*"/, 'width="100%"')
+          .replace(/height="[^"]*"/, 'height="100%"');
+
+        console.log('SVG cleaned, setting rendered SVG');
+        setRenderedSvg(cleanedSvg);
         setIsLoading(false);
+        console.log('Rendering complete');
       } catch (err) {
         console.error('Mermaid rendering error:', err);
-        setError('Failed to render diagram');
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        setError(`Failed to render diagram: ${errorMessage}`);
         setIsLoading(false);
       }
     };
 
-    renderMermaid();
-  }, [mermaidCode, id]);
+    // Add a small delay to ensure the component is mounted
+    const timer = setTimeout(renderMermaid, 200);
+    return () => clearTimeout(timer);
+  }, [mermaidCode, id, isMounted]);
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     // TODO: Open edit dialog for mermaid code
     console.log('Double-clicked mermaid diagram:', id);
   };
+
+  // Don't render anything until mounted (SSR safety)
+  if (!isMounted) {
+    return (
+      <foreignObject
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        onPointerDown={(e) => onPointerDown(e, id)}
+        style={{
+          outline: selectionColor ? `1px solid ${selectionColor}` : "none",
+          backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
+        }}
+        className="shadow-md drop-shadow-xl"
+      >
+        <div
+          className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
+          style={{ fontSize: '12px', color: '#666' }}
+        >
+          <div className="text-center">
+            <div>Loading...</div>
+          </div>
+        </div>
+      </foreignObject>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -157,15 +218,25 @@ export const Mermaid = ({
     >
       <div
         ref={containerRef}
-        className="h-full w-full overflow-hidden rounded border border-gray-200"
+        className="h-full w-full overflow-hidden rounded border border-gray-200 bg-white"
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '8px',
+          padding: '4px',
         }}
-        dangerouslySetInnerHTML={{ __html: renderedSvg }}
-      />
+      >
+        {renderedSvg && (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            dangerouslySetInnerHTML={{ __html: renderedSvg }}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+            }}
+          />
+        )}
+      </div>
     </foreignObject>
   );
 };
