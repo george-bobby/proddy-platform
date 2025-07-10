@@ -122,7 +122,7 @@ export const SavedCanvasesDropdown = () => {
   const deleteLiveblocksRoom = async (roomId: string) => {
     try {
       // Make a request to your API route that will delete the Liveblocks room
-      const response = await fetch(`/api/liveblocks/delete-room?roomId=${roomId}`, {
+      const response = await fetch(`/api/liveblocks/delete?roomId=${roomId}`, {
         method: 'DELETE',
       });
 

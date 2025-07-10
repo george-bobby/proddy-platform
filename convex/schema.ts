@@ -376,10 +376,10 @@ const schema = defineSchema({
 		.index('by_member_id', ['memberId'])
 		.index('by_workspace_id_member_id', ['workspaceId', 'memberId']),
 
-	// Keep the integrations table from old schema
-	integrations: defineTable({
+	// Composio v3 Auth Configs (formerly integrations)
+	auth_configs: defineTable({
 		workspaceId: v.id('workspaces'),
-		service: v.union(
+		toolkit: v.union(
 			v.literal('github'),
 			v.literal('gmail'),
 			v.literal('slack'),
@@ -387,22 +387,69 @@ const schema = defineSchema({
 			v.literal('notion'),
 			v.literal('clickup')
 		),
-		connectedAccountId: v.string(), // Composio connected account ID
-		entityId: v.string(), // Composio entity ID
-		status: v.union(
-			v.literal('connected'),
-			v.literal('disconnected'),
-			v.literal('error')
+		name: v.string(), // Human-readable name
+		type: v.union(
+			v.literal('use_composio_managed_auth'),
+			v.literal('use_custom_auth'),
+			v.literal('service_connection'),
+			v.literal('no_auth')
 		),
-		metadata: v.optional(v.any()), // Service-specific metadata
-		connectedAt: v.number(),
-		connectedBy: v.id('members'),
-		lastUsed: v.optional(v.number()),
+		authScheme: v.optional(v.string()), // OAuth2, API_KEY, etc.
+		composioAuthConfigId: v.string(), // Composio's auth config ID
+		credentials: v.optional(v.any()), // Custom auth credentials
+		isComposioManaged: v.boolean(), // Whether Composio manages auth
+		isDisabled: v.boolean(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		createdBy: v.id('members'),
 	})
 		.index('by_workspace_id', ['workspaceId'])
-		.index('by_workspace_service', ['workspaceId', 'service'])
-		.index('by_connected_account_id', ['connectedAccountId'])
-		.index('by_entity_id', ['entityId']),
+		.index('by_workspace_toolkit', ['workspaceId', 'toolkit']),
+
+	// Composio v3 Connected Accounts
+	connected_accounts: defineTable({
+		workspaceId: v.id('workspaces'),
+		authConfigId: v.id('auth_configs'),
+		userId: v.string(), // User identifier for Composio
+		composioAccountId: v.string(), // Composio's connected account ID
+		toolkit: v.string(), // Toolkit name
+		status: v.union(
+			v.literal('ACTIVE'),
+			v.literal('PENDING'),
+			v.literal('EXPIRED'),
+			v.literal('ERROR'),
+			v.literal('DISABLED')
+		),
+		statusReason: v.optional(v.string()),
+		metadata: v.optional(v.any()),
+		testRequestEndpoint: v.optional(v.string()),
+		isDisabled: v.boolean(),
+		connectedAt: v.number(),
+		lastUsed: v.optional(v.number()),
+		connectedBy: v.id('members'),
+	})
+		.index('by_workspace_id', ['workspaceId'])
+		.index('by_auth_config', ['authConfigId'])
+		.index('by_user_id', ['userId']),
+
+	// MCP Servers for AI Agents
+	mcp_servers: defineTable({
+		workspaceId: v.id('workspaces'),
+		name: v.string(), // Server name
+		composioServerId: v.string(), // Composio's MCP server ID
+		toolkitConfigs: v.array(v.object({
+			toolkit: v.string(),
+			authConfigId: v.string(),
+			allowedTools: v.array(v.string()),
+		})),
+		useComposioManagedAuth: v.boolean(),
+		serverUrls: v.optional(v.any()), // Generated server URLs
+		isActive: v.boolean(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		createdBy: v.id('members'),
+	})
+		.index('by_workspace_id', ['workspaceId']),
 });
 
 export default schema;

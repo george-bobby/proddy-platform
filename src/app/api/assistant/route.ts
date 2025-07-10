@@ -16,14 +16,21 @@ export async function POST(req: NextRequest) {
 		console.log('[Assistant Router] Processing request:', message);
 
 		// Check if this is an external integration request
-		const externalIntegrations = ['github', 'gmail', 'slack', 'jira', 'notion', 'clickup'];
+		const externalIntegrations = [
+			'github',
+			'gmail',
+			'slack',
+			'jira',
+			'notion',
+			'clickup',
+		];
 		const lowerMessage = message.toLowerCase();
 
 		for (const integration of externalIntegrations) {
 			if (lowerMessage.includes(integration)) {
 				console.log(`[Assistant Router] Routing to ${integration} integration`);
 				const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-				const targetUrl = `${baseUrl}/api/assistant/${integration}`;
+				const targetUrl = `${baseUrl}/api/assistant/others/${integration}`;
 
 				const response = await fetch(targetUrl, {
 					method: 'POST',
@@ -69,7 +76,6 @@ export async function POST(req: NextRequest) {
 
 		const data = await response.json();
 		return NextResponse.json(data);
-
 	} catch (error) {
 		console.error('[Assistant Router] Error:', error);
 		return NextResponse.json(
