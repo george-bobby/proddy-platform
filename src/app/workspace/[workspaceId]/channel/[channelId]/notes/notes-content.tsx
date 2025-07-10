@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { FileText, Plus } from 'lucide-react';
 import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/../convex/_generated/api';
 import { BlockNoteNotesEditor, ExportNoteDialog, useLiveNoteSession } from '@/features/notes';
-import { LiveSidebar, LiveParticipants, LiveHeader } from '@/features/live';
+import { LiveSidebar, LiveHeader } from '@/features/live';
 import { StreamAudioRoom } from '@/features/audio';
 import { useNoteContent } from '@/hooks/use-note-content';
 import { Note } from '@/features/notes/types';
@@ -19,8 +17,8 @@ interface NotesContentProps {
   workspaceId: Id<'workspaces'>;
   channelId: Id<'channels'>;
   activeNoteId: Id<'notes'> | null;
-  activeNote: any;
-  notes: any[];
+  activeNote: Note | null;
+  notes: Note[];
   isFullScreen: boolean;
   setIsFullScreen: (value: boolean) => void;
   showExportDialog: boolean;
@@ -29,7 +27,7 @@ interface NotesContentProps {
   onNoteSelect: (noteId: Id<'notes'>) => void;
   onCreateNote: () => Promise<void>;
   onDeleteNote: (noteId: Id<'notes'>) => Promise<void>;
-  onUpdateNote: (noteId: Id<'notes'>, updates: any) => Promise<void>;
+  onUpdateNote: (noteId: Id<'notes'>, updates: Partial<Note>) => Promise<void>;
 }
 
 export const NotesContent = ({
@@ -68,7 +66,7 @@ export const NotesContent = ({
 
   // Note content management
   const { localContent, localTitle, isTyping, handleContentChange: handleNoteContentChange, handleTitleChange: handleNoteTitleChange, hasUnsavedChanges } = useNoteContent({
-    note: activeNote,
+    note: activeNote || undefined,
     onUpdate: handleUpdate,
     debounceMs: 1000,
   });
@@ -76,7 +74,13 @@ export const NotesContent = ({
   // Handle save
   const handleSave = useCallback(async () => {
     if (!activeNoteId) return;
-    await handleUpdate({ content: localContent });
+    try {
+      await handleUpdate({ content: localContent });
+      toast.success('Note saved successfully');
+    } catch (error) {
+      console.error('Failed to save note:', error);
+      toast.error('Failed to save note');
+    }
   }, [activeNoteId, localContent, handleUpdate]);
 
   // Create wrapper for onItemSelect to match LiveSidebar's expected signature
@@ -86,7 +90,12 @@ export const NotesContent = ({
 
   // Create wrapper for onDeleteItem to match LiveSidebar's expected signature
   const handleDeleteItem = useCallback(async (itemId: string) => {
-    await onDeleteNote(itemId as Id<'notes'>);
+    try {
+      await onDeleteNote(itemId as Id<'notes'>);
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+      toast.error('Failed to delete note');
+    }
   }, [onDeleteNote]);
 
   return (
@@ -125,14 +134,19 @@ export const NotesContent = ({
             onSave={handleSave}
             hasUnsavedChanges={hasUnsavedChanges}
             isFullScreen={isFullScreen}
-            onToggleFullScreen={() => setIsFullScreen(!isFullScreen)}
+            toggleFullScreen={() => setIsFullScreen(!isFullScreen)}
             onExport={() => setShowExportDialog(true)}
             tags={activeNote?.tags || []}
-            onTagsChange={(tags) => handleUpdate({ tags })}
-            workspaceId={workspaceId}
-            channelId={channelId}
+            onTagsChange={(tags) => {
+              handleUpdate({ tags }).catch((error) => {
+                console.error('Failed to update tags:', error);
+                toast.error('Failed to update tags');
+              });
+            }}
             createdAt={activeNote?.createdAt}
             updatedAt={activeNote?.updatedAt}
+            showTags={true}
+            showFullScreenToggle={true}
           />
 
           {/* Notes Editor */}
@@ -144,7 +158,12 @@ export const NotesContent = ({
                   title: isTyping ? localTitle : activeNote.title,
                   content: isTyping ? localContent : activeNote.content
                 }}
-                onUpdate={handleUpdate}
+                onUpdate={(updates) => {
+                  handleUpdate(updates).catch((error) => {
+                    console.error('Failed to update note:', error);
+                    toast.error('Failed to update note');
+                  });
+                }}
                 onTitleChange={handleNoteTitleChange}
                 onContentChange={handleNoteContentChange}
                 onSaveNote={handleSave}
@@ -160,7 +179,15 @@ export const NotesContent = ({
                   <FileText className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
                   <div className="text-lg font-medium mb-2">No note selected</div>
                   <div className="text-sm mb-4">Select a note from the sidebar or create a new one</div>
-                  <Button onClick={onCreateNote} className="gap-2">
+                  <Button
+                    onClick={() => {
+                      onCreateNote().catch((error) => {
+                        console.error('Failed to create note:', error);
+                        toast.error('Failed to create note');
+                      });
+                    }}
+                    className="gap-2"
+                  >
                     <Plus className="h-4 w-4" />
                     Create Note
                   </Button>
