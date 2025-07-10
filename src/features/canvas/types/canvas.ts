@@ -27,6 +27,7 @@ export enum LayerType {
   Ellipse = "ellipse",
   Text = "text",
   Note = "note",
+  Mermaid = "mermaid",
 }
 
 export enum CanvasMode {
@@ -64,7 +65,8 @@ export type CanvasState =
         | LayerType.Ellipse
         | LayerType.Rectangle
         | LayerType.Text
-        | LayerType.Note;
+        | LayerType.Note
+        | LayerType.Mermaid;
     }
   | {
       mode: CanvasMode.Resizing;
@@ -79,7 +81,7 @@ export type CanvasState =
       mode: CanvasMode.Eraser;
     };
 
-export type Layer = PathLayer | RectangleLayer | EllipseLayer | TextLayer | NoteLayer;
+export type Layer = PathLayer | RectangleLayer | EllipseLayer | TextLayer | NoteLayer | MermaidLayer;
 
 export type PathLayer = {
   type: LayerType.Path;
@@ -128,6 +130,16 @@ export type NoteLayer = {
   height: number;
   fill: Color;
   value: string;
+};
+
+export type MermaidLayer = {
+  type: LayerType.Mermaid;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fill: Color;
+  mermaidCode: string;
 };
 
 export enum Side {

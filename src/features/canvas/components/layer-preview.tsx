@@ -11,6 +11,7 @@ import { Note } from "./note";
 import { Rectangle } from "./rectangle";
 import { Text } from "./text";
 import { Path } from "./path";
+import { Mermaid } from "./mermaid";
 
 type LayerPreviewProps = {
   id: string;
@@ -92,6 +93,15 @@ export const LayerPreview = memo(
             onPointerDown={onLayerPointerDown}
             selectionColor={selectionColor}
             layer={layer as any}
+          />
+        );
+      case LayerType.Mermaid:
+        return (
+          <Mermaid
+            id={id}
+            layer={layer as any}
+            onPointerDown={onLayerPointerDown}
+            selectionColor={selectionColor}
           />
         );
       default:

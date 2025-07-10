@@ -23,7 +23,8 @@ export function useLayerOperations(lastUsedColor: Color) {
 				| LayerType.Ellipse
 				| LayerType.Rectangle
 				| LayerType.Text
-				| LayerType.Note,
+				| LayerType.Note
+				| LayerType.Mermaid,
 			position: Point
 		) => {
 			try {
@@ -73,6 +74,16 @@ export function useLayerOperations(lastUsedColor: Color) {
 						width: 200, // Notes are wider by default
 						fill: lastUsedColor,
 						value: '',
+					};
+				} else if (layerType === LayerType.Mermaid) {
+					layerData = {
+						type: layerType,
+						x: centerX,
+						y: centerY,
+						height: 300,
+						width: 400, // Mermaid diagrams are larger by default
+						fill: lastUsedColor,
+						mermaidCode: 'flowchart TD\n    A([Start]) --> B[Process]\n    B --> C([End])',
 					};
 				} else {
 					layerData = {
@@ -190,9 +201,66 @@ export function useLayerOperations(lastUsedColor: Color) {
 		} catch (error) {}
 	}, []);
 
+// Insert a Mermaid diagram with custom code
+const insertMermaidLayer = useMutation(
+	({ storage, setMyPresence }, mermaidCode: string, position: Point) => {
+		try {
+			// Get the storage objects
+			let liveLayers = storage.get('layers');
+			let liveLayerIds = storage.get('layerIds');
+
+			// Initialize storage if needed
+			if (!liveLayers || typeof liveLayers.set !== 'function') {
+				liveLayers = new LiveMap<string, LiveObject<any>>();
+				storage.set('layers', liveLayers);
+			}
+
+			if (!liveLayerIds || typeof liveLayerIds.push !== 'function') {
+				liveLayerIds = new LiveList<string>();
+				storage.set('layerIds', liveLayerIds);
+			}
+
+			// Check layer limit
+			if (liveLayerIds.length >= MAX_LAYERS) {
+				console.warn('Maximum number of layers reached');
+				return;
+			}
+
+			const layerId = nanoid();
+
+			const layerData = {
+				type: LayerType.Mermaid,
+				x: position.x - 200, // Center the diagram
+				y: position.y - 150,
+				height: 300,
+				width: 400,
+				fill: lastUsedColor,
+				mermaidCode: mermaidCode,
+			};
+
+			// Create a LiveObject and set it in the map
+			const liveObject = new LiveObject(layerData);
+			liveLayers.set(layerId, liveObject);
+			liveLayerIds.push(layerId);
+
+			// Force a storage update to ensure changes are synchronized
+			storage.set('lastUpdate', Date.now());
+
+			setMyPresence({ selection: [layerId] }, { addToHistory: true });
+
+			return layerId;
+		} catch (error) {
+			console.error('Error inserting Mermaid layer:', error);
+			return null;
+		}
+	},
+	[lastUsedColor]
+);
+
 	return {
 		insertLayer,
 		insertPath,
 		eraseLayerById,
+		insertMermaidLayer,
 	};
 }

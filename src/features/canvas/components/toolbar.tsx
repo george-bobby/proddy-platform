@@ -7,8 +7,11 @@ import {
   Undo2,
   Redo2,
   Trash2,
+  Sparkles,
 } from "lucide-react";
 import { ToolButton } from "./tool-button";
+import { FlowchartGenerator } from "./flowchart-generator";
+import { Point } from "../types/canvas";
 
 type ToolbarProps = {
   onColorChange?: (color: Color) => void;
@@ -18,6 +21,8 @@ type ToolbarProps = {
   canUndo?: boolean;
   canRedo?: boolean;
   effectiveId?: string;
+  onGenerateFlowchart?: (mermaidCode: string, position: Point) => void;
+  camera?: { x: number; y: number };
 };
 
 export const Toolbar = ({
@@ -27,6 +32,8 @@ export const Toolbar = ({
   canRedo = false,
   canUndo = false,
   effectiveId,
+  onGenerateFlowchart,
+  camera = { x: 0, y: 0 },
 }: ToolbarProps = {}) => {
   // Handle color change
   const handleColorChange = useCallback((color: Color) => {
@@ -127,6 +134,23 @@ export const Toolbar = ({
           isDisabled={!canRedo}
         />
       </div>
+
+      {/* AI Flowchart Generator Card */}
+      {onGenerateFlowchart && (
+        <div className="bg-white rounded-md p-1.5 flex flex-col items-center shadow-md">
+          <FlowchartGenerator
+            onGenerateFlowchart={onGenerateFlowchart}
+            camera={camera}
+          >
+            <ToolButton
+              label="AI Flowchart"
+              icon={Sparkles}
+              onClick={() => {}} // Handled by FlowchartGenerator
+              variant="default"
+            />
+          </FlowchartGenerator>
+        </div>
+      )}
 
       {/* Clear Canvas Card */}
       <div className="bg-white rounded-md p-1.5 flex flex-col items-center shadow-md">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useCallback } from "react";
 import { useDisableScrollBounce } from "../hooks/use-disable-scroll-bounce";
 import { useDeleteLayers } from "../hooks/use-delete-layers";
 import {
@@ -21,6 +21,7 @@ import {
 import {
   CanvasMode,
   LayerType,
+  Point,
 } from "../types/canvas";
 
 // Import refactored hooks
@@ -124,7 +125,7 @@ export const Canvas = ({
   // onWheel is now provided by useCamera hook
 
   // Use refactored layer operations hook
-  const { insertLayer, insertPath, eraseLayerById } = useLayerOperations(lastUsedColor);
+  const { insertLayer, insertPath, eraseLayerById, insertMermaidLayer } = useLayerOperations(lastUsedColor);
 
   // Use refactored drawing hook
   const { startDrawing, continueDrawing } = useDrawing(canvasState.mode, lastUsedColor, strokeWidth);
@@ -138,6 +139,11 @@ export const Canvas = ({
     onResizeHandlePointerDown,
     translateSelectedLayers
   } = useSelection(canvasState, setCanvasState, layerIds, history);
+
+  // Handle flowchart generation
+  const handleGenerateFlowchart = useCallback((mermaidCode: string, position: Point) => {
+    insertMermaidLayer(mermaidCode, position);
+  }, [insertMermaidLayer]);
 
   const onPointerMove = useMutation(
     ({ setMyPresence, self, storage }, e: React.PointerEvent) => {
@@ -417,6 +423,8 @@ export const Canvas = ({
         undo={history.undo}
         redo={history.redo}
         effectiveId={effectiveId}
+        onGenerateFlowchart={handleGenerateFlowchart}
+        camera={camera}
       />
 
       <svg

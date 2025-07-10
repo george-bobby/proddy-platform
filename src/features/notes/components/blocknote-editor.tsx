@@ -9,15 +9,17 @@ import { Id } from "@/../convex/_generated/dataModel";
 import { useUpdateMyPresence } from "@/../liveblocks.config";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import { BlockNoteEditor as BlockNoteEditorType } from "@blocknote/core";
 
 interface BlockNoteEditorProps {
   noteId: Id<"notes">;
   className?: string;
+  onEditorReady?: (editor: BlockNoteEditorType) => void;
 }
 
-export const BlockNoteEditor = ({ noteId, className }: BlockNoteEditorProps) => {
+export const BlockNoteEditor = ({ noteId, className, onEditorReady }: BlockNoteEditorProps) => {
   const updateMyPresence = useUpdateMyPresence();
-  
+
   const sync = useBlockNoteSync(api.prosemirror, noteId, {
     snapshotDebounceMs: 1000,
   });
@@ -26,7 +28,12 @@ export const BlockNoteEditor = ({ noteId, className }: BlockNoteEditorProps) => 
   useEffect(() => {
     if (sync.editor) {
       const editor = sync.editor;
-      
+
+      // Notify parent component that editor is ready
+      if (onEditorReady) {
+        onEditorReady(editor);
+      }
+
       // Listen for editor changes to update presence
       const handleChange = () => {
         updateMyPresence({
@@ -54,7 +61,7 @@ export const BlockNoteEditor = ({ noteId, className }: BlockNoteEditorProps) => 
         });
       };
     }
-  }, [sync.editor, updateMyPresence]);
+  }, [sync.editor, updateMyPresence, onEditorReady]);
 
   if (sync.isLoading) {
     return (
