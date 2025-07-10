@@ -2,7 +2,7 @@
 
 import { nanoid } from 'nanoid';
 import { useMutation } from '../../../../liveblocks.config';
-import { Camera, Color, LayerType, Point } from '../types/canvas';
+import { Camera, Color, LayerType, Point, MermaidLayer } from '../types/canvas';
 import { LiveMap, LiveList, LiveObject } from '@liveblocks/client';
 import { penPointsToPathLayer } from '../../../lib/utils';
 
@@ -228,7 +228,7 @@ const insertMermaidLayer = useMutation(
 
 			const layerId = nanoid();
 
-			const layerData = {
+			const layerData: MermaidLayer = {
 				type: LayerType.Mermaid,
 				x: position.x - 200, // Center the diagram
 				y: position.y - 150,
