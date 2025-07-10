@@ -77,6 +77,16 @@ export const NotesContent = ({
     await handleUpdate({ content: localContent });
   }, [activeNoteId, localContent, handleUpdate]);
 
+  // Create wrapper for onItemSelect to match LiveSidebar's expected signature
+  const handleItemSelect = useCallback((itemId: string) => {
+    onNoteSelect(itemId as Id<'notes'>);
+  }, [onNoteSelect]);
+
+  // Create wrapper for onDeleteItem to match LiveSidebar's expected signature
+  const handleDeleteItem = useCallback(async (itemId: string) => {
+    await onDeleteNote(itemId as Id<'notes'>);
+  }, [onDeleteNote]);
+
   return (
     <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
       <div className="flex flex-1 overflow-hidden">
@@ -93,9 +103,9 @@ export const NotesContent = ({
               updatedAt: note.updatedAt
             }))}
             selectedItemId={activeNoteId}
-            onItemSelect={onNoteSelect}
+            onItemSelect={handleItemSelect}
             onCreateItem={onCreateNote}
-            onDeleteItem={onDeleteNote}
+            onDeleteItem={handleDeleteItem}
             workspaceId={workspaceId}
             channelId={channelId}
           />
