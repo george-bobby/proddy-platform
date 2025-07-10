@@ -59,49 +59,17 @@ export const NotesContent = ({
   });
 
   // Note content management
-  const { content, setContent, hasUnsavedChanges } = useNoteContent(
-    activeNote?.content || ''
-  );
-
-  // Handle note updates
-  const handleNoteUpdate = async (updates: Partial<Note>) => {
-    if (!activeNoteId) return;
-
-    try {
-      await onUpdateNote(activeNoteId, updates);
-    } catch (error) {
-      console.error('Failed to update note:', error);
-      toast.error('Failed to update note');
-    }
-  };
-
-  // Handle content changes
-  const handleContentChange = useCallback((newContent: string) => {
-    setContent(newContent);
-  }, [setContent]);
-
-  // Handle title changes
-  const handleTitleChange = useCallback(async (newTitle: string) => {
-    if (!activeNoteId) return;
-    await handleNoteUpdate({ title: newTitle });
-  }, [activeNoteId, handleNoteUpdate]);
+  const { localContent, localTitle, isTyping, handleContentChange: handleNoteContentChange, handleTitleChange: handleNoteTitleChange, hasUnsavedChanges } = useNoteContent({
+    note: activeNote,
+    onUpdate: onUpdateNote,
+    debounceMs: 1000,
+  });
 
   // Handle save
   const handleSave = useCallback(async () => {
     if (!activeNoteId) return;
-    await handleNoteUpdate({ content });
-  }, [activeNoteId, content, handleNoteUpdate]);
-
-  // Auto-save content changes
-  useEffect(() => {
-    if (!activeNoteId || !hasUnsavedChanges) return;
-
-    const timeoutId = setTimeout(() => {
-      handleNoteUpdate({ content });
-    }, 1000); // Auto-save after 1 second of inactivity
-
-    return () => clearTimeout(timeoutId);
-  }, [content, hasUnsavedChanges, activeNoteId, handleNoteUpdate]);
+    await onUpdateNote(activeNoteId, { content: localContent });
+  }, [activeNoteId, localContent, onUpdateNote]);
 
   return (
     <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
@@ -132,15 +100,15 @@ export const NotesContent = ({
           {/* Live Header - always visible */}
           <LiveHeader
             type="notes"
-            title={activeNote?.title || 'Untitled Note'}
-            onTitleChange={handleTitleChange}
+            title={isTyping ? localTitle : (activeNote?.title || 'Untitled Note')}
+            onTitleChange={handleNoteTitleChange}
             onSave={handleSave}
             hasUnsavedChanges={hasUnsavedChanges}
             isFullScreen={isFullScreen}
             onToggleFullScreen={() => setIsFullScreen(!isFullScreen)}
             onExport={() => setShowExportDialog(true)}
             tags={activeNote?.tags || []}
-            onTagsChange={(tags) => handleNoteUpdate({ tags })}
+            onTagsChange={(tags) => onUpdateNote(activeNoteId!, { tags })}
             workspaceId={workspaceId}
             channelId={channelId}
             createdAt={activeNote?.createdAt}
@@ -153,13 +121,14 @@ export const NotesContent = ({
               <BlockNoteNotesEditor
                 note={{
                   ...activeNote,
-                  content: content
+                  title: isTyping ? localTitle : activeNote.title,
+                  content: isTyping ? localContent : activeNote.content
                 }}
-                onUpdate={handleNoteUpdate}
-                onTitleChange={handleTitleChange}
-                onContentChange={handleContentChange}
+                onUpdate={(updates) => onUpdateNote(activeNoteId!, updates)}
+                onTitleChange={handleNoteTitleChange}
+                onContentChange={handleNoteContentChange}
                 onSaveNote={handleSave}
-                isLoading={hasUnsavedChanges}
+                isLoading={isTyping || hasUnsavedChanges}
                 workspaceId={workspaceId}
                 channelId={channelId}
                 toggleFullScreen={() => setIsFullScreen(!isFullScreen)}

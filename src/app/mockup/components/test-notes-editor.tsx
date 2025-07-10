@@ -143,6 +143,7 @@ export const TestNotesEditor = ({ note, onUpdate }: TestNotesEditorProps) => {
             <div className="flex items-center gap-3 p-4 rounded-lg border border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <Image className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
