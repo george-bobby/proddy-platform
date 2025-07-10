@@ -58,18 +58,24 @@ export const NotesContent = ({
     autoAnnounce: !!activeNoteId, // Only auto-announce when there's an active note
   });
 
+  // Create a wrapper function that matches the hook's expected signature
+  const handleUpdate = useCallback(async (updates: Partial<Note>) => {
+    if (!activeNoteId) return;
+    await onUpdateNote(activeNoteId, updates);
+  }, [activeNoteId, onUpdateNote]);
+
   // Note content management
   const { localContent, localTitle, isTyping, handleContentChange: handleNoteContentChange, handleTitleChange: handleNoteTitleChange, hasUnsavedChanges } = useNoteContent({
     note: activeNote,
-    onUpdate: onUpdateNote,
+    onUpdate: handleUpdate,
     debounceMs: 1000,
   });
 
   // Handle save
   const handleSave = useCallback(async () => {
     if (!activeNoteId) return;
-    await onUpdateNote(activeNoteId, { content: localContent });
-  }, [activeNoteId, localContent, onUpdateNote]);
+    await handleUpdate({ content: localContent });
+  }, [activeNoteId, localContent, handleUpdate]);
 
   return (
     <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
@@ -108,7 +114,7 @@ export const NotesContent = ({
             onToggleFullScreen={() => setIsFullScreen(!isFullScreen)}
             onExport={() => setShowExportDialog(true)}
             tags={activeNote?.tags || []}
-            onTagsChange={(tags) => onUpdateNote(activeNoteId!, { tags })}
+            onTagsChange={(tags) => handleUpdate({ tags })}
             workspaceId={workspaceId}
             channelId={channelId}
             createdAt={activeNote?.createdAt}
@@ -124,7 +130,7 @@ export const NotesContent = ({
                   title: isTyping ? localTitle : activeNote.title,
                   content: isTyping ? localContent : activeNote.content
                 }}
-                onUpdate={(updates) => onUpdateNote(activeNoteId!, updates)}
+                onUpdate={handleUpdate}
                 onTitleChange={handleNoteTitleChange}
                 onContentChange={handleNoteContentChange}
                 onSaveNote={handleSave}
