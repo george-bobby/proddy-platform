@@ -93,7 +93,8 @@ export const useNotesParticipants = () => {
 
 		// Generate avatar fallback
 		const avatarFallback = userName ? userName[0].toUpperCase() : 'U';
-		const fallbackPicture = `https://via.placeholder.com/40/4f46e5/ffffff?text=${avatarFallback}`;
+		// Use null instead of external placeholder URL - let the Avatar component handle fallbacks
+		const fallbackPicture = null;
 
 		return {
 			connectionId: other.connectionId,

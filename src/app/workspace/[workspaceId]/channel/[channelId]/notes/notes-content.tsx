@@ -80,17 +80,6 @@ export const NotesContent = ({
     setContent(newContent);
   }, [setContent]);
 
-  // Auto-save content changes
-  useEffect(() => {
-    if (!activeNoteId || !hasUnsavedChanges) return;
-
-    const timeoutId = setTimeout(() => {
-      handleNoteUpdate({ content });
-    }, 1000); // Auto-save after 1 second of inactivity
-
-    return () => clearTimeout(timeoutId);
-  }, [content, hasUnsavedChanges, activeNoteId, handleNoteUpdate]);
-
   // Handle title changes
   const handleTitleChange = useCallback(async (newTitle: string) => {
     if (!activeNoteId) return;
@@ -102,6 +91,17 @@ export const NotesContent = ({
     if (!activeNoteId) return;
     await handleNoteUpdate({ content });
   }, [activeNoteId, content, handleNoteUpdate]);
+
+  // Auto-save content changes
+  useEffect(() => {
+    if (!activeNoteId || !hasUnsavedChanges) return;
+
+    const timeoutId = setTimeout(() => {
+      handleNoteUpdate({ content });
+    }, 1000); // Auto-save after 1 second of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [content, hasUnsavedChanges, activeNoteId, handleNoteUpdate]);
 
   return (
     <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
@@ -151,11 +151,18 @@ export const NotesContent = ({
           <div className="flex-1 overflow-hidden">
             {activeNote ? (
               <BlockNoteNotesEditor
-                noteId={activeNote._id}
-                initialContent={content}
-                onChange={handleContentChange}
+                note={{
+                  ...activeNote,
+                  content: content
+                }}
+                onUpdate={handleNoteUpdate}
+                onTitleChange={handleTitleChange}
+                onContentChange={handleContentChange}
+                onSaveNote={handleSave}
+                isLoading={hasUnsavedChanges}
                 workspaceId={workspaceId}
                 channelId={channelId}
+                toggleFullScreen={() => setIsFullScreen(!isFullScreen)}
                 isFullScreen={isFullScreen}
               />
             ) : (

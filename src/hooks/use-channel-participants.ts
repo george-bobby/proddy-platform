@@ -152,7 +152,7 @@ export const useChannelParticipants = () => {
 				picture:
 					member?.user?.image ||
 					other.info?.picture ||
-					`https://via.placeholder.com/40/4f46e5/ffffff?text=${(member?.user?.name?.[0] || other.info?.name?.[0] || 'U').toUpperCase()}`,
+					null, // Let Avatar component handle fallbacks instead of external URLs
 			},
 		};
 	});

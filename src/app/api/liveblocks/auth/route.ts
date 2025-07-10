@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
     // This ensures a consistent identity across sessions
     const userId = body.userId || body.memberId || `user-${Date.now().toString(36)}`;
     const userName = body.userName || `User ${userId.substring(5)}`;
-    const userAvatar = body.userAvatar || `https://via.placeholder.com/40/4f46e5/ffffff?text=${userName.substring(0, 2).toUpperCase()}`;
+    // Don't use external placeholder URLs - let the Avatar component handle fallbacks
+    const userAvatar = body.userAvatar || null;
 
     // Log the authentication request for debugging
     console.log("Liveblocks auth request:", { room, userId, userName });
