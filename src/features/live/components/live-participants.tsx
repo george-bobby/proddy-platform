@@ -25,13 +25,6 @@ export const LiveParticipants = ({
   const { participants, currentParticipant, participantCount, isLoading } = useChannelParticipants();
   const room = useRoom();
 
-  // Log participants for debugging
-  useEffect(() => {
-    console.log(`LiveParticipants (${variant}): ${participantCount} users in room ${room.id}`);
-    console.log("Current participants:", participants);
-    console.log("Current user:", currentParticipant);
-  }, [participants, currentParticipant, participantCount, room.id, variant]);
-
   // If still loading, show nothing
   if (isLoading) return null;
 

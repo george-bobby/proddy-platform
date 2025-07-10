@@ -18,8 +18,6 @@ import {FaGithub, FaSlack} from 'react-icons/fa';
 import {Button} from '../../components/ui/button';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '../../components/ui/card';
 import {Badge} from '../../components/ui/badge';
-import {useAction} from 'convex/react';
-import {api} from '../../../convex/_generated/api';
 import {Id} from '../../../convex/_generated/dataModel';
 
 type AuthConfig = {
@@ -126,16 +124,12 @@ export const ServiceIntegrationCard = ({
         error?: string;
     }>({connected: !!connectedAccount && connectedAccount.status === 'ACTIVE'});
 
-    // Convex hooks for v3 API
-    const createAuthConfig = useAction(api.integrations.createAuthConfig);
-    const initiateConnection = useAction(api.integrations.initiateConnection);
-    const disconnectAccount = useAction(api.integrations.disconnectAccount);
-    const checkConnection = useAction(api.integrations.checkConnectionStatus);
+    // Component state and derived values
 
     const IconComponent = toolkits[toolkit].icon;
     const isConnected = connectedAccount && connectedAccount.status === 'ACTIVE';
-    const hasAuthConfig = !!authConfig;
     const isOwnerOrAdmin = currentMember.role === 'owner' || currentMember.role === 'admin';
+    const hasAuthConfig = !!authConfig;
 
     const handleCreateAuthConfig = async () => {
         if (!isOwnerOrAdmin) {
@@ -146,20 +140,32 @@ export const ServiceIntegrationCard = ({
         setIsConnecting(true);
 
         try {
-            // Create auth config with Composio-managed authentication
-            const authConfigResult = await createAuthConfig({
-                workspaceId,
-                toolkit,
-                name: `${toolkits[toolkit].name} Auth Config`,
-                type: 'use_composio_managed_auth',
+            // Use AgentAuth to authorize user to toolkit
+            const response = await fetch('/api/composio/agentauth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'authorize',
+                    userId: currentMember.userId,
+                    toolkit,
+                    workspaceId,
+                    memberId: currentMember._id,
+                }),
             });
 
-            toast.success(`${toolkits[toolkit].name} auth config created successfully!`);
-            onConnectionChange?.();
+            if (!response.ok) {
+                throw new Error('Failed to authorize toolkit');
+            }
+
+            const result = await response.json();
+
+            // Redirect to service OAuth (AgentAuth handles the full flow)
+            window.location.href = result.redirectUrl;
         } catch (error) {
-            console.error(`Error creating auth config for ${toolkit}:`, error);
-            toast.error(`Failed to create ${toolkits[toolkit].name} auth config`);
-        } finally {
+            console.error(`Error authorizing ${toolkit}:`, error);
+            toast.error(`Failed to authorize ${toolkits[toolkit].name}`);
             setIsConnecting(false);
         }
     };
@@ -170,29 +176,9 @@ export const ServiceIntegrationCard = ({
             return;
         }
 
-        if (!hasAuthConfig) {
-            toast.error('Please create an auth config first');
-            return;
-        }
-
-        setIsConnecting(true);
-
-        try {
-            // Initiate connection using v3 API with AgentAuth
-            const result = await initiateConnection({
-                workspaceId,
-                authConfigId: authConfig._id,
-                userId: currentMember.userId,
-                callbackUrl: `${window.location.origin}/workspace/${workspaceId}/manage?tab=integrations&toolkit=${toolkit}&authConfigId=${authConfig._id}&connected=true`,
-            });
-
-            // Redirect to service OAuth
-            window.location.href = result.redirectUrl;
-        } catch (error) {
-            console.error(`Error connecting ${toolkit}:`, error);
-            toast.error(`Failed to connect ${toolkits[toolkit].name} account`);
-            setIsConnecting(false);
-        }
+        // With AgentAuth, we don't need a separate auth config step
+        // The authorization and connection happen in one flow
+        await handleCreateAuthConfig();
     };
 
     const handleDisconnect = async () => {
@@ -209,10 +195,23 @@ export const ServiceIntegrationCard = ({
         setIsDisconnecting(true);
 
         try {
-            await disconnectAccount({
-                workspaceId,
-                connectedAccountId: connectedAccount._id,
+            // Call API to disconnect the account
+            const response = await fetch('/api/composio/connections/disconnect', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    workspaceId,
+                    connectedAccountId: connectedAccount._id,
+                    composioAccountId: connectedAccount.composioAccountId,
+                }),
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to disconnect account');
+            }
+
             toast.success(`${toolkits[toolkit].name} disconnected successfully`);
             onConnectionChange?.();
         } catch (error) {
@@ -227,10 +226,15 @@ export const ServiceIntegrationCard = ({
         if (!connectedAccount?.composioAccountId) return;
 
         try {
-            const status = await checkConnection({
-                composioAccountId: connectedAccount.composioAccountId,
+            // Call API to check connection status
+            const response = await fetch(`/api/composio/connections/status?composioAccountId=${connectedAccount.composioAccountId}`, {
+                method: 'GET',
             });
-            setConnectionStatus(status);
+
+            if (response.ok) {
+                const status = await response.json();
+                setConnectionStatus(status);
+            }
         } catch (error) {
             console.error(`Error checking ${toolkit} connection:`, error);
         }
@@ -317,43 +321,23 @@ export const ServiceIntegrationCard = ({
                             </div>
                         )}
 
-                        {!hasAuthConfig ? (
-                            <Button
-                                onClick={handleCreateAuthConfig}
-                                disabled={isConnecting || !isOwnerOrAdmin}
-                                className={`w-full ${toolkits[toolkit].color} text-white`}
-                            >
-                                {isConnecting ? (
-                                    <>
-                                        <Loader className="mr-2 h-4 w-4 animate-spin"/>
-                                        Creating Auth Config...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Settings className="mr-2 h-4 w-4"/>
-                                        Setup {toolkits[toolkit].name} Auth
-                                    </>
-                                )}
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleConnect}
-                                disabled={isConnecting || !isOwnerOrAdmin}
-                                className={`w-full ${toolkits[toolkit].color} text-white`}
-                            >
-                                {isConnecting ? (
-                                    <>
-                                        <Loader className="mr-2 h-4 w-4 animate-spin"/>
-                                        Connecting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <IconComponent className="mr-2 h-4 w-4"/>
-                                        Connect {toolkits[toolkit].name}
-                                    </>
-                                )}
-                            </Button>
-                        )}
+                        <Button
+                            onClick={handleCreateAuthConfig}
+                            disabled={isConnecting || !isOwnerOrAdmin}
+                            className={`w-full ${toolkits[toolkit].color} text-white`}
+                        >
+                            {isConnecting ? (
+                                <>
+                                    <Loader className="mr-2 h-4 w-4 animate-spin"/>
+                                    Connecting with AgentAuth...
+                                </>
+                            ) : (
+                                <>
+                                    <IconComponent className="mr-2 h-4 w-4"/>
+                                    Connect {toolkits[toolkit].name}
+                                </>
+                            )}
+                        </Button>
                     </div>
                 )}
             </CardContent>

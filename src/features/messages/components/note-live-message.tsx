@@ -3,22 +3,23 @@
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PaintBucket, Users } from "lucide-react";
+import { FileText, Users } from "lucide-react";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { useChannelId } from "@/hooks/use-channel-id";
 import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 
-interface CanvasLiveMessageProps {
+interface NoteLiveMessageProps {
   data: {
-    type: "canvas-live";
-    roomId: string;
+    type: "note-live";
+    noteId: string;
+    noteTitle: string;
     participants?: string[];
   };
 }
 
-export const CanvasLiveMessage = ({ data }: CanvasLiveMessageProps) => {
+export const NoteLiveMessage = ({ data }: NoteLiveMessageProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const channelId = useChannelId();
@@ -43,44 +44,42 @@ export const CanvasLiveMessage = ({ data }: CanvasLiveMessageProps) => {
     }
   }, [members, data.participants]);
 
-  const handleJoinCanvas = () => {
+  const handleJoinNote = () => {
     if (!workspaceId || !channelId) return;
 
-    // Navigate to the canvas using the specific room ID from the message data
-    // Use router.push for client-side navigation without page reload
-    // Add the roomId parameter to ensure we join the exact same canvas session
-    const url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&t=${Date.now()}`;
+    // Navigate to the notes page with the specific note ID
+    const url = `/workspace/${workspaceId}/channel/${channelId}/notes?noteId=${data.noteId}&t=${Date.now()}`;
     router.push(url);
   };
 
   return (
-    <Card className="w-full max-w-lg bg-white shadow-md border-l-4 border-l-indigo-500" data-message-component="true">
+    <Card className="w-full max-w-lg bg-white shadow-md border-l-4 border-l-purple-500" data-message-component="true">
       <div className="flex items-center justify-between p-4 min-h-[64px]">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
-          <PaintBucket className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+          <FileText className="h-5 w-5 text-purple-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <CardTitle className="text-sm font-medium text-gray-900 truncate">
-              Live Canvas Session
+              Live Note: {data.noteTitle}
             </CardTitle>
             <div className="flex items-center text-xs text-gray-600 mt-1">
               <Users className="h-3 w-3 mr-1 flex-shrink-0" />
               {participantNames.length > 0 ? (
                 <span className="truncate">
-                  {participantNames.join(", ")} {participantNames.length === 1 ? "is" : "are"} currently drawing
+                  {participantNames.join(", ")} {participantNames.length === 1 ? "is" : "are"} currently editing
                 </span>
               ) : (
-                <span>Canvas session in progress</span>
+                <span>Note session in progress</span>
               )}
             </div>
           </div>
         </div>
         <Button
-          onClick={handleJoinCanvas}
+          onClick={handleJoinNote}
           variant="default"
           size="sm"
-          className="ml-3 flex-shrink-0 bg-indigo-600 text-white hover:bg-indigo-700"
+          className="ml-3 flex-shrink-0 bg-purple-600 text-white hover:bg-purple-700"
         >
-          Join Canvas
+          Join Note
         </Button>
       </div>
     </Card>

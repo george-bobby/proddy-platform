@@ -91,67 +91,42 @@ export const CanvasExportMessage = ({ data }: CanvasExportMessageProps) => {
   const isDataUrl = data.imageData?.startsWith('data:');
 
   return (
-    <Card className="w-full max-w-sm bg-white shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center">
-          <PaintBucket className="h-4 w-4 mr-2 text-indigo-500" />
-          Canvas Export: {data.canvasName}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pb-2">
-        {data.imageData && (data.exportFormat === "png" || data.exportFormat === "svg") && (
-          <div className="relative aspect-video w-full overflow-hidden rounded-md">
-            {isDataUrl ? (
-              <div className="relative h-full w-full">
-                <Image
-                  src={data.imageData}
-                  alt={data.canvasName || "Canvas export"}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 400px"
-                  className="object-cover"
-                  priority
-                  unoptimized={true} // Required for data URLs
-                />
-              </div>
-            ) : (
-              <Image
-                src={data.imageData}
-                alt={data.canvasName || "Canvas export"}
-                fill
-                sizes="(max-width: 768px) 100vw, 400px"
-                className="object-cover"
-                priority
-              />
-            )}
+    <Card className="w-full max-w-lg bg-white shadow-md" data-message-component="true">
+      <div className="flex items-center justify-between p-4 min-h-[64px]">
+        <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <PaintBucket className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-sm font-medium text-gray-900 truncate">
+              Canvas Export: {data.canvasName}
+            </CardTitle>
+            <div className="text-xs text-gray-600 mt-1">
+              {data.exportFormat.toUpperCase()} • {new Date(data.exportTime).toLocaleDateString()}
+            </div>
           </div>
-        )}
-        {data.exportFormat === "json" && (
-          <div className="text-xs text-muted-foreground">
-            JSON data export - {new Date(data.exportTime).toLocaleString()}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex justify-between pt-1">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs"
-          onClick={handleOpenCanvas}
-        >
-          <ExternalLink className="h-3 w-3 mr-1" />
-          Open Canvas
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs"
-          onClick={handleDownload}
-          disabled={isDownloading}
-        >
-          <Download className="h-3 w-3 mr-1" />
-          Download
-        </Button>
-      </CardFooter>
+        </div>
+
+        <div className="flex items-center space-x-2 ml-3 flex-shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenCanvas}
+            className="border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            Open
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="bg-indigo-600 text-white hover:bg-indigo-700"
+          >
+            <Download className="h-3 w-3 mr-1" />
+            Download
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 };

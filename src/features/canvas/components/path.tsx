@@ -21,9 +21,6 @@ export const Path = ({
   stroke,
   strokeWidth = 16,
 }: PathProps) => {
-  // Log the path properties for debugging
-  console.log("Rendering path at:", { x, y, pointsCount: points.length, strokeWidth });
-
   // Process the stroke with perfect-freehand
   const strokePath = getStroke(points, {
     size: strokeWidth,

@@ -84,11 +84,6 @@ export const LiveHeader = ({
     setLocalTitle(title || '');
   }, [title]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('LiveHeader props:', { type, showTags, tags, onTagsChange: !!onTagsChange });
-  }, [type, showTags, tags, onTagsChange]);
-
   const handleTitleSubmit = () => {
     if (onTitleChange && localTitle.trim()) {
       onTitleChange(localTitle.trim());

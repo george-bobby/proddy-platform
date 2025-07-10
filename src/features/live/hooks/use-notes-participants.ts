@@ -33,25 +33,6 @@ export const useNotesParticipants = () => {
 		// Count is others plus self (if present)
 		const count = others.length + (self ? 1 : 0);
 		setParticipantCount(count);
-
-		console.log(`Notes participants: ${count} users in room ${room.id}`);
-
-		// Log all participants for debugging
-		others.forEach((other) => {
-			console.log(
-				`Other participant: ${other.connectionId}`,
-				other.id ? `User ID: ${other.id}` : 'No user ID',
-				other.info?.name ? `Name: ${other.info.name}` : 'No name'
-			);
-		});
-
-		if (self) {
-			console.log(
-				`Self participant:`,
-				self.id ? `User ID: ${self.id}` : 'No user ID',
-				self.info?.name ? `Name: ${self.info.name}` : 'No name'
-			);
-		}
 	}, [others, self, room.id]);
 
 	if (isLoading) {
@@ -86,7 +67,6 @@ export const useNotesParticipants = () => {
 				member = exactMatch;
 				userName = exactMatch.user.name;
 				userPicture = exactMatch.user.image;
-				console.log('DIRECT DB: Found exact user name match:', userName);
 			} else if (typeof userId === 'string') {
 				// Try partial match if exact match fails
 				const partialMatch = members.find(
@@ -96,7 +76,6 @@ export const useNotesParticipants = () => {
 					member = partialMatch;
 					userName = partialMatch.user.name;
 					userPicture = partialMatch.user.image;
-					console.log('DIRECT DB: Found partial user name match:', userName);
 				}
 			}
 		}
@@ -105,13 +84,11 @@ export const useNotesParticipants = () => {
 		if (!userName && other.info?.name) {
 			userName = other.info.name;
 			userPicture = other.info.picture;
-			console.log('Using name from Liveblocks info:', userName);
 		}
 
 		// Final fallback
 		if (!userName) {
 			userName = `User ${other.connectionId}`;
-			console.log('Using fallback name:', userName);
 		}
 
 		// Generate avatar fallback

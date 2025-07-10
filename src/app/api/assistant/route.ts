@@ -28,11 +28,12 @@ export async function POST(req: NextRequest) {
 
 		for (const integration of externalIntegrations) {
 			if (lowerMessage.includes(integration)) {
-				console.log(`[Assistant Router] Routing to ${integration} integration`);
-				const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-				const targetUrl = `${baseUrl}/api/assistant/others/${integration}`;
+				console.log(`[Assistant Router] Routing to ${integration} integration via AgentAuth`);
 
-				const response = await fetch(targetUrl, {
+				const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+				const agentAuthUrl = `${baseUrl}/api/assistant/agentauth`;
+
+				const agentAuthResponse = await fetch(agentAuthUrl, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -41,12 +42,22 @@ export async function POST(req: NextRequest) {
 						message,
 						workspaceContext,
 						workspaceId,
+						userId: workspaceContext?.userId || `user_${Date.now()}`,
+						toolkit: integration,
 					}),
 				});
 
-				if (response.ok) {
-					const data = await response.json();
+				if (agentAuthResponse.ok) {
+					const data = await agentAuthResponse.json();
 					return NextResponse.json(data);
+				} else {
+					// Return AgentAuth error instead of falling back to legacy
+					const errorData = await agentAuthResponse.json().catch(() => ({}));
+					return NextResponse.json({
+						success: false,
+						error: errorData.error || `Failed to connect to ${integration}. Please ensure your ${integration} account is connected.`,
+						toolkit: integration,
+					}, { status: agentAuthResponse.status });
 				}
 			}
 		}

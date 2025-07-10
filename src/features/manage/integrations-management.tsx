@@ -1,14 +1,10 @@
 'use client';
 
-import {useCallback, useEffect, useState} from 'react';
-import {useRouter, useSearchParams} from 'next/navigation';
-import {toast} from 'sonner';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '../../components/ui/tabs';
-import {Server, Settings, Zap} from 'lucide-react';
-import {ServiceIntegrationCard} from './service-integration-card';
-import {useAction, useQuery} from 'convex/react';
-import {api} from '../../../convex/_generated/api';
-import {Id} from '../../../convex/_generated/dataModel';
+import { useCallback, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
+import { ServiceIntegrationCard } from './service-integration-card';
+import { Id } from '../../../convex/_generated/dataModel';
 
 type CurrentMember = {
     _id: Id<'members'>;
@@ -24,68 +20,100 @@ interface IntegrationsManagementProps {
 const SUPPORTED_TOOLKITS = ['github', 'gmail', 'slack', 'jira', 'notion', 'clickup'] as const;
 
 export const IntegrationsManagement = ({
-                                           workspaceId,
-                                           currentMember,
-                                       }: IntegrationsManagementProps) => {
+    workspaceId,
+    currentMember,
+}: IntegrationsManagementProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [refreshKey, setRefreshKey] = useState(0);
 
-    // Convex hooks for v3 API
-    const authConfigs = useQuery(api.integrations.getAuthConfigs, {workspaceId});
-    const connectedAccounts = useQuery(api.integrations.getConnectedAccounts, {workspaceId});
-    const mcpServers = useQuery(api.integrations.getMCPServers, {workspaceId});
-    const completeConnection = useAction(api.integrations.completeConnection);
+    // State for data fetching
+    const [authConfigs, setAuthConfigs] = useState<any[]>([]);
+    const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const handleConnectionComplete = useCallback(async (toolkit: string, authConfigId: string, connectionData?: string) => {
+    // Fetch data from API routes
+    const fetchData = useCallback(async () => {
         try {
-            // Parse connection data if provided
-            const parsedConnectionData = connectionData ? JSON.parse(decodeURIComponent(connectionData)) : {};
+            setIsLoading(true);
 
-            // Complete connection using v3 API
-            await completeConnection({
-                workspaceId,
-                authConfigId: authConfigId as Id<'auth_configs'>,
-                userId: currentMember.userId,
-                connectionData: {
-                    id: parsedConnectionData.id || `conn_${Date.now()}`,
-                    status: 'ACTIVE',
-                    ...parsedConnectionData,
+            // Fetch auth configs
+            const authConfigsResponse = await fetch(`/api/composio/auth-configs?workspaceId=${workspaceId}`);
+            const authConfigsData = authConfigsResponse.ok ? await authConfigsResponse.json() : [];
+
+            // Fetch connected accounts
+            const accountsResponse = await fetch(`/api/composio/connections?workspaceId=${workspaceId}`);
+            const accountsData = accountsResponse.ok ? await accountsResponse.json() : [];
+
+            setAuthConfigs(authConfigsData);
+            setConnectedAccounts(accountsData);
+        } catch (error) {
+            console.error('Error fetching integration data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [workspaceId]);
+
+    const handleConnectionComplete = useCallback(async (toolkit: string, userId?: string) => {
+        try {
+            // Complete connection using AgentAuth
+            const response = await fetch('/api/composio/agentauth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                    action: 'complete',
+                    userId: userId || currentMember.userId,
+                    toolkit,
+                    workspaceId,
+                    memberId: currentMember._id,
+                }),
             });
 
+            if (!response.ok) {
+                throw new Error('Failed to complete AgentAuth connection');
+            }
+
+            const result = await response.json();
+
             // Refresh the data
+            await fetchData();
             setRefreshKey(prev => prev + 1);
         } catch (error) {
-            console.error('Error completing connection:', error);
+            console.error('Error completing AgentAuth connection:', error);
             toast.error('Failed to complete connection setup');
         }
-    }, [completeConnection, workspaceId, currentMember.userId]);
+    }, [workspaceId, currentMember.userId, currentMember._id, fetchData]);
 
     // Check if user just returned from OAuth (AgentAuth callback)
     useEffect(() => {
         const connected = searchParams.get('connected');
         const toolkit = searchParams.get('toolkit');
-        const authConfigId = searchParams.get('authConfigId');
-        const connectionData = searchParams.get('connectionData');
+        const userId = searchParams.get('userId');
 
-        if (connected === 'true' && toolkit && authConfigId) {
-            toast.success(`${toolkit.charAt(0).toUpperCase() + toolkit.slice(1)} connected successfully!`);
+        if (connected === 'true' && toolkit) {
+            toast.success(`${toolkit.charAt(0).toUpperCase() + toolkit.slice(1)} authorization completed!`);
 
             // Handle the connection completion using AgentAuth
-            handleConnectionComplete(toolkit, authConfigId, connectionData || undefined);
+            handleConnectionComplete(toolkit, userId || undefined);
 
             // Remove the query parameters
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.delete('connected');
             newUrl.searchParams.delete('toolkit');
-            newUrl.searchParams.delete('authConfigId');
-            newUrl.searchParams.delete('connectionData');
+            newUrl.searchParams.delete('userId');
             router.replace(newUrl.pathname + newUrl.search);
         }
     }, [searchParams, router, handleConnectionComplete]);
 
+    // Initial data fetch
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
     const handleConnectionChange = () => {
+        fetchData();
         setRefreshKey(prev => prev + 1);
     };
 
@@ -103,88 +131,26 @@ export const IntegrationsManagement = ({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold tracking-tight">Composio v3 + AgentAuth Integrations</h3>
+                <h3 className="text-lg font-semibold tracking-tight">Service Integrations</h3>
                 <p className="text-sm text-muted-foreground">
                     Connect your workspace to external services using Composio's v3 API with AgentAuth for
                     AI-powered automation and enhanced productivity features.
                 </p>
             </div>
 
-            <Tabs defaultValue="integrations" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="integrations" className="flex items-center gap-2">
-                        <Settings className="h-4 w-4"/>
-                        Integrations
-                    </TabsTrigger>
-                    <TabsTrigger value="mcp-servers" className="flex items-center gap-2">
-                        <Server className="h-4 w-4"/>
-                        MCP Servers
-                    </TabsTrigger>
-                    <TabsTrigger value="agent-auth" className="flex items-center gap-2">
-                        <Zap className="h-4 w-4"/>
-                        AgentAuth
-                    </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="integrations" className="space-y-6">
-                    <div>
-                        <h4 className="text-md font-medium">Service Integrations</h4>
-                        <p className="text-sm text-muted-foreground">
-                            Connect to external services using Composio-managed authentication.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {SUPPORTED_TOOLKITS.map((toolkit) => (
-                            <ServiceIntegrationCard
-                                key={`${toolkit}-${refreshKey}`}
-                                workspaceId={workspaceId}
-                                toolkit={toolkit}
-                                authConfig={authConfigsByToolkit[toolkit]}
-                                connectedAccount={connectedAccountsByToolkit[toolkit]}
-                                currentMember={currentMember}
-                                onConnectionChange={handleConnectionChange}
-                            />
-                        ))}
-                    </div>
-
-                </TabsContent>
-
-                <TabsContent value="mcp-servers" className="space-y-6">
-                    <div>
-                        <h4 className="text-md font-medium">MCP Servers for AI Agents</h4>
-                        <p className="text-sm text-muted-foreground">
-                            Create Model Context Protocol servers that AI agents can connect to for autonomous tool
-                            discovery and execution.
-                        </p>
-                    </div>
-
-                    {/* MCP Server Management Component */}
-                    <div className="p-4 border rounded-lg">
-                        <p className="text-sm text-muted-foreground">
-                            MCP Server management interface will be implemented here.
-                            This will allow creating servers with specific toolkit configurations for AI agents.
-                        </p>
-                    </div>
-                </TabsContent>
-
-                <TabsContent value="agent-auth" className="space-y-6">
-                    <div>
-                        <h4 className="text-md font-medium">AgentAuth Configuration</h4>
-                        <p className="text-sm text-muted-foreground">
-                            Configure authentication settings for AI agents to autonomously handle OAuth flows and API
-                            authentication.
-                        </p>
-                    </div>
-
-                    <div className="p-4 border rounded-lg">
-                        <p className="text-sm text-muted-foreground">
-                            AgentAuth configuration interface will be implemented here.
-                            This will enable helper actions for autonomous authentication flows.
-                        </p>
-                    </div>
-                </TabsContent>
-            </Tabs>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {SUPPORTED_TOOLKITS.map((toolkit) => (
+                    <ServiceIntegrationCard
+                        key={`${toolkit}-${refreshKey}`}
+                        workspaceId={workspaceId}
+                        toolkit={toolkit}
+                        authConfig={authConfigsByToolkit[toolkit]}
+                        connectedAccount={connectedAccountsByToolkit[toolkit]}
+                        currentMember={currentMember}
+                        onConnectionChange={handleConnectionChange}
+                    />
+                ))}
+            </div>
         </div>
     );
 };

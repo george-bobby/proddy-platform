@@ -26,8 +26,6 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
     // Get the workspace ID from params
     const workspaceId = useWorkspaceId();
 
-    console.log("Room component rendering with normalized roomId:", normalizedRoomId);
-
     // Get the current user from Convex
     const currentUser = useQuery(api.users.current);
 
@@ -36,17 +34,6 @@ export const Room = ({ children, roomId, fallback }: RoomProps) => {
         api.members.current,
         workspaceId ? { workspaceId } : "skip"
     );
-
-    // Log authentication info for debugging
-    useEffect(() => {
-        if (currentUser && currentMember) {
-            console.log("Authentication info for Liveblocks:", {
-                userId: currentUser._id,
-                memberId: currentMember._id,
-                name: currentUser.name || "Unknown User"
-            });
-        }
-    }, [currentUser, currentMember]);
 
     // If user data is still loading, show a loading indicator
     if (!currentUser) {

@@ -39,24 +39,17 @@ export const AddMessageToTaskModal = ({
   workspaceId,
   messageContent,
 }: AddMessageToTaskModalProps) => {
-  console.log('AddMessageToTaskModal received messageContent:', messageContent);
-  console.log('messageId:', messageId);
-  console.log('workspaceId:', workspaceId);
-
   // Use the entire message content as the task title
   const extractTitle = (content: string): string => {
-    console.log('extractTitle called with content:', content);
     return content || 'New Task';
   };
 
   // Form state
   const [title, setTitle] = useState(() => {
     if (!messageContent) {
-      console.log('No message content provided, using default title');
       return 'New Task';
     }
     const extractedTitle = extractTitle(messageContent);
-    console.log('Setting initial title to:', extractedTitle);
     return extractedTitle || 'New Task';
   });
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);

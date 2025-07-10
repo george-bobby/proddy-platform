@@ -31,12 +31,10 @@ export const useDeleteNote = () => {
 		async (id: Id<'notes'> | string, options?: Options) => {
 			try {
 				setStatus('pending');
-				console.log('Deleting note with ID:', id);
 
 				// Make sure we're passing an object with an id property
 				const idObj = typeof id === 'object' ? id : { id: id as Id<'notes'> };
 				await mutation(idObj);
-				console.log('Note deleted successfully:', id);
 
 				setData(true);
 				setStatus('success');

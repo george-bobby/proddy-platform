@@ -35,7 +35,6 @@ export const Toolbar = ({
   workspaceId,
   messageContent,
 }: ToolbarProps) => {
-  console.log('Toolbar received messageContent:', messageContent);
   const [isAddToTaskModalOpen, setIsAddToTaskModalOpen] = useState(false);
   const [extractedContent, setExtractedContent] = useState(messageContent);
   const { isMessageSelected, toggleMessageSelection } = useMessageSelection();

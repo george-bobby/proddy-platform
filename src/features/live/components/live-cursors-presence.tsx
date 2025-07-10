@@ -21,9 +21,9 @@ const Cursors = ({ variant }: { variant: 'canvas' | 'notes' }) => {
   return (
     <>
       {ids.map((connectionId) => (
-        <LiveCursor 
-          key={connectionId} 
-          connectionId={connectionId} 
+        <LiveCursor
+          key={connectionId}
+          connectionId={connectionId}
           variant={variant}
         />
       ))}
@@ -90,9 +90,9 @@ const DrawingPaths = () => {
   );
 };
 
-export const LiveCursorsPresence = memo(({ 
-  variant = 'canvas', 
-  showDrawingPaths = true 
+export const LiveCursorsPresence = memo(({
+  variant = 'canvas',
+  showDrawingPaths = true
 }: LiveCursorsPresenceProps) => {
   // Log all other users for debugging
   const others = useOthers();
@@ -122,12 +122,6 @@ export const LiveCursorsPresence = memo(({
           realName = memberByUserId.user.name;
         }
       }
-
-      console.log(
-        `${variant} - User:`, other.connectionId,
-        "Real name:", realName,
-        "Liveblocks info:", other.info
-      );
     });
   }, [others, members, variant]);
 

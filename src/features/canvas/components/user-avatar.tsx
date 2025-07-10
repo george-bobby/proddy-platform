@@ -14,9 +14,6 @@ export const UserAvatar = ({
   fallback,
   borderColor,
 }: UserAvatarProps) => {
-  // Log the name for debugging
-  console.log("UserAvatar rendering with name:", name);
-
   return (
     <Hint label={name || "Teammate"} side="bottom">
       <Avatar className="h-8 w-8 border-2" style={{ borderColor }}>

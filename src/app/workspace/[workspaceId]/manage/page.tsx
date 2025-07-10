@@ -72,7 +72,7 @@ const ManagePage = () => {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <Tabs defaultValue="workspace" className="w-full">
+          <Tabs defaultValue="integrations" className="w-full">
             <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="workspace">
                 <Settings className="h-4 w-4 mr-2" />

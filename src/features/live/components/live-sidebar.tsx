@@ -33,19 +33,19 @@ interface LiveSidebarProps {
   items: LiveItem[];
   selectedItemId?: string | null;
   onItemSelect: (itemId: string, roomId?: string, title?: string) => void;
-  
+
   // Collapse props
   collapsed: boolean;
   onToggleCollapse: () => void;
-  
+
   // Action props
   onCreateItem: () => void;
   onDeleteItem?: (itemId: string) => void;
-  
+
   // Context props
   workspaceId?: Id<'workspaces'>;
   channelId?: Id<'channels'>;
-  
+
   // Styling
   className?: string;
 }
@@ -70,14 +70,14 @@ export const LiveSidebar = ({
   // Filter items based on search query
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return items;
-    
+
     return items.filter((item) => {
       const title = item.title || item.canvasName || '';
       const content = item.content || '';
       const tags = item.tags || [];
-      
+
       const searchLower = searchQuery.toLowerCase();
-      
+
       return (
         title.toLowerCase().includes(searchLower) ||
         content.toLowerCase().includes(searchLower) ||
@@ -89,7 +89,7 @@ export const LiveSidebar = ({
   // Get preview text for notes
   const getPreviewText = (content: string) => {
     if (!content) return '';
-    
+
     try {
       const delta = JSON.parse(content);
       if (delta.ops) {
@@ -137,7 +137,7 @@ export const LiveSidebar = ({
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        
+
         <div className="p-2">
           <Button onClick={onCreateItem} size="sm" className="w-full h-8 p-0">
             <Plus className="h-4 w-4" />
@@ -160,7 +160,7 @@ export const LiveSidebar = ({
             )}
             {type === 'notes' ? 'Notes' : 'Canvas'}
           </h2>
-          
+
           <Button
             onClick={onToggleCollapse}
             variant="ghost"
@@ -238,13 +238,13 @@ export const LiveSidebar = ({
                       <h3 className="font-medium text-sm truncate">
                         {getItemTitle(item)}
                       </h3>
-                      
+
                       {type === 'notes' && item.content && (
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                           {getPreviewText(item.content)}
                         </p>
                       )}
-                      
+
                       {item.tags && item.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {item.tags.slice(0, 3).map((tag, index) => (
@@ -259,7 +259,7 @@ export const LiveSidebar = ({
                           )}
                         </div>
                       )}
-                      
+
                       <div className="text-xs text-muted-foreground mt-1">
                         {item.updatedAt && new Date(item.updatedAt).toLocaleDateString()}
                       </div>
@@ -291,7 +291,7 @@ export const LiveSidebar = ({
                           <DropdownMenuItem
                             onClick={() => {
                               // Handle rename functionality
-                              console.log('Rename item:', item._id);
+                              // TODO: Implement rename functionality
                             }}
                           >
                             <FileText className="h-4 w-4 mr-2" />

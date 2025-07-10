@@ -14,9 +14,7 @@ export const NavigationListener = () => {
   useEffect(() => {
     const handleNavigation = (event: NavigationEvent) => {
       const { url } = event.detail;
-      
-      console.log('Navigation event received:', url);
-      
+
       try {
         // Use Next.js router for proper client-side navigation
         router.push(url);

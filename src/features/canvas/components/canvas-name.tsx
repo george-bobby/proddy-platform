@@ -60,7 +60,6 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
       setCanvasName(savedCanvasName);
       setInputValue(savedCanvasName);
       setIsExistingSavedCanvas(true);
-      console.log(`Editing existing saved canvas: ${savedCanvasName} with roomId: ${currentRoomId}`);
     }
     // Otherwise use the channel name
     else if (channelData && channelData.name) {
@@ -114,7 +113,6 @@ export const CanvasName = ({ savedCanvasName }: CanvasNameProps) => {
     // Create a new canvas with a new room ID
     // Add a timestamp to ensure we get a fresh URL that bypasses any caching
     const timestamp = Date.now();
-    console.log(`Creating new canvas with timestamp: ${timestamp}`);
 
     // Show a loading message
     toast.loading("Creating new canvas...");

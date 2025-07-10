@@ -39,23 +39,10 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
     // Try to get user ID from Liveblocks info
     const userId = other?.id;
 
-    console.log("Cursor user info:", {
-      connectionId,
-      userId,
-      otherInfo: other.info,
-      membersCount: members?.length || 0
-    });
-
     // Determine the name to display
     let newUserName = `${connectionId}`; // Default fallback
 
     if (members) {
-      // Log all members for debugging
-      console.log("Available members:", members.map(m => ({
-        id: m.user._id,
-        name: m.user.name
-      })));
-
       // First try to find the member by user ID from Liveblocks
       if (userId) {
         // Try to find an exact match first
@@ -71,10 +58,7 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
 
         if (member && member.user.name) {
           newUserName = member.user.name;
-          console.log("Found real user name for cursor by ID:", member.user.name);
         } else {
-          console.log("Could not find member with ID:", userId);
-
           // If we couldn't find by ID, try to match by connection ID
           // This is a fallback approach that might work in some cases
           if (members.length > 0) {
@@ -82,7 +66,6 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
             const memberByIndex = members[connectionId % members.length];
             if (memberByIndex && memberByIndex.user.name) {
               newUserName = memberByIndex.user.name;
-              console.log("Found user name for cursor by connection ID:", memberByIndex.user.name);
             }
           }
         }
@@ -91,26 +74,22 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
         const memberByIndex = members[connectionId % members.length];
         if (memberByIndex && memberByIndex.user.name) {
           newUserName = memberByIndex.user.name;
-          console.log("Found user name for cursor by connection ID (no userId):", memberByIndex.user.name);
         }
       }
 
       // If we still don't have a name, use Liveblocks info if available
       if (newUserName === `${connectionId}` && other.info?.name) {
         newUserName = other.info.name;
-        console.log("Using name from Liveblocks info:", other.info.name);
       }
     } else if (other.info?.name) {
       // No members but we have Liveblocks info
       newUserName = other.info.name;
-      console.log("Using name from Liveblocks info (no members):", other.info.name);
     }
 
     // Only update the state if the name has changed
     // This helps prevent infinite loops
     if (newUserName !== userName) {
       setUserName(newUserName);
-      console.log("Setting user name to:", newUserName);
     }
   }, [members, connectionId, other, currentUser, userName]);
 
@@ -119,8 +98,6 @@ export const Cursor = memo(({ connectionId }: CursorProps) => {
 
   const { cursor, info } = other;
   const { x, y } = cursor;
-
-  console.log("Cursor user info:", info, "Real name:", userName);
 
   // Calculate width based on name length to ensure it fits
   // Use a more generous multiplier for longer names and a minimum width for short names

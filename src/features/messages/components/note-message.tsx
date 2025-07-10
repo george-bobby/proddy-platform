@@ -29,30 +29,26 @@ export const NoteMessage = ({ data }: NoteMessageProps) => {
   };
 
   return (
-    <Card className="w-full max-w-sm bg-white shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center">
-          <FileText className="h-4 w-4 mr-2" />
-          Note: {data.noteTitle}
-        </CardTitle>
-      </CardHeader>
-      {data.previewContent && (
-        <CardContent className="pb-2">
-          <div className="text-sm text-muted-foreground line-clamp-3">
-            {data.previewContent}
+    <Card data-message-component="true" className="w-full bg-white text-gray-900">
+      <div className="flex items-center justify-between p-4 min-h-[100px]">
+        <div className="flex items-center space-x-3 flex-1 min-w-0">
+          <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-sm font-medium text-gray-900 truncate">
+              Note: {data.noteTitle}
+            </CardTitle>
+
           </div>
-        </CardContent>
-      )}
-      <CardFooter>
+        </div>
         <Button
           onClick={handleOpenNote}
-          variant="outline"
+          variant="default"
           size="sm"
-          className="w-full"
+          className="ml-3 flex-shrink-0 bg-primary text-white hover:bg-primary/80"
         >
           Open Note
         </Button>
-      </CardFooter>
+      </div>
     </Card>
   );
 };

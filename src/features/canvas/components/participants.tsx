@@ -35,13 +35,6 @@ export const Participants = ({ isFullScreen }: ParticipantsProps = {}) => {
   const { participants, currentParticipant, participantCount, isLoading } = useChannelParticipants();
   const room = useRoom();
 
-  // Log participants for debugging
-  useEffect(() => {
-    console.log(`Participants component: ${participantCount} users in room ${room.id}`);
-    console.log("Current participants:", participants);
-    console.log("Current user:", currentParticipant);
-  }, [participants, currentParticipant, participantCount, room.id]);
-
   // If still loading, show nothing
   if (isLoading) return null;
 
@@ -57,9 +50,6 @@ export const Participants = ({ isFullScreen }: ParticipantsProps = {}) => {
         )}
         <div className="flex gap-x-2">
           {participants.slice(0, MAX_SHOWN_OTHER_USERS).map((user) => {
-            // Log the user info for debugging
-            console.log("Rendering participant:", user.info?.name, user);
-
             return (
               <UserAvatar
                 borderColor={connectionIdToColor(user.connectionId)}

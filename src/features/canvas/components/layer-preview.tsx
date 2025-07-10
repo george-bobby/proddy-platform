@@ -29,13 +29,8 @@ export const LayerPreview = memo(
       if (root.layers && typeof root.layers.get === 'function') {
         const layer = root.layers.get(id);
         if (layer) {
-          console.log(`Retrieved layer with id ${id}:`, layer);
           return layer;
-        } else {
-          console.warn(`Layer with id ${id} not found in LiveMap`);
         }
-      } else {
-        console.warn(`Layer with id ${id} not found or layers is not a LiveMap`);
       }
       return null;
     });
@@ -105,7 +100,6 @@ export const LayerPreview = memo(
           />
         );
       default:
-        console.warn("Unknown layer type");
         return null;
     }
   },

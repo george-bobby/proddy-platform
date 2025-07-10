@@ -8,7 +8,7 @@ import { Id } from '@/../convex/_generated/dataModel';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
-import { BlockNoteNotesEditor } from '@/features/notes/components/blocknote-notes-editor';
+import { BlockNoteNotesEditor, ExportNoteDialog, useLiveNoteSession } from '@/features/notes';
 import { LiveblocksRoom, LiveSidebar, LiveParticipants, LiveHeader } from '@/features/live';
 import { StreamAudioRoom } from '@/features/audio';
 import { useDocumentTitle } from '@/hooks/use-document-title';
@@ -25,6 +25,7 @@ const NotesPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   // Ref for fullscreen container
   const pageContainerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,15 @@ const NotesPage = () => {
   const createNote = useMutation(api.notes.create);
   const updateNote = useMutation(api.notes.update);
   const deleteNote = useMutation(api.notes.remove);
+
+  // Live note session hook
+  const liveSession = useLiveNoteSession({
+    noteId: activeNoteId!,
+    noteTitle: activeNote?.title || 'Untitled',
+    workspaceId,
+    channelId,
+    autoAnnounce: true,
+  });
 
   // Handle note updates
   const handleNoteUpdate = async (updates: Partial<Note>) => {
@@ -156,6 +166,15 @@ const NotesPage = () => {
     }
   };
 
+  // Handle note export
+  const handleExportNote = () => {
+    if (activeNote) {
+      setShowExportDialog(true);
+    } else {
+      toast.error("No note selected to export");
+    }
+  };
+
   // Show empty state if no notes and no folders
   if (notes.length === 0) {
     return (
@@ -228,6 +247,7 @@ const NotesPage = () => {
                       handleTitleChange(newTitle);
                     }}
                     onCreateItem={handleCreateNote}
+                    onExport={handleExportNote}
                     toggleFullScreen={toggleFullScreen}
                     isFullScreen={isFullScreen}
                     showFullScreenToggle={true}
@@ -287,6 +307,15 @@ const NotesPage = () => {
           channelId={channelId}
           canvasName={activeNote.title || 'Notes Audio Room'}
           isFullScreen={isFullScreen}
+        />
+      )}
+
+      {/* Export Dialog */}
+      {activeNote && (
+        <ExportNoteDialog
+          isOpen={showExportDialog}
+          onClose={() => setShowExportDialog(false)}
+          note={activeNote}
         />
       )}
     </LiveblocksRoom>

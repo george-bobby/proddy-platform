@@ -14,11 +14,6 @@ import { useMultipleUserPresence } from '@/features/presence/hooks/use-workspace
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
 
-// Add console logs for debugging
-const debug = (message: string, data?: any) => {
-  console.log(`[MentionPicker] ${message}`, data || '');
-};
-
 interface MentionPickerProps {
   open: boolean;
   onClose: () => void;
@@ -46,20 +41,9 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
   const userIds = members?.map(m => m.userId) || [];
   const { isUserOnline } = useMultipleUserPresence(userIds);
 
-  // Debug the component state
-  useEffect(() => {
-    debug('Component mounted');
-    debug('Initial state', { open, searchQuery, workspaceId });
-  }, []);
-
-  useEffect(() => {
-    debug('Open state changed', { open });
-  }, [open]);
-
   // Initialize search term from the searchQuery prop
   useEffect(() => {
     if (open) {
-      debug('Setting search term', { searchQuery });
       setSearchTerm(searchQuery || '');
     }
   }, [open, searchQuery]);
@@ -67,7 +51,6 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
   // Focus the search input when the picker opens
   useEffect(() => {
     if (open && searchInputRef.current) {
-      debug('Focusing search input');
       setTimeout(() => {
         searchInputRef.current?.focus();
       }, 100);
@@ -77,11 +60,8 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
   // Process members and add status information
   useEffect(() => {
     if (!members) {
-      debug('No members data available');
       return;
     }
-
-    debug('Processing members', { memberCount: members.length });
 
     const processMembers = async () => {
       const membersWithPresence: MemberWithPresence[] = members.map((member) => ({
@@ -93,20 +73,12 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
         isOnline: isUserOnline(member.userId), // Use presence data
       }));
 
-      debug('Members with presence', { count: membersWithPresence.length });
-
       // Always show all members when first opened or when search is empty
       const filtered = searchTerm.trim() === ''
         ? membersWithPresence
         : membersWithPresence.filter((member) =>
           member.user.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-
-      debug('Filtered members', {
-        count: filtered.length,
-        searchTerm,
-        isEmpty: searchTerm.trim() === ''
-      });
 
       setFilteredMembers(filtered);
     };
@@ -121,14 +93,8 @@ export const MentionPicker = ({ open, onClose, onSelect, searchQuery }: MentionP
 
   // Don't render anything if not open
   if (!open) {
-    debug('Not rendering - picker is closed');
     return null;
   }
-
-  debug('Rendering mention picker', {
-    filteredMembersCount: filteredMembers.length,
-    isLoading
-  });
 
   // Handle clicks inside the mention picker to prevent them from closing the picker
   const handleMentionPickerClick = (e: React.MouseEvent) => {

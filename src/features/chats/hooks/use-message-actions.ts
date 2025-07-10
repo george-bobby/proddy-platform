@@ -15,165 +15,190 @@ import type { Id } from '../../../../convex/_generated/dataModel';
 import type { TaskModalState } from '../types/message';
 
 interface UseMessageActionsProps {
-  messageId: Id<'messages'>;
-  body: string;
-  authorName?: string;
-  setEditingId: (id: Id<'messages'> | null) => void;
+	messageId: Id<'messages'>;
+	body: string;
+	authorName?: string;
+	setEditingId: (id: Id<'messages'> | null) => void;
 }
 
 export const useMessageActions = ({
-  messageId,
-  body,
-  authorName = 'Member',
-  setEditingId,
+	messageId,
+	body,
+	authorName = 'Member',
+	setEditingId,
 }: UseMessageActionsProps) => {
-  const [ConfirmDialog, confirm] = useConfirm('Delete message', 'Are you sure you want to delete this message? This cannot be undone.');
-  const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
-  const { isMessageSelected, toggleMessageSelection } = useMessageSelection();
-  const workspaceId = useWorkspaceId();
+	const [ConfirmDialog, confirm] = useConfirm(
+		'Delete message',
+		'Are you sure you want to delete this message? This cannot be undone.'
+	);
+	const { parentMessageId, onOpenMessage, onOpenProfile, onClose } = usePanel();
+	const { isMessageSelected, toggleMessageSelection } = useMessageSelection();
+	const workspaceId = useWorkspaceId();
 
-  const { mutate: updateMessage, isPending: isUpdatingMessage } = useUpdateMessage();
-  const { mutate: removeMessage, isPending: isRemovingMessage } = useRemoveMessage();
-  const { mutate: toggleReaction, isPending: isTogglingReaction } = useToggleReaction();
-  const createTaskFromMessage = useCreateTaskFromMessage();
+	const { mutate: updateMessage, isPending: isUpdatingMessage } =
+		useUpdateMessage();
+	const { mutate: removeMessage, isPending: isRemovingMessage } =
+		useRemoveMessage();
+	const { mutate: toggleReaction, isPending: isTogglingReaction } =
+		useToggleReaction();
+	const createTaskFromMessage = useCreateTaskFromMessage();
 
-  // Task modal state
-  const [taskModal, setTaskModal] = useState<TaskModalState>({
-    show: false,
-    title: '',
-    content: '',
-    dueDate: '',
-  });
+	// Task modal state
+	const [taskModal, setTaskModal] = useState<TaskModalState>({
+		show: false,
+		title: '',
+		content: '',
+		dueDate: '',
+	});
 
-  const isPending = isUpdatingMessage || isRemovingMessage || isTogglingReaction;
-  const isSelected = isMessageSelected(messageId);
+	const isPending =
+		isUpdatingMessage || isRemovingMessage || isTogglingReaction;
+	const isSelected = isMessageSelected(messageId);
 
-  const handleUpdate = useCallback(({ body }: { body: string }) => {
-    updateMessage(
-      { id: messageId, body },
-      {
-        onSuccess: () => {
-          toast.success('Message updated.');
-          setEditingId(null);
-        },
-        onError: () => {
-          toast.error('Failed to update message.');
-        },
-      },
-    );
-  }, [messageId, updateMessage, setEditingId]);
+	const handleUpdate = useCallback(
+		({ body }: { body: string }) => {
+			updateMessage(
+				{ id: messageId, body },
+				{
+					onSuccess: () => {
+						toast.success('Message updated.');
+						setEditingId(null);
+					},
+					onError: () => {
+						toast.error('Failed to update message.');
+					},
+				}
+			);
+		},
+		[messageId, updateMessage, setEditingId]
+	);
 
-  const handleDelete = useCallback(async () => {
-    const ok = await confirm();
+	const handleDelete = useCallback(async () => {
+		const ok = await confirm();
 
-    if (!ok) return;
+		if (!ok) return;
 
-    removeMessage(
-      { id: messageId },
-      {
-        onSuccess: () => {
-          toast.success('Message deleted.');
+		removeMessage(
+			{ id: messageId },
+			{
+				onSuccess: () => {
+					toast.success('Message deleted.');
 
-          if (parentMessageId === messageId) onClose();
-        },
-        onError: () => {
-          toast.error('Failed to delete message.');
-        },
-      },
-    );
-  }, [messageId, removeMessage, confirm, parentMessageId, onClose]);
+					if (parentMessageId === messageId) onClose();
+				},
+				onError: () => {
+					toast.error('Failed to delete message.');
+				},
+			}
+		);
+	}, [messageId, removeMessage, confirm, parentMessageId, onClose]);
 
-  const handleReaction = useCallback(async (value: string) => {
-    toggleReaction(
-      { messageId, value },
-      {
-        onError: () => {
-          toast.error('Failed to toggle reaction.');
-        },
-      },
-    );
-  }, [messageId, toggleReaction]);
+	const handleReaction = useCallback(
+		async (value: string) => {
+			toggleReaction(
+				{ messageId, value },
+				{
+					onError: () => {
+						toast.error('Failed to toggle reaction.');
+					},
+				}
+			);
+		},
+		[messageId, toggleReaction]
+	);
 
-  const handleAddToTask = useCallback(() => {
-    const messageText = extractTextFromBody(body);
-    setTaskModal({
-      show: true,
-      title: `Task from ${authorName}`,
-      content: messageText,
-      dueDate: '',
-    });
-  }, [body, authorName]);
+	const handleAddToTask = useCallback(() => {
+		const messageText = extractTextFromBody(body);
+		setTaskModal({
+			show: true,
+			title: `Task from ${authorName}`,
+			content: messageText,
+			dueDate: '',
+		});
+	}, [body, authorName]);
 
-  const handleCreateTask = useCallback(async () => {
-    if (!taskModal.title.trim()) {
-      toast.error('Please enter a task title');
-      return;
-    }
+	const handleCreateTask = useCallback(async () => {
+		if (!taskModal.title.trim()) {
+			toast.error('Please enter a task title');
+			return;
+		}
 
-    try {
-      await createTaskFromMessage({
-        messageId,
-        workspaceId,
-        title: taskModal.title,
-        dueDate: taskModal.dueDate ? new Date(taskModal.dueDate).getTime() : undefined,
-        priority: 'medium', // Default priority
-      });
+		try {
+			await createTaskFromMessage({
+				messageId,
+				workspaceId,
+				title: taskModal.title,
+				dueDate: taskModal.dueDate
+					? new Date(taskModal.dueDate).getTime()
+					: undefined,
+				priority: 'medium', // Default priority
+			});
 
-      toast.success('Task created successfully');
-      setTaskModal({
-        show: false,
-        title: '',
-        content: '',
-        dueDate: '',
-      });
-    } catch (error) {
-      console.error('Failed to create task:', error);
-      toast.error('Failed to create task');
-    }
-  }, [taskModal, messageId, workspaceId, createTaskFromMessage]);
+			toast.success('Task created successfully');
+			setTaskModal({
+				show: false,
+				title: '',
+				content: '',
+				dueDate: '',
+			});
+		} catch (error) {
+			console.error('Failed to create task:', error);
+			toast.error('Failed to create task');
+		}
+	}, [taskModal, messageId, workspaceId, createTaskFromMessage]);
 
-  const handleContextMenuAction = useCallback((action: string) => {
-    switch (action) {
-      case 'select':
-        toggleMessageSelection(messageId);
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(extractTextFromBody(body));
-        toast.success('Message copied to clipboard');
-        break;
-      case 'summarize':
-        // The summarize functionality is handled by the SummarizeButton component
-        // This action just triggers the summarize process for selected messages
-        console.log('Summarize action triggered for selected messages');
-        break;
-      case 'addToTask':
-        handleAddToTask();
-        break;
-      case 'edit':
-        setEditingId(messageId);
-        break;
-      case 'delete':
-        handleDelete();
-        break;
-      case 'reply':
-        onOpenMessage(messageId);
-        break;
-      default:
-        console.log(`Action: ${action} for message:`, messageId);
-    }
-  }, [messageId, body, toggleMessageSelection, handleAddToTask, setEditingId, handleDelete, onOpenMessage]);
+	const handleContextMenuAction = useCallback(
+		(action: string) => {
+			switch (action) {
+				case 'select':
+					toggleMessageSelection(messageId);
+					break;
+				case 'copy':
+					navigator.clipboard.writeText(extractTextFromBody(body));
+					toast.success('Message copied to clipboard');
+					break;
+				case 'summarize':
+					// The summarize functionality is handled by the SummarizeButton component
+					// This action just triggers the summarize process for selected messages
+					break;
+				case 'addToTask':
+					handleAddToTask();
+					break;
+				case 'edit':
+					setEditingId(messageId);
+					break;
+				case 'delete':
+					handleDelete();
+					break;
+				case 'reply':
+					onOpenMessage(messageId);
+					break;
+				default:
+				// Unknown action
+			}
+		},
+		[
+			messageId,
+			body,
+			toggleMessageSelection,
+			handleAddToTask,
+			setEditingId,
+			handleDelete,
+			onOpenMessage,
+		]
+	);
 
-  return {
-    ConfirmDialog,
-    isPending,
-    isSelected,
-    taskModal,
-    setTaskModal,
-    handleUpdate,
-    handleReaction,
-    handleContextMenuAction,
-    handleCreateTask,
-    onOpenMessage,
-    onOpenProfile,
-  };
+	return {
+		ConfirmDialog,
+		isPending,
+		isSelected,
+		taskModal,
+		setTaskModal,
+		handleUpdate,
+		handleReaction,
+		handleContextMenuAction,
+		handleCreateTask,
+		onOpenMessage,
+		onOpenProfile,
+	};
 };

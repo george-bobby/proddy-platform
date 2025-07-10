@@ -30,8 +30,6 @@ export const NotesRoom = ({ children, noteId, fallback }: NotesRoomProps) => {
     // Get the workspace ID from params
     const workspaceId = useWorkspaceId();
 
-    console.log("NotesRoom component rendering with normalized roomId:", normalizedRoomId);
-
     // Get the current user from Convex
     const currentUser = useQuery(api.users.current);
 
@@ -40,17 +38,6 @@ export const NotesRoom = ({ children, noteId, fallback }: NotesRoomProps) => {
         api.members.current,
         workspaceId ? { workspaceId } : "skip"
     );
-
-    // Log authentication info for debugging
-    useEffect(() => {
-        if (currentUser && currentMember) {
-            console.log("Authentication info for Liveblocks Notes Room:", {
-                userId: currentUser._id,
-                memberId: currentMember._id,
-                name: currentUser.name || "Unknown User"
-            });
-        }
-    }, [currentUser, currentMember]);
 
     // If user data is still loading, show a loading indicator
     if (!currentUser) {
@@ -70,9 +57,6 @@ export const NotesRoom = ({ children, noteId, fallback }: NotesRoomProps) => {
     if (currentMember?._id) authParams.set("memberId", currentMember._id);
     if (currentUser?.name) authParams.set("userName", currentUser.name);
     if (currentUser?.image) authParams.set("userAvatar", currentUser.image);
-
-    // Log the auth parameters for debugging
-    console.log("Auth parameters for Liveblocks:", Object.fromEntries(authParams));
 
     return (
         // Use the key to force remount when roomId changes

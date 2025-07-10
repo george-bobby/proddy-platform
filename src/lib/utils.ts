@@ -60,9 +60,6 @@ export function findIntersectingLayersWithRectangle(
 	const minY = Math.min(start.y, end.y);
 	const maxY = Math.max(start.y, end.y);
 
-	console.log('Selection rectangle bounds:', { minX, maxX, minY, maxY });
-	console.log('Number of layers to check:', layerIds.length);
-
 	// Add a small tolerance to make selection easier
 	const tolerance = 5;
 
@@ -106,14 +103,9 @@ export function findIntersectingLayersWithRectangle(
 			layerY + layerHeight + tolerance >= minY &&
 			layerY - tolerance <= maxY;
 
-		if (intersects) {
-			console.log(`Layer ${layerId} intersects with selection rectangle`);
-		}
-
 		return intersects;
 	});
 
-	console.log('Found intersecting layers:', intersectingLayers.length);
 	return intersectingLayers;
 }
 
@@ -162,10 +154,6 @@ export function findLayerAtPoint(
 				point.y >= layer.y - effectiveTolerance &&
 				point.y <= layer.y + (layer.height || 0) + effectiveTolerance
 			) {
-				console.log(
-					`Found path layer at point ${point.x},${point.y}:`,
-					layerId
-				);
 				return layerId;
 			}
 		} else {
@@ -176,16 +164,11 @@ export function findLayerAtPoint(
 				point.y >= layer.y - effectiveTolerance &&
 				point.y <= layer.y + (layer.height || 0) + effectiveTolerance
 			) {
-				console.log(
-					`Found regular layer at point ${point.x},${point.y}:`,
-					layerId
-				);
 				return layerId;
 			}
 		}
 	}
 
-	console.log(`No layer found at point ${point.x},${point.y}`);
 	return null;
 }
 

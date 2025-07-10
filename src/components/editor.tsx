@@ -97,7 +97,6 @@ const Editor = ({
         !mentionPickerRef.current.contains(e.target as Node) &&
         !(e.target as HTMLElement).closest('button[data-mention-button="true"]')
       ) {
-        console.log('Click outside detected, closing mention picker');
         setMentionPickerOpen(false);
         setLastKeyWasAt(false);
       }
@@ -184,10 +183,8 @@ const Editor = ({
 
       // Check if the last character is "@" to trigger mention picker (only if mentions are enabled)
       const lastChar = newText.slice(-1);
-      console.log('Last character typed:', lastChar, 'Text:', newText);
 
       if (!disableMentions && newText.trim().endsWith('@') && !lastKeyWasAt) {
-        console.log('@ character detected, opening mention picker');
         setLastKeyWasAt(true);
         setMentionPickerOpen(true);
         setMentionSearchQuery('');
@@ -197,25 +194,21 @@ const Editor = ({
         if (atIndex >= 0) {
           // Extract the text after the @ symbol for filtering
           const query = newText.substring(atIndex + 1).trim();
-          console.log('Mention query:', query);
           setMentionSearchQuery(query);
 
           // If user presses space after typing some text, close the mention picker
           if (query.includes(' ')) {
-            console.log('Space detected, closing mention picker');
             setLastKeyWasAt(false);
             setMentionPickerOpen(false);
           }
 
           // If the @ symbol is the only character and it's deleted, close the picker
           if (atIndex === -1 || newText.trim() === '') {
-            console.log('@ character deleted, closing mention picker');
             setLastKeyWasAt(false);
             setMentionPickerOpen(false);
           }
         } else {
           // If @ is deleted, close the mention picker
-          console.log('@ character deleted, closing mention picker');
           setLastKeyWasAt(false);
           setMentionPickerOpen(false);
         }
@@ -223,7 +216,6 @@ const Editor = ({
 
       // If the text is completely empty, close the mention picker
       if (newText.trim() === '' && mentionPickerOpen) {
-        console.log('Text is empty, closing mention picker');
         setLastKeyWasAt(false);
         setMentionPickerOpen(false);
       }
@@ -328,7 +320,6 @@ const Editor = ({
   };
 
   const handleMentionSelect = (memberId: Id<'members'>, memberName: string) => {
-    console.log('Mention selected:', memberName);
     const quill = quillRef.current;
     if (!quill) {
       console.error('Quill editor not initialized');
@@ -339,13 +330,9 @@ const Editor = ({
     const currentText = quill.getText();
     const atIndex = currentText.lastIndexOf('@');
 
-    console.log('Current text:', currentText);
-    console.log('@ index:', atIndex);
-
     if (atIndex >= 0) {
       // Delete from @ to current cursor position
       const currentPosition = quill.getSelection()?.index || currentText.length;
-      console.log('Current cursor position:', currentPosition);
 
       quill.deleteText(atIndex, currentPosition - atIndex);
 
@@ -588,7 +575,6 @@ const Editor = ({
                     variant="ghost"
                     data-mention-button="true"
                     onClick={() => {
-                      console.log('Mention button clicked');
                       // Just open the mention picker directly
                       setLastKeyWasAt(true);
                       setMentionPickerOpen(true);
@@ -598,7 +584,6 @@ const Editor = ({
                       const quill = quillRef.current;
                       if (quill) {
                         const position = quill.getSelection()?.index || quill.getText().length;
-                        console.log('Inserting @ at position:', position);
                         quill.insertText(position, '@');
                         quill.focus();
                       }

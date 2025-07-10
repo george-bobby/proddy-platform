@@ -18,11 +18,11 @@ interface LiveblocksRoomProps {
     fallback?: ReactNode;
 }
 
-export const LiveblocksRoom = ({ 
-    children, 
-    roomId, 
+export const LiveblocksRoom = ({
+    children,
+    roomId,
     roomType = 'canvas',
-    fallback 
+    fallback
 }: LiveblocksRoomProps) => {
     // Ensure roomId is a string and normalize it
     const normalizedRoomId = String(roomId).trim();
@@ -32,8 +32,6 @@ export const LiveblocksRoom = ({
 
     // Get the workspace ID from params
     const workspaceId = useWorkspaceId();
-
-    console.log(`LiveblocksRoom component rendering with normalized roomId: ${normalizedRoomId}, type: ${roomType}`);
 
     // Get the current user from Convex
     const currentUser = useQuery(api.users.current);
@@ -46,15 +44,7 @@ export const LiveblocksRoom = ({
 
     // Set up user info for Liveblocks authentication
     useEffect(() => {
-        if (currentUser && currentMember) {
-            console.log("Setting up Liveblocks user info:", {
-                userId: currentUser._id,
-                name: currentUser.name,
-                memberId: currentMember._id,
-                roomId: normalizedRoomId,
-                roomType
-            });
-        }
+        // User info is set up automatically by Liveblocks
     }, [currentUser, currentMember, normalizedRoomId, roomType]);
 
     // Show loading state while user data is being fetched

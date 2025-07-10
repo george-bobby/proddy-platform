@@ -9,6 +9,8 @@ import { CanvasMessage } from '@/features/messages/components/canvas-message';
 import { CanvasLiveMessage } from '@/features/messages/components/canvas-live-message';
 import { CanvasExportMessage } from '@/features/messages/components/canvas-export-message';
 import { NoteMessage } from '@/features/messages/components/note-message';
+import { NoteLiveMessage } from '@/features/messages/components/note-live-message';
+import { NoteExportMessage } from '@/features/messages/components/note-export-message';
 
 interface RendererProps {
   value: string;
@@ -64,9 +66,29 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     }
   };
 
+  // Check if this is a live note message
+  const isNoteLiveMessage = () => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed.type === 'note-live';
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Check if this is a note export message
+  const isNoteExportMessage = () => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed.type === 'note-export';
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
-    // If this is a canvas message, live canvas message, canvas export message, or note message, don't process with Quill
-    if (isCanvasMessage() || isCanvasLiveMessage() || isCanvasExportMessage() || isNoteMessage()) {
+    // If this is a canvas message, live canvas message, canvas export message, note message, live note message, or note export message, don't process with Quill
+    if (isCanvasMessage() || isCanvasLiveMessage() || isCanvasExportMessage() || isNoteMessage() || isNoteLiveMessage() || isNoteExportMessage()) {
       setIsEmpty(false);
       return;
     }
@@ -218,6 +240,28 @@ const Renderer = ({ value, calendarEvent }: RendererProps) => {
     } catch (e) {
       console.error("Error parsing note data:", e);
       return <div>Error displaying note</div>;
+    }
+  }
+
+  // If this is a live note message, render the NoteLiveMessage component
+  if (isNoteLiveMessage()) {
+    try {
+      const noteLiveData = JSON.parse(value);
+      return <NoteLiveMessage data={noteLiveData} />;
+    } catch (e) {
+      console.error("Error parsing live note data:", e);
+      return <div>Error displaying live note</div>;
+    }
+  }
+
+  // If this is a note export message, render the NoteExportMessage component
+  if (isNoteExportMessage()) {
+    try {
+      const noteExportData = JSON.parse(value);
+      return <NoteExportMessage data={noteExportData} />;
+    } catch (e) {
+      console.error("Error parsing note export data:", e);
+      return <div>Error displaying note export</div>;
     }
   }
 

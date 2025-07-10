@@ -44,8 +44,6 @@ export const useGetNote = (noteId?: Id<'notes'>) => {
 				createdAt: now,
 				updatedAt: now,
 			});
-
-			console.log('Created temporary note in useGetNote:', noteId);
 		} else if (!isTempId) {
 			// Clear the temp note when we switch to a real note
 			setTempNote(undefined);

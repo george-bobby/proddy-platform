@@ -51,17 +51,11 @@ const Topbar = () => {
   // Determine the current active tab value
   const activeTab = tabs.find(tab => tab.active)?.href.split('/').pop() || 'chats';
 
-  // Debug logging
-  console.log('Topbar - Current pathname:', pathname);
-  console.log('Topbar - Active tab:', activeTab);
-  console.log('Topbar - All tabs:', tabs.map(t => ({ label: t.label, active: t.active, value: t.href.split('/').pop() })));
-
   return (
     <div className="flex w-full items-center justify-center border-b bg-white shadow-sm">
       <div className="grid h-12 w-full grid-cols-4 bg-white p-0 relative z-10 min-w-0">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
-          console.log(`Rendering tab ${index}:`, tab.label, 'active:', tab.active);
 
           return (
             <Link
