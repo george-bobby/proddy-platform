@@ -135,7 +135,7 @@ const NotesPage = () => {
         workspaceId={workspaceId}
         channelId={channelId}
         activeNoteId={activeNoteId}
-        activeNote={activeNote}
+        activeNote={activeNote || null}
         notes={notes}
         isFullScreen={isFullScreen}
         setIsFullScreen={setIsFullScreen}
