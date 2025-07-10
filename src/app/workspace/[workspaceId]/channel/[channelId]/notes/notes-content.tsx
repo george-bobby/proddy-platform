@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { FileText, Plus } from 'lucide-react';
 import { Id } from '@/../convex/_generated/dataModel';
@@ -98,6 +98,42 @@ export const NotesContent = ({
     }
   }, [onDeleteNote]);
 
+  // Memoize the note object to prevent unnecessary re-renders
+  const memoizedNote = useMemo(() => {
+    if (!activeNote) return null;
+    return {
+      ...activeNote,
+      title: isTyping ? localTitle : activeNote.title,
+      content: isTyping ? localContent : activeNote.content
+    };
+  }, [activeNote, isTyping, localTitle, localContent]);
+
+  // Memoize the update callback to prevent re-renders
+  const memoizedOnUpdate = useCallback((updates: Partial<Note>) => {
+    handleUpdate(updates).catch((error) => {
+      console.error('Failed to update note:', error);
+      toast.error('Failed to update note');
+    });
+  }, [handleUpdate]);
+
+  // Memoize the fullscreen toggle to prevent re-renders
+  const memoizedToggleFullScreen = useCallback(() => {
+    setIsFullScreen(!isFullScreen);
+  }, [isFullScreen, setIsFullScreen]);
+
+  // Memoize the export callback
+  const memoizedOnExport = useCallback(() => {
+    setShowExportDialog(true);
+  }, [setShowExportDialog]);
+
+  // Memoize the tags change callback
+  const memoizedOnTagsChange = useCallback((tags: string[]) => {
+    handleUpdate({ tags }).catch((error) => {
+      console.error('Failed to update tags:', error);
+      toast.error('Failed to update tags');
+    });
+  }, [handleUpdate]);
+
   return (
     <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
       <div className="flex flex-1 overflow-hidden">
@@ -134,15 +170,10 @@ export const NotesContent = ({
             onSave={handleSave}
             hasUnsavedChanges={hasUnsavedChanges}
             isFullScreen={isFullScreen}
-            toggleFullScreen={() => setIsFullScreen(!isFullScreen)}
-            onExport={() => setShowExportDialog(true)}
+            toggleFullScreen={memoizedToggleFullScreen}
+            onExport={memoizedOnExport}
             tags={activeNote?.tags || []}
-            onTagsChange={(tags) => {
-              handleUpdate({ tags }).catch((error) => {
-                console.error('Failed to update tags:', error);
-                toast.error('Failed to update tags');
-              });
-            }}
+            onTagsChange={memoizedOnTagsChange}
             createdAt={activeNote?.createdAt}
             updatedAt={activeNote?.updatedAt}
             showTags={true}
@@ -151,26 +182,17 @@ export const NotesContent = ({
 
           {/* Notes Editor */}
           <div className="flex-1 overflow-hidden">
-            {activeNote ? (
+            {memoizedNote ? (
               <BlockNoteNotesEditor
-                note={{
-                  ...activeNote,
-                  title: isTyping ? localTitle : activeNote.title,
-                  content: isTyping ? localContent : activeNote.content
-                }}
-                onUpdate={(updates) => {
-                  handleUpdate(updates).catch((error) => {
-                    console.error('Failed to update note:', error);
-                    toast.error('Failed to update note');
-                  });
-                }}
+                note={memoizedNote}
+                onUpdate={memoizedOnUpdate}
                 onTitleChange={handleNoteTitleChange}
                 onContentChange={handleNoteContentChange}
                 onSaveNote={handleSave}
                 isLoading={isTyping || hasUnsavedChanges}
                 workspaceId={workspaceId}
                 channelId={channelId}
-                toggleFullScreen={() => setIsFullScreen(!isFullScreen)}
+                toggleFullScreen={memoizedToggleFullScreen}
                 isFullScreen={isFullScreen}
               />
             ) : (
