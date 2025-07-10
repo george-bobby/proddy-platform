@@ -48,6 +48,8 @@ export const NotesContent = ({
   onDeleteNote,
   onUpdateNote
 }: NotesContentProps) => {
+  // Local state for sidebar
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // Live note session hook - now inside RoomProvider context
   // We need to call hooks unconditionally, so we'll pass a dummy noteId when none is active
   const liveSession = useLiveNoteSession({
@@ -104,6 +106,8 @@ export const NotesContent = ({
             }))}
             selectedItemId={activeNoteId}
             onItemSelect={handleItemSelect}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
             onCreateItem={onCreateNote}
             onDeleteItem={handleDeleteItem}
             workspaceId={workspaceId}
