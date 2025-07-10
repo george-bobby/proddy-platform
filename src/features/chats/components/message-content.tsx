@@ -80,10 +80,14 @@ export const MessageContent = ({
     <div className={cn("relative group/message", isAuthor && "flex justify-end")}>
       <div
         className={cn(
-          "max-w-md rounded-lg px-3 py-2 text-sm cursor-pointer [&_[data-message-component='true']]:max-w-none [&_[data-message-component='true']]:p-0 [&_[data-message-component='true']]:bg-transparent",
+          "rounded-lg px-3 py-2 text-sm cursor-pointer",
+          // Apply max-width and background only to non-custom message components
+          "[&:not(:has([data-message-component='true']))]:max-w-md",
           isAuthor
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted"
+            ? "[&:not(:has([data-message-component='true']))]:bg-primary [&:not(:has([data-message-component='true']))]:text-primary-foreground"
+            : "[&:not(:has([data-message-component='true']))]:bg-muted",
+          // For custom message components, remove all styling constraints
+          "[&:has([data-message-component='true'])]:p-0 [&:has([data-message-component='true'])]:bg-transparent [&:has([data-message-component='true'])]:rounded-none"
         )}
         onContextMenu={onContextMenu}
       >

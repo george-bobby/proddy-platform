@@ -53,7 +53,7 @@ export const NoteLiveMessage = ({ data }: NoteLiveMessageProps) => {
   };
 
   return (
-    <Card className="w-full max-w-lg bg-white shadow-md border-l-4 border-l-primary" data-message-component="true">
+    <Card className="w-full max-w-lg !bg-white shadow-md border-l-4 border-l-primary" data-message-component="true">
       <div className="flex items-center justify-between p-4 min-h-[64px]">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           <FileText className="h-5 w-5 text-primary flex-shrink-0" />
