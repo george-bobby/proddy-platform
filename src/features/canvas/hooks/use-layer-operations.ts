@@ -216,7 +216,7 @@ const insertMermaidLayer = useMutation(
 			}
 
 			if (!liveLayerIds || typeof liveLayerIds.push !== 'function') {
-				liveLayerIds = new LiveList<string>();
+				liveLayerIds = new LiveList<string>([]);
 				storage.set('layerIds', liveLayerIds);
 			}
 
