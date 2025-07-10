@@ -54,10 +54,10 @@ export const CanvasLiveMessage = ({ data }: CanvasLiveMessageProps) => {
   };
 
   return (
-    <Card className="w-full max-w-lg bg-white shadow-md border-l-4 border-l-indigo-500" data-message-component="true">
+    <Card className="w-full max-w-lg bg-white shadow-md border-l-4 border-l-primary" data-message-component="true">
       <div className="flex items-center justify-between p-4 min-h-[64px]">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
-          <PaintBucket className="h-5 w-5 text-indigo-600 flex-shrink-0" />
+          <PaintBucket className="h-5 w-5 text-primary flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <CardTitle className="text-sm font-medium text-gray-900 truncate">
               Live Canvas Session
@@ -78,7 +78,7 @@ export const CanvasLiveMessage = ({ data }: CanvasLiveMessageProps) => {
           onClick={handleJoinCanvas}
           variant="default"
           size="sm"
-          className="ml-3 flex-shrink-0 bg-indigo-600 text-white hover:bg-indigo-700"
+          className="ml-3 flex-shrink-0 bg-primary text-white hover:bg-primary/80"
         >
           Join Canvas
         </Button>
