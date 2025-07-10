@@ -110,6 +110,12 @@ export const useLiveNoteSession = ({
 				return;
 			}
 
+			// Don't announce for dummy note IDs
+			if (noteId.toString().includes('dummy') || noteId === 'kn7cvx952gp794j4vzvxxqqgk57k9yhh') {
+				console.log('Skipping announcement for dummy note ID');
+				return;
+			}
+
 			// Create a message announcing the live session
 			const messageData = {
 				type: 'note-live',

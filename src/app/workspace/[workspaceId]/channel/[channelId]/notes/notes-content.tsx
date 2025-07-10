@@ -49,9 +49,10 @@ export const NotesContent = ({
   // Local state for sidebar
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // Live note session hook - now inside RoomProvider context
-  // We need to call hooks unconditionally, so we'll pass a dummy noteId when none is active
+  // Use a stable dummy ID that exists in the database to avoid server errors
+  const dummyNoteId = 'kn7cvx952gp794j4vzvxxqqgk57k9yhh' as Id<'notes'>;
   const liveSession = useLiveNoteSession({
-    noteId: activeNoteId || ('dummy-note-id' as Id<'notes'>),
+    noteId: activeNoteId || dummyNoteId,
     noteTitle: activeNote?.title || 'Untitled',
     workspaceId,
     channelId,
@@ -182,7 +183,7 @@ export const NotesContent = ({
 
           {/* Notes Editor */}
           <div className="flex-1 overflow-hidden">
-            {memoizedNote ? (
+            {memoizedNote && activeNoteId ? (
               <BlockNoteNotesEditor
                 note={memoizedNote}
                 onUpdate={memoizedOnUpdate}

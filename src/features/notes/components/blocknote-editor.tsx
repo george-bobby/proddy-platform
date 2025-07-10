@@ -20,8 +20,15 @@ interface BlockNoteEditorProps {
 export const BlockNoteEditor = ({ noteId, className, onEditorReady }: BlockNoteEditorProps) => {
   const updateMyPresence = useUpdateMyPresence();
 
+  // Add error handling and debugging
+  console.log('BlockNoteEditor: Initializing with noteId:', noteId);
+
   const sync = useBlockNoteSync(api.prosemirror, noteId, {
     snapshotDebounceMs: 1000,
+    onError: (error) => {
+      console.error('ProseMirror sync error:', error);
+      // Don't throw the error, just log it to prevent crashes
+    },
   });
 
   // Update presence when editor changes
