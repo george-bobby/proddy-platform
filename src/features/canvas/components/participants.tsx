@@ -57,6 +57,7 @@ export const Participants = ({ isFullScreen }: ParticipantsProps = {}) => {
                 src={user.info?.picture}
                 name={user.info?.name}
                 fallback={user.info?.name?.[0] || "U"}
+                userId={user.userId || user.info?.name}
               />
             );
           })}
@@ -67,6 +68,7 @@ export const Participants = ({ isFullScreen }: ParticipantsProps = {}) => {
               src={currentParticipant.info?.picture}
               name={`${currentParticipant.info?.name} (You)`}
               fallback={currentParticipant.info?.name?.[0] || "Y"}
+              userId={currentParticipant.userId || currentParticipant.info?.name}
             />
           )}
 

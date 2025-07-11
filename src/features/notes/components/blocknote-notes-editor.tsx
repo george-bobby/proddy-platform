@@ -115,8 +115,8 @@ export const BlockNoteNotesEditor = ({
         />
       </div>
 
-      {/* Format Button - Bottom Right */}
-      <div className="absolute bottom-4 right-4 z-10">
+      {/* Format Button - Top Right */}
+      <div className="absolute top-4 right-4 z-10">
         <Button
           onClick={handleFormatNote}
           disabled={isFormatting || isLoading}

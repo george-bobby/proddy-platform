@@ -50,13 +50,6 @@ export const useAudioRoom = ({
 			};
 
 			// Fetch token from our API
-			console.log('Fetching Stream token for user:', userId);
-			console.log('Client-side API key check:', {
-				apiKeyExists: !!apiKey,
-				apiKeyLength: apiKey?.length || 0,
-				apiKeyPrefix: apiKey?.substring(0, 4) || 'none'
-			});
-
 			const response = await fetch('/api/stream', {
 				method: 'POST',
 				headers: {
@@ -71,20 +64,12 @@ export const useAudioRoom = ({
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
-				console.error('Stream token request failed:', {
-					status: response.status,
-					statusText: response.statusText,
-					error: errorData
-				});
-				throw new Error(`Failed to get Stream token: ${response.status} - ${JSON.stringify(errorData)}`);
+				console.error('Stream token request failed:', response.status);
+				throw new Error(`Failed to get Stream token: ${response.status}`);
 			}
 
 			const tokenResponse = await response.json();
 			const { token } = tokenResponse;
-			console.log('Token received successfully', {
-				tokenLength: token?.length || 0,
-				debug: tokenResponse.debug || 'No debug info'
-			});
 
 			// Initialize Stream client
 			const videoClient = new StreamVideoClient({
@@ -93,11 +78,6 @@ export const useAudioRoom = ({
 				token,
 			});
 
-			console.log('Stream client initialized successfully', {
-				apiKey: apiKey?.substring(0, 4) + '...',
-				userId: user.id,
-				userName: user.name
-			});
 			setClient(videoClient);
 
 			// Create unique room ID (keeping it under 64 characters)
@@ -106,7 +86,6 @@ export const useAudioRoom = ({
 					0,
 					63
 				);
-			console.log('Creating audio room with ID:', uniqueRoomId);
 
 			// Create and join the call
 			const audioCall = videoClient.call('audio_room', uniqueRoomId);
@@ -124,7 +103,6 @@ export const useAudioRoom = ({
 				},
 			});
 
-			console.log('Successfully joined audio room');
 			setCall(audioCall);
 			setIsConnected(true);
 			setIsConnecting(false);
@@ -137,36 +115,44 @@ export const useAudioRoom = ({
 
 	const disconnectFromAudioRoom = async () => {
 		try {
-			console.log('Starting audio room disconnection...');
-
-			// First, leave the call
-			if (call) {
-				console.log('Leaving call...');
-				await call.leave();
-				setCall(null);
-			}
-
-			// Then disconnect the client
-			if (client) {
-				console.log('Disconnecting client...');
-				await client.disconnectUser();
-				setClient(null);
-			}
-
-			// Reset all states
-			setIsConnected(false);
+			// Set disconnecting state to prevent UI issues
 			setIsConnecting(false);
 			setError(null);
 
-			console.log('Successfully disconnected from audio room');
+			// First, leave the call if it exists
+			if (call) {
+				try {
+					await call.leave();
+				} catch (callError) {
+					console.warn('Error leaving call:', callError);
+					// Continue with cleanup even if call.leave() fails
+				}
+				setCall(null);
+			}
+
+			// Then disconnect the client if it exists
+			if (client) {
+				try {
+					await client.disconnectUser();
+				} catch (clientError) {
+					console.warn('Error disconnecting client:', clientError);
+					// Continue with cleanup even if disconnectUser() fails
+				}
+				setClient(null);
+			}
+
+			// Reset connection state
+			setIsConnected(false);
+			return true;
 		} catch (error) {
 			console.error('Failed to disconnect from audio room:', error);
-			// Even if there's an error, reset the states to allow reconnection
+
+			// Force cleanup even if there's an error
 			setCall(null);
 			setClient(null);
 			setIsConnected(false);
 			setIsConnecting(false);
-			setError('Failed to disconnect properly');
+			return false;
 		}
 	};
 
@@ -184,6 +170,13 @@ export const useAudioRoom = ({
 		isConnected,
 		isConnecting,
 	]);
+
+	// Effect to handle disconnection when shouldConnect becomes false
+	useEffect(() => {
+		if (!shouldConnect && (isConnected || isConnecting)) {
+			disconnectFromAudioRoom();
+		}
+	}, [shouldConnect, isConnected, isConnecting]);
 
 	// Cleanup on unmount
 	useEffect(() => {

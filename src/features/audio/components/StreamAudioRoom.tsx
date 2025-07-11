@@ -27,6 +27,8 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
   const [retryKey, setRetryKey] = useState(0);
   const [showFallbackUI, setShowFallbackUI] = useState(false);
   const [shouldConnect, setShouldConnect] = useState(false);
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [isLeavingConfirmed, setIsLeavingConfirmed] = useState(false);
 
   // Use our custom hook to manage the audio room
   const {
@@ -46,22 +48,79 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
     shouldConnect
   });
 
+  // Cleanup effect to handle disconnection when shouldConnect becomes false
+  useEffect(() => {
+    if (!shouldConnect && isConnected) {
+      disconnectFromAudioRoom();
+    }
+  }, [shouldConnect, isConnected, disconnectFromAudioRoom]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (isConnected) {
+        disconnectFromAudioRoom();
+      }
+    };
+  }, [isConnected, disconnectFromAudioRoom]);
+
   // Function to join audio room
   const handleJoinAudio = () => {
     setShouldConnect(true);
   };
 
-  // Function to leave audio room
-  const handleLeaveAudio = async () => {
-    console.log('Leave audio button clicked');
+  // Function to show leave confirmation
+  const handleLeaveAudio = () => {
+    setShowLeaveConfirmation(true);
+  };
+
+  // Function to actually leave audio room after confirmation
+  const confirmLeaveAudio = async () => {
+    if (isLeavingConfirmed) return;
+
     try {
-      await disconnectFromAudioRoom();
+      setIsLeavingConfirmed(true);
+
+      // First set shouldConnect to false to prevent reconnection
       setShouldConnect(false);
-      console.log('Successfully left audio room');
+
+      // Then disconnect from the audio room
+      await disconnectFromAudioRoom();
+
+      // Hide confirmation dialog
+      setShowLeaveConfirmation(false);
     } catch (error) {
       console.error('Error leaving audio room:', error);
+      // Still set shouldConnect to false even if there's an error
+      setShouldConnect(false);
+      setShowLeaveConfirmation(false);
+    } finally {
+      setIsLeavingConfirmed(false);
     }
   };
+
+  // Function to cancel leave confirmation
+  const cancelLeaveAudio = () => {
+    if (!isLeavingConfirmed) {
+      setShowLeaveConfirmation(false);
+    }
+  };
+
+  // Handle keyboard events for confirmation dialog
+  useEffect(() => {
+    if (!showLeaveConfirmation) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        cancelLeaveAudio();
+      } else if (event.key === 'Enter') {
+        confirmLeaveAudio();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showLeaveConfirmation, isLeavingConfirmed]);
 
   // Function to force a retry by changing the key
   const handleRetry = () => {
@@ -107,8 +166,6 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
   }
 
   if (error) {
-    console.error('Audio room error:', error);
-
     // Check if this is a WebSocket connection issue
     const isWSError = typeof error === 'string' && error.includes('WS connection');
 
@@ -158,32 +215,16 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
     );
   }
 
-  // Show join button if not connected
-  if (!isConnected && !isConnecting) {
+  // Show join button if not connected and not connecting
+  if (!isConnected && !isConnecting && !shouldConnect) {
     return (
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+      <div className={`fixed ${isFullScreen ? 'bottom-8 right-8' : 'bottom-4 right-4'} z-50`}>
         <AudioControlButton
           icon={Phone}
           label="Join Audio Room"
           onClick={handleJoinAudio}
           variant="action"
           className="bg-green-600 hover:bg-green-700 text-white border-green-600"
-        />
-      </div>
-    );
-  }
-
-  // Show connecting state
-  if (isConnecting) {
-    return (
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-        <AudioControlButton
-          icon={Loader2}
-          label="Connecting..."
-          onClick={() => {}}
-          variant="action"
-          disabled={true}
-          className="bg-gray-600 text-white border-gray-600 animate-pulse"
         />
       </div>
     );
@@ -202,6 +243,38 @@ export const StreamAudioRoom = ({ roomId, workspaceId, channelId, canvasName, is
         // Render an empty div when not ready
         <div className="hidden"></div>
       )}
+
+      {/* Leave Confirmation Dialog */}
+      {showLeaveConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl">
+            <h3 className="text-lg font-semibold mb-2">Leave Audio Room?</h3>
+            <p className="text-gray-600 mb-4">
+              Are you sure you want to leave the audio room? You can rejoin at any time.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={cancelLeaveAudio}
+                disabled={isLeavingConfirmed}
+                className="px-4 py-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmLeaveAudio}
+                disabled={isLeavingConfirmed}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
+              >
+                {isLeavingConfirmed && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                {isLeavingConfirmed ? 'Leaving...' : 'Leave'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
@@ -215,22 +288,17 @@ const AudioRoomUI = ({ isFullScreen, onLeaveAudio }: AudioRoomUIProps) => {
   const { useParticipants, useLocalParticipant } = useCallStateHooks();
   const participants = useParticipants();
   const localParticipant = useLocalParticipant();
+  const [isLeaving, setIsLeaving] = useState(false);
 
-  // Check if audio is published - kept for debugging purposes
+  // Check if audio is published
   const hasAudio = (p: StreamVideoParticipant) =>
     p.publishedTracks.includes(SfuModels.TrackType.AUDIO);
 
-  // Log audio state for debugging
-  useEffect(() => {
-    if (localParticipant) {
-      console.log('Local participant audio state:', {
-        hasAudio: hasAudio(localParticipant),
-        isSpeaking: localParticipant.isSpeaking,
-        publishedTracks: localParticipant.publishedTracks,
-        audioLevel: localParticipant.audioLevel
-      });
-    }
-  }, [localParticipant]);
+  // Handle leave audio with confirmation
+  const handleLeaveWithConfirmation = () => {
+    if (!onLeaveAudio || isLeaving) return;
+    onLeaveAudio();
+  };
 
   return (
     <div className="audio-room-ui">
@@ -251,7 +319,7 @@ const AudioRoomUI = ({ isFullScreen, onLeaveAudio }: AudioRoomUIProps) => {
               <AudioControlButton
                 icon={PhoneOff}
                 label="Leave Audio"
-                onClick={onLeaveAudio}
+                onClick={handleLeaveWithConfirmation}
                 variant="action"
                 className="bg-red-500 hover:bg-red-600 text-white border-red-500 text-xs px-3 py-1.5"
               />

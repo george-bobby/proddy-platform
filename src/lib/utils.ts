@@ -42,6 +42,34 @@ export function connectionIdToColor(connectionId: number): string {
 }
 
 /**
+ * Maps a string (user name, ID, etc.) to a consistent color
+ * Uses the same color palette as connectionIdToColor for consistency
+ */
+export function stringToColor(input: string): string {
+	const colors = [
+		'#FF5733', // Red
+		'#33FF57', // Green
+		'#3357FF', // Blue
+		'#FF33A8', // Pink
+		'#33FFF5', // Cyan
+		'#FFD133', // Yellow
+		'#9E33FF', // Purple
+		'#FF8333', // Orange
+		'#33FFBD', // Mint
+		'#FF3333', // Bright Red
+	];
+
+	// Generate hash from string (similar to tag color generation)
+	let hash = 0;
+	for (let i = 0; i < input.length; i++) {
+		hash = ((hash << 5) - hash) + input.charCodeAt(i);
+		hash = hash & hash; // Convert to 32-bit integer
+	}
+
+	return colors[Math.abs(hash) % colors.length];
+}
+
+/**
  * Finds layers that intersect with a selection rectangle
  */
 export function findIntersectingLayersWithRectangle(

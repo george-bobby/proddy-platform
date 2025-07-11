@@ -429,7 +429,7 @@ const Editor = ({
       setIsCreatingNote(true);
 
       // Create a new note with default values
-      const defaultTitle = 'Untitled';
+      const defaultTitle = 'Untitled Note';
       const defaultContent = JSON.stringify({ ops: [{ insert: '\n' }] });
 
       // Create the note in the database

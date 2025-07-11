@@ -72,7 +72,7 @@ const NotesPage = () => {
   // Handle note creation
   const handleCreateNote = async () => {
     try {
-      const defaultTitle = "Untitled";
+      const defaultTitle = "Untitled Note";
       const defaultContent = ""; // Empty content for BlockNote
 
       // Create the note in Convex

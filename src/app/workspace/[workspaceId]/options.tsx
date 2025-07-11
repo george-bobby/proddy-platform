@@ -13,6 +13,7 @@ import { useGetMember } from '@/features/members/api/use-get-member';
 import { useUserPresence } from '@/features/presence/hooks/use-workspace-presence';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { cn } from '@/lib/utils';
+import { generateUserColor } from '@/lib/placeholder-image';
 
 // SidebarItem Component
 interface SidebarItemProps {
@@ -91,6 +92,9 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
   // Get the user's presence status using the new presence system
   const { isOnline } = useUserPresence(member?.userId);
 
+  // Generate background color for avatar fallback
+  const backgroundColor = generateUserColor(member?.userId || label);
+
   return (
     <Button
       variant="ghost"
@@ -110,7 +114,12 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
               <div className="relative">
                 <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
                   <AvatarImage alt={label} src={image} />
-                  <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
+                  <AvatarFallback
+                    className="text-xs font-medium text-white"
+                    style={{ backgroundColor }}
+                  >
+                    {avatarFallback}
+                  </AvatarFallback>
                 </Avatar>
                 {member && <PresenceIndicator isOnline={isOnline} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
               </div>
@@ -121,7 +130,12 @@ export const MemberItem = ({ id, label = 'Member', image, isActive = false, isCo
             <div className="relative mr-2 md:mr-3 flex-shrink-0">
               <Avatar className="size-6 md:size-7 transition-transform duration-200 group-hover:scale-110">
                 <AvatarImage alt={label} src={image} />
-                <AvatarFallback className="text-xs font-medium bg-secondary/20 text-secondary-foreground">{avatarFallback}</AvatarFallback>
+                <AvatarFallback
+                  className="text-xs font-medium text-white"
+                  style={{ backgroundColor }}
+                >
+                  {avatarFallback}
+                </AvatarFallback>
               </Avatar>
               {member && <PresenceIndicator isOnline={isOnline} className="w-2 h-2 md:w-2.5 md:h-2.5" />}
             </div>

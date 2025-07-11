@@ -43,7 +43,6 @@ export const AudioToolbarButton = ({ }: AudioToolbarButtonProps) => {
           await call.requestPermissions({
             permissions: [OwnCapability.SEND_AUDIO],
           });
-          console.log('Audio permission granted');
         } catch (error) {
           console.error('Failed to request audio permission:', error);
         }
@@ -137,13 +136,6 @@ export const AudioToolbarButton = ({ }: AudioToolbarButtonProps) => {
 
       // Update state
       setSpeakerMuted(!speakerMuted);
-
-      // Log state change
-      if (speakerMuted) {
-        console.log('Speaker enabled');
-      } else {
-        console.log('Speaker disabled');
-      }
     } catch (error) {
       console.error('Failed to toggle speaker:', error);
     }
@@ -165,7 +157,7 @@ export const AudioToolbarButton = ({ }: AudioToolbarButtonProps) => {
         <AudioControlButton
           icon={AlertCircle}
           label="Mic Permission Denied"
-          onClick={() => console.error('Microphone access denied')}
+          onClick={() => {}}
           variant="mic"
           disabled={true}
         />

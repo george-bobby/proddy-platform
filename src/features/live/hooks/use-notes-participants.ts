@@ -129,7 +129,8 @@ export const useNotesParticipants = () => {
 								'You',
 							members?.find((m) => m._id === currentMember._id)?.user?.image ||
 								members?.find((m) => m.userId === currentMember.userId)?.user
-									?.image
+									?.image,
+							currentMember.userId
 						),
 					},
 				}

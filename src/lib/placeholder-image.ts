@@ -89,13 +89,47 @@ export function getInitials(name: string): string {
  * Get a placeholder image URL for a user
  * @param name - User's name (optional)
  * @param imageUrl - User's actual image URL (optional)
+ * @param userId - User's ID for consistent color generation (optional)
  * @returns Image URL to use
  */
-export function getUserImageUrl(name?: string, imageUrl?: string): string {
+export function getUserImageUrl(name?: string, imageUrl?: string, userId?: string): string {
 	if (imageUrl) {
 		return imageUrl;
 	}
 
 	const initials = getInitials(name || 'User');
-	return generatePlaceholderImage(initials);
+	// Use userId or name for color generation, fallback to default color
+	const colorKey = userId || name || 'User';
+	const bgColor = generateUserColor(colorKey);
+	return generatePlaceholderImage(initials, 40, 40, bgColor);
+}
+
+/**
+ * Generate a consistent color for a user based on their identifier
+ * @param identifier - User identifier (ID, name, etc.)
+ * @returns Hex color string
+ */
+export function generateUserColor(identifier: string): string {
+	// Import stringToColor dynamically to avoid circular dependencies
+	const colors = [
+		'#FF5733', // Red
+		'#33FF57', // Green
+		'#3357FF', // Blue
+		'#FF33A8', // Pink
+		'#33FFF5', // Cyan
+		'#FFD133', // Yellow
+		'#9E33FF', // Purple
+		'#FF8333', // Orange
+		'#33FFBD', // Mint
+		'#FF3333', // Bright Red
+	];
+
+	// Generate hash from identifier
+	let hash = 0;
+	for (let i = 0; i < identifier.length; i++) {
+		hash = ((hash << 5) - hash) + identifier.charCodeAt(i);
+		hash = hash & hash; // Convert to 32-bit integer
+	}
+
+	return colors[Math.abs(hash) % colors.length];
 }

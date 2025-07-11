@@ -61,7 +61,6 @@ const AudioControlsInner = () => {
     try {
       // First check if we have browser permission
       if (micPermissionError) {
-        console.error('Microphone access denied');
         return;
       }
 
@@ -76,11 +75,9 @@ const AudioControlsInner = () => {
       // Toggle microphone
       if (isMute) {
         await microphone.enable();
-        console.log('Microphone enabled');
         toast.success('Microphone unmuted');
       } else {
         await microphone.disable();
-        console.log('Microphone disabled');
         toast.success('Microphone muted');
       }
     } catch (error) {
