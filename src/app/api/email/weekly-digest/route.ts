@@ -20,16 +20,12 @@ export async function POST(req: NextRequest) {
 	try {
 		console.log('Weekly Digest Email API received request');
 		const body = await req.json();
-		console.log('Weekly Digest Email request body:', JSON.stringify(body, null, 2));
+		console.log(
+			'Weekly Digest Email request body:',
+			JSON.stringify(body, null, 2)
+		);
 
-		const {
-			to,
-			userId,
-			firstName,
-			weekRange,
-			workspaces,
-			totalStats,
-		} = body;
+		const { to, userId, firstName, weekRange, workspaces, totalStats } = body;
 
 		// Validate required fields
 		if (!to || !userId) {
@@ -49,9 +45,14 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive weekly digest emails
-		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'weeklyDigest');
+		const shouldSend = await shouldSendEmailServer(
+			userId as Id<'users'>,
+			'weeklyDigest'
+		);
 		if (!shouldSend) {
-			console.log('User has unsubscribed from weekly digest emails, skipping send');
+			console.log(
+				'User has unsubscribed from weekly digest emails, skipping send'
+			);
 			return NextResponse.json(
 				{ success: true, message: 'Email skipped - user has unsubscribed' },
 				{ status: 200 }
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
 		const subject = `Your Proddy Weekly Digest - ${weekRange}`;
 
 		console.log('Preparing weekly digest email template');
-		
+
 		// Create the weekly digest email template
 		const emailTemplate = WeeklyDigestTemplate({
 			firstName: firstName || 'User',
@@ -112,7 +113,10 @@ export async function POST(req: NextRequest) {
 					});
 
 					if (fallbackResult.error) {
-						console.error('Fallback weekly digest email also failed:', fallbackResult.error);
+						console.error(
+							'Fallback weekly digest email also failed:',
+							fallbackResult.error
+						);
 						return NextResponse.json(
 							{
 								error: 'Email sending failed on both attempts',
@@ -134,7 +138,10 @@ export async function POST(req: NextRequest) {
 						{ status: 200 }
 					);
 				} catch (fallbackError) {
-					console.error('Fallback weekly digest email failed with exception:', fallbackError);
+					console.error(
+						'Fallback weekly digest email failed with exception:',
+						fallbackError
+					);
 					return NextResponse.json(
 						{
 							error: 'Email sending failed on both attempts',
@@ -159,7 +166,10 @@ export async function POST(req: NextRequest) {
 				{ status: 200 }
 			);
 		} catch (resendError) {
-			console.error('Resend API exception for weekly digest email:', resendError);
+			console.error(
+				'Resend API exception for weekly digest email:',
+				resendError
+			);
 			return NextResponse.json(
 				{
 					error: 'Failed to send weekly digest email',

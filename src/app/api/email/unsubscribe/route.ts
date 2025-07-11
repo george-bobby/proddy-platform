@@ -1,80 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  verifyUnsubscribeSignature,
-  getEmailTypeName,
-  type EmailType
+	verifyUnsubscribeSignature,
+	getEmailTypeName,
+	type EmailType,
 } from '@/lib/email-unsubscribe';
 import { updateNotificationPreferencesServer } from '@/lib/email-preferences-server';
 import { type Id } from '@/../convex/_generated/dataModel';
 
 export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId');
-    const emailType = searchParams.get('emailType') as EmailType;
-    const timestamp = searchParams.get('timestamp');
-    const signature = searchParams.get('signature');
+	try {
+		const { searchParams } = new URL(req.url);
+		const userId = searchParams.get('userId');
+		const emailType = searchParams.get('emailType') as EmailType;
+		const timestamp = searchParams.get('timestamp');
+		const signature = searchParams.get('signature');
 
-    // Validate required parameters
-    if (!userId || !emailType || !timestamp || !signature) {
-      return new NextResponse(
-        generateErrorPage('Invalid unsubscribe link. Missing required parameters.'),
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'text/html' }
-        }
-      );
-    }
+		// Validate required parameters
+		if (!userId || !emailType || !timestamp || !signature) {
+			return new NextResponse(
+				generateErrorPage(
+					'Invalid unsubscribe link. Missing required parameters.'
+				),
+				{
+					status: 400,
+					headers: { 'Content-Type': 'text/html' },
+				}
+			);
+		}
 
-    // Verify the signature
-    const verification = verifyUnsubscribeSignature(userId, emailType, timestamp, signature);
-    if (!verification.valid) {
-      return new NextResponse(
-        generateErrorPage(verification.error || 'Invalid unsubscribe link.'),
-        { 
-          status: 400,
-          headers: { 'Content-Type': 'text/html' }
-        }
-      );
-    }
+		// Verify the signature
+		const verification = verifyUnsubscribeSignature(
+			userId,
+			emailType,
+			timestamp,
+			signature
+		);
+		if (!verification.valid) {
+			return new NextResponse(
+				generateErrorPage(verification.error || 'Invalid unsubscribe link.'),
+				{
+					status: 400,
+					headers: { 'Content-Type': 'text/html' },
+				}
+			);
+		}
 
-    // Update the notification preference using the server-side utility
-    const success = await updateNotificationPreferencesServer(userId as Id<'users'>, emailType, false);
+		// Update the notification preference using the server-side utility
+		const success = await updateNotificationPreferencesServer(
+			userId as Id<'users'>,
+			emailType,
+			false
+		);
 
-    if (!success) {
-      return new NextResponse(
-        generateErrorPage('Failed to update your email preferences. Please try again.'),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'text/html' }
-        }
-      );
-    }
+		if (!success) {
+			return new NextResponse(
+				generateErrorPage(
+					'Failed to update your email preferences. Please try again.'
+				),
+				{
+					status: 500,
+					headers: { 'Content-Type': 'text/html' },
+				}
+			);
+		}
 
-    // Return success page
-    const emailTypeName = getEmailTypeName(emailType);
-    return new NextResponse(
-      generateSuccessPage(emailTypeName),
-      { 
-        status: 200,
-        headers: { 'Content-Type': 'text/html' }
-      }
-    );
-
-  } catch (error) {
-    console.error('Unsubscribe error:', error);
-    return new NextResponse(
-      generateErrorPage('An error occurred while processing your unsubscribe request.'),
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'text/html' }
-      }
-    );
-  }
+		// Return success page
+		const emailTypeName = getEmailTypeName(emailType);
+		return new NextResponse(generateSuccessPage(emailTypeName), {
+			status: 200,
+			headers: { 'Content-Type': 'text/html' },
+		});
+	} catch (error) {
+		console.error('Unsubscribe error:', error);
+		return new NextResponse(
+			generateErrorPage(
+				'An error occurred while processing your unsubscribe request.'
+			),
+			{
+				status: 500,
+				headers: { 'Content-Type': 'text/html' },
+			}
+		);
+	}
 }
 
 function generateSuccessPage(emailTypeName: string): string {
-  return `
+	return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -184,7 +195,7 @@ function generateSuccessPage(emailTypeName: string): string {
 }
 
 function generateErrorPage(errorMessage: string): string {
-  return `
+	return `
     <!DOCTYPE html>
     <html lang="en">
     <head>

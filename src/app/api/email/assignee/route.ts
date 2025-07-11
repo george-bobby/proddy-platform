@@ -47,7 +47,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive assignee emails
-		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'assignee');
+		const shouldSend = await shouldSendEmailServer(
+			userId as Id<'users'>,
+			'assignee'
+		);
 		if (!shouldSend) {
 			console.log('User has unsubscribed from assignee emails, skipping send');
 			return NextResponse.json(

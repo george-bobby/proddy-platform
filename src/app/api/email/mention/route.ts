@@ -43,7 +43,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive mention emails
-		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'mentions');
+		const shouldSend = await shouldSendEmailServer(
+			userId as Id<'users'>,
+			'mentions'
+		);
 		if (!shouldSend) {
 			console.log('User has unsubscribed from mention emails, skipping send');
 			return NextResponse.json(
@@ -102,7 +105,10 @@ export async function POST(req: NextRequest) {
 					});
 
 					if (fallbackResult.error) {
-						console.error('Fallback mention email also failed:', fallbackResult.error);
+						console.error(
+							'Fallback mention email also failed:',
+							fallbackResult.error
+						);
 						return NextResponse.json(
 							{
 								error: 'Email sending failed on both attempts',
@@ -124,7 +130,10 @@ export async function POST(req: NextRequest) {
 						{ status: 200 }
 					);
 				} catch (fallbackError) {
-					console.error('Fallback mention email failed with exception:', fallbackError);
+					console.error(
+						'Fallback mention email failed with exception:',
+						fallbackError
+					);
 					return NextResponse.json(
 						{
 							error: 'Email sending failed on both attempts',

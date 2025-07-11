@@ -328,6 +328,7 @@ export const sendDirectMessageEmail = action({
 					},
 					body: JSON.stringify({
 						to: recipient.user.email,
+						userId: recipient.userId,
 						firstName: recipient.user.name || 'User',
 						senderName: sender.user.name || 'A team member',
 						messagePreview: messagePreview,
@@ -454,6 +455,7 @@ export const sendMentionEmail = action({
 					},
 					body: JSON.stringify({
 						to: mentionedMember.user.email,
+						userId: mentionedMember.userId,
 						firstName: mentionedMember.user.name || 'User',
 						mentionerName: mentioner.user.name || 'A team member',
 						messagePreview: messagePreview,
@@ -587,6 +589,7 @@ export const sendThreadReplyEmail = action({
 					},
 					body: JSON.stringify({
 						to: originalAuthor.user.email,
+						userId: originalAuthor.userId,
 						firstName: originalAuthor.user.name || 'User',
 						replierName: replier.user.name || 'A team member',
 						originalMessagePreview: originalMessagePreview,
@@ -721,6 +724,7 @@ export const sendWeeklyDigestEmails = action({
 								},
 								body: JSON.stringify({
 									to: user.email,
+									userId: user.userId,
 									firstName: user.name.split(' ')[0],
 									weekRange,
 									workspaces: digestData.workspaces,
@@ -1093,6 +1097,7 @@ export const sendCardAssignmentEmail = action({
 					},
 					body: JSON.stringify({
 						to: assigneeEmail,
+						userId: assigneeId,
 						firstName: assigneeName || 'User',
 						type: 'card_assignment',
 						cardTitle: card.title,

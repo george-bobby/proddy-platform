@@ -20,7 +20,10 @@ export async function POST(req: NextRequest) {
 	try {
 		console.log('Thread Reply Email API received request');
 		const body = await req.json();
-		console.log('Thread Reply Email request body:', JSON.stringify(body, null, 2));
+		console.log(
+			'Thread Reply Email request body:',
+			JSON.stringify(body, null, 2)
+		);
 
 		const {
 			to,
@@ -44,9 +47,14 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive thread reply emails
-		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'threadReply');
+		const shouldSend = await shouldSendEmailServer(
+			userId as Id<'users'>,
+			'threadReply'
+		);
 		if (!shouldSend) {
-			console.log('User has unsubscribed from thread reply emails, skipping send');
+			console.log(
+				'User has unsubscribed from thread reply emails, skipping send'
+			);
 			return NextResponse.json(
 				{ success: true, message: 'Email skipped - user has unsubscribed' },
 				{ status: 200 }
@@ -104,7 +112,10 @@ export async function POST(req: NextRequest) {
 					});
 
 					if (fallbackResult.error) {
-						console.error('Fallback thread reply email also failed:', fallbackResult.error);
+						console.error(
+							'Fallback thread reply email also failed:',
+							fallbackResult.error
+						);
 						return NextResponse.json(
 							{
 								error: 'Email sending failed on both attempts',
@@ -126,7 +137,10 @@ export async function POST(req: NextRequest) {
 						{ status: 200 }
 					);
 				} catch (fallbackError) {
-					console.error('Fallback thread reply email failed with exception:', fallbackError);
+					console.error(
+						'Fallback thread reply email failed with exception:',
+						fallbackError
+					);
 					return NextResponse.json(
 						{
 							error: 'Email sending failed on both attempts',
@@ -151,7 +165,10 @@ export async function POST(req: NextRequest) {
 				{ status: 200 }
 			);
 		} catch (resendError) {
-			console.error('Resend API exception for thread reply email:', resendError);
+			console.error(
+				'Resend API exception for thread reply email:',
+				resendError
+			);
 			return NextResponse.json(
 				{
 					error: 'Failed to send thread reply email',
