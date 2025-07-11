@@ -8,6 +8,7 @@ import { JotaiProvider } from "@/components/jotai-provider";
 import { ModalProvider } from "@/components/modal-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TidioChat } from "@/components/tidio-chat";
+import { UsetifulProvider } from "@/components/usetiful-provider";
 import { siteConfig } from "@/config";
 
 import "./globals.css";
@@ -55,12 +56,14 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
         <body className={`${poppins.className} antialiased`}>
           <ConvexClientProvider>
             <JotaiProvider>
-              <Toaster theme="light" richColors closeButton />
-              <ModalProvider />
-              <TidioChat />
+              <UsetifulProvider>
+                <Toaster theme="light" richColors closeButton />
+                <ModalProvider />
+                <TidioChat />
 
-              {children}
-              <Analytics />
+                {children}
+                <Analytics />
+              </UsetifulProvider>
             </JotaiProvider>
           </ConvexClientProvider>
         </body>
