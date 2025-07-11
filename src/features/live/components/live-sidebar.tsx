@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import { Search, Plus, FileText, Palette, ChevronLeft, ChevronRight, Trash2, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Id } from '@/../convex/_generated/dataModel';
@@ -189,7 +188,7 @@ export const LiveSidebar = ({
       </div>
 
       {/* Items List */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-2">
           {filteredItems.length === 0 ? (
             <div className="text-center py-8">
@@ -315,7 +314,7 @@ export const LiveSidebar = ({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

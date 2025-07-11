@@ -20,15 +20,8 @@ interface BlockNoteEditorProps {
 export const BlockNoteEditor = ({ noteId, className, onEditorReady }: BlockNoteEditorProps) => {
   const updateMyPresence = useUpdateMyPresence();
 
-  // Add error handling and debugging
-  console.log('BlockNoteEditor: Initializing with noteId:', noteId);
-
   const sync = useBlockNoteSync(api.prosemirror, noteId, {
     snapshotDebounceMs: 1000,
-    onError: (error) => {
-      console.error('ProseMirror sync error:', error);
-      // Don't throw the error, just log it to prevent crashes
-    },
   });
 
   // Update presence when editor changes
@@ -41,26 +34,43 @@ export const BlockNoteEditor = ({ noteId, className, onEditorReady }: BlockNoteE
         onEditorReady(editor);
       }
 
+      // Throttle presence updates to prevent excessive calls
+      let presenceUpdateTimeout: NodeJS.Timeout | null = null;
+
       // Listen for editor changes to update presence
       const handleChange = () => {
-        updateMyPresence({
-          isEditing: true,
-          lastActivity: Date.now()
-        });
+        if (presenceUpdateTimeout) {
+          clearTimeout(presenceUpdateTimeout);
+        }
+        presenceUpdateTimeout = setTimeout(() => {
+          updateMyPresence({
+            isEditing: true,
+            lastActivity: Date.now()
+          });
+        }, 100); // Throttle to max 10 updates per second
       };
 
       // Listen for selection changes
       const handleSelectionChange = () => {
-        updateMyPresence({
-          isEditing: false,
-          lastActivity: Date.now()
-        });
+        if (presenceUpdateTimeout) {
+          clearTimeout(presenceUpdateTimeout);
+        }
+        presenceUpdateTimeout = setTimeout(() => {
+          updateMyPresence({
+            isEditing: false,
+            lastActivity: Date.now()
+          });
+        }, 100); // Throttle to max 10 updates per second
       };
 
       editor.onEditorContentChange(handleChange);
       editor.onEditorSelectionChange(handleSelectionChange);
 
       return () => {
+        // Clear timeout on cleanup
+        if (presenceUpdateTimeout) {
+          clearTimeout(presenceUpdateTimeout);
+        }
         // Cleanup listeners if needed
         updateMyPresence({
           isEditing: false,
@@ -92,11 +102,11 @@ export const BlockNoteEditor = ({ noteId, className, onEditorReady }: BlockNoteE
   }
 
   return (
-    <div className={className}>
-      <BlockNoteView 
+    <div className={className} style={{ height: '100%', overflow: 'hidden' }}>
+      <BlockNoteView
         editor={sync.editor}
         theme="light"
-        className="min-h-full"
+        style={{ height: '100%' }}
       />
     </div>
   );

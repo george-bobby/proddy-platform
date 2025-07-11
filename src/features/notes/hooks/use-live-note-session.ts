@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useMutation } from 'convex/react';
 import { api } from '@/../convex/_generated/api';
 import { Id } from '@/../convex/_generated/dataModel';
@@ -35,13 +35,13 @@ export const useLiveNoteSession = ({
 	const self = useSelf();
 	const createMessage = useMutation(api.messages.create);
 
-	// Get all participants (including self)
-	const participants = [
+	// Get all participants (including self) - memoized to prevent infinite loops
+	const participants = useMemo(() => [
 		...(self && self.id ? [self.id] : []),
 		...others
 			.map((other) => other.id)
 			.filter((id): id is string => typeof id === 'string'),
-	];
+	], [self, others]);
 
 	// Check if this is a live session (more than one participant actively editing)
 	useEffect(() => {
@@ -60,17 +60,20 @@ export const useLiveNoteSession = ({
 		const wasLiveSession = isLiveSession;
 		const nowLiveSession = activeParticipants.length > 1;
 
-		setIsLiveSession(nowLiveSession);
+		// Only update state if the live session status actually changed
+		if (wasLiveSession !== nowLiveSession) {
+			setIsLiveSession(nowLiveSession);
 
-		// Auto-announce when session becomes live
-		if (!wasLiveSession && nowLiveSession && autoAnnounce && !hasAnnounced) {
-			announceLiveSession();
-			setHasAnnounced(true);
-		}
+			// Auto-announce when session becomes live
+			if (!wasLiveSession && nowLiveSession && autoAnnounce && !hasAnnounced) {
+				announceLiveSession();
+				setHasAnnounced(true);
+			}
 
-		// Reset announcement flag when session ends
-		if (wasLiveSession && !nowLiveSession) {
-			setHasAnnounced(false);
+			// Reset announcement flag when session ends
+			if (wasLiveSession && !nowLiveSession) {
+				setHasAnnounced(false);
+			}
 		}
 	}, [participants, others, self, isLiveSession, autoAnnounce, hasAnnounced]);
 

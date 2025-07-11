@@ -79,8 +79,8 @@ export const MessageContent = ({
   // Check if this contains a custom message component
   const hasCustomMessageComponent = body && typeof body === 'string' &&
     (body.includes('"type":"canvas"') || body.includes('"type":"note"') ||
-     body.includes('"type":"canvas-live"') || body.includes('"type":"note-live"') ||
-     body.includes('"type":"canvas-export"') || body.includes('"type":"note-export"'));
+      body.includes('"type":"canvas-live"') || body.includes('"type":"note-live"') ||
+      body.includes('"type":"canvas-export"') || body.includes('"type":"note-export"'));
 
   return (
     <div className={cn("relative group/message", isAuthor && "flex justify-end")}>
@@ -91,9 +91,9 @@ export const MessageContent = ({
           hasCustomMessageComponent
             ? "p-0 bg-transparent" // No padding, no background for custom components
             : cn(
-                "max-w-md px-3 py-2", // Normal styling for regular messages
-                isAuthor ? "bg-primary text-primary-foreground" : "bg-muted"
-              )
+              "max-w-md px-3 py-2", // Normal styling for regular messages
+              isAuthor ? "bg-primary text-primary-foreground" : "bg-muted"
+            )
         )}
         onContextMenu={onContextMenu}
       >
@@ -107,9 +107,7 @@ export const MessageContent = ({
           />
         ) : (
           <div className={cn(
-            isAuthor && "text-white [&_.ql-editor]:text-white [&_.ql-editor_*]:text-white [&_p]:text-white [&_span]:text-white [&_div]:text-white [&_strong]:text-white [&_em]:text-white [&_u]:text-white [&_s]:text-white [&_a]:text-white [&_li]:text-white [&_ol]:text-white [&_ul]:text-white [&_blockquote]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white",
-            // Exclude our custom message components from white text styling with stronger specificity
-            isAuthor && "[&_[data-message-component='true']]:!text-gray-900 [&_[data-message-component='true']_*]:!text-inherit [&_[data-message-component='true']_.text-gray-900]:!text-gray-900 [&_[data-message-component='true']_.text-gray-600]:!text-gray-600 [&_[data-message-component='true']_.text-indigo-600]:!text-indigo-600 [&_[data-message-component='true']_.text-purple-600]:!text-purple-600 [&_[data-message-component='true']_.text-blue-600]:!text-blue-600 [&_[data-message-component='true']_.text-green-600]:!text-green-600"
+            isAuthor && !hasCustomMessageComponent && "text-white [&_.ql-editor]:text-white [&_.ql-editor_*]:text-white [&_p]:text-white [&_span]:text-white [&_div]:text-white [&_strong]:text-white [&_em]:text-white [&_u]:text-white [&_s]:text-white [&_a]:text-white [&_li]:text-white [&_ol]:text-white [&_ul]:text-white [&_blockquote]:text-white [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_h4]:text-white [&_h5]:text-white [&_h6]:text-white"
           )}>
             <Renderer value={body} calendarEvent={calendarEvent} />
             <Thumbnail url={image} />

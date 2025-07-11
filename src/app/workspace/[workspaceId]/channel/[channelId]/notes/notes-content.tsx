@@ -135,6 +135,23 @@ export const NotesContent = ({
     });
   }, [handleUpdate]);
 
+  // Memoize the items array to prevent unnecessary re-renders of LiveSidebar
+  const memoizedItems = useMemo(() => {
+    return notes.map(note => ({
+      _id: note._id,
+      title: note.title,
+      content: note.content,
+      tags: note.tags,
+      createdAt: note.createdAt,
+      updatedAt: note.updatedAt
+    }));
+  }, [notes]);
+
+  // Memoize the sidebar toggle callback
+  const memoizedToggleCollapse = useCallback(() => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  }, [sidebarCollapsed]);
+
   return (
     <div ref={pageContainerRef} className={`flex h-full ${isFullScreen ? 'fixed inset-0 z-50 bg-white' : 'flex-col'}`}>
       <div className="flex flex-1 overflow-hidden">
@@ -142,18 +159,11 @@ export const NotesContent = ({
         {!isFullScreen && (
           <LiveSidebar
             type="notes"
-            items={notes.map(note => ({
-              _id: note._id,
-              title: note.title,
-              content: note.content,
-              tags: note.tags,
-              createdAt: note.createdAt,
-              updatedAt: note.updatedAt
-            }))}
+            items={memoizedItems}
             selectedItemId={activeNoteId}
             onItemSelect={handleItemSelect}
             collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onToggleCollapse={memoizedToggleCollapse}
             onCreateItem={onCreateNote}
             onDeleteItem={handleDeleteItem}
             workspaceId={workspaceId}

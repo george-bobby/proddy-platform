@@ -94,7 +94,7 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
     if (!workspaceId || !channelId) return;
 
     let url = "";
-    
+
     if (isCanvas) {
       if (isLive) {
         // For live canvas, navigate to canvas with room ID
@@ -116,7 +116,7 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
   };
 
   return (
-    <Card 
+    <Card
       data-message-component="true"
       className="w-full max-w-lg !bg-white !text-gray-900 shadow-md border-l-4 border-l-primary"
     >
@@ -127,7 +127,7 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
             <CardTitle className="text-sm font-medium text-gray-900 truncate">
               {getTitle()}
             </CardTitle>
-            
+
             {/* Show participants for live sessions */}
             {isLive && (
               <div className="flex items-center text-xs text-gray-600 mt-1">
@@ -143,12 +143,12 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
             )}
           </div>
         </div>
-        
+
         <Button
           onClick={handleClick}
           variant="default"
           size="sm"
-          className="ml-3 flex-shrink-0 bg-primary text-white hover:bg-primary/80"
+          className="ml-3 flex-shrink-0 bg-primary !text-white hover:bg-primary/80"
         >
           {getButtonText()}
         </Button>

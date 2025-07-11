@@ -4,7 +4,7 @@ import { Note } from '../types';
 import { Id } from '@/../convex/_generated/dataModel';
 import { BlockNoteEditor } from './blocknote-editor';
 import { BlockNoteEditor as BlockNoteEditorType } from "@blocknote/core";
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Wand2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -37,9 +37,9 @@ export const BlockNoteNotesEditor = ({
   const [isFormatting, setIsFormatting] = useState(false);
   const editorRef = useRef<BlockNoteEditorType | null>(null);
 
-  const handleEditorReady = (editor: BlockNoteEditorType) => {
+  const handleEditorReady = useCallback((editor: BlockNoteEditorType) => {
     editorRef.current = editor;
-  };
+  }, []);
 
   const handleFormatNote = async () => {
     if (!editorRef.current) {

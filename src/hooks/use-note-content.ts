@@ -62,7 +62,7 @@ export const useNoteContent = ({
 
     // Reset the local change flag
     isLocalChangeRef.current = false;
-  }, [note?.content, note?.title, note?._id, isTyping, localContent, localTitle, hasUnsavedChanges]);
+  }, [note?.content, note?.title, note?._id, isTyping, hasUnsavedChanges]);
 
   // Debounced save function
   const debouncedSave = useCallback(async (updates: Partial<Note>) => {
