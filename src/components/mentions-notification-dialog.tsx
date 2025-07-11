@@ -299,7 +299,7 @@ export const MentionsNotificationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden shadow-lg">
+      <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden shadow-lg [&>button]:hidden">
         <DialogHeader className="p-5 border-b bg-white">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-xl">
@@ -313,9 +313,7 @@ export const MentionsNotificationDialog = ({
                 </Badge>
               )}
             </DialogTitle>
-          </div>
-          {unreadCounts.all > 0 && (
-            <div className="mt-2">
+            {unreadCounts.all > 0 && (
               <Button
                 variant="outline"
                 size="sm"
@@ -325,11 +323,8 @@ export const MentionsNotificationDialog = ({
                 <CheckCircle2 className="size-3.5" />
                 Mark all as read
               </Button>
-            </div>
-          )}
-          <DialogDescription className="text-muted-foreground mt-1">
-            View your direct messages and mentions across channels, conversations, and boards
-          </DialogDescription>
+            )}
+          </div>
         </DialogHeader>
 
         {isLoading ? (
