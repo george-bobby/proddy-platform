@@ -8,6 +8,7 @@ import type { Id } from '../../convex/_generated/dataModel';
 import { useChannelId } from './use-channel-id';
 import { useWorkspaceId } from './use-workspace-id';
 import { useWorkspacePresence } from '@/features/presence/hooks/use-workspace-presence';
+import { getUserImageUrl } from '@/lib/placeholder-image';
 
 import { useOthers, useSelf, useRoom } from '../../liveblocks.config';
 
@@ -149,10 +150,7 @@ export const useChannelParticipants = () => {
 					member?.user?.name ||
 					other.info?.name ||
 					`User ${other.connectionId}`,
-				picture:
-					member?.user?.image ||
-					other.info?.picture ||
-					null, // Let Avatar component handle fallbacks instead of external URLs
+				picture: member?.user?.image || other.info?.picture || null, // Let Avatar component handle fallbacks instead of external URLs
 			},
 		};
 	});
@@ -169,9 +167,11 @@ export const useChannelParticipants = () => {
 						name:
 							members?.find((m) => m._id === currentMember._id)?.user?.name ||
 							'You',
-						picture:
-							members?.find((m) => m._id === currentMember._id)?.user?.image ||
-							`https://via.placeholder.com/40/4f46e5/ffffff?text=Y`,
+						picture: getUserImageUrl(
+							members?.find((m) => m._id === currentMember._id)?.user?.name ||
+								'You',
+							members?.find((m) => m._id === currentMember._id)?.user?.image
+						),
 					},
 				}
 			: null;

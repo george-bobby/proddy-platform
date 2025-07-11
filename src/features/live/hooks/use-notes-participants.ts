@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/../convex/_generated/api';
 import { useWorkspaceId } from '@/hooks/use-workspace-id';
 import { useOthers, useSelf, useRoom } from '@/../liveblocks.config';
+import { getUserImageUrl } from '@/lib/placeholder-image';
 
 export const useNotesParticipants = () => {
 	// Get workspace ID from the URL
@@ -121,11 +122,15 @@ export const useNotesParticipants = () => {
 							members?.find((m) => m.userId === currentMember.userId)?.user
 								?.name ||
 							'You',
-						picture:
+						picture: getUserImageUrl(
+							members?.find((m) => m._id === currentMember._id)?.user?.name ||
+								members?.find((m) => m.userId === currentMember.userId)?.user
+									?.name ||
+								'You',
 							members?.find((m) => m._id === currentMember._id)?.user?.image ||
-							members?.find((m) => m.userId === currentMember.userId)?.user
-								?.image ||
-							`https://via.placeholder.com/40/4f46e5/ffffff?text=Y`,
+								members?.find((m) => m.userId === currentMember.userId)?.user
+									?.image
+						),
 					},
 				}
 			: null;
