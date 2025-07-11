@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MentionTemplate } from '@/features/email/components/mention-template';
 import { Resend } from 'resend';
+import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
+import { shouldSendEmailServer } from '@/lib/email-preferences-server';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -21,6 +23,7 @@ export async function POST(req: NextRequest) {
 
 		const {
 			to,
+			userId,
 			firstName,
 			mentionerName,
 			messagePreview,
@@ -30,19 +33,32 @@ export async function POST(req: NextRequest) {
 		} = body;
 
 		// Validate required fields
-		if (!to) {
-			console.error('Missing required field: to (email address)');
+		if (!to || !userId) {
+			console.error('Missing required fields: to (email address) and userId');
 			return NextResponse.json(
-				{ error: 'Missing required field: to (email address)' },
+				{ error: 'Missing required fields: to (email address) and userId' },
 				{ status: 400 }
 			);
 		}
 
+		// Check if user wants to receive mention emails
+		const shouldSend = await shouldSendEmailServer(userId, 'mentions');
+		if (!shouldSend) {
+			console.log('User has unsubscribed from mention emails, skipping send');
+			return NextResponse.json(
+				{ success: true, message: 'Email skipped - user has unsubscribed' },
+				{ status: 200 }
+			);
+		}
+
+		// Generate unsubscribe URL
+		const unsubscribeUrl = generateUnsubscribeUrl(userId, 'mentions');
+
 		// Set the subject for mention emails
 		const subject = 'You were mentioned in Proddy';
-		
+
 		console.log('Preparing mention email template');
-		
+
 		// Create the mention email template
 		const emailTemplate = MentionTemplate({
 			firstName: firstName || 'User',
@@ -51,6 +67,7 @@ export async function POST(req: NextRequest) {
 			channelName: channelName || 'a channel',
 			workspaceUrl,
 			workspaceName,
+			unsubscribeUrl,
 		});
 
 		console.log('Sending mention email via Resend to:', to);

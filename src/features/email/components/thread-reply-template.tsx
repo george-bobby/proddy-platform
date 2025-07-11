@@ -22,6 +22,7 @@ interface ThreadReplyTemplateProps {
   channelName?: string;
   workspaceUrl?: string;
   workspaceName?: string;
+  unsubscribeUrl?: string;
 }
 
 export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> = ({
@@ -32,6 +33,7 @@ export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> =
   channelName = 'a channel',
   workspaceUrl = process.env.NEXT_PUBLIC_APP_URL,
   workspaceName = 'Proddy',
+  unsubscribeUrl,
 }) => {
   const previewText = `${replierName} replied to your message in ${channelName}`;
 
@@ -95,6 +97,15 @@ export const ThreadReplyTemplate: React.FC<Readonly<ThreadReplyTemplateProps>> =
             This email was sent from {workspaceName}, your team collaboration platform.
             If you didn't expect this email, you can safely ignore it.
           </Text>
+
+          {unsubscribeUrl && (
+            <Text style={unsubscribeText}>
+              Don't want to receive thread reply notifications? {' '}
+              <Link href={unsubscribeUrl} style={unsubscribeLink}>
+                Unsubscribe from these emails
+              </Link>
+            </Text>
+          )}
         </Container>
       </Body>
     </Html>
@@ -206,6 +217,19 @@ const footer = {
   fontSize: '12px',
   lineHeight: '1.5',
   textAlign: 'center' as const,
+};
+
+const unsubscribeText = {
+  color: '#8898aa',
+  fontSize: '11px',
+  lineHeight: '1.4',
+  textAlign: 'center' as const,
+  marginTop: '20px',
+};
+
+const unsubscribeLink = {
+  color: '#4F46E5',
+  textDecoration: 'underline',
 };
 
 export default ThreadReplyTemplate;

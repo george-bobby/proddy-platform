@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DirectMessageTemplate } from '@/features/email/components/direct-message-template';
 import { Resend } from 'resend';
+import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
+import { shouldSendEmailServer } from '@/lib/email-preferences-server';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -21,6 +23,7 @@ export async function POST(req: NextRequest) {
 
 		const {
 			to,
+			userId,
 			firstName,
 			senderName,
 			messagePreview,
@@ -29,19 +32,32 @@ export async function POST(req: NextRequest) {
 		} = body;
 
 		// Validate required fields
-		if (!to) {
-			console.error('Missing required field: to (email address)');
+		if (!to || !userId) {
+			console.error('Missing required fields: to (email address) and userId');
 			return NextResponse.json(
-				{ error: 'Missing required field: to (email address)' },
+				{ error: 'Missing required fields: to (email address) and userId' },
 				{ status: 400 }
 			);
 		}
 
+		// Check if user wants to receive direct message emails
+		const shouldSend = await shouldSendEmailServer(userId, 'directMessage');
+		if (!shouldSend) {
+			console.log('User has unsubscribed from direct message emails, skipping send');
+			return NextResponse.json(
+				{ success: true, message: 'Email skipped - user has unsubscribed' },
+				{ status: 200 }
+			);
+		}
+
+		// Generate unsubscribe URL
+		const unsubscribeUrl = generateUnsubscribeUrl(userId, 'directMessage');
+
 		// Set the subject for direct message emails
 		const subject = `New direct message from ${senderName}`;
-		
+
 		console.log('Preparing direct message email template');
-		
+
 		// Create the direct message email template
 		const emailTemplate = DirectMessageTemplate({
 			firstName: firstName || 'User',
@@ -49,6 +65,7 @@ export async function POST(req: NextRequest) {
 			messagePreview: messagePreview || 'You have a new direct message',
 			workspaceUrl,
 			workspaceName,
+			unsubscribeUrl,
 		});
 
 		console.log('Sending direct message email via Resend to:', to);

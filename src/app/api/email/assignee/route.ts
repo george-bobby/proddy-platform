@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CardAssignmentTemplate } from '@/features/email/components/card-assignment';
 import { Resend } from 'resend';
+import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
+import { shouldSendEmailServer } from '@/lib/email-preferences-server';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -21,6 +23,7 @@ export async function POST(req: NextRequest) {
 
 		const {
 			to,
+			userId,
 			firstName,
 			cardTitle,
 			cardDescription,
@@ -34,13 +37,26 @@ export async function POST(req: NextRequest) {
 		} = body;
 
 		// Validate required fields
-		if (!to) {
-			console.error('Missing required field: to (email address)');
+		if (!to || !userId) {
+			console.error('Missing required fields: to (email address) and userId');
 			return NextResponse.json(
-				{ error: 'Missing required field: to (email address)' },
+				{ error: 'Missing required fields: to (email address) and userId' },
 				{ status: 400 }
 			);
 		}
+
+		// Check if user wants to receive assignee emails
+		const shouldSend = await shouldSendEmailServer(userId, 'assignee');
+		if (!shouldSend) {
+			console.log('User has unsubscribed from assignee emails, skipping send');
+			return NextResponse.json(
+				{ success: true, message: 'Email skipped - user has unsubscribed' },
+				{ status: 200 }
+			);
+		}
+
+		// Generate unsubscribe URL
+		const unsubscribeUrl = generateUnsubscribeUrl(userId, 'assignee');
 
 		// Set the subject for card assignment emails
 		const subject = `Card Assignment: ${cardTitle}`;
@@ -59,6 +75,7 @@ export async function POST(req: NextRequest) {
 			assignedBy,
 			workspaceUrl,
 			workspaceName,
+			unsubscribeUrl,
 		});
 
 		console.log('Sending email via Resend to:', to);

@@ -586,3 +586,101 @@ export const updateDashboardWidgets = mutation({
 		return { success: true };
 	},
 });
+
+/**
+ * Update notification preferences for a specific user (for unsubscribe functionality)
+ * This function doesn't require authentication since it's used by unsubscribe links
+ */
+export const updateNotificationPreferencesByUserId = mutation({
+	args: {
+		userId: v.id('users'),
+		notificationKey: v.union(
+			v.literal('mentions'),
+			v.literal('assignee'),
+			v.literal('threadReply'),
+			v.literal('directMessage'),
+			v.literal('weeklyDigest')
+		),
+		enabled: v.boolean(),
+	},
+	handler: async (ctx, args) => {
+		// Check if user preferences already exist
+		const existingPrefs = await ctx.db
+			.query('preferences')
+			.withIndex('by_user_id', (q) => q.eq('userId', args.userId))
+			.unique();
+
+		if (existingPrefs) {
+			// Get current notifications or initialize with defaults
+			const currentNotifications = existingPrefs.settings?.notifications || {
+				mentions: true,
+				assignee: true,
+				threadReply: true,
+				directMessage: true,
+				weeklyDigest: false,
+				weeklyDigestDay: 'monday' as const,
+			};
+
+			// Update the specific notification preference
+			const updatedNotifications = {
+				...currentNotifications,
+				[args.notificationKey]: args.enabled,
+			};
+
+			// Update existing preferences
+			await ctx.db.patch(existingPrefs._id, {
+				settings: {
+					...existingPrefs.settings,
+					notifications: updatedNotifications,
+				},
+			});
+		} else {
+			// Create new preferences with the updated notification setting
+			const notifications = {
+				mentions: true,
+				assignee: true,
+				threadReply: true,
+				directMessage: true,
+				weeklyDigest: false,
+				weeklyDigestDay: 'monday' as const,
+				[args.notificationKey]: args.enabled,
+			};
+
+			await ctx.db.insert('preferences', {
+				userId: args.userId,
+				settings: {
+					notifications,
+				},
+			});
+		}
+
+		return { success: true };
+	},
+});
+
+/**
+ * Get notification preferences for a specific user by ID (for unsubscribe functionality)
+ */
+export const getNotificationPreferencesByUserId = query({
+	args: {
+		userId: v.id('users'),
+	},
+	handler: async (ctx, args) => {
+		const preferences = await ctx.db
+			.query('preferences')
+			.withIndex('by_user_id', (q) => q.eq('userId', args.userId))
+			.unique();
+
+		const notifications = preferences?.settings?.notifications;
+
+		// Return with defaults
+		return {
+			mentions: notifications?.mentions ?? true,
+			assignee: notifications?.assignee ?? true,
+			threadReply: notifications?.threadReply ?? true,
+			directMessage: notifications?.directMessage ?? true,
+			weeklyDigest: notifications?.weeklyDigest ?? false,
+			weeklyDigestDay: notifications?.weeklyDigestDay ?? 'monday',
+		};
+	},
+});

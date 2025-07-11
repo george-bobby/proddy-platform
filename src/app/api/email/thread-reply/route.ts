@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ThreadReplyTemplate } from '@/features/email/components/thread-reply-template';
 import { Resend } from 'resend';
+import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
+import { shouldSendEmailServer } from '@/lib/email-preferences-server';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -21,6 +23,7 @@ export async function POST(req: NextRequest) {
 
 		const {
 			to,
+			userId,
 			firstName,
 			replierName,
 			originalMessagePreview,
@@ -31,19 +34,32 @@ export async function POST(req: NextRequest) {
 		} = body;
 
 		// Validate required fields
-		if (!to) {
-			console.error('Missing required field: to (email address)');
+		if (!to || !userId) {
+			console.error('Missing required fields: to (email address) and userId');
 			return NextResponse.json(
-				{ error: 'Missing required field: to (email address)' },
+				{ error: 'Missing required fields: to (email address) and userId' },
 				{ status: 400 }
 			);
 		}
 
+		// Check if user wants to receive thread reply emails
+		const shouldSend = await shouldSendEmailServer(userId, 'threadReply');
+		if (!shouldSend) {
+			console.log('User has unsubscribed from thread reply emails, skipping send');
+			return NextResponse.json(
+				{ success: true, message: 'Email skipped - user has unsubscribed' },
+				{ status: 200 }
+			);
+		}
+
+		// Generate unsubscribe URL
+		const unsubscribeUrl = generateUnsubscribeUrl(userId, 'threadReply');
+
 		// Set the subject for thread reply emails
 		const subject = `${replierName} replied to your message in Proddy`;
-		
+
 		console.log('Preparing thread reply email template');
-		
+
 		// Create the thread reply email template
 		const emailTemplate = ThreadReplyTemplate({
 			firstName: firstName || 'User',
@@ -53,6 +69,7 @@ export async function POST(req: NextRequest) {
 			channelName: channelName || 'a channel',
 			workspaceUrl,
 			workspaceName,
+			unsubscribeUrl,
 		});
 
 		console.log('Sending thread reply email via Resend to:', to);

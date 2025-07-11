@@ -45,7 +45,7 @@ interface WeeklyDigestTemplateProps {
     };
     userId?: string;
     email?: string;
-    unsubscribeToken?: string;
+    unsubscribeUrl?: string;
 }
 
 export const WeeklyDigestTemplate: React.FC<Readonly<WeeklyDigestTemplateProps>> = ({
@@ -55,15 +55,9 @@ export const WeeklyDigestTemplate: React.FC<Readonly<WeeklyDigestTemplateProps>>
                                                                                         totalStats,
                                                                                         userId,
                                                                                         email,
-                                                                                        unsubscribeToken,
+                                                                                        unsubscribeUrl,
                                                                                     }) => {
     const previewText = `Your weekly Proddy digest for ${weekRange}`;
-
-    // Generate unsubscribe URL with proper parameters
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-    const unsubscribeUrl = userId && unsubscribeToken && workspaces.length > 0
-        ? `${baseUrl}/unsubscribe?token=${unsubscribeToken}&userId=${userId}&workspaceId=${workspaces[0].workspaceUrl.split('/').pop()}&email=${encodeURIComponent(email || '')}`
-        : `${baseUrl}/unsubscribe`;
 
 
     return (
