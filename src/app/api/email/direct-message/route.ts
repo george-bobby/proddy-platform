@@ -3,6 +3,7 @@ import { DirectMessageTemplate } from '@/features/email/components/direct-messag
 import { Resend } from 'resend';
 import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
 import { shouldSendEmailServer } from '@/lib/email-preferences-server';
+import { type Id } from '@/../convex/_generated/dataModel';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive direct message emails
-		const shouldSend = await shouldSendEmailServer(userId, 'directMessage');
+		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'directMessage');
 		if (!shouldSend) {
 			console.log('User has unsubscribed from direct message emails, skipping send');
 			return NextResponse.json(

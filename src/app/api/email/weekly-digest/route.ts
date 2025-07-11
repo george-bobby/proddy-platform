@@ -3,6 +3,7 @@ import { WeeklyDigestTemplate } from '@/features/email/components/weekly-digest-
 import { Resend } from 'resend';
 import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
 import { shouldSendEmailServer } from '@/lib/email-preferences-server';
+import { type Id } from '@/../convex/_generated/dataModel';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive weekly digest emails
-		const shouldSend = await shouldSendEmailServer(userId, 'weeklyDigest');
+		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'weeklyDigest');
 		if (!shouldSend) {
 			console.log('User has unsubscribed from weekly digest emails, skipping send');
 			return NextResponse.json(

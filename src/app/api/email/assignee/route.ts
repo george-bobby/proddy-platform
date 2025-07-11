@@ -3,6 +3,7 @@ import { CardAssignmentTemplate } from '@/features/email/components/card-assignm
 import { Resend } from 'resend';
 import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
 import { shouldSendEmailServer } from '@/lib/email-preferences-server';
+import { type Id } from '@/../convex/_generated/dataModel';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive assignee emails
-		const shouldSend = await shouldSendEmailServer(userId, 'assignee');
+		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'assignee');
 		if (!shouldSend) {
 			console.log('User has unsubscribed from assignee emails, skipping send');
 			return NextResponse.json(

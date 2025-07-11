@@ -3,6 +3,7 @@ import { ThreadReplyTemplate } from '@/features/email/components/thread-reply-te
 import { Resend } from 'resend';
 import { generateUnsubscribeUrl } from '@/lib/email-unsubscribe';
 import { shouldSendEmailServer } from '@/lib/email-preferences-server';
+import { type Id } from '@/../convex/_generated/dataModel';
 
 // Log the API key (masked for security)
 const apiKey = process.env.RESEND_API_KEY;
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if user wants to receive thread reply emails
-		const shouldSend = await shouldSendEmailServer(userId, 'threadReply');
+		const shouldSend = await shouldSendEmailServer(userId as Id<'users'>, 'threadReply');
 		if (!shouldSend) {
 			console.log('User has unsubscribed from thread reply emails, skipping send');
 			return NextResponse.json(

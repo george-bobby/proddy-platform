@@ -5,6 +5,7 @@ import {
   type EmailType
 } from '@/lib/email-unsubscribe';
 import { updateNotificationPreferencesServer } from '@/lib/email-preferences-server';
+import { type Id } from '@/../convex/_generated/dataModel';
 
 export async function GET(req: NextRequest) {
   try {
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Update the notification preference using the server-side utility
-    const success = await updateNotificationPreferencesServer(userId, emailType, false);
+    const success = await updateNotificationPreferencesServer(userId as Id<'users'>, emailType, false);
 
     if (!success) {
       return new NextResponse(
