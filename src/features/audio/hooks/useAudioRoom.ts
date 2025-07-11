@@ -51,6 +51,12 @@ export const useAudioRoom = ({
 
 			// Fetch token from our API
 			console.log('Fetching Stream token for user:', userId);
+			console.log('Client-side API key check:', {
+				apiKeyExists: !!apiKey,
+				apiKeyLength: apiKey?.length || 0,
+				apiKeyPrefix: apiKey?.substring(0, 4) || 'none'
+			});
+
 			const response = await fetch('/api/stream', {
 				method: 'POST',
 				headers: {
@@ -64,11 +70,21 @@ export const useAudioRoom = ({
 			});
 
 			if (!response.ok) {
-				throw new Error(`Failed to get Stream token: ${response.status}`);
+				const errorData = await response.json().catch(() => ({}));
+				console.error('Stream token request failed:', {
+					status: response.status,
+					statusText: response.statusText,
+					error: errorData
+				});
+				throw new Error(`Failed to get Stream token: ${response.status} - ${JSON.stringify(errorData)}`);
 			}
 
-			const { token } = await response.json();
-			console.log('Token received successfully');
+			const tokenResponse = await response.json();
+			const { token } = tokenResponse;
+			console.log('Token received successfully', {
+				tokenLength: token?.length || 0,
+				debug: tokenResponse.debug || 'No debug info'
+			});
 
 			// Initialize Stream client
 			const videoClient = new StreamVideoClient({
@@ -77,7 +93,11 @@ export const useAudioRoom = ({
 				token,
 			});
 
-			console.log('Stream client initialized successfully');
+			console.log('Stream client initialized successfully', {
+				apiKey: apiKey?.substring(0, 4) + '...',
+				userId: user.id,
+				userName: user.name
+			});
 			setClient(videoClient);
 
 			// Create unique room ID (keeping it under 64 characters)
