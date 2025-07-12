@@ -117,16 +117,9 @@ export const Mermaid = ({
     return () => clearTimeout(timer);
   }, [mermaidCode, id, isMounted]);
 
-  const handlePointerDown = (e: React.PointerEvent) => {
-    // Check for double-click
-    if (e.detail === 2) {
-      e.stopPropagation();
-      setIsEditDialogOpen(true);
-      return;
-    }
-
-    // For single clicks, call the original onPointerDown handler
-    onPointerDown(e, id);
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditDialogOpen(true);
   };
 
   const handleSaveMermaidCode = (newCode: string) => {
@@ -142,7 +135,8 @@ export const Mermaid = ({
           y={y}
           width={width}
           height={height}
-          onPointerDown={handlePointerDown}
+          onPointerDown={(e) => onPointerDown(e, id)}
+          onDoubleClick={handleDoubleClick}
           style={{
             outline: selectionColor ? `1px solid ${selectionColor}` : "none",
             backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
@@ -178,7 +172,8 @@ export const Mermaid = ({
           y={y}
           width={width}
           height={height}
-          onPointerDown={handlePointerDown}
+          onPointerDown={(e) => onPointerDown(e, id)}
+          onDoubleClick={handleDoubleClick}
           style={{
             outline: selectionColor ? `1px solid ${selectionColor}` : "none",
             backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
@@ -215,7 +210,8 @@ export const Mermaid = ({
           y={y}
           width={width}
           height={height}
-          onPointerDown={handlePointerDown}
+          onPointerDown={(e) => onPointerDown(e, id)}
+          onDoubleClick={handleDoubleClick}
           style={{
             outline: selectionColor ? `1px solid ${selectionColor}` : "none",
             backgroundColor: fill ? colorToCSS(fill) : "#fee2e2",
@@ -251,7 +247,8 @@ export const Mermaid = ({
         y={y}
         width={width}
         height={height}
-        onPointerDown={handlePointerDown}
+        onPointerDown={(e) => onPointerDown(e, id)}
+        onDoubleClick={handleDoubleClick}
         style={{
           outline: selectionColor ? `1px solid ${selectionColor}` : "none",
           backgroundColor: fill ? colorToCSS(fill) : "white",
