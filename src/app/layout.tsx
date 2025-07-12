@@ -11,6 +11,7 @@ import { TidioChat } from "@/components/tidio-chat";
 import { UsetifulProvider } from "@/components/usetiful-provider";
 import { siteConfig } from "@/config";
 
+import * as Sentry from '@sentry/nextjs';
 import "./globals.css";
 
 const poppins = Poppins({
@@ -27,22 +28,30 @@ export const viewport: Viewport = {
   themeColor: "#4A0D68",
 };
 
-export const metadata: Metadata = {
-  ...siteConfig,
-  title: "Proddy - Your Team's Second Brain",
-  description:
-    "A vibrant team collaboration platform with real-time messaging, rich text editing, and emoji support.",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Proddy",
-  },
-  applicationName: "Proddy",
-  formatDetection: {
-    telephone: false,
-  },
-};
+// Add generateMetadata function to include Sentry trace data
+export function generateMetadata(): Metadata {
+  return {
+    ...siteConfig,
+    title: "Proddy - Your Team's Second Brain",
+    description:
+      "A vibrant team collaboration platform with real-time messaging, rich text editing, and emoji support.",
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Proddy",
+    },
+    applicationName: "Proddy",
+    formatDetection: {
+      telephone: false,
+    },
+    other: {
+      ...Sentry.getTraceData()
+    }
+  };
+}
+
+
 
 const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
   return (
@@ -52,6 +61,12 @@ const RootLayout = ({ children }: Readonly<PropsWithChildren>) => {
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="mobile-web-app-capable" content="yes" />
           <link rel="apple-touch-icon" href="/logo-nobg.png" />
+          {/* Canny SDK */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `!function(w,d,i,s){function l(){if(!d.getElementById(i)){var f=d.getElementsByTagName(s)[0],e=d.createElement(s);e.type="text/javascript",e.async=!0,e.src="https://canny.io/sdk.js",f.parentNode.insertBefore(e,f)}}if("function"!=typeof w.Canny){var c=function(){c.q.push(arguments)};c.q=[],w.Canny=c,"complete"===d.readyState?l():w.attachEvent?w.attachEvent("onload",l):w.addEventListener("load",l,!1)}}(window,document,"canny-jssdk","script");`
+            }}
+          />
         </head>
         <body className={`${poppins.className} antialiased`}>
           <ConvexClientProvider>

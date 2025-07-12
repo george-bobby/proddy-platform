@@ -1,41 +1,41 @@
 'use client';
 
 import React from 'react';
-import {Activity, Bell, HeartPulse, HelpCircle, Map, Search} from 'lucide-react';
-import {useRouter, useSearchParams} from 'next/navigation';
-import {ReactNode, useEffect, useState} from 'react';
+import { Activity, Bell, HeartPulse, HelpCircle, Map, Search } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ReactNode, useEffect, useState } from 'react';
 
-import type {Id} from '@/../convex/_generated/dataModel';
-import {Button} from '@/components/ui/button';
-import {Hint} from '@/components/hint';
+import type { Id } from '@/../convex/_generated/dataModel';
+import { Button } from '@/components/ui/button';
+import { Hint } from '@/components/hint';
 import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
 } from '@/components/ui/command';
-import {Badge} from '@/components/ui/badge';
-import {MentionsNotificationDialog} from '@/components/mentions-notification-dialog';
-import {UserButton} from '@/features/auth/components/user-button';
-import {useGetChannels} from '@/features/channels/api/use-get-channels';
-import {useGetMembers} from '@/features/members/api/use-get-members';
-import {useGetWorkspace} from '@/features/workspaces/api/use-get-workspace';
-import {useWorkspaceSearch} from '@/features/workspaces/store/use-workspace-search';
-import {useGetUnreadMentionsCount} from '@/features/messages/api/use-get-unread-mentions-count';
-import {showTidioChat} from '@/lib/tidio-helpers';
+import { Badge } from '@/components/ui/badge';
+import { MentionsNotificationDialog } from '@/components/mentions-notification-dialog';
+import { UserButton } from '@/features/auth/components/user-button';
+import { useGetChannels } from '@/features/channels/api/use-get-channels';
+import { useGetMembers } from '@/features/members/api/use-get-members';
+import { useGetWorkspace } from '@/features/workspaces/api/use-get-workspace';
+import { useWorkspaceSearch } from '@/features/workspaces/store/use-workspace-search';
+import { useGetUnreadMentionsCount } from '@/features/messages/api/use-get-unread-mentions-count';
+import { showTidioChat } from '@/lib/tidio-helpers';
 
-import {useWorkspaceId} from '@/hooks/use-workspace-id';
+import { useWorkspaceId } from '@/hooks/use-workspace-id';
 
 interface WorkspaceToolbarProps {
     children: ReactNode;
 }
 
 export const WorkspaceToolbar = ({
-                                     children
-                                 }: WorkspaceToolbarProps) => {
+    children
+}: WorkspaceToolbarProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const workspaceId = useWorkspaceId();
@@ -43,11 +43,12 @@ export const WorkspaceToolbar = ({
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [forceOpenUserSettings, setForceOpenUserSettings] = useState(false);
     const [userSettingsTab, setUserSettingsTab] = useState<'profile' | 'notifications'>('profile');
+    const [cannyInitialized, setCannyInitialized] = useState(false);
 
-    const {data: workspace} = useGetWorkspace({id: workspaceId});
-    const {data: channels} = useGetChannels({workspaceId});
-    const {data: members} = useGetMembers({workspaceId});
-    const {counts, isLoading: isLoadingMentions} = useGetUnreadMentionsCount();
+    const { data: workspace } = useGetWorkspace({ id: workspaceId });
+    const { data: channels } = useGetChannels({ workspaceId });
+    const { data: members } = useGetMembers({ workspaceId });
+    const { counts, isLoading: isLoadingMentions } = useGetUnreadMentionsCount();
 
     // Handle URL parameter for opening user settings
     useEffect(() => {
@@ -88,6 +89,42 @@ export const WorkspaceToolbar = ({
         return () => document.removeEventListener('keydown', down);
     }, [setSearchOpen]);
 
+    // Initialize Canny changelog widget
+    useEffect(() => {
+        const initializeCanny = () => {
+            if (!cannyInitialized && typeof window !== 'undefined' && window.Canny) {
+                try {
+                    window.Canny('initChangelog', {
+                        appID: process.env.NEXT_PUBLIC_CANNY_APP_ID!,
+                        position: 'bottom',
+                        align: 'left',
+                        theme: 'light',
+                    });
+                    setCannyInitialized(true);
+                } catch (error) {
+                    console.error('Failed to initialize Canny changelog:', error);
+                }
+            }
+        };
+
+        // Add a small delay to ensure Canny SDK is fully loaded
+        const timer = setTimeout(initializeCanny, 100);
+        return () => clearTimeout(timer);
+    }, [cannyInitialized]);
+
+    // Cleanup Canny changelog on unmount
+    useEffect(() => {
+        return () => {
+            if (typeof window !== 'undefined' && window.Canny) {
+                try {
+                    window.Canny('closeChangelog');
+                } catch (error) {
+                    console.error('Failed to close Canny changelog:', error);
+                }
+            }
+        };
+    }, []);
+
     return (
         <nav
             className="sticky top-0 z-50 flex h-16 items-center overflow-hidden border-b bg-primary text-secondary-foreground shadow-md">
@@ -103,7 +140,7 @@ export const WorkspaceToolbar = ({
                     size="sm"
                     className="h-9 w-full justify-start bg-white/10 px-3 hover:bg-white/20 transition-standard border border-white/10 rounded-[10px]"
                 >
-                    <Search className="mr-2 size-4 text-white"/>
+                    <Search className="mr-2 size-4 text-white" />
                     <span className="text-xs text-white">Search {workspace?.name ?? 'workspace'}...</span>
                     <kbd
                         className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-90">
@@ -112,7 +149,7 @@ export const WorkspaceToolbar = ({
                 </Button>
 
                 <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-                    <CommandInput placeholder={`Search ${workspace?.name ?? 'workspace'}...`}/>
+                    <CommandInput placeholder={`Search ${workspace?.name ?? 'workspace'}...`} />
                     <CommandList>
                         <CommandEmpty>No results found.</CommandEmpty>
 
@@ -124,7 +161,7 @@ export const WorkspaceToolbar = ({
                             ))}
                         </CommandGroup>
 
-                        <CommandSeparator/>
+                        <CommandSeparator />
 
                         <CommandGroup heading="Members">
                             {members?.map((member) => (
@@ -146,14 +183,10 @@ export const WorkspaceToolbar = ({
                         variant="ghost"
                         size="iconSm"
                         className="text-white relative hover:bg-white/15 transition-colors"
-                        onClick={() => {
-                            // Open roadmap page in a new tab
-                            const roadmapUrl = 'https://proddy.canny.io/';
-                            window.open(roadmapUrl, '_blank', 'noopener,noreferrer');
-                        }}
+                        data-canny-changelog
                     >
                         <div className="relative">
-                            <Map className="size-5"/>
+                            <Map className="size-5" />
                         </div>
                     </Button>
                 </Hint>
@@ -171,7 +204,7 @@ export const WorkspaceToolbar = ({
                         }}
                     >
                         <div className="relative">
-                            <HelpCircle className="size-5"/>
+                            <HelpCircle className="size-5" />
                         </div>
                     </Button>
                 </Hint>
@@ -188,7 +221,7 @@ export const WorkspaceToolbar = ({
                         }}
                     >
                         <div className="relative">
-                            <HeartPulse className="size-5"/>
+                            <HeartPulse className="size-5" />
                         </div>
                     </Button>
                 </Hint>
@@ -206,7 +239,7 @@ export const WorkspaceToolbar = ({
                         }}
                     >
                         <div className="relative">
-                            <Activity className="size-5"/>
+                            <Activity className="size-5" />
                         </div>
                     </Button>
                 </Hint>
@@ -221,7 +254,7 @@ export const WorkspaceToolbar = ({
                         onClick={() => setNotificationsOpen(true)}
                     >
                         <div className="relative">
-                            <Bell className="size-5"/>
+                            <Bell className="size-5" />
                             {!isLoadingMentions && counts && counts.total > 0 && (
                                 <Badge
                                     variant="default"

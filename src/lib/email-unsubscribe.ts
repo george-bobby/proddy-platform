@@ -10,7 +10,7 @@ export type EmailType =
 
 // Get the secret key for signing unsubscribe URLs
 function getUnsubscribeSecret(): string {
-	return 'email213';
+	return process.env.NEXT_PUBLIC_EMAIL_UNSUBSCRIBE_SECRET!;
 }
 
 /**
