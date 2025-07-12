@@ -1,30 +1,30 @@
 'use client';
 
-import {useAuthActions} from '@convex-dev/auth/react';
-import {AlertTriangle, Loader, LogOut, Settings, Trash2} from 'lucide-react';
-import {useRouter} from 'next/navigation';
-import {useEffect, useState} from 'react';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { AlertTriangle, Loader, LogOut, Settings, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {Button} from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {UserProfileModal} from './user-profile-modal';
-import {useDeleteAccount} from '../api/use-delete-account';
-import {useCurrentUser} from '../api/use-current-user';
+import { UserProfileModal } from './user-profile-modal';
+import { useDeleteAccount } from '../api/use-delete-account';
+import { useCurrentUser } from '../api/use-current-user';
 // Removed useMarkOfflineGlobally - now handled by presence system
 
 interface UserButtonProps {
@@ -34,13 +34,13 @@ interface UserButtonProps {
 }
 
 export const UserButton = ({
-                               forceOpenSettings = false,
-                               defaultTab = 'profile',
-                               onSettingsClose
-                           }: UserButtonProps = {}) => {
+    forceOpenSettings = false,
+    defaultTab = 'profile',
+    onSettingsClose
+}: UserButtonProps = {}) => {
     const router = useRouter();
-    const {signOut} = useAuthActions();
-    const {data, isLoading} = useCurrentUser();
+    const { signOut } = useAuthActions();
+    const { data, isLoading } = useCurrentUser();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -62,14 +62,14 @@ export const UserButton = ({
     };
 
     if (isLoading) {
-        return <Loader className="size-4 animate-spin text-muted-foreground"/>;
+        return <Loader className="size-4 animate-spin text-muted-foreground" />;
     }
 
     if (!data) {
         return null;
     }
 
-    const {image, name, email} = data;
+    const { image, name, email } = data;
     const avatarFallback = name?.charAt(0).toUpperCase();
 
     const handleSignOut = async () => {
@@ -98,7 +98,7 @@ export const UserButton = ({
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger className="relative outline-none">
                     <Avatar className="size-10 transition hover:opacity-75">
-                        <AvatarImage alt={name} src={image}/>
+                        <AvatarImage alt={name} src={image || undefined} />
                         <AvatarFallback className="text-base">{avatarFallback}</AvatarFallback>
                     </Avatar>
                 </DropdownMenuTrigger>
@@ -108,27 +108,27 @@ export const UserButton = ({
                         onClick={() => setSettingsOpen(true)}
                         className="h-10"
                     >
-                        <Settings className="mr-2 size-4"/>
+                        <Settings className="mr-2 size-4" />
                         Account Settings
                     </DropdownMenuItem>
 
-                    <DropdownMenuSeparator/>
+                    <DropdownMenuSeparator />
 
                     <DropdownMenuItem
                         onClick={handleSignOut}
                         className="h-10"
                     >
-                        <LogOut className="mr-2 size-4"/>
+                        <LogOut className="mr-2 size-4" />
                         Log out
                     </DropdownMenuItem>
 
-                    <DropdownMenuSeparator/>
+                    <DropdownMenuSeparator />
 
                     <DropdownMenuItem
                         onClick={() => setDeleteDialogOpen(true)}
                         className="h-10 text-destructive"
                     >
-                        <Trash2 className="mr-2 size-4"/>
+                        <Trash2 className="mr-2 size-4" />
                         Delete Account
                     </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -147,7 +147,7 @@ export const UserButton = ({
 
                     <div
                         className="flex items-center gap-x-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                        <AlertTriangle className="size-4"/>
+                        <AlertTriangle className="size-4" />
                         <p>Warning: This will delete all your workspaces, channels, and messages.</p>
                     </div>
 
@@ -162,7 +162,7 @@ export const UserButton = ({
                         <Button variant="destructive" onClick={handleDeleteAccount} disabled={isDeleting}>
                             {isDeleting ? (
                                 <>
-                                    <Loader className="mr-2 size-4 animate-spin"/>
+                                    <Loader className="mr-2 size-4 animate-spin" />
                                     Deleting...
                                 </>
                             ) : (
@@ -180,7 +180,7 @@ export const UserButton = ({
                     onOpenChange={handleSettingsClose}
                     name={name}
                     email={email}
-                    image={image}
+                    image={image || undefined}
                     mode="edit"
                     defaultTab={defaultTab}
                 />
