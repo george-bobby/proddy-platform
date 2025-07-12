@@ -32,11 +32,11 @@ const DashboardPage = () => {
     return {
       _id: member._id,
       userId: member.userId,
-      role: member.role,
+      role: member.role as string,
       workspaceId: member.workspaceId,
       user: {
         name: currentUser.name || 'User',
-        image: currentUser.image
+        image: currentUser.image || undefined
       }
     };
   }, [member, currentUser]);
