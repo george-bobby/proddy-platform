@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useMutation } from "../../../../liveblocks.config";
 import { MermaidLayer } from "../types/canvas";
 import { colorToCSS } from "../../../lib/utils";
+import { MermaidEditDialog } from "./mermaid-edit-dialog";
 
 type MermaidProps = {
   id: string;
@@ -24,6 +25,7 @@ export const Mermaid = ({
   const [error, setError] = useState<string | null>(null);
   const [renderedSvg, setRenderedSvg] = useState<string>("");
   const [isMounted, setIsMounted] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Update layer content
   const updateMermaidCode = useMutation(
@@ -117,126 +119,172 @@ export const Mermaid = ({
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Open edit dialog for mermaid code
-    console.log('Double-clicked mermaid diagram:', id);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveMermaidCode = (newCode: string) => {
+    updateMermaidCode(newCode);
   };
 
   // Don't render anything until mounted (SSR safety)
   if (!isMounted) {
     return (
-      <foreignObject
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        onPointerDown={(e) => onPointerDown(e, id)}
-        style={{
-          outline: selectionColor ? `1px solid ${selectionColor}` : "none",
-          backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
-        }}
-        className="shadow-md drop-shadow-xl"
-      >
-        <div
-          className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
-          style={{ fontSize: '12px', color: '#666' }}
+      <>
+        <foreignObject
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          onPointerDown={(e) => onPointerDown(e, id)}
+          onDoubleClick={handleDoubleClick}
+          style={{
+            outline: selectionColor ? `1px solid ${selectionColor}` : "none",
+            backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
+          }}
+          className="shadow-md drop-shadow-xl cursor-pointer"
         >
-          <div className="text-center">
-            <div>Loading...</div>
+          <div
+            className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
+            style={{ fontSize: '12px', color: '#666' }}
+          >
+            <div className="text-center">
+              <div>Loading...</div>
+            </div>
           </div>
-        </div>
-      </foreignObject>
+        </foreignObject>
+
+        {/* Edit Dialog */}
+        <MermaidEditDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          mermaidCode={mermaidCode}
+          onSave={handleSaveMermaidCode}
+        />
+      </>
     );
   }
 
   if (isLoading) {
     return (
-      <foreignObject
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        onPointerDown={(e) => onPointerDown(e, id)}
-        style={{
-          outline: selectionColor ? `1px solid ${selectionColor}` : "none",
-          backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
-        }}
-        className="shadow-md drop-shadow-xl"
-      >
-        <div
-          className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
-          style={{ fontSize: '12px', color: '#666' }}
+      <>
+        <foreignObject
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          onPointerDown={(e) => onPointerDown(e, id)}
+          onDoubleClick={handleDoubleClick}
+          style={{
+            outline: selectionColor ? `1px solid ${selectionColor}` : "none",
+            backgroundColor: fill ? colorToCSS(fill) : "#f9f9f9",
+          }}
+          className="shadow-md drop-shadow-xl cursor-pointer"
         >
-          <div className="text-center">
-            <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-            <div>Rendering diagram...</div>
+          <div
+            className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
+            style={{ fontSize: '12px', color: '#666' }}
+          >
+            <div className="text-center">
+              <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+              <div>Rendering diagram...</div>
+            </div>
           </div>
-        </div>
-      </foreignObject>
+        </foreignObject>
+
+        {/* Edit Dialog */}
+        <MermaidEditDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          mermaidCode={mermaidCode}
+          onSave={handleSaveMermaidCode}
+        />
+      </>
     );
   }
 
   if (error) {
     return (
+      <>
+        <foreignObject
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          onPointerDown={(e) => onPointerDown(e, id)}
+          onDoubleClick={handleDoubleClick}
+          style={{
+            outline: selectionColor ? `1px solid ${selectionColor}` : "none",
+            backgroundColor: fill ? colorToCSS(fill) : "#fee2e2",
+          }}
+          className="shadow-md drop-shadow-xl cursor-pointer"
+        >
+          <div
+            className="h-full w-full flex items-center justify-center bg-red-50 border border-red-300 rounded text-red-600"
+            style={{ fontSize: '12px' }}
+          >
+            <div className="text-center p-2">
+              <div className="font-medium mb-1">Diagram Error</div>
+              <div className="text-xs">{error}</div>
+            </div>
+          </div>
+        </foreignObject>
+
+        {/* Edit Dialog */}
+        <MermaidEditDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          mermaidCode={mermaidCode}
+          onSave={handleSaveMermaidCode}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
       <foreignObject
         x={x}
         y={y}
         width={width}
         height={height}
         onPointerDown={(e) => onPointerDown(e, id)}
+        onDoubleClick={handleDoubleClick}
         style={{
           outline: selectionColor ? `1px solid ${selectionColor}` : "none",
-          backgroundColor: fill ? colorToCSS(fill) : "#fee2e2",
+          backgroundColor: fill ? colorToCSS(fill) : "white",
         }}
-        className="shadow-md drop-shadow-xl"
+        className="shadow-md drop-shadow-xl cursor-pointer"
       >
         <div
-          className="h-full w-full flex items-center justify-center bg-red-50 border border-red-300 rounded text-red-600"
-          style={{ fontSize: '12px' }}
+          ref={containerRef}
+          className="h-full w-full overflow-hidden rounded border border-gray-200 bg-white"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '4px',
+          }}
         >
-          <div className="text-center p-2">
-            <div className="font-medium mb-1">Diagram Error</div>
-            <div className="text-xs">{error}</div>
-          </div>
+          {renderedSvg && (
+            <div
+              className="w-full h-full flex items-center justify-center"
+              dangerouslySetInnerHTML={{ __html: renderedSvg }}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+              }}
+            />
+          )}
         </div>
       </foreignObject>
-    );
-  }
 
-  return (
-    <foreignObject
-      x={x}
-      y={y}
-      width={width}
-      height={height}
-      onPointerDown={(e) => onPointerDown(e, id)}
-      onDoubleClick={handleDoubleClick}
-      style={{
-        outline: selectionColor ? `1px solid ${selectionColor}` : "none",
-        backgroundColor: fill ? colorToCSS(fill) : "white",
-      }}
-      className="shadow-md drop-shadow-xl cursor-pointer"
-    >
-      <div
-        ref={containerRef}
-        className="h-full w-full overflow-hidden rounded border border-gray-200 bg-white"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '4px',
-        }}
-      >
-        {renderedSvg && (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            dangerouslySetInnerHTML={{ __html: renderedSvg }}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-            }}
-          />
-        )}
-      </div>
-    </foreignObject>
+      {/* Edit Dialog */}
+      <MermaidEditDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        mermaidCode={mermaidCode}
+        onSave={handleSaveMermaidCode}
+      />
+    </>
   );
 };

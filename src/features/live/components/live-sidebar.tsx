@@ -40,6 +40,7 @@ interface LiveSidebarProps {
   // Action props
   onCreateItem: () => void;
   onDeleteItem?: (itemId: string) => void;
+  onRenameItem?: (itemId: string, newName: string) => void;
 
   // Context props
   workspaceId?: Id<'workspaces'>;
@@ -58,6 +59,7 @@ export const LiveSidebar = ({
   onToggleCollapse,
   onCreateItem,
   onDeleteItem,
+  onRenameItem,
   workspaceId,
   channelId,
   className
@@ -65,6 +67,8 @@ export const LiveSidebar = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [renamingItemId, setRenamingItemId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   // Filter items based on search query
   const filteredItems = useMemo(() => {
@@ -121,6 +125,38 @@ export const LiveSidebar = ({
   const handleDelete = (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
     onDeleteItem?.(itemId);
+  };
+
+  // Handle rename
+  const handleRename = (e: React.MouseEvent, item: LiveItem) => {
+    e.stopPropagation();
+    setRenamingItemId(item._id);
+    setRenameValue(getItemTitle(item));
+    setOpenDropdownId(null);
+  };
+
+  // Handle rename submit
+  const handleRenameSubmit = (itemId: string) => {
+    if (renameValue.trim() && onRenameItem) {
+      onRenameItem(itemId, renameValue.trim());
+    }
+    setRenamingItemId(null);
+    setRenameValue('');
+  };
+
+  // Handle rename cancel
+  const handleRenameCancel = () => {
+    setRenamingItemId(null);
+    setRenameValue('');
+  };
+
+  // Handle rename key down
+  const handleRenameKeyDown = (e: React.KeyboardEvent, itemId: string) => {
+    if (e.key === 'Enter') {
+      handleRenameSubmit(itemId);
+    } else if (e.key === 'Escape') {
+      handleRenameCancel();
+    }
   };
 
   if (collapsed) {
@@ -234,9 +270,21 @@ export const LiveSidebar = ({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm truncate">
-                        {getItemTitle(item)}
-                      </h3>
+                      {renamingItemId === item._id ? (
+                        <Input
+                          value={renameValue}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => handleRenameKeyDown(e, item._id)}
+                          onBlur={() => handleRenameSubmit(item._id)}
+                          autoFocus
+                          className="h-6 text-sm font-medium border-none shadow-none p-0 focus-visible:ring-0"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      ) : (
+                        <h3 className="font-medium text-sm truncate">
+                          {getItemTitle(item)}
+                        </h3>
+                      )}
 
                       {type === 'notes' && item.content && (
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -287,15 +335,14 @@ export const LiveSidebar = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              // Handle rename functionality
-                              // TODO: Implement rename functionality
-                            }}
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            Rename
-                          </DropdownMenuItem>
+                          {onRenameItem && (
+                            <DropdownMenuItem
+                              onClick={(e) => handleRename(e, item)}
+                            >
+                              <FileText className="h-4 w-4 mr-2" />
+                              Rename
+                            </DropdownMenuItem>
+                          )}
                           {onDeleteItem && (
                             <DropdownMenuItem
                               onClick={(e) => handleDelete(e, item._id)}

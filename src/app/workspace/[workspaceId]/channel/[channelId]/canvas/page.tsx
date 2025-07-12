@@ -147,6 +147,35 @@ const CanvasPage = () => {
         }
     }, [deleteMessage, activeCanvasId]);
 
+    // Handle canvas rename
+    const handleRenameCanvas = useCallback(async (canvasId: string, newName: string) => {
+        try {
+            // Find the canvas item to get its current data
+            const canvasItem = canvasItems.find(item => item._id === canvasId);
+            if (!canvasItem) {
+                toast.error('Canvas not found');
+                return;
+            }
+
+            // Parse the current body to update only the canvas name
+            const currentBody = JSON.parse(canvasItem.body);
+            const updatedBody = {
+                ...currentBody,
+                canvasName: newName
+            };
+
+            await updateMessage({
+                id: canvasId as Id<"messages">,
+                body: JSON.stringify(updatedBody)
+            });
+
+            toast.success('Canvas renamed successfully');
+        } catch (error) {
+            toast.error('Failed to rename canvas');
+            console.error('Error renaming canvas:', error);
+        }
+    }, [updateMessage, canvasItems]);
+
     // Function to create a new canvas - simplified like notes
     const handleCreateCanvas = async () => {
         if (!workspaceId || !channelId || !currentUser) {
@@ -219,6 +248,7 @@ const CanvasPage = () => {
                         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                         onCreateItem={handleCreateCanvas}
                         onDeleteItem={handleDeleteCanvas}
+                        onRenameItem={handleRenameCanvas}
                         workspaceId={workspaceId}
                         channelId={channelId}
                     />
@@ -263,6 +293,7 @@ const CanvasPage = () => {
                         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                         onCreateItem={handleCreateCanvas}
                         onDeleteItem={handleDeleteCanvas}
+                        onRenameItem={handleRenameCanvas}
                         workspaceId={workspaceId}
                         channelId={channelId}
                     />

@@ -99,6 +99,16 @@ export const NotesContent = ({
     }
   }, [onDeleteNote]);
 
+  // Create wrapper for onRenameItem to match LiveSidebar's expected signature
+  const handleRenameItem = useCallback(async (itemId: string, newName: string) => {
+    try {
+      await onUpdateNote(itemId as Id<'notes'>, { title: newName });
+    } catch (error) {
+      console.error('Failed to rename note:', error);
+      toast.error('Failed to rename note');
+    }
+  }, [onUpdateNote]);
+
   // Memoize the note object to prevent unnecessary re-renders
   const memoizedNote = useMemo(() => {
     if (!activeNote) return null;
@@ -166,6 +176,7 @@ export const NotesContent = ({
             onToggleCollapse={memoizedToggleCollapse}
             onCreateItem={onCreateNote}
             onDeleteItem={handleDeleteItem}
+            onRenameItem={handleRenameItem}
             workspaceId={workspaceId}
             channelId={channelId}
           />

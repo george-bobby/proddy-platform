@@ -10,7 +10,16 @@ export const current = query({
 
 		if (userId === null) return null;
 
-		return await ctx.db.get(userId);
+		const user = await ctx.db.get(userId);
+		if (!user) return null;
+
+		// Get image URL if user has an image
+		const imageUrl = user.image ? await ctx.storage.getUrl(user.image) : undefined;
+
+		return {
+			...user,
+			image: imageUrl,
+		};
 	},
 });
 
@@ -30,8 +39,14 @@ export const getUserById = query({
 
 		if (!user) return null;
 
-		// Return the user data
-		return user;
+		// Get image URL if user has an image
+		const imageUrl = user.image ? await ctx.storage.getUrl(user.image) : undefined;
+
+		// Return the user data with image URL
+		return {
+			...user,
+			image: imageUrl,
+		};
 	},
 });
 
@@ -45,6 +60,7 @@ export const updateProfile = mutation({
 		location: v.optional(v.string()),
 		website: v.optional(v.string()),
 		phone: v.optional(v.string()),
+		image: v.optional(v.id('_storage')),
 	},
 	handler: async (ctx, args) => {
 		const userId = await getAuthUserId(ctx);
@@ -76,6 +92,9 @@ export const updateProfile = mutation({
 		}
 		if (args.phone !== undefined) {
 			updateData.phone = args.phone.trim() || undefined;
+		}
+		if (args.image !== undefined) {
+			updateData.image = args.image;
 		}
 
 		// Update the user

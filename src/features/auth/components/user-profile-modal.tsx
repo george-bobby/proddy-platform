@@ -1,22 +1,23 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {toast} from 'sonner';
-import {Camera, Edit3, Globe, Mail, MapPin, Phone, Save, User, X} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import { Camera, Edit3, Globe, Mail, MapPin, Phone, Save, User, X, Loader2 } from 'lucide-react';
 
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
-import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogHeader, DialogTitle,} from '@/components/ui/dialog';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
-import {Separator} from '@/components/ui/separator';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import {Badge} from '@/components/ui/badge';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {NotificationSettings} from '@/features/preferences/components/notification-settings';
-import {StatusTrackingSettings} from '@/features/preferences/components/status-tracking-settings';
-import {useUpdateUser} from '@/features/auth/api/use-update-user';
-import {useCurrentUser} from '../api/use-current-user';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { NotificationSettings } from '@/features/preferences/components/notification-settings';
+import { StatusTrackingSettings } from '@/features/preferences/components/status-tracking-settings';
+import { useUpdateUser } from '@/features/auth/api/use-update-user';
+import { useCurrentUser } from '../api/use-current-user';
+import { useGenerateUploadUrl } from '@/features/upload/api/use-generate-upload-url';
 
 interface UserProfileModalProps {
     open: boolean;
@@ -29,17 +30,20 @@ interface UserProfileModalProps {
 }
 
 export const UserProfileModal = ({
-                                     open,
-                                     onOpenChange,
-                                     name = '',
-                                     email = '',
-                                     image,
-                                     mode,
-                                     defaultTab = 'profile'
-                                 }: UserProfileModalProps) => {
-    const {data: currentUser} = useCurrentUser();
-    const {updateUser} = useUpdateUser();
+    open,
+    onOpenChange,
+    name = '',
+    email = '',
+    image,
+    mode,
+    defaultTab = 'profile'
+}: UserProfileModalProps) => {
+    const { data: currentUser } = useCurrentUser();
+    const { updateUser } = useUpdateUser();
+    const { mutate: generateUploadUrl } = useGenerateUploadUrl();
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [displayName, setDisplayName] = useState(name);
     const [bio, setBio] = useState('');
@@ -48,6 +52,7 @@ export const UserProfileModal = ({
     const [phone, setPhone] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
     // Initialize form data when user data loads
     useEffect(() => {
@@ -123,8 +128,68 @@ export const UserProfileModal = ({
     };
 
     const handleAvatarChange = () => {
-        // TODO: Implement avatar upload functionality
-        toast.info('Avatar upload coming soon!');
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            toast.error('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            toast.error('Image size must be less than 5MB');
+            return;
+        }
+
+        // Create preview URL outside try block so it's accessible in catch
+        const previewUrl = URL.createObjectURL(file);
+        setAvatarPreview(previewUrl);
+
+        try {
+            setIsUploadingAvatar(true);
+
+            // Generate upload URL
+            const uploadUrl = await generateUploadUrl({}, { throwError: true });
+            if (!uploadUrl) throw new Error('Failed to generate upload URL');
+
+            // Upload file
+            const result = await fetch(uploadUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': file.type },
+                body: file,
+            });
+
+            if (!result.ok) throw new Error('Failed to upload image');
+
+            const { storageId } = await result.json();
+
+            // Update user profile with new image
+            await updateUser({ image: storageId });
+
+            toast.success('Avatar updated successfully!');
+
+        } catch (error) {
+            console.error('Avatar upload error:', error);
+            toast.error('Failed to upload avatar. Please try again.');
+        } finally {
+            // Always clean up preview URL and reset states
+            URL.revokeObjectURL(previewUrl);
+            setAvatarPreview(null);
+            setIsUploadingAvatar(false);
+
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
     };
 
     return (
@@ -138,21 +203,38 @@ export const UserProfileModal = ({
                             <div className="space-y-4 flex-shrink-0">
                                 <div className="relative">
                                     <Avatar className="size-24 ring-4 ring-background shadow-lg">
-                                        <AvatarImage src={image || currentUser?.image}/>
+                                        <AvatarImage src={avatarPreview || image || currentUser?.image || undefined} />
                                         <AvatarFallback className="text-2xl bg-primary/10 text-primary">
                                             {avatarFallback}
                                         </AvatarFallback>
                                     </Avatar>
+                                    {isUploadingAvatar && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                                            <Loader2 className="size-6 text-white animate-spin" />
+                                        </div>
+                                    )}
                                     {isEditMode && (
                                         <Button
                                             size="sm"
                                             variant="secondary"
                                             className="absolute -bottom-2 -right-2 rounded-full size-8 p-0"
                                             onClick={handleAvatarChange}
+                                            disabled={isUploadingAvatar}
                                         >
-                                            <Camera className="size-4"/>
+                                            {isUploadingAvatar ? (
+                                                <Loader2 className="size-4 animate-spin" />
+                                            ) : (
+                                                <Camera className="size-4" />
+                                            )}
                                         </Button>
                                     )}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
                                 </div>
 
                                 <div className="space-y-2">
@@ -169,7 +251,7 @@ export const UserProfileModal = ({
                                             onClick={() => setIsEditing(true)}
                                             className="gap-2 mt-3"
                                         >
-                                            <Edit3 className="size-4"/>
+                                            <Edit3 className="size-4" />
                                             Edit Profile
                                         </Button>
                                     )}
@@ -184,7 +266,7 @@ export const UserProfileModal = ({
                                                 className="gap-2 w-full"
                                                 size="sm"
                                             >
-                                                <X className="size-4"/>
+                                                <X className="size-4" />
                                                 Cancel
                                             </Button>
                                             <Button
@@ -194,7 +276,7 @@ export const UserProfileModal = ({
                                                 size="sm"
                                                 form="profile-form"
                                             >
-                                                <Save className="size-4"/>
+                                                <Save className="size-4" />
                                                 {isUpdating ? 'Saving...' : 'Save Changes'}
                                             </Button>
                                         </div>
@@ -213,13 +295,13 @@ export const UserProfileModal = ({
                                 <div className="space-y-2 w-full">
                                     {location && (
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <MapPin className="size-4 flex-shrink-0"/>
+                                            <MapPin className="size-4 flex-shrink-0" />
                                             <span className="truncate">{location}</span>
                                         </div>
                                     )}
                                     {website && (
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Globe className="size-4 flex-shrink-0"/>
+                                            <Globe className="size-4 flex-shrink-0" />
                                             <a
                                                 href={website.startsWith('http') ? website : `https://${website}`}
                                                 target="_blank"
@@ -232,7 +314,7 @@ export const UserProfileModal = ({
                                     )}
                                     {phone && (
                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Phone className="size-4 flex-shrink-0"/>
+                                            <Phone className="size-4 flex-shrink-0" />
                                             <span className="truncate">{phone}</span>
                                         </div>
                                     )}
@@ -255,25 +337,25 @@ export const UserProfileModal = ({
                                     <Tabs defaultValue={defaultTab} className="w-full h-full flex flex-col">
                                         <TabsList className="grid w-full grid-cols-2 mx-6 mt-4 flex-shrink-0">
                                             <TabsTrigger value="profile" className="gap-2">
-                                                <User className="size-4"/>
+                                                <User className="size-4" />
                                                 Profile
                                             </TabsTrigger>
                                             <TabsTrigger value="notifications" className="gap-2">
-                                                <Mail className="size-4"/>
+                                                <Mail className="size-4" />
                                                 Notifications
                                             </TabsTrigger>
                                         </TabsList>
 
                                         <TabsContent value="profile" className="flex-1 overflow-y-auto min-w-0 px-6"
-                                                     data-state="active">
+                                            data-state="active">
                                             <div className="py-6 space-y-6 max-w-none">
                                                 {isEditing ? (
                                                     <form id="profile-form" onSubmit={handleSubmit}
-                                                          className="space-y-6">
+                                                        className="space-y-6">
                                                         <Card>
                                                             <CardHeader>
                                                                 <CardTitle className="flex items-center gap-2">
-                                                                    <User className="size-5"/>
+                                                                    <User className="size-5" />
                                                                     Personal Information
                                                                 </CardTitle>
                                                                 <CardDescription>
@@ -367,7 +449,7 @@ export const UserProfileModal = ({
                                                                 </CardDescription>
                                                             </CardHeader>
                                                             <CardContent>
-                                                                <StatusTrackingSettings/>
+                                                                <StatusTrackingSettings />
                                                             </CardContent>
                                                         </Card>
                                                     </form>
@@ -404,7 +486,7 @@ export const UserProfileModal = ({
 
                                                                 {((currentUser as any)?.bio || (currentUser as any)?.location || (currentUser as any)?.website || currentUser?.phone) && (
                                                                     <>
-                                                                        <Separator/>
+                                                                        <Separator />
                                                                         <div className="grid grid-cols-2 gap-6">
                                                                             {(currentUser as any)?.bio && (
                                                                                 <div className="col-span-2">
@@ -460,7 +542,7 @@ export const UserProfileModal = ({
                                                                 <CardTitle>Privacy Settings</CardTitle>
                                                             </CardHeader>
                                                             <CardContent>
-                                                                <StatusTrackingSettings/>
+                                                                <StatusTrackingSettings />
                                                             </CardContent>
                                                         </Card>
                                                     </div>
@@ -469,10 +551,10 @@ export const UserProfileModal = ({
                                         </TabsContent>
 
                                         <TabsContent value="notifications"
-                                                     className="flex-1 overflow-y-auto min-w-0 px-6"
-                                                     data-state="inactive">
+                                            className="flex-1 overflow-y-auto min-w-0 px-6"
+                                            data-state="inactive">
                                             <div className="py-6">
-                                                <NotificationSettings/>
+                                                <NotificationSettings />
                                             </div>
                                         </TabsContent>
                                     </Tabs>
@@ -487,7 +569,7 @@ export const UserProfileModal = ({
                                             <div className="flex items-center gap-3">
                                                 <div
                                                     className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-                                                    <Mail className="size-5 text-primary"/>
+                                                    <Mail className="size-5 text-primary" />
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-medium text-muted-foreground">Email
@@ -510,7 +592,7 @@ export const UserProfileModal = ({
                                                 <div className="flex items-center gap-3">
                                                     <div
                                                         className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
-                                                        <Phone className="size-5 text-primary"/>
+                                                        <Phone className="size-5 text-primary" />
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-medium text-muted-foreground">Phone

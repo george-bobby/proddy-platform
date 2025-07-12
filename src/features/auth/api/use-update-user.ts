@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 
 import { api } from '@/../convex/_generated/api';
+import type { Id } from '@/../convex/_generated/dataModel';
 
 interface UpdateUserData {
   name?: string;
@@ -10,6 +11,7 @@ interface UpdateUserData {
   location?: string;
   website?: string;
   phone?: string;
+  image?: Id<'_storage'>;
 }
 
 export const useUpdateUser = () => {
