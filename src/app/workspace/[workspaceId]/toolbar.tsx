@@ -43,7 +43,6 @@ export const WorkspaceToolbar = ({
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [forceOpenUserSettings, setForceOpenUserSettings] = useState(false);
     const [userSettingsTab, setUserSettingsTab] = useState<'profile' | 'notifications'>('profile');
-    const [cannyInitialized, setCannyInitialized] = useState(false);
 
     const { data: workspace } = useGetWorkspace({ id: workspaceId });
     const { data: channels } = useGetChannels({ workspaceId });
@@ -88,42 +87,6 @@ export const WorkspaceToolbar = ({
         document.addEventListener('keydown', down);
         return () => document.removeEventListener('keydown', down);
     }, [setSearchOpen]);
-
-    // Initialize Canny changelog widget
-    useEffect(() => {
-        const initializeCanny = () => {
-            if (!cannyInitialized && typeof window !== 'undefined' && window.Canny) {
-                try {
-                    window.Canny('initChangelog', {
-                        appID: process.env.NEXT_PUBLIC_CANNY_APP_ID!,
-                        position: 'bottom',
-                        align: 'left',
-                        theme: 'light',
-                    });
-                    setCannyInitialized(true);
-                } catch (error) {
-                    console.error('Failed to initialize Canny changelog:', error);
-                }
-            }
-        };
-
-        // Add a small delay to ensure Canny SDK is fully loaded
-        const timer = setTimeout(initializeCanny, 100);
-        return () => clearTimeout(timer);
-    }, [cannyInitialized]);
-
-    // Cleanup Canny changelog on unmount
-    useEffect(() => {
-        return () => {
-            if (typeof window !== 'undefined' && window.Canny) {
-                try {
-                    window.Canny('closeChangelog');
-                } catch (error) {
-                    console.error('Failed to close Canny changelog:', error);
-                }
-            }
-        };
-    }, []);
 
     return (
         <nav
@@ -183,7 +146,11 @@ export const WorkspaceToolbar = ({
                         variant="ghost"
                         size="iconSm"
                         className="text-white relative hover:bg-white/15 transition-colors"
-                        data-canny-changelog
+                        onClick={() => {
+                            // Open roadmap page in a new tab
+                            const roadmapUrl = 'https://proddy.canny.io/';
+                            window.open(roadmapUrl, '_blank', 'noopener,noreferrer');
+                        }}
                     >
                         <div className="relative">
                             <Map className="size-5" />
