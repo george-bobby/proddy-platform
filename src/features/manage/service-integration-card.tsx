@@ -73,7 +73,7 @@ const toolkits = {
         icon: FaGithub,
         color: 'bg-gray-900 hover:bg-gray-800',
         name: 'GitHub',
-        description: 'Connect to GitHub for repository management and issue tracking with v3 API',
+        description: 'Connect to GitHub for repository management and issue tracking with AgentAuth',
     },
     gmail: {
         icon: Mail,
@@ -85,13 +85,13 @@ const toolkits = {
         icon: FaSlack,
         color: 'bg-purple-600 hover:bg-purple-700',
         name: 'Slack',
-        description: 'Connect to Slack for team communication and notifications with Composio-managed auth',
+        description: 'Connect to Slack for team communication and notifications with AgentAuth',
     },
     jira: {
         icon: Ticket,
         color: 'bg-blue-600 hover:bg-blue-700',
         name: 'Jira',
-        description: 'Connect to Jira for project management and issue tracking with v3 API',
+        description: 'Connect to Jira for project management and issue tracking with AgentAuth',
     },
     notion: {
         icon: FileText,
@@ -103,7 +103,7 @@ const toolkits = {
         icon: CheckSquare,
         color: 'bg-pink-600 hover:bg-pink-700',
         name: 'ClickUp',
-        description: 'Connect to ClickUp for task management and productivity with Composio-managed auth',
+        description: 'Connect to ClickUp for task management and productivity with AgentAuth',
     },
 };
 
@@ -195,8 +195,8 @@ export const ServiceIntegrationCard = ({
         setIsDisconnecting(true);
 
         try {
-            // Call API to disconnect the account
-            const response = await fetch('/api/composio/connections/disconnect', {
+            // Call AgentAuth API to disconnect the account
+            const response = await fetch('/api/composio/agentauth', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -226,8 +226,8 @@ export const ServiceIntegrationCard = ({
         if (!connectedAccount?.composioAccountId) return;
 
         try {
-            // Call API to check connection status
-            const response = await fetch(`/api/composio/connections/status?composioAccountId=${connectedAccount.composioAccountId}`, {
+            // Call AgentAuth API to check connection status
+            const response = await fetch(`/api/composio/agentauth?action=check-status&composioAccountId=${connectedAccount.composioAccountId}`, {
                 method: 'GET',
             });
 

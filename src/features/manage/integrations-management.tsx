@@ -32,23 +32,27 @@ export const IntegrationsManagement = ({
     const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Fetch data from API routes
+    // Fetch data from AgentAuth API route
     const fetchData = useCallback(async () => {
         try {
             setIsLoading(true);
 
-            // Fetch auth configs
-            const authConfigsResponse = await fetch(`/api/composio/auth-configs?workspaceId=${workspaceId}`);
-            const authConfigsData = authConfigsResponse.ok ? await authConfigsResponse.json() : [];
+            // Fetch auth configs and connected accounts using unified AgentAuth endpoint
+            const response = await fetch(`/api/composio/agentauth?action=fetch-data&workspaceId=${workspaceId}`);
 
-            // Fetch connected accounts
-            const accountsResponse = await fetch(`/api/composio/connections?workspaceId=${workspaceId}`);
-            const accountsData = accountsResponse.ok ? await accountsResponse.json() : [];
-
-            setAuthConfigs(authConfigsData);
-            setConnectedAccounts(accountsData);
+            if (response.ok) {
+                const data = await response.json();
+                setAuthConfigs(data.authConfigs || []);
+                setConnectedAccounts(data.connectedAccounts || []);
+            } else {
+                console.warn('Failed to fetch integration data, using empty arrays');
+                setAuthConfigs([]);
+                setConnectedAccounts([]);
+            }
         } catch (error) {
             console.error('Error fetching integration data:', error);
+            setAuthConfigs([]);
+            setConnectedAccounts([]);
         } finally {
             setIsLoading(false);
         }
@@ -133,7 +137,7 @@ export const IntegrationsManagement = ({
             <div>
                 <h3 className="text-lg font-semibold tracking-tight">Service Integrations</h3>
                 <p className="text-sm text-muted-foreground">
-                    Connect your workspace to external services using Composio's v3 API with AgentAuth for
+                    Connect your workspace to external services using Composio's unified AgentAuth system for
                     AI-powered automation and enhanced productivity features.
                 </p>
             </div>
