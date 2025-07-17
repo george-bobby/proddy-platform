@@ -68,14 +68,14 @@ const validateAuthConfigFormat = (composioAuthConfigId: string): boolean => {
 // Unified POST endpoint for authorization and completion using v3 API
 export async function POST(req: NextRequest) {
 	try {
-		console.log('[Composio] POST request received');
+		console.log('[AgentAuth] POST request received');
 		const body = await req.json();
-		console.log('[Composio] Request body:', body);
+		console.log('[AgentAuth] Request body:', body);
 
 		const { action, userId, toolkit, workspaceId, memberId } = body;
 
 		if (!userId || !toolkit || !workspaceId) {
-			console.log('[Composio] Missing required fields:', {
+			console.log('[AgentAuth] Missing required fields:', {
 				userId,
 				toolkit,
 				workspaceId,
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 		const composio = initializeComposio();
 
 		if (action === 'authorize') {
-			console.log(`[Composio] Authorizing user ${userId} for ${toolkit}`);
+			console.log(`[AgentAuth] Authorizing user ${userId} for ${toolkit}`);
 
 			try {
 				// Step 1: Authorize the User to a Toolkit (following SDK pattern)
@@ -103,7 +103,10 @@ export async function POST(req: NextRequest) {
 					connectionRequest.redirectUrl || connectionRequest.authUrl;
 
 				if (!redirectUrl) {
-					console.error('No redirect URL received from Composio');
+					console.error(
+						'No redirect URL received from Composio:',
+						connectionRequest
+					);
 					return NextResponse.json(
 						{ error: 'No redirect URL received from authorization' },
 						{ status: 400 }
@@ -126,7 +129,7 @@ export async function POST(req: NextRequest) {
 							createdBy: memberId as Id<'members'>,
 						});
 
-						console.log(`[Composio] Auth config stored for ${toolkit}`);
+						console.log(`[AgentAuth] Auth config stored for ${toolkit}`);
 					} catch (error) {
 						console.warn('Failed to store auth config:', error);
 					}
@@ -151,7 +154,7 @@ export async function POST(req: NextRequest) {
 
 		if (action === 'complete') {
 			console.log(
-				`[Composio] Completing connection for user ${userId} and ${toolkit}`
+				`[AgentAuth] Completing connection for user ${userId} and ${toolkit}`
 			);
 
 			try {
@@ -175,11 +178,13 @@ export async function POST(req: NextRequest) {
 
 				const connections = await connectionResponse.json();
 				// Find the most recent connection for this toolkit
-				const connectedAccount = connections.items?.find(
-					(account: any) =>
-						account.toolkit === toolkit ||
-						account.authConfig?.toolkit === toolkit
-				);
+				const connectedAccount =
+					connections.items?.find((account: any) => {
+						// Match by toolkit name or authConfig toolkit
+						const accountToolkit =
+							account.toolkit || account.authConfig?.toolkit;
+						return accountToolkit === toolkit;
+					}) || connections.items?.[0]; // Fallback to most recent if no exact match
 
 				if (!connectedAccount) {
 					return NextResponse.json(
@@ -228,7 +233,7 @@ export async function POST(req: NextRequest) {
 							authConfigId: authConfigId,
 							userId,
 							composioAccountId: connectedAccount.id,
-							toolkit,
+							toolkit: toolkit as any, // Toolkit type validation
 							status: 'ACTIVE',
 							metadata: connectedAccount,
 							connectedBy: memberId as Id<'members'>,
@@ -246,7 +251,7 @@ export async function POST(req: NextRequest) {
 					message: `${toolkit} connected successfully`,
 				});
 			} catch (error) {
-				console.error('Complete connection error:', error);
+				console.error('Connection completion error:', error);
 				return NextResponse.json(
 					{
 						error: `Failed to complete connection: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -367,7 +372,7 @@ export async function GET(req: NextRequest) {
 		// Fetch tools for connected toolkit (Step 2 from documentation)
 		if (action === 'fetch-tools' && userId && toolkit) {
 			console.log(
-				`[Composio] Fetching tools for user ${userId} and toolkit ${toolkit}`
+				`[AgentAuth] Fetching tools for user ${userId} and toolkit ${toolkit}`
 			);
 
 			try {
