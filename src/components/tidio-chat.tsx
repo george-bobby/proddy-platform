@@ -35,6 +35,10 @@ const PUBLIC_ROUTES = [
   '/features',
   '/pricing',
   '/why-proddy',
+  '/assistant',
+  '/signup',
+  '/signin',
+  '/auth',
   '/' // Root path
 ];
 
@@ -121,8 +125,22 @@ export const TidioChat = () => {
   // Use Next.js public environment variable for Tidio key
   const tidioKey = process.env.NEXT_PUBLIC_TIDIO_PUBLIC_KEY;
 
+  // Check if current path is in the list of public routes to determine loading strategy
+  const isPublicRoute = PUBLIC_ROUTES.some(route =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
+
   return (
     <>
+      {/* Preload Tidio fonts with proper attributes to avoid unused preload warning */}
+      <link
+        rel="preload"
+        href="https://code.tidio.co/widget-v4/fonts/mulish_SGhgqk3wotYKNnBQ.woff2"
+        as="font"
+        type="font/woff2"
+        crossOrigin="anonymous"
+      />
+
       {/* Set up tidioIdentify before loading the Tidio script */}
       {currentUser && currentUser._id && (
         <Script
@@ -162,7 +180,7 @@ export const TidioChat = () => {
       <Script
         id="tidio-chat"
         src={`//code.tidio.co/${tidioKey}.js`}
-        strategy="lazyOnload"
+        strategy={isPublicRoute ? "afterInteractive" : "lazyOnload"}
       />
     </>
   );
