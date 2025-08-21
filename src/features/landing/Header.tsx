@@ -204,7 +204,7 @@ export const Header = () => {
               </AnimatePresence>
             </div>
 
-            <Link
+            {/* <Link
               href="/why-proddy"
               className={cn(
                 "text-sm font-medium transition-colors duration-200",
@@ -212,7 +212,7 @@ export const Header = () => {
               )}
             >
               Why Proddy?
-            </Link>
+            </Link> */}
 
             <Link
               href="/assistant"
@@ -352,13 +352,13 @@ export const Header = () => {
                     </Link>
                   </div>
                 </div>
-                <Link
+                {/* <Link
                   href="/why-proddy"
                   className="block text-base font-medium text-gray-700 hover:text-primary transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Why Proddy?
-                </Link>
+                </Link> */}
 
                 <Link
                   href="/pricing"

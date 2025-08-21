@@ -89,31 +89,9 @@ export const HeroSection = () => {
             variants={itemVariants}
             className="text-lg md:text-xl text-gray-600 mb-6 max-w-[800px]"
           >
-            An intelligent platform built for college students and startups — get started in minutes with an easy learning curve.
+            An intelligent workspace designed for startups and growing teams — streamline collaboration, boost productivity, and scale effortlessly.
           </motion.p>
 
-          {/* <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 mb-8"
-          >
-            <Link href="/signup">
-              <Button
-                size="lg"
-                className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all duration-300 bg-primary hover:bg-primary/90 px-6 py-3 text-base"
-              >
-                Get Started <ArrowRight className="size-4" />
-              </Button>
-            </Link>
-            <Link href="/home#modules">
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2 rounded-full border-gray-300 hover:border-primary/50 px-6 py-3 text-base"
-              >
-                Explore Features
-              </Button>
-            </Link>
-          </motion.div> */}
 
           <motion.div
             variants={imageVariants}

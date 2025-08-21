@@ -42,7 +42,7 @@ const PricingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              Proddy is free for students and small groups during our beta. Get started on your campus project with zero learning curve.
+              Proddy is free for students and startups during our beta. Get started on your projects with zero learning curve.
             </motion.p>
           </div>
         </div>
