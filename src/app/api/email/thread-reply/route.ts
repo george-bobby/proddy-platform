@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
 
 		// Validate the from address
 		// Use Resend's default domain as a fallback if your domain isn't verified
-		const fromAddress = 'Proddy <onboarding@resend.dev>';
+		const fromAddress = 'Proddy <support@proddy.tech>';
 		console.log('From address:', fromAddress);
 
 		try {

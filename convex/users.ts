@@ -14,7 +14,17 @@ export const current = query({
 		if (!user) return null;
 
 		// Get image URL if user has an image
-		const imageUrl = user.image ? await ctx.storage.getUrl(user.image) : undefined;
+		// Check if it's a storage ID or external URL
+		let imageUrl: string | undefined = undefined;
+		if (user.image) {
+			// If it starts with http, it's an external URL (from OAuth providers)
+			if (user.image.startsWith('http')) {
+				imageUrl = user.image;
+			} else {
+				// Otherwise, it's a Convex storage ID
+				imageUrl = (await ctx.storage.getUrl(user.image)) || undefined;
+			}
+		}
 
 		return {
 			...user,
@@ -40,7 +50,17 @@ export const getUserById = query({
 		if (!user) return null;
 
 		// Get image URL if user has an image
-		const imageUrl = user.image ? await ctx.storage.getUrl(user.image) : undefined;
+		// Check if it's a storage ID or external URL
+		let imageUrl: string | undefined = undefined;
+		if (user.image) {
+			// If it starts with http, it's an external URL (from OAuth providers)
+			if (user.image.startsWith('http')) {
+				imageUrl = user.image;
+			} else {
+				// Otherwise, it's a Convex storage ID
+				imageUrl = (await ctx.storage.getUrl(user.image)) || undefined;
+			}
+		}
 
 		// Return the user data with image URL
 		return {

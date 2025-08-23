@@ -285,7 +285,7 @@ const PricingPage = () => {
 
                 <AccordionItem title="Do you offer discounts for nonprofits or education?">
                   <p>
-                    Yes! We're committed to supporting nonprofits, educational institutions, and open-source projects. Once paid plans launch, we'll offer significant discounts for qualifying organizations. Contact our team at <span className="text-primary font-medium">support@proddy.io</span> to learn more about our discount programs and how to apply.
+                    Yes! We're committed to supporting nonprofits, educational institutions, and open-source projects. Once paid plans launch, we'll offer significant discounts for qualifying organizations. Contact our team at <span className="text-primary font-medium">support@proddy.tech</span> to learn more about our discount programs and how to apply.
                   </p>
                 </AccordionItem>
               </Accordion>

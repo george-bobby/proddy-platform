@@ -17,8 +17,68 @@ const CustomPassword = Password<DataModel>({
 	},
 });
 
+// Custom GitHub provider with proper profile mapping
+const CustomGitHub = GitHub({
+	profile(profile) {
+		return {
+			id: profile.id.toString(),
+			name: profile.name || profile.login || '',
+			email: profile.email || '',
+			image: profile.avatar_url || '',
+		};
+	},
+});
+
+// Custom Google provider with proper profile mapping
+const CustomGoogle = Google({
+	profile(profile) {
+		return {
+			id: profile.sub,
+			name: profile.name || '',
+			email: profile.email || '',
+			image: profile.picture || '',
+		};
+	},
+});
+
 export const { auth, signIn, signOut, store } = convexAuth({
-	providers: [CustomPassword, GitHub, Google],
+	providers: [CustomPassword, CustomGitHub, CustomGoogle],
+});
+
+// Function to clean up orphaned auth accounts
+export const cleanupOrphanedAuthAccounts = mutation({
+	args: {},
+	handler: async (ctx) => {
+		// This function should be called by an admin to clean up orphaned auth accounts
+		// Get all auth accounts
+		const authAccounts = await ctx.db.query('authAccounts').collect();
+
+		let cleanedCount = 0;
+
+		for (const authAccount of authAccounts) {
+			// Check if the user still exists
+			try {
+				const user = await ctx.db.get(authAccount.userId);
+				if (!user) {
+					// User doesn't exist, delete the orphaned auth account
+					await ctx.db.delete(authAccount._id);
+					cleanedCount++;
+					console.log(
+						`Deleted orphaned auth account for user ${authAccount.userId}`
+					);
+				}
+			} catch (e) {
+				// User doesn't exist, delete the orphaned auth account
+				await ctx.db.delete(authAccount._id);
+				cleanedCount++;
+				console.log(
+					`Deleted orphaned auth account for user ${authAccount.userId}`
+				);
+			}
+		}
+
+		return { success: true, cleanedCount };
+	},
 });
 
 export const deleteAccount = mutation({

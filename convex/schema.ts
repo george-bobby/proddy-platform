@@ -17,7 +17,7 @@ const schema = defineSchema({
 		bio: v.optional(v.string()),
 		location: v.optional(v.string()),
 		website: v.optional(v.string()),
-	}),
+	}).index('email', ['email']),
 
 	workspaces: defineTable({
 		name: v.string(),
@@ -136,8 +136,7 @@ const schema = defineSchema({
 		),
 		dueDate: v.optional(v.number()),
 		assignees: v.optional(v.array(v.id('members'))),
-	})
-		.index('by_list_id', ['listId']),
+	}).index('by_list_id', ['listId']),
 
 	categories: defineTable({
 		name: v.string(),
@@ -321,8 +320,6 @@ const schema = defineSchema({
 		),
 	}).index('by_user_id', ['userId']),
 
-
-
 	notes: defineTable({
 		title: v.string(),
 		content: v.string(), // JSON stringified Quill Delta
@@ -437,19 +434,20 @@ const schema = defineSchema({
 		workspaceId: v.id('workspaces'),
 		name: v.string(), // Server name
 		composioServerId: v.string(), // Composio's MCP server ID
-		toolkitConfigs: v.array(v.object({
-			toolkit: v.string(),
-			authConfigId: v.string(),
-			allowedTools: v.array(v.string()),
-		})),
+		toolkitConfigs: v.array(
+			v.object({
+				toolkit: v.string(),
+				authConfigId: v.string(),
+				allowedTools: v.array(v.string()),
+			})
+		),
 		useComposioManagedAuth: v.boolean(),
 		serverUrls: v.optional(v.any()), // Generated server URLs
 		isActive: v.boolean(),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 		createdBy: v.id('members'),
-	})
-		.index('by_workspace_id', ['workspaceId']),
+	}).index('by_workspace_id', ['workspaceId']),
 });
 
 export default schema;
