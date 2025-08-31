@@ -58,7 +58,7 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
       });
 
       const names = data.participants.map(
-        (id) => memberMap.get(id) || "Unknown user"
+        (id) => memberMap.get(id) || "Unknown user",
       );
 
       setParticipantNames(names);
