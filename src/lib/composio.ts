@@ -40,12 +40,12 @@ export function initializeComposio() {
 
         if (!authConfigId) {
           throw new Error(
-            `Auth config ID not found for ${appName}. Please check your environment variables. Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`
+            `Auth config ID not found for ${appName}. Please check your environment variables. Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`,
           );
         }
 
         console.log(
-          `[Composio API] Creating connection for ${appName} with auth config ID: ${authConfigId}`
+          `[Composio API] Creating connection for ${appName} with auth config ID: ${authConfigId}`,
         );
 
         // Try to initiate connection using auth config ID
@@ -91,7 +91,7 @@ export function initializeComposio() {
       try {
         const connection =
           (await (composioInstance as any).connectedAccounts?.get?.(
-            connectionId
+            connectionId,
           )) ||
           (await (composioInstance as any).connections?.get?.(connectionId));
 
@@ -120,7 +120,7 @@ export function initializeComposio() {
     async deleteConnection(connectionId: string) {
       try {
         (await (composioInstance as any).connectedAccounts?.delete?.(
-          connectionId
+          connectionId,
         )) ||
           (await (composioInstance as any).connections?.delete?.(connectionId));
       } catch (error) {
@@ -158,7 +158,7 @@ export async function getOpenAITools(userId: string, appNames: string[]) {
 export async function executeComposioAction(
   userId: string,
   actionName: string,
-  params: any
+  params: any,
 ) {
   try {
     const result = await composio.tools.execute(actionName, params, {
@@ -177,7 +177,7 @@ export async function handleOpenAIToolCalls(response: any, userId: string) {
     // Use the provider's handle_tool_calls method
     const result = await (composio.provider as any).handleToolCalls(
       response,
-      userId
+      userId,
     );
     return result;
   } catch (error) {
@@ -189,7 +189,7 @@ export async function handleOpenAIToolCalls(response: any, userId: string) {
 // Helper function to get Composio tools for OpenAI function calling format
 export async function getComposioToolsForOpenAI(
   userId: string,
-  appNames: string[]
+  appNames: string[],
 ) {
   if (!appNames.length) {
     return [];
@@ -211,7 +211,7 @@ export async function getComposioToolsForOpenAI(
 export async function createOpenAICompletion(
   userId: string,
   appNames: string[],
-  message: string
+  message: string,
 ) {
   try {
     // Get tools for the user
@@ -234,7 +234,7 @@ export async function createOpenAICompletion(
   } catch (error) {
     console.error(
       "Error creating OpenAI completion with Composio tools:",
-      error
+      error,
     );
     throw error;
   }

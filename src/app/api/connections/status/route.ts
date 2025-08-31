@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     if (!workspaceId) {
       return NextResponse.json(
         { error: "workspaceId required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         app: app.app,
         connected: app.connected,
         connectionId: app.connectionId,
-      }))
+      })),
     );
 
     // Get total tool count if there are connected apps
@@ -49,12 +49,12 @@ export async function GET(req: NextRequest) {
           composio,
           userId,
           connectedAppNames,
-          true // use cache
+          true, // use cache
         );
         totalTools = allTools.length;
 
         console.log(
-          `[Connections Status] Found ${totalTools} total tools for connected apps`
+          `[Connections Status] Found ${totalTools} total tools for connected apps`,
         );
       } catch (error) {
         console.warn("[Connections Status] Failed to get tool count:", error);
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
         connected: [],
         totalTools: 0,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

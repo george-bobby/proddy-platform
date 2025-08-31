@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     if (!workspaceId) {
       return NextResponse.json(
         { error: "workspaceId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       { error: "Invalid action. Use action=status" },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (error) {
     console.error("Composio API error:", error);
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         error: "Failed to fetch Composio status",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     if (!workspaceId || !action) {
       return NextResponse.json(
         { error: "workspaceId and action are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
           {
             error: `Invalid app. Must be one of: ${Object.values(AVAILABLE_APPS).join(", ")}`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         composio,
         userId,
         app as AvailableApp,
-        redirectUrl
+        redirectUrl,
       );
 
       if (result.success) {
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: "Invalid action. Use action=connect" },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (error) {
     console.error("Composio API error:", error);
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to process Composio request",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

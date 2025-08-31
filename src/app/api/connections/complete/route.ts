@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
     if (!workspaceId || !app || !memberId) {
       return NextResponse.json(
         { error: "workspaceId, app, and memberId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.log(
-      `[Connection Complete] Completing ${app} connection for workspace ${workspaceId}`
+      `[Connection Complete] Completing ${app} connection for workspace ${workspaceId}`,
     );
 
     // Use consistent workspace entity ID pattern
@@ -45,12 +45,12 @@ export async function POST(req: NextRequest) {
           error: "Connection not found",
           details: `No active connection found for ${app}. Please try connecting again.`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     console.log(
-      `[Connection Complete] Found connection: ${connectedAccount.id} for ${app}`
+      `[Connection Complete] Found connection: ${connectedAccount.id} for ${app}`,
     );
 
     // Store connected account in database (consistent with agentauth)
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
           {
             workspaceId: workspaceId as Id<"workspaces">,
             toolkit: app as any,
-          }
+          },
         );
         authConfigId = existingAuthConfig?._id;
       } catch (error) {
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to complete connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

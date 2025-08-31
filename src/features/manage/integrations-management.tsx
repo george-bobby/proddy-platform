@@ -127,7 +127,7 @@ export const IntegrationsManagement = ({
 
       // Fetch auth configs and connected accounts using unified AgentAuth endpoint
       const response = await fetch(
-        `/api/composio/agentauth?action=fetch-data&workspaceId=${workspaceId}`
+        `/api/composio/agentauth?action=fetch-data&workspaceId=${workspaceId}`,
       );
 
       if (response.ok) {
@@ -180,7 +180,7 @@ export const IntegrationsManagement = ({
         toast.error("Failed to complete connection setup");
       }
     },
-    [workspaceId, currentMember._id, fetchData] // Removed currentMember.userId since we now use workspace entity ID
+    [workspaceId, currentMember._id, fetchData], // Removed currentMember.userId since we now use workspace entity ID
   );
 
   // Check if user just returned from OAuth (AgentAuth callback)
@@ -191,7 +191,7 @@ export const IntegrationsManagement = ({
 
     if (connected === "true" && toolkit) {
       toast.success(
-        `${toolkit.charAt(0).toUpperCase() + toolkit.slice(1)} authorization completed!`
+        `${toolkit.charAt(0).toUpperCase() + toolkit.slice(1)} authorization completed!`,
       );
 
       // Handle the connection completion using AgentAuth
@@ -223,7 +223,7 @@ export const IntegrationsManagement = ({
         acc[config.toolkit] = config;
         return acc;
       },
-      {} as Record<string, any>
+      {} as Record<string, any>,
     ) || {};
 
   const connectedAccountsByToolkit =
@@ -232,7 +232,7 @@ export const IntegrationsManagement = ({
         acc[account.toolkit] = account;
         return acc;
       },
-      {} as Record<string, any>
+      {} as Record<string, any>,
     ) || {};
 
   return (

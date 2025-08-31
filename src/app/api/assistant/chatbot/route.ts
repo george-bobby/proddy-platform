@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     if (!message || !workspaceId) {
       return NextResponse.json(
         { error: "Message and workspaceId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     // Check cache for common queries (only for simple questions)
     const isSimpleQuery = !/\b(create|update|delete|send|add|remove)\b/i.test(
-      message.toLowerCase()
+      message.toLowerCase(),
     );
     const cacheKey = isSimpleQuery
       ? `${workspaceId}-${message.toLowerCase().trim()}`
@@ -116,12 +116,12 @@ export async function POST(req: NextRequest) {
       console.log(
         "[Chatbot Assistant] Found",
         searchResults.length,
-        "search results"
+        "search results",
       );
     } catch (error) {
       console.warn(
         "[Chatbot Assistant] Search failed, continuing without context:",
-        error
+        error,
       );
     }
 
@@ -139,7 +139,7 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
    ${result.type === "task" ? `Status: ${(result as any).status || "Unknown"} | Completed: ${(result as any).completed || false}` : ""}
    ${result.type === "note" ? `Channel: ${(result as any).channelId || "Unknown"}` : ""}
    ${result.type === "card" ? `List: ${(result as any).listName || "Unknown"} | Channel: ${(result as any).channelName || "Unknown"}` : ""}
-`
+`,
   )
   .join("")}
 `;
@@ -162,7 +162,7 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
           app: app.app,
           connected: app.connected,
           connectionId: app.connectionId,
-        }))
+        })),
       );
 
       // Get tools for connected apps only
@@ -178,11 +178,11 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
 
       console.log(
         "[Chatbot Assistant] Connected app names:",
-        connectedAppNames
+        connectedAppNames,
       );
       console.log(
         "[Chatbot Assistant] Connected apps descriptions:",
-        connectedAppsDescriptions
+        connectedAppsDescriptions,
       );
 
       if (connectedAppNames.length > 0) {
@@ -190,23 +190,23 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
         const actualEntityId = `workspace_${workspaceId}`;
 
         console.log(
-          `[Chatbot Assistant] Using workspace-scoped entity ID: ${actualEntityId} for tool fetching`
+          `[Chatbot Assistant] Using workspace-scoped entity ID: ${actualEntityId} for tool fetching`,
         );
 
         // Fetch ALL available tools first (cached)
         console.log(
-          `[Chatbot Assistant] Fetching all tools for connected apps: ${connectedAppNames.join(",")}`
+          `[Chatbot Assistant] Fetching all tools for connected apps: ${connectedAppNames.join(",")}`,
         );
 
         const allAvailableTools = await getAllToolsForApps(
           composio,
           actualEntityId,
           connectedAppNames,
-          true // use cache
+          true, // use cache
         );
 
         console.log(
-          `[Chatbot Assistant] Loaded ${allAvailableTools.length} total tools from cache/API`
+          `[Chatbot Assistant] Loaded ${allAvailableTools.length} total tools from cache/API`,
         );
 
         // Store all tools for later filtering
@@ -223,7 +223,7 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
       } else {
         // No apps are connected - inform user about available workspace features only
         console.log(
-          "[Chatbot Assistant] No external integrations connected - workspace-only mode"
+          "[Chatbot Assistant] No external integrations connected - workspace-only mode",
         );
 
         // Early return if user is asking for external service features without connections
@@ -256,12 +256,12 @@ For now, I can help you with workspace content like messages, tasks, notes, and 
       console.log("[Chatbot Assistant] Connected apps:", connectedAppNames);
       console.log(
         "[Chatbot Assistant] Total tools loaded:",
-        composioTools.length
+        composioTools.length,
       );
     } catch (error) {
       console.error(
         "[Chatbot Assistant] Failed to load Composio tools:",
-        error
+        error,
       );
       console.error("[Chatbot Assistant] Error details:", {
         message: error instanceof Error ? error.message : "Unknown error",
@@ -360,16 +360,16 @@ ${connectedAppsDescriptions}`;
       connectedApps.some((app) => app.connected) &&
       // Specific tool keywords
       (/\b(github|repository|repo|email|gmail|send|slack|channel|list|create|update|delete|pull|issue|commit|branch|merge|clone|push|api|integration|connect|external)\b/i.test(
-        message.toLowerCase()
+        message.toLowerCase(),
       ) ||
         // General queries that could benefit from external data
         /\b(what|how|show|get|fetch|find|search|recent|latest|status|check)\b/i.test(
-          message.toLowerCase()
+          message.toLowerCase(),
         ) ||
         // Always allow tools for connected GitHub when asking about code/development
         (connectedApps.some((app) => app.app === "GITHUB" && app.connected) &&
           /\b(code|development|project|work|activity|progress|changes|files)\b/i.test(
-            message.toLowerCase()
+            message.toLowerCase(),
           )));
 
     // Add current user message with tool usage hint
@@ -393,7 +393,7 @@ ${connectedAppsDescriptions}`;
       });
 
       console.log(
-        `[Chatbot Assistant] Filtered to ${filteredTools.length} relevant tools for query`
+        `[Chatbot Assistant] Filtered to ${filteredTools.length} relevant tools for query`,
       );
 
       // Log some sample tools for debugging
@@ -403,7 +403,7 @@ ${connectedAppsDescriptions}`;
           filteredTools
             .slice(0, 5)
             .map((t) => `${t.name} (score: ${t._score || "N/A"})`)
-            .join(", ")
+            .join(", "),
         );
       }
 
@@ -461,7 +461,7 @@ ${connectedAppsDescriptions}`;
                 `[Chatbot Assistant] Executing tool: ${toolCall.function.name}`,
                 {
                   arguments: toolCall.function.arguments,
-                }
+                },
               );
 
               // Find the specific connection for this tool
@@ -477,12 +477,12 @@ ${connectedAppsDescriptions}`;
 
               if (!toolApp) {
                 throw new Error(
-                  `Cannot determine app for tool: ${toolCall.function.name}`
+                  `Cannot determine app for tool: ${toolCall.function.name}`,
                 );
               }
 
               const connectionForTool = connectedApps.find(
-                (app) => app.app === toolApp && app.connected
+                (app) => app.app === toolApp && app.connected,
               );
 
               if (!connectionForTool) {
@@ -501,7 +501,7 @@ ${connectedAppsDescriptions}`;
                 parsedArguments = JSON.parse(toolCall.function.arguments);
               } catch (parseError) {
                 throw new Error(
-                  `Failed to parse tool arguments: ${parseError}`
+                  `Failed to parse tool arguments: ${parseError}`,
                 );
               }
 
@@ -514,7 +514,7 @@ ${connectedAppsDescriptions}`;
 
               console.log(
                 `[Chatbot Assistant] Tool execution params:`,
-                toolExecutionParams
+                toolExecutionParams,
               );
 
               // Use connection ID approach which works reliably
@@ -523,7 +523,7 @@ ${connectedAppsDescriptions}`;
                 {
                   connectedAccountId: connectionForTool.connectionId,
                   arguments: parsedArguments,
-                }
+                },
               );
 
               toolResults.push({
@@ -534,7 +534,7 @@ ${connectedAppsDescriptions}`;
             } catch (toolError) {
               console.error(
                 `Tool execution error for ${toolCall.function.name}:`,
-                toolError
+                toolError,
               );
               toolResults.push({
                 toolCallId: toolCall.id,
@@ -594,7 +594,7 @@ ${connectedAppsDescriptions}`;
 
     // Check for notes content
     const notesResults = searchResults.filter(
-      (result: any) => result.type === "note"
+      (result: any) => result.type === "note",
     );
     if (notesResults.length > 0) {
       const firstNote = notesResults[0];
@@ -612,7 +612,7 @@ ${connectedAppsDescriptions}`;
 
     // Check for board cards content
     const cardResults = searchResults.filter(
-      (result: any) => result.type === "card"
+      (result: any) => result.type === "card",
     );
     if (cardResults.length > 0) {
       const firstCard = cardResults[0];
@@ -638,7 +638,7 @@ ${connectedAppsDescriptions}`;
 
     // Check for message content
     const messageResults = searchResults.filter(
-      (result) => result.type === "message"
+      (result) => result.type === "message",
     );
     if (messageResults.length > 0) {
       const firstMessage = messageResults[0];
@@ -677,7 +677,7 @@ ${connectedAppsDescriptions}`;
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

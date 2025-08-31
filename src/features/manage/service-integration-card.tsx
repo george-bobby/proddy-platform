@@ -151,7 +151,7 @@ export const ServiceIntegrationCard = ({
   const handleCreateAuthConfig = async () => {
     if (!isOwnerOrAdmin) {
       toast.error(
-        "Only workspace owners and administrators can manage integrations"
+        "Only workspace owners and administrators can manage integrations",
       );
       return;
     }
@@ -192,7 +192,7 @@ export const ServiceIntegrationCard = ({
   const handleConnect = async () => {
     if (!isOwnerOrAdmin) {
       toast.error(
-        "Only workspace owners and administrators can manage integrations"
+        "Only workspace owners and administrators can manage integrations",
       );
       return;
     }
@@ -205,7 +205,7 @@ export const ServiceIntegrationCard = ({
   const handleDisconnect = async () => {
     if (!isOwnerOrAdmin) {
       toast.error(
-        "Only workspace owners and administrators can manage integrations"
+        "Only workspace owners and administrators can manage integrations",
       );
       return;
     }
@@ -254,7 +254,7 @@ export const ServiceIntegrationCard = ({
         `/api/composio/agentauth?action=check-status&composioAccountId=${connectedAccount.composioAccountId}`,
         {
           method: "GET",
-        }
+        },
       );
 
       if (response.ok) {

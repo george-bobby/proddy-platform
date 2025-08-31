@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       // Always use workspace-scoped entity ID for all connections
       const entityId = `workspace_${workspaceId}`;
       console.log(
-        `[AgentAuth] Authorizing workspace ${workspaceId} (entityId: ${entityId}) for ${toolkit}`
+        `[AgentAuth] Authorizing workspace ${workspaceId} (entityId: ${entityId}) for ${toolkit}`,
       );
 
       try {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
           console.error("No redirect URL received from Composio:", connection);
           return NextResponse.json(
             { error: "No redirect URL received from authorization" },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
           {
             error: `Failed to authorize toolkit: ${error instanceof Error ? error.message : "Unknown error"}`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       // Always use workspace-scoped entity ID for all connections
       const entityId = `workspace_${workspaceId}`;
       console.log(
-        `[AgentAuth] Completing connection for workspace ${workspaceId} (entityId: ${entityId}) and ${toolkit}`
+        `[AgentAuth] Completing connection for workspace ${workspaceId} (entityId: ${entityId}) and ${toolkit}`,
       );
 
       try {
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
         if (!connectedAccount) {
           return NextResponse.json(
             { error: "No connected account found" },
-            { status: 404 }
+            { status: 404 },
           );
         }
 
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
                 {
                   workspaceId: workspaceId as Id<"workspaces">,
                   toolkit: toolkit as any,
-                }
+                },
               );
               authConfigId = existingAuthConfig?._id;
             } catch (error) {
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
                   composioAuthConfigId: connectedAccount.id,
                   isComposioManaged: true,
                   createdBy: memberId as Id<"members">,
-                }
+                },
               );
             }
 
@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
           {
             error: `Failed to complete connection: ${error instanceof Error ? error.message : "Unknown error"}`,
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
     }
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
     console.error("[AgentAuth] Error:", error);
     return NextResponse.json(
       { error: "AgentAuth operation failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -216,7 +216,7 @@ export async function GET(req: NextRequest) {
     // Fetch auth configs and connected accounts for workspace
     if (action === "fetch-data" && workspaceId) {
       console.log(
-        `[AgentAuth] Fetching integration data for workspace: ${workspaceId}`
+        `[AgentAuth] Fetching integration data for workspace: ${workspaceId}`,
       );
 
       try {
@@ -225,7 +225,7 @@ export async function GET(req: NextRequest) {
           api.integrations.getAuthConfigsPublic,
           {
             workspaceId: workspaceId as Id<"workspaces">,
-          }
+          },
         );
 
         // UPDATED: Fetch real connected accounts from Composio using the new helper
@@ -235,7 +235,7 @@ export async function GET(req: NextRequest) {
         const composioClient = createComposioClient();
         const realConnectedApps = await getAnyConnectedApps(
           composioClient,
-          workspaceId
+          workspaceId,
         );
 
         // Transform the real connected apps to match the expected format
@@ -256,7 +256,7 @@ export async function GET(req: NextRequest) {
           }));
 
         console.log(
-          `[AgentAuth] Found ${authConfigs.length} auth configs and ${connectedAccounts.length} connected accounts`
+          `[AgentAuth] Found ${authConfigs.length} auth configs and ${connectedAccounts.length} connected accounts`,
         );
 
         return NextResponse.json({
@@ -278,7 +278,7 @@ export async function GET(req: NextRequest) {
     // Check connection status
     if (action === "check-status" && composioAccountId) {
       console.log(
-        `[AgentAuth] Checking status for account: ${composioAccountId}`
+        `[AgentAuth] Checking status for account: ${composioAccountId}`,
       );
 
       try {
@@ -303,7 +303,7 @@ export async function GET(req: NextRequest) {
     // Fetch tools for connected toolkit (Step 2 from documentation)
     if (action === "fetch-tools" && userId && toolkit) {
       console.log(
-        `[AgentAuth] Fetching tools for user ${userId} and toolkit ${toolkit}`
+        `[AgentAuth] Fetching tools for user ${userId} and toolkit ${toolkit}`,
       );
 
       try {
@@ -323,7 +323,7 @@ export async function GET(req: NextRequest) {
           {
             error: `Failed to fetch tools: ${error instanceof Error ? error.message : "Unknown error"}`,
           },
-          { status: 500 }
+          { status: 500 },
         );
       }
     }
@@ -334,13 +334,13 @@ export async function GET(req: NextRequest) {
         error: "Invalid action or missing required parameters",
         receivedAction: action,
       },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (error) {
     console.error("[AgentAuth] GET Error:", error);
     return NextResponse.json(
       { error: "AgentAuth GET operation failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -354,7 +354,7 @@ export async function DELETE(req: NextRequest) {
     if (!workspaceId || !composioAccountId) {
       return NextResponse.json(
         { error: "workspaceId and composioAccountId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -366,7 +366,7 @@ export async function DELETE(req: NextRequest) {
     try {
       await apiClient.deleteConnection(composioAccountId);
       console.log(
-        `[AgentAuth] Successfully deleted from Composio: ${composioAccountId}`
+        `[AgentAuth] Successfully deleted from Composio: ${composioAccountId}`,
       );
     } catch (error) {
       console.warn("Error disconnecting from Composio:", error);
@@ -385,7 +385,7 @@ export async function DELETE(req: NextRequest) {
           isDisabled: true,
         });
         console.log(
-          `[AgentAuth] Database record updated for ${connectedAccountId}`
+          `[AgentAuth] Database record updated for ${connectedAccountId}`,
         );
       } catch (error) {
         console.warn("Error updating database record:", error);
@@ -393,7 +393,7 @@ export async function DELETE(req: NextRequest) {
       }
     } else {
       console.log(
-        `[AgentAuth] No valid database ID provided (got: ${connectedAccountId}), skipping database update`
+        `[AgentAuth] No valid database ID provided (got: ${connectedAccountId}), skipping database update`,
       );
     }
 
@@ -407,7 +407,7 @@ export async function DELETE(req: NextRequest) {
     console.error("[AgentAuth] DELETE Error:", error);
     return NextResponse.json(
       { error: "Failed to disconnect account" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -17,12 +17,12 @@ export async function DELETE(req: NextRequest) {
     if (!workspaceId || !connectionId) {
       return NextResponse.json(
         { error: "workspaceId and connectionId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.log(
-      `[Connection Delete] Deleting connection ${connectionId} for workspace ${workspaceId}`
+      `[Connection Delete] Deleting connection ${connectionId} for workspace ${workspaceId}`,
     );
 
     const { apiClient } = initializeComposio();
@@ -31,7 +31,7 @@ export async function DELETE(req: NextRequest) {
     try {
       await apiClient.deleteConnection(connectionId);
       console.log(
-        `[Connection Delete] Composio connection ${connectionId} deleted`
+        `[Connection Delete] Composio connection ${connectionId} deleted`,
       );
     } catch (error) {
       console.warn(`[Connection Delete] Error deleting from Composio:`, error);
@@ -51,14 +51,14 @@ export async function DELETE(req: NextRequest) {
           isDisabled: true,
         });
         console.log(
-          `[Connection Delete] Database record updated for ${connectedAccountId}`
+          `[Connection Delete] Database record updated for ${connectedAccountId}`,
         );
       } catch (error) {
         console.warn(`[Connection Delete] Error updating database:`, error);
       }
     } else if (connectedAccountId) {
       console.log(
-        `[Connection Delete] Skipping database update - invalid ID format: ${connectedAccountId}`
+        `[Connection Delete] Skipping database update - invalid ID format: ${connectedAccountId}`,
       );
     }
 
@@ -66,12 +66,12 @@ export async function DELETE(req: NextRequest) {
     try {
       // This would need a Convex function to find auth configs by connectionId
       console.log(
-        `[Connection Delete] Cleaned up database records for workspace ${workspaceId}`
+        `[Connection Delete] Cleaned up database records for workspace ${workspaceId}`,
       );
     } catch (error) {
       console.warn(
         `[Connection Delete] Error cleaning up auth configs:`,
-        error
+        error,
       );
     }
 
@@ -88,7 +88,7 @@ export async function DELETE(req: NextRequest) {
         error: "Failed to delete connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -100,12 +100,12 @@ export async function POST(req: NextRequest) {
     if (!workspaceId || !connectionId) {
       return NextResponse.json(
         { error: "workspaceId and connectionId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.log(
-      `[Connection Delete] Deleting connection ${connectionId} for workspace ${workspaceId} (POST method)`
+      `[Connection Delete] Deleting connection ${connectionId} for workspace ${workspaceId} (POST method)`,
     );
 
     const { apiClient } = initializeComposio();
@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     try {
       await apiClient.deleteConnection(connectionId);
       console.log(
-        `[Connection Delete] Composio connection ${connectionId} deleted`
+        `[Connection Delete] Composio connection ${connectionId} deleted`,
       );
     } catch (error) {
       console.warn(`[Connection Delete] Error deleting from Composio:`, error);
@@ -134,14 +134,14 @@ export async function POST(req: NextRequest) {
           isDisabled: true,
         });
         console.log(
-          `[Connection Delete] Database record updated for ${connectedAccountId}`
+          `[Connection Delete] Database record updated for ${connectedAccountId}`,
         );
       } catch (error) {
         console.warn(`[Connection Delete] Error updating database:`, error);
       }
     } else if (connectedAccountId) {
       console.log(
-        `[Connection Delete] Skipping database update - invalid ID format: ${connectedAccountId}`
+        `[Connection Delete] Skipping database update - invalid ID format: ${connectedAccountId}`,
       );
     }
 
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to delete connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

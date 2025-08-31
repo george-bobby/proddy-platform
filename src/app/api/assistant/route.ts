@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
-      }
+      },
     );
 
     // Return the response from the chatbot endpoint
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to process request",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

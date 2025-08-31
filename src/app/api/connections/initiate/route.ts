@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     if (!workspaceId || !app || !memberId) {
       return NextResponse.json(
         { error: "workspaceId, app, and memberId are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,12 +27,12 @@ export async function POST(req: NextRequest) {
         {
           error: `Invalid app. Must be one of: ${Object.values(AVAILABLE_APPS).join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.log(
-      `[Connection Initiate] Starting connection for ${app} in workspace ${workspaceId}`
+      `[Connection Initiate] Starting connection for ${app} in workspace ${workspaceId}`,
     );
 
     // Use consistent workspace entity ID pattern
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       entityId,
       app as AvailableApp,
       redirectUrl ||
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations/callback?workspaceId=${workspaceId}&app=${app}`
+        `${process.env.NEXT_PUBLIC_APP_URL}/integrations/callback?workspaceId=${workspaceId}&app=${app}`,
     );
 
     if (!result.success) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to initiate connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

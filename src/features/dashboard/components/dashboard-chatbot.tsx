@@ -151,7 +151,7 @@ I'm checking for available integrations...`,
       ) {
         const connectedApps = integrationStatus.connected;
         const hasGitHub = connectedApps.some(
-          (app: any) => app.app === "GITHUB"
+          (app: any) => app.app === "GITHUB",
         );
         const hasGmail = connectedApps.some((app: any) => app.app === "GMAIL");
 
@@ -214,7 +214,7 @@ Try asking me things like:`;
     const checkIntegrations = async () => {
       try {
         const response = await fetch(
-          `/api/connections/status?workspaceId=${workspaceId}`
+          `/api/connections/status?workspaceId=${workspaceId}`,
         );
         if (response.ok) {
           const data = await response.json();
@@ -241,7 +241,7 @@ Try asking me things like:`;
   useEffect(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]"
+        "[data-radix-scroll-area-viewport]",
       );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
@@ -289,7 +289,7 @@ Try asking me things like:`;
       console.log(
         "Sending conversation history:",
         conversationHistory.length,
-        "messages"
+        "messages",
       );
 
       // Call the main assistant router API
@@ -308,7 +308,7 @@ Try asking me things like:`;
 
       if (!response.ok) {
         throw new Error(
-          `Assistant API error: ${response.status} ${response.statusText}`
+          `Assistant API error: ${response.status} ${response.statusText}`,
         );
       }
 
