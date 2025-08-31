@@ -145,7 +145,7 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
 `;
 
     // Initialize Composio client and get available tools (enhanced with critical fallbacks)
-    const userId = `workspace_${workspaceId}`;
+    const userId = `workspace_${workspaceId}`; // Always use workspace-scoped entity ID
     let composioTools: any[] = [];
     let connectedApps: any[] = [];
     let connectedAppsDescriptions = "No external integrations connected";
@@ -186,11 +186,11 @@ ${index + 1}. [${result.type.toUpperCase()}] ${result.text?.substring(0, 200) ||
       );
 
       if (connectedAppNames.length > 0) {
-        // For tool execution, we need to use the workspace entity ID pattern
-        const actualEntityId = userId; // Always use workspace_${workspaceId} pattern
+        // Always use workspace-scoped entity ID pattern for consistency
+        const actualEntityId = `workspace_${workspaceId}`;
 
         console.log(
-          `[Chatbot Assistant] Using entity ID: ${actualEntityId} for tool fetching`
+          `[Chatbot Assistant] Using workspace-scoped entity ID: ${actualEntityId} for tool fetching`
         );
 
         // Fetch ALL available tools first (cached)

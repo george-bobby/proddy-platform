@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const { composio, apiClient } = initializeComposio();
 
     if (action === "authorize") {
-      // Use workspace-scoped entity ID for workspace-dependent connections
+      // Always use workspace-scoped entity ID for all connections
       const entityId = `workspace_${workspaceId}`;
       console.log(
         `[AgentAuth] Authorizing workspace ${workspaceId} (entityId: ${entityId}) for ${toolkit}`
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "complete") {
-      // Use workspace-scoped entity ID for workspace-dependent connections
+      // Always use workspace-scoped entity ID for all connections
       const entityId = `workspace_${workspaceId}`;
       console.log(
         `[AgentAuth] Completing connection for workspace ${workspaceId} (entityId: ${entityId}) and ${toolkit}`
@@ -233,7 +233,10 @@ export async function GET(req: NextRequest) {
           "@/lib/composio-config"
         );
         const composioClient = createComposioClient();
-        const realConnectedApps = await getAnyConnectedApps(composioClient);
+        const realConnectedApps = await getAnyConnectedApps(
+          composioClient,
+          workspaceId
+        );
 
         // Transform the real connected apps to match the expected format
         const connectedAccounts = realConnectedApps
@@ -348,9 +351,9 @@ export async function DELETE(req: NextRequest) {
     const { workspaceId, connectedAccountId, composioAccountId } =
       await req.json();
 
-    if (!workspaceId || !connectedAccountId || !composioAccountId) {
+    if (!workspaceId || !composioAccountId) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "workspaceId and composioAccountId are required" },
         { status: 400 }
       );
     }
@@ -362,16 +365,37 @@ export async function DELETE(req: NextRequest) {
     // First, disconnect from Composio using the API client
     try {
       await apiClient.deleteConnection(composioAccountId);
+      console.log(
+        `[AgentAuth] Successfully deleted from Composio: ${composioAccountId}`
+      );
     } catch (error) {
       console.warn("Error disconnecting from Composio:", error);
     }
 
-    // Update the connected account status in database
-    await convex.mutation(api.integrations.updateConnectedAccountStatus, {
-      connectedAccountId: connectedAccountId as Id<"connected_accounts">,
-      status: "DISABLED",
-      isDisabled: true,
-    });
+    // If connectedAccountId is provided and looks like a valid Convex ID, update the database
+    if (
+      connectedAccountId &&
+      connectedAccountId.length > 10 &&
+      !connectedAccountId.startsWith("ca_")
+    ) {
+      try {
+        await convex.mutation(api.integrations.updateConnectedAccountStatus, {
+          connectedAccountId: connectedAccountId as Id<"connected_accounts">,
+          status: "DISABLED",
+          isDisabled: true,
+        });
+        console.log(
+          `[AgentAuth] Database record updated for ${connectedAccountId}`
+        );
+      } catch (error) {
+        console.warn("Error updating database record:", error);
+        // Don't fail the whole operation if database update fails
+      }
+    } else {
+      console.log(
+        `[AgentAuth] No valid database ID provided (got: ${connectedAccountId}), skipping database update`
+      );
+    }
 
     console.log(`[AgentAuth] Account disconnected successfully`);
 

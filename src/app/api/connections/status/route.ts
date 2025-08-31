@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     const composio = createComposioClient();
 
-    // Get connected apps using the new comprehensive system
+    // Get connected apps using the new comprehensive system (workspace-scoped)
     const connectedApps = await getAnyConnectedApps(composio, workspaceId);
 
     console.log(
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       .map((app) => app.app) as AvailableApp[];
 
     if (connectedAppNames.length > 0) {
-      const userId = `workspace_${workspaceId}`;
+      const userId = `workspace_${workspaceId}`; // Always use workspace-scoped entity ID
 
       try {
         // Get all available tools using the comprehensive system
