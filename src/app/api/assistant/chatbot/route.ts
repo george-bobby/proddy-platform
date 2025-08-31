@@ -273,17 +273,44 @@ For now, I can help you with workspace content like messages, tasks, notes, and 
       composioTools = [];
     }
 
+    // Create dynamic capabilities and instructions based on connected apps
+    const connectedAppNames = connectedApps
+      .filter((app) => app.connected)
+      .map((app) => app.app);
+
+    const externalToolsCapability =
+      connectedAppNames.length > 0
+        ? `- Use external tools (${connectedAppNames.join(", ")}) when needed`
+        : `- Connect external tools like Gmail, GitHub, or Slack to unlock more capabilities`;
+
+    const toolInstructions =
+      connectedAppNames.length > 0
+        ? connectedAppNames
+            .map((app) => {
+              switch (app) {
+                case "GITHUB":
+                  return "- When users ask about GitHub repositories, issues, or pull requests, ALWAYS use the available GitHub tools";
+                case "GMAIL":
+                  return "- When users want to send emails or check Gmail, ALWAYS use the available Gmail tools";
+                case "SLACK":
+                  return "- When users mention Slack channels or messages, ALWAYS use the available Slack tools";
+                default:
+                  return `- Use ${app} tools when relevant to user requests`;
+              }
+            })
+            .join("\n")
+        : "- Connect external integrations to enable tool usage for tasks like GitHub repository management or email handling";
+
     // Create system prompt after determining connected apps
     const systemPrompt = `You are Proddy AI, a workspace assistant that helps teams stay organized.
 
 CAPABILITIES:
 - Search workspace content (messages, tasks, notes, boards)
-- Use external tools (Gmail, GitHub, Slack) when connected
+${externalToolsCapability}
 - Format responses with emojis and clear structure
 
 TOOL USAGE INSTRUCTIONS:
-- When users ask about GitHub repositories, issues, or pull requests, ALWAYS use the available GitHub tools
-- When users want to send emails or check Gmail, ALWAYS use the available Gmail tools  
+${toolInstructions}
 - Use tools proactively to provide real-time, accurate information
 - Don't tell users to "check manually" if you have tools available
 
@@ -297,9 +324,11 @@ WORKSPACE CONTEXT:
 ${enhancedContext}
 
 Rules: 
-1. ALWAYS use available tools when the user's request matches tool capabilities
-2. If no workspace info available, say "I don't have information about that" ONLY if no external tools can help
-3. Provide helpful, actionable responses using connected integrations
+1. ALWAYS use available tools when the user's request matches tool capabilities - DO NOT just describe what you could do, actually DO IT
+2. When user asks about GitHub repositories, issues, or pull requests, you MUST call the appropriate GitHub tools to get real data
+3. If tools are available for the user's request, USE THEM immediately - don't ask permission or suggest alternatives
+4. If no workspace info available, say "I don't have information about that" ONLY if no external tools can help
+5. Provide helpful, actionable responses using connected integrations
 
 CONNECTED TOOLS:
 ${connectedAppsDescriptions}`;
@@ -325,17 +354,34 @@ ${connectedAppsDescriptions}`;
       }
     }
 
-    // Add current user message
+    // Smart tool selection: Filter tools based on query context
+    // More permissive detection - especially for GitHub since it's commonly connected
+    const needsExternalTools =
+      connectedApps.some((app) => app.connected) &&
+      // Specific tool keywords
+      (/\b(github|repository|repo|email|gmail|send|slack|channel|list|create|update|delete|pull|issue|commit|branch|merge|clone|push|api|integration|connect|external)\b/i.test(
+        message.toLowerCase()
+      ) ||
+        // General queries that could benefit from external data
+        /\b(what|how|show|get|fetch|find|search|recent|latest|status|check)\b/i.test(
+          message.toLowerCase()
+        ) ||
+        // Always allow tools for connected GitHub when asking about code/development
+        (connectedApps.some((app) => app.app === "GITHUB" && app.connected) &&
+          /\b(code|development|project|work|activity|progress|changes|files)\b/i.test(
+            message.toLowerCase()
+          )));
+
+    // Add current user message with tool usage hint
+    const userContent =
+      needsExternalTools && composioTools.length > 0
+        ? `${message}\n\n[SYSTEM: You have access to external tools. If this request can be fulfilled with available tools, use them to provide real data instead of general responses.]`
+        : message;
+
     messages.push({
       role: "user",
-      content: message,
+      content: userContent,
     });
-
-    // Smart tool selection: Filter tools based on query context
-    const needsExternalTools =
-      /\b(github|repository|repo|email|gmail|send|slack|channel|list|create|update|delete)\b/i.test(
-        message.toLowerCase()
-      );
 
     let toolsToUse: any[] | undefined = undefined;
     if (needsExternalTools && composioTools.length > 0) {
@@ -379,6 +425,7 @@ ${connectedAppsDescriptions}`;
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       tools: toolsToUse,
+      tool_choice: toolsToUse && toolsToUse.length > 0 ? "auto" : undefined,
       messages,
       temperature: 0.7,
       max_tokens: 500, // Reduced from 1000 to 500
