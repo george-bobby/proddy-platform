@@ -1,5 +1,52 @@
 import { Composio } from "@composio/core";
 import { OpenAIProvider } from "@composio/openai";
+import { logger } from "./logger";
+
+// Type definitions for Composio tools
+export interface ComposioTool {
+  name?: string;
+  description?: string;
+  function?: {
+    name: string;
+    description?: string;
+    parameters?: Record<string, unknown>;
+  };
+  toolkit?: string;
+  app?: string;
+  _originalName?: string;
+  priority?: number;
+}
+
+export interface ComposioConnection {
+  id: string;
+  status: string;
+  toolkit?: {
+    slug?: string;
+  };
+  appName?: string;
+  createdAt: string;
+}
+
+export interface ToolFetchOptions {
+  maxToolsPerApp?: number;
+  priorityLevel?: number;
+  keywords?: string[];
+  useCache?: boolean;
+}
+
+export interface ProcessToolOptions {
+  maxTools: number;
+  priorityLevel: number;
+  keywords: string[];
+  dashboardTools: string[];
+}
+
+export interface ConnectedApp {
+  app: AvailableApp;
+  connected: boolean;
+  connectionId?: string;
+  entityId?: string;
+}
 
 // Available apps in your Composio setup
 export const AVAILABLE_APPS = {
@@ -201,33 +248,31 @@ export async function getAllToolsForApps(
   composio: Composio,
   entityId: string,
   apps: AvailableApp[],
-  useCache: boolean = true,
-): Promise<any[]> {
+  useCache: boolean = true
+): Promise<ComposioTool[]> {
   try {
     if (apps.length === 0) {
       return [];
     }
 
-    console.log(
-      `[Composio] Fetching ALL tools for apps: ${apps.join(", ")} with entityId: ${entityId}`,
+    logger.info(
+      `Fetching ALL tools for apps: ${apps.join(", ")} with entityId: ${entityId}`
     );
 
     const cacheKey = `all-tools-${entityId}-${apps.join(",")}`;
 
     // Check cache first
     if (useCache && toolCache.has(cacheKey)) {
-      const cached = toolCache.get(cacheKey)!;
-      if (Date.now() - cached.timestamp < TOOL_CACHE_DURATION) {
-        console.log(
-          `[Composio] Using cached ALL tools: ${cached.tools.length} tools`,
-        );
+      const cached = toolCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < TOOL_CACHE_DURATION) {
+        logger.info(`Using cached ALL tools: ${cached.tools.length} tools`);
         return cached.tools;
       } else {
         toolCache.delete(cacheKey); // Remove expired cache
       }
     }
 
-    let allTools: any[] = [];
+    let allTools: ComposioTool[] = [];
 
     // Fetch ALL tools for each app
     for (const app of apps) {
@@ -240,7 +285,7 @@ export async function getAllToolsForApps(
 
       try {
         console.log(
-          `[Composio] Fetching ALL tools for ${app} (authConfigId: ${authConfigId})`,
+          `[Composio] Fetching ALL tools for ${app} (authConfigId: ${authConfigId})`
         );
 
         // Fetch maximum available tools
@@ -251,7 +296,7 @@ export async function getAllToolsForApps(
 
         const toolsArray = Object.values(tools || {});
         console.log(
-          `[Composio] Fetched ${toolsArray.length} raw tools for ${app}`,
+          `[Composio] Fetched ${toolsArray.length} raw tools for ${app}`
         );
 
         // Process tools to standard format without filtering
@@ -267,7 +312,7 @@ export async function getAllToolsForApps(
               _originalName: functionName,
               // Add metadata for smart filtering later
               _isDashboardTool: ((DASHBOARD_TOOLS as any)[app] || []).includes(
-                functionName,
+                functionName
               ),
               _priority: TOOL_PRIORITY_MAP[functionName] || TOOL_PRIORITIES.LOW,
             };
@@ -285,12 +330,12 @@ export async function getAllToolsForApps(
 
         allTools.push(...processedTools);
         console.log(
-          `[Composio] Added ${processedTools.length} processed tools for ${app}`,
+          `[Composio] Added ${processedTools.length} processed tools for ${app}`
         );
       } catch (appError) {
         console.warn(
           `[Composio] Failed to fetch tools for ${app}:`,
-          appError instanceof Error ? appError.message : String(appError),
+          appError instanceof Error ? appError.message : String(appError)
         );
       }
     }
@@ -308,7 +353,7 @@ export async function getAllToolsForApps(
     }
 
     console.log(
-      `[Composio] Cached ALL tools: ${validatedTools.length} total validated tools`,
+      `[Composio] Cached ALL tools: ${validatedTools.length} total validated tools`
     );
 
     return validatedTools;
@@ -326,7 +371,7 @@ export function filterToolsForQuery(
     maxTools?: number;
     preferDashboard?: boolean;
     keywords?: string[];
-  } = {},
+  } = {}
 ): any[] {
   const { maxTools = 100, preferDashboard = true, keywords = [] } = options;
 
@@ -335,7 +380,7 @@ export function filterToolsForQuery(
   const allKeywords = [...keywords, ...extractedKeywords];
 
   console.log(
-    `[Tool Filter] Filtering ${allTools.length} tools for query: "${query}"`,
+    `[Tool Filter] Filtering ${allTools.length} tools for query: "${query}"`
   );
   console.log(`[Tool Filter] Keywords: ${allKeywords.join(", ")}`);
 
@@ -349,13 +394,13 @@ export function filterToolsForQuery(
       "pull",
       "commit",
       "branch",
-    ].includes(k),
+    ].includes(k)
   );
   const needsGmail = allKeywords.some((k) =>
-    ["gmail", "email", "send", "mail", "inbox", "draft"].includes(k),
+    ["gmail", "email", "send", "mail", "inbox", "draft"].includes(k)
   );
   const needsSlack = allKeywords.some((k) =>
-    ["slack", "channel", "message"].includes(k),
+    ["slack", "channel", "message"].includes(k)
   );
 
   let filteredTools = allTools;
@@ -426,7 +471,7 @@ export function filterToolsForQuery(
     `[Tool Filter] Selected ${selectedTools.length} tools (top scores: ${selectedTools
       .slice(0, 5)
       .map((t) => `${t.name}:${t._score}`)
-      .join(", ")})`,
+      .join(", ")})`
   );
 
   return selectedTools;
@@ -478,20 +523,15 @@ function extractKeywordsFromQuery(query: string): string[] {
 // Legacy wrapper for backward compatibility
 // Process tools for a specific app with intelligent filtering
 function processAppTools(
-  toolsArray: any[],
+  toolsArray: ComposioTool[],
   app: AvailableApp,
-  options: {
-    maxTools: number;
-    priorityLevel: number;
-    keywords: string[];
-    dashboardTools: string[];
-  },
-): any[] {
+  options: ProcessToolOptions
+): ComposioTool[] {
   const { maxTools, priorityLevel, keywords, dashboardTools } = options;
 
   // Transform tools to standard format
   const processedTools = toolsArray
-    .map((tool: any) => {
+    .map((tool: ComposioTool) => {
       const functionName = tool.function?.name || tool.name || "";
       return {
         ...tool,
@@ -520,8 +560,8 @@ function processAppTools(
   if (dashboardTools.length > 0) {
     const dashboardMatches = processedTools.filter(
       (tool) =>
-        dashboardTools.includes(tool.name) ||
-        dashboardTools.includes(tool._originalName),
+        (tool.name && dashboardTools.includes(tool.name)) ||
+        (tool._originalName && dashboardTools.includes(tool._originalName))
     );
 
     // Also check for API fallbacks for missing dashboard tools
@@ -529,8 +569,8 @@ function processAppTools(
       (dashboardTool) =>
         !dashboardMatches.some(
           (tool) =>
-            tool.name === dashboardTool || tool._originalName === dashboardTool,
-        ),
+            tool.name === dashboardTool || tool._originalName === dashboardTool
+        )
     );
 
     const fallbackMatches: any[] = [];
@@ -538,7 +578,7 @@ function processAppTools(
       const fallbacks = API_TOOL_FALLBACKS[missingTool] || [];
       fallbacks.forEach((fallback) => {
         const match = processedTools.find(
-          (tool) => tool.name === fallback || tool._originalName === fallback,
+          (tool) => tool.name === fallback || tool._originalName === fallback
         );
         if (match && !fallbackMatches.includes(match)) {
           fallbackMatches.push(match);
@@ -548,7 +588,7 @@ function processAppTools(
 
     filteredTools = [...dashboardMatches, ...fallbackMatches];
     console.log(
-      `[Composio] ${app}: Found ${dashboardMatches.length} dashboard tools + ${fallbackMatches.length} fallbacks`,
+      `[Composio] ${app}: Found ${dashboardMatches.length} dashboard tools + ${fallbackMatches.length} fallbacks`
     );
   }
 
@@ -559,10 +599,11 @@ function processAppTools(
 
     // Get tools by priority
     const priorityTools = processedTools
-      .filter((tool) => !existingNames.has(tool.name))
+      .filter((tool) => tool.name && !existingNames.has(tool.name))
       .map((tool) => ({
         ...tool,
-        priority: TOOL_PRIORITY_MAP[tool.name] || TOOL_PRIORITIES.LOW,
+        priority:
+          (tool.name && TOOL_PRIORITY_MAP[tool.name]) || TOOL_PRIORITIES.LOW,
       }))
       .filter((tool) => tool.priority <= priorityLevel)
       .sort((a, b) => a.priority - b.priority) // Higher priority first (lower number)
@@ -570,7 +611,7 @@ function processAppTools(
 
     filteredTools.push(...priorityTools);
     console.log(
-      `[Composio] ${app}: Added ${priorityTools.length} priority tools`,
+      `[Composio] ${app}: Added ${priorityTools.length} priority tools`
     );
   }
 
@@ -580,21 +621,22 @@ function processAppTools(
     const existingNames = new Set(filteredTools.map((t) => t.name));
 
     const keywordTools = processedTools
-      .filter((tool) => !existingNames.has(tool.name))
+      .filter((tool) => tool.name && !existingNames.has(tool.name))
       .filter((tool) => {
+        if (!tool.name) return false;
         const toolName = tool.name.toLowerCase();
         const toolDesc = (tool.description || "").toLowerCase();
         return keywords.some(
           (keyword) =>
             toolName.includes(keyword.toLowerCase()) ||
-            toolDesc.includes(keyword.toLowerCase()),
+            toolDesc.includes(keyword.toLowerCase())
         );
       })
       .slice(0, remainingSlots);
 
     filteredTools.push(...keywordTools);
     console.log(
-      `[Composio] ${app}: Added ${keywordTools.length} keyword-matching tools`,
+      `[Composio] ${app}: Added ${keywordTools.length} keyword-matching tools`
     );
   }
 
@@ -604,13 +646,13 @@ function processAppTools(
     const existingNames = new Set(filteredTools.map((t) => t.name));
 
     const commonTools = processedTools
-      .filter((tool) => !existingNames.has(tool.name))
-      .sort((a, b) => a.name.localeCompare(b.name)) // Alphabetical as proxy for common tools
+      .filter((tool) => tool.name && !existingNames.has(tool.name))
+      .sort((a, b) => (a.name || "").localeCompare(b.name || "")) // Alphabetical as proxy for common tools
       .slice(0, remainingSlots);
 
     filteredTools.push(...commonTools);
     console.log(
-      `[Composio] ${app}: Added ${commonTools.length} common tools to fill remaining slots`,
+      `[Composio] ${app}: Added ${commonTools.length} common tools to fill remaining slots`
     );
   }
 
@@ -618,7 +660,7 @@ function processAppTools(
 }
 
 // Remove duplicate tools based on function name
-function removeDuplicateTools(tools: any[]): any[] {
+function removeDuplicateTools(tools: ComposioTool[]): ComposioTool[] {
   const seen = new Set<string>();
   return tools.filter((tool) => {
     const toolName = tool.name || tool.function?.name;
@@ -638,7 +680,7 @@ export function getWorkspaceEntityId(workspaceId: string): string {
 // Helper to check if user has connected accounts for specific apps
 export async function getConnectedApps(
   composio: Composio,
-  entityId: string,
+  entityId: string
 ): Promise<{ app: AvailableApp; connected: boolean; connectionId?: string }[]> {
   try {
     const connectionsResponse = await composio.connectedAccounts.list({
@@ -652,7 +694,7 @@ export async function getConnectedApps(
         (conn: any) =>
           conn.toolkit?.slug?.toUpperCase() === app ||
           conn.appName?.toUpperCase() === app ||
-          conn.integrationId?.toUpperCase() === app,
+          conn.integrationId?.toUpperCase() === app
       );
 
       return {
@@ -671,8 +713,8 @@ export async function getConnectedApps(
 }
 
 // Validate tools for OpenAI compatibility
-function validateToolsForOpenAI(tools: any[]): any[] {
-  const validTools: any[] = [];
+function validateToolsForOpenAI(tools: ComposioTool[]): ComposioTool[] {
+  const validTools: ComposioTool[] = [];
 
   for (let i = 0; i < tools.length; i++) {
     const tool = tools[i];
@@ -682,7 +724,7 @@ function validateToolsForOpenAI(tools: any[]): any[] {
       // Check function name length (OpenAI limit: 64 characters)
       if (toolName.length > 64) {
         console.warn(
-          `[OpenAI Validation] Tool ${i}: Name too long (${toolName.length} chars): ${toolName}`,
+          `[OpenAI Validation] Tool ${i}: Name too long (${toolName.length} chars): ${toolName}`
         );
         continue;
       }
@@ -690,7 +732,7 @@ function validateToolsForOpenAI(tools: any[]): any[] {
       // Check if function name contains only valid characters
       if (!/^[a-zA-Z0-9_-]+$/.test(toolName)) {
         console.warn(
-          `[OpenAI Validation] Tool ${i}: Invalid characters in name: ${toolName}`,
+          `[OpenAI Validation] Tool ${i}: Invalid characters in name: ${toolName}`
         );
         continue;
       }
@@ -699,7 +741,7 @@ function validateToolsForOpenAI(tools: any[]): any[] {
       const description = tool.function?.description || tool.description || "";
       if (description.length > 1000) {
         console.warn(
-          `[OpenAI Validation] Tool ${i}: Description too long (${description.length} chars): ${toolName}`,
+          `[OpenAI Validation] Tool ${i}: Description too long (${description.length} chars): ${toolName}`
         );
         continue;
       }
@@ -711,7 +753,7 @@ function validateToolsForOpenAI(tools: any[]): any[] {
           JSON.stringify(parameters);
         } catch (e) {
           console.warn(
-            `[OpenAI Validation] Tool ${i}: Invalid parameters JSON: ${toolName}`,
+            `[OpenAI Validation] Tool ${i}: Invalid parameters JSON: ${toolName}`
           );
           continue;
         }
@@ -720,7 +762,7 @@ function validateToolsForOpenAI(tools: any[]): any[] {
       // Validate required structure
       if (!tool.function?.name) {
         console.warn(
-          `[OpenAI Validation] Tool ${i}: Missing function.name: ${JSON.stringify(tool).substring(0, 100)}`,
+          `[OpenAI Validation] Tool ${i}: Missing function.name: ${JSON.stringify(tool).substring(0, 100)}`
         );
         continue;
       }
@@ -729,13 +771,13 @@ function validateToolsForOpenAI(tools: any[]): any[] {
     } catch (error) {
       console.warn(
         `[OpenAI Validation] Tool ${i}: Validation error for ${toolName}:`,
-        error,
+        error
       );
     }
   }
 
   console.log(
-    `[OpenAI Validation] Validated ${validTools.length}/${tools.length} tools`,
+    `[OpenAI Validation] Validated ${validTools.length}/${tools.length} tools`
   );
   return validTools;
 }
@@ -743,25 +785,18 @@ function validateToolsForOpenAI(tools: any[]): any[] {
 // Helper to check if ANY user has connected accounts for specific apps (for workspace-wide access)
 export async function getAnyConnectedApps(
   composio: Composio,
-  workspaceId: string, // Make workspaceId required for workspace scoping
-): Promise<
-  {
-    app: AvailableApp;
-    connected: boolean;
-    connectionId?: string;
-    entityId?: string;
-  }[]
-> {
+  workspaceId: string // Make workspaceId required for workspace scoping
+): Promise<ConnectedApp[]> {
   try {
     // Always use workspace-scoped entity ID for consistency
     const workspaceEntityId = `workspace_${workspaceId}`;
 
     console.log(
-      `[Composio] Checking connections for workspace-scoped entity: ${workspaceEntityId}`,
+      `[Composio] Checking connections for workspace-scoped entity: ${workspaceEntityId}`
     );
 
     // Get workspace-scoped connections (primary approach)
-    let workspaceConnections: any[] = [];
+    let workspaceConnections: ComposioConnection[] = [];
     try {
       const workspaceConnectionsResponse =
         await composio.connectedAccounts.list({
@@ -772,28 +807,28 @@ export async function getAnyConnectedApps(
         "[Composio] Found",
         workspaceConnections.length,
         "workspace-scoped connections for",
-        workspaceEntityId,
+        workspaceEntityId
       );
     } catch (error) {
       console.warn(
         "[Composio] Failed to get workspace-scoped connections:",
-        error,
+        error
       );
     }
 
     // Only fall back to global connections if no workspace connections found
     // and only for backward compatibility
-    let globalConnections: any[] = [];
+    let globalConnections: ComposioConnection[] = [];
     if (workspaceConnections.length === 0) {
       try {
         const globalConnectionsResponse = await composio.connectedAccounts.list(
-          {},
+          {}
         );
         globalConnections = globalConnectionsResponse.items || [];
         console.log(
           "[Composio] Fallback: Found",
           globalConnections.length,
-          "global connections (for backward compatibility)",
+          "global connections (for backward compatibility)"
         );
       } catch (error) {
         console.warn("[Composio] Failed to get global connections:", error);
@@ -807,16 +842,16 @@ export async function getAnyConnectedApps(
     return Object.values(AVAILABLE_APPS).map((app) => {
       // Find all connections for this app
       const appConnections = allConnections.filter(
-        (conn: any) =>
+        (conn: ComposioConnection) =>
           conn.toolkit?.slug?.toUpperCase() === app ||
           conn.appName?.toUpperCase() === app ||
-          conn.toolkit?.slug?.toUpperCase() === app.toLowerCase().toUpperCase(),
+          conn.toolkit?.slug?.toUpperCase() === app.toLowerCase().toUpperCase()
       );
 
       // Prefer workspace-scoped connections, then newest
       const connection = appConnections
-        .filter((conn: any) => conn.status === "ACTIVE")
-        .sort((a: any, b: any) => {
+        .filter((conn: ComposioConnection) => conn.status === "ACTIVE")
+        .sort((a: ComposioConnection, b: ComposioConnection) => {
           // Strongly prefer workspace-scoped connections
           const aIsWorkspace = workspaceConnections.includes(a);
           const bIsWorkspace = workspaceConnections.includes(b);
@@ -830,7 +865,7 @@ export async function getAnyConnectedApps(
         })[0];
 
       console.log(
-        `[Composio] App ${app}: found ${appConnections.length} connections, using ${connection ? (workspaceConnections.includes(connection) ? "workspace-scoped" : "global (fallback)") : "none"}: connected=${!!connection}, connectionId=${connection?.id}, entityId=${workspaceEntityId}`,
+        `[Composio] App ${app}: found ${appConnections.length} connections, using ${connection ? (workspaceConnections.includes(connection) ? "workspace-scoped" : "global (fallback)") : "none"}: connected=${!!connection}, connectionId=${connection?.id}, entityId=${workspaceEntityId}`
       );
 
       return {
@@ -855,7 +890,7 @@ export async function initiateAppConnection(
   composio: Composio,
   entityId: string,
   app: AvailableApp,
-  callbackUrl?: string,
+  callbackUrl?: string
 ) {
   try {
     // Get the auth config ID for this app
@@ -863,12 +898,12 @@ export async function initiateAppConnection(
 
     if (!authConfigId) {
       throw new Error(
-        `Auth config ID not found for ${app}. Please check your environment variables.`,
+        `Auth config ID not found for ${app}. Please check your environment variables.`
       );
     }
 
     console.log(
-      `[Composio] Initiating connection for ${app} with auth config ID: ${authConfigId}`,
+      `[Composio] Initiating connection for ${app} with auth config ID: ${authConfigId}`
     );
 
     const connection = await composio.connectedAccounts.initiate(
@@ -878,7 +913,7 @@ export async function initiateAppConnection(
         callbackUrl:
           callbackUrl ||
           `${process.env.NEXT_PUBLIC_APP_URL}/integrations/callback`,
-      },
+      }
     );
 
     return {

@@ -12,7 +12,13 @@ import { api } from "@/../convex/_generated/api";
 
 interface UnifiedMessageProps {
   data: {
-    type: "canvas" | "note" | "canvas-live" | "note-live" | "canvas-export" | "note-export";
+    type:
+      | "canvas"
+      | "note"
+      | "canvas-live"
+      | "note-live"
+      | "canvas-export"
+      | "note-export";
     // Canvas specific
     canvasName?: string;
     roomId?: string;
@@ -47,12 +53,12 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
   useEffect(() => {
     if (members && data.participants) {
       const memberMap = new Map();
-      members.forEach(member => {
+      members.forEach((member) => {
         memberMap.set(member.user._id, member.user.name);
       });
 
-      const names = data.participants.map(id =>
-        memberMap.get(id) || "Unknown user"
+      const names = data.participants.map(
+        (id) => memberMap.get(id) || "Unknown user"
       );
 
       setParticipantNames(names);
@@ -73,9 +79,11 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
       return isCanvas ? "Live Canvas Session" : `Live Note: ${data.noteTitle}`;
     }
     if (isExport) {
-      return isCanvas ? `Canvas Export: ${data.canvasName}` : `Note Export: ${data.noteTitle}`;
+      return isCanvas
+        ? `Canvas Export: ${data.canvasName}`
+        : `Note Export: ${data.noteTitle}`;
     }
-    return isCanvas ? `${data.canvasName}` : `${data.noteTitle}`;
+    return isCanvas ? data.canvasName : data.noteTitle;
   };
 
   // Get the button text
@@ -101,7 +109,7 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
         url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&t=${Date.now()}`;
       } else {
         // For regular canvas, navigate with canvas name and room ID
-        url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&canvasName=${encodeURIComponent(data.canvasName || '')}&t=${Date.now()}`;
+        url = `/workspace/${workspaceId}/channel/${channelId}/canvas?roomId=${data.roomId}&canvasName=${encodeURIComponent(data.canvasName || "")}&t=${Date.now()}`;
       }
     } else {
       // For notes (live or regular)
@@ -134,10 +142,14 @@ export const UnifiedMessage = ({ data }: UnifiedMessageProps) => {
                 <Users className="h-3 w-3 mr-1 flex-shrink-0" />
                 {participantNames.length > 0 ? (
                   <span className="truncate">
-                    {participantNames.join(", ")} {participantNames.length === 1 ? "is" : "are"} currently {isCanvas ? "drawing" : "editing"}
+                    {participantNames.join(", ")}{" "}
+                    {participantNames.length === 1 ? "is" : "are"} currently{" "}
+                    {isCanvas ? "drawing" : "editing"}
                   </span>
                 ) : (
-                  <span>{isCanvas ? "Canvas" : "Note"} session in progress</span>
+                  <span>
+                    {isCanvas ? "Canvas" : "Note"} session in progress
+                  </span>
                 )}
               </div>
             )}
