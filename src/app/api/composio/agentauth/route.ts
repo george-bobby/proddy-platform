@@ -60,18 +60,19 @@ export async function POST(req: NextRequest) {
         // Store auth config in database for tracking
         if (memberId) {
           try {
-            // Store the auth config with Composio SDK format
+            // Store the auth config linked to this toolkit (persist the real authConfigId)
+            const { APP_CONFIGS } = await import("@/lib/composio-config");
+            const appKey = toolkit.toUpperCase() as keyof typeof APP_CONFIGS;
+            const toolkitAuthConfigId = APP_CONFIGS[appKey]?.authConfigId;
             await convex.mutation(api.integrations.storeAuthConfig, {
               workspaceId: workspaceId as Id<"workspaces">,
               toolkit: toolkit as any,
               name: `${toolkit.charAt(0).toUpperCase() + toolkit.slice(1)} Config`,
               type: "use_composio_managed_auth",
-              composioAuthConfigId:
-                connection.connectionId || `composio_${toolkit}_${Date.now()}`,
+              composioAuthConfigId: toolkitAuthConfigId,
               isComposioManaged: true,
               createdBy: memberId as Id<"members">,
             });
-
             console.log(`[AgentAuth] Auth config stored for ${toolkit}`);
           } catch (error) {
             console.warn("Failed to store auth config:", error);
