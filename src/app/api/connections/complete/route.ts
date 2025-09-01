@@ -4,22 +4,66 @@ import { initializeComposio } from "@/lib/composio";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
+import {
+  convexAuthNextjsToken,
+  isAuthenticatedNextjs,
+} from "@convex-dev/auth/nextjs/server";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {
   try {
-    const { workspaceId, app, memberId, redirectUrl } = await req.json();
-
-    if (!workspaceId || !app || !memberId) {
+    // Check authentication first
+    if (!isAuthenticatedNextjs()) {
       return NextResponse.json(
-        { error: "workspaceId, app, and memberId are required" },
-        { status: 400 },
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
+    // Get the auth token to make authenticated Convex calls
+    const token = convexAuthNextjsToken();
+    if (!token) {
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 }
+      );
+    }
+
+    // Set the token for authenticated Convex operations
+    convex.setAuth(token);
+
+    const { workspaceId, app, redirectUrl } = await req.json();
+
+    if (!workspaceId || !app) {
+      return NextResponse.json(
+        { error: "workspaceId and app are required" },
+        { status: 400 }
+      );
+    }
+
+    // Get the current user from the authenticated session
+    const currentUser = await convex.query(api.users.current);
+    if (!currentUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    }
+
+    // Verify user is a member of the workspace
+    const members = await convex.query(api.members.get, {
+      workspaceId: workspaceId as Id<"workspaces">,
+    });
+
+    if (!members || members.length === 0) {
+      return NextResponse.json(
+        { error: "Access denied: Not a member of this workspace" },
+        { status: 403 }
+      );
+    }
+
+    const memberId = members[0]._id;
+
     console.log(
-      `[Connection Complete] Completing ${app} connection for workspace ${workspaceId}`,
+      `[Connection Complete] Completing ${app} connection for workspace ${workspaceId}`
     );
 
     // Use consistent workspace entity ID pattern
@@ -45,12 +89,12 @@ export async function POST(req: NextRequest) {
           error: "Connection not found",
           details: `No active connection found for ${app}. Please try connecting again.`,
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
     console.log(
-      `[Connection Complete] Found connection: ${connectedAccount.id} for ${app}`,
+      `[Connection Complete] Found connection: ${connectedAccount.id} for ${app}`
     );
 
     // Store connected account in database (consistent with agentauth)
@@ -63,7 +107,7 @@ export async function POST(req: NextRequest) {
           {
             workspaceId: workspaceId as Id<"workspaces">,
             toolkit: app as any,
-          },
+          }
         );
         authConfigId = existingAuthConfig?._id;
       } catch (error) {
@@ -117,7 +161,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to complete connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

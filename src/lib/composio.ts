@@ -1,13 +1,43 @@
+// Server-only runtime guard
+if (typeof window !== "undefined") {
+  throw new Error(
+    "composio.ts contains server-only code and cannot be imported in the browser. " +
+      "This file uses server credentials that must not be exposed to the client."
+  );
+}
+
 import { Composio } from "@composio/core";
 import { OpenAIProvider } from "@composio/openai";
 import OpenAI from "openai";
 
-// Initialize OpenAI client
+// Validate required environment variables
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error(
+    "OPENAI_API_KEY environment variable is required but not set. " +
+      "Please configure your OpenAI API key in the environment variables."
+  );
+}
+
+// Configure timeout (default 30 seconds, configurable via env var)
+const openaiTimeoutMs = process.env.OPENAI_TIMEOUT_MS
+  ? parseInt(process.env.OPENAI_TIMEOUT_MS, 10)
+  : 30000;
+
+// Initialize OpenAI client (server-only)
 export const openaiClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: openaiTimeoutMs,
 });
 
-// Initialize Composio client with OpenAI provider
+// Validate Composio API key
+if (!process.env.COMPOSIO_API_KEY) {
+  throw new Error(
+    "COMPOSIO_API_KEY environment variable is required but not set. " +
+      "Please configure your Composio API key in the environment variables."
+  );
+}
+
+// Initialize Composio client with OpenAI provider (server-only)
 export const composio = new Composio({
   apiKey: process.env.COMPOSIO_API_KEY,
   provider: new OpenAIProvider(),
@@ -21,10 +51,8 @@ export function initializeComposio() {
     throw new Error("COMPOSIO_API_KEY environment variable is required");
   }
 
-  const composioInstance = new Composio({
-    apiKey: process.env.COMPOSIO_API_KEY,
-    provider: new OpenAIProvider(),
-  });
+  // Use the shared singleton Composio instance instead of creating a new one
+  const composioInstance = composio;
 
   // Create API client wrapper for common operations
   const apiClient = {
@@ -40,12 +68,12 @@ export function initializeComposio() {
 
         if (!authConfigId) {
           throw new Error(
-            `Auth config ID not found for ${appName}. Please check your environment variables. Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`,
+            `Auth config ID not found for ${appName}. Please check your environment variables. Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`
           );
         }
 
         console.log(
-          `[Composio API] Creating connection for ${appName} with auth config ID: ${authConfigId}`,
+          `[Composio API] Creating connection for ${appName} with auth config ID: ${authConfigId}`
         );
 
         // Try to initiate connection using auth config ID
@@ -91,7 +119,7 @@ export function initializeComposio() {
       try {
         const connection =
           (await (composioInstance as any).connectedAccounts?.get?.(
-            connectionId,
+            connectionId
           )) ||
           (await (composioInstance as any).connections?.get?.(connectionId));
 
@@ -102,10 +130,10 @@ export function initializeComposio() {
       }
     },
 
-    // Get tools for user and apps
-    async getTools(userId: string, appNames: string[]) {
+    // Get tools for entity and apps
+    async getTools(entityId: string, appNames: string[]) {
       try {
-        const tools = await composioInstance.tools.get(userId, {
+        const tools = await composioInstance.tools.get(entityId, {
           appNames: appNames,
         } as any);
 
@@ -120,7 +148,7 @@ export function initializeComposio() {
     async deleteConnection(connectionId: string) {
       try {
         (await (composioInstance as any).connectedAccounts?.delete?.(
-          connectionId,
+          connectionId
         )) ||
           (await (composioInstance as any).connections?.delete?.(connectionId));
       } catch (error) {
@@ -136,15 +164,15 @@ export function initializeComposio() {
   };
 }
 
-// Helper function to get OpenAI-compatible tools for a user with specific apps
-export async function getOpenAITools(userId: string, appNames: string[]) {
+// Helper function to get OpenAI-compatible tools for an entity with specific apps
+export async function getOpenAITools(entityId: string, appNames: string[]) {
   if (!appNames.length) {
     return [];
   }
 
   try {
     // Get tools using the correct API according to TypeScript definitions
-    const tools = await composio.tools.get(userId, {
+    const tools = await composio.tools.get(entityId, {
       appNames: appNames,
     } as any);
     return tools;
@@ -156,9 +184,9 @@ export async function getOpenAITools(userId: string, appNames: string[]) {
 
 // Helper function to execute tools using Composio
 export async function executeComposioAction(
-  userId: string,
+  entityId: string,
   actionName: string,
-  params: Record<string, unknown>,
+  params: Record<string, unknown>
 ) {
   try {
     const result = await composio.tools.execute(actionName, params);
@@ -170,17 +198,20 @@ export async function executeComposioAction(
 }
 
 // Helper function to handle tool calls from OpenAI response
-export async function handleOpenAIToolCalls(response: unknown, userId: string) {
+export async function handleOpenAIToolCalls(
+  response: unknown,
+  entityId: string
+) {
   try {
     // Use the provider's handle_tool_calls method
     const result = await (
       composio.provider as unknown as {
         handleToolCalls: (
           response: unknown,
-          userId: string,
+          entityId: string
         ) => Promise<unknown>;
       }
-    ).handleToolCalls(response, userId);
+    ).handleToolCalls(response, entityId);
     return result;
   } catch (error) {
     console.error("Error handling OpenAI tool calls:", error);
@@ -190,15 +221,15 @@ export async function handleOpenAIToolCalls(response: unknown, userId: string) {
 
 // Helper function to get Composio tools for OpenAI function calling format
 export async function getComposioToolsForOpenAI(
-  userId: string,
-  appNames: string[],
+  entityId: string,
+  appNames: string[]
 ) {
   if (!appNames.length) {
     return [];
   }
 
   try {
-    const tools = await composio.tools.get(userId, {
+    const tools = await composio.tools.get(entityId, {
       appNames: appNames,
     } as any);
     // Tools from Composio with OpenAI provider are already in the correct format
@@ -211,13 +242,13 @@ export async function getComposioToolsForOpenAI(
 
 // Create a simple example function following the documentation pattern
 export async function createOpenAICompletion(
-  userId: string,
+  entityId: string,
   appNames: string[],
-  message: string,
+  message: string
 ) {
   try {
-    // Get tools for the user
-    const tools = await getComposioToolsForOpenAI(userId, appNames);
+    // Get tools for the entity
+    const tools = await getComposioToolsForOpenAI(entityId, appNames);
 
     // Create OpenAI completion with tools
     const response = await openaiClient.chat.completions.create({
@@ -228,7 +259,7 @@ export async function createOpenAICompletion(
 
     // Handle tool calls if any
     if (response.choices[0].message.tool_calls) {
-      const result = await handleOpenAIToolCalls(response, userId);
+      const result = await handleOpenAIToolCalls(response, entityId);
       return result;
     }
 
@@ -236,7 +267,7 @@ export async function createOpenAICompletion(
   } catch (error) {
     console.error(
       "Error creating OpenAI completion with Composio tools:",
-      error,
+      error
     );
     throw error;
   }

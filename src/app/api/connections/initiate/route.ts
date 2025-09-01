@@ -8,31 +8,75 @@ import {
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/../convex/_generated/api";
 import type { Id } from "@/../convex/_generated/dataModel";
+import {
+  convexAuthNextjsToken,
+  isAuthenticatedNextjs,
+} from "@convex-dev/auth/nextjs/server";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {
   try {
-    const { workspaceId, app, redirectUrl, memberId } = await req.json();
-
-    if (!workspaceId || !app || !memberId) {
+    // Check authentication first
+    if (!isAuthenticatedNextjs()) {
       return NextResponse.json(
-        { error: "workspaceId, app, and memberId are required" },
-        { status: 400 },
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
+
+    // Get the auth token to make authenticated Convex calls
+    const token = convexAuthNextjsToken();
+    if (!token) {
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 }
+      );
+    }
+
+    // Set the token for authenticated Convex operations
+    convex.setAuth(token);
+
+    const { workspaceId, app, redirectUrl } = await req.json();
+
+    if (!workspaceId || !app) {
+      return NextResponse.json(
+        { error: "workspaceId and app are required" },
+        { status: 400 }
+      );
+    }
+
+    // Get the current user from the authenticated session
+    const currentUser = await convex.query(api.users.current);
+    if (!currentUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
+    }
+
+    // Verify user is a member of the workspace
+    const members = await convex.query(api.members.get, {
+      workspaceId: workspaceId as Id<"workspaces">,
+    });
+
+    if (!members || members.length === 0) {
+      return NextResponse.json(
+        { error: "Access denied: Not a member of this workspace" },
+        { status: 403 }
+      );
+    }
+
+    const memberId = members[0]._id;
 
     if (!Object.values(AVAILABLE_APPS).includes(app)) {
       return NextResponse.json(
         {
           error: `Invalid app. Must be one of: ${Object.values(AVAILABLE_APPS).join(", ")}`,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     console.log(
-      `[Connection Initiate] Starting connection for ${app} in workspace ${workspaceId}`,
+      `[Connection Initiate] Starting connection for ${app} in workspace ${workspaceId}`
     );
 
     // Use consistent workspace entity ID pattern
@@ -45,7 +89,7 @@ export async function POST(req: NextRequest) {
       entityId,
       app as AvailableApp,
       redirectUrl ||
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations/callback?workspaceId=${workspaceId}&app=${app}`,
+        `${process.env.NEXT_PUBLIC_APP_URL}/integrations/callback?workspaceId=${workspaceId}&app=${app}`
     );
 
     if (!result.success) {
@@ -86,7 +130,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to initiate connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

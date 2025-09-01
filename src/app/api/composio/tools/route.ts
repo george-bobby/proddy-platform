@@ -1,19 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Composio } from "@composio/core";
-import { OpenAIProvider } from "@composio/openai";
 import OpenAI from "openai";
-
-// Initialize Composio SDK with OpenAI provider
-const initializeComposio = () => {
-  if (!process.env.COMPOSIO_API_KEY) {
-    throw new Error("COMPOSIO_API_KEY environment variable is required");
-  }
-
-  return new Composio({
-    apiKey: process.env.COMPOSIO_API_KEY,
-    provider: new OpenAIProvider(),
-  });
-};
+import { createComposioClient } from "@/lib/composio-config";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -23,18 +10,26 @@ const openai = new OpenAI({
 // Get Composio tools for OpenAI
 export async function POST(req: NextRequest) {
   try {
+    // Check for required environment variable early
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: "OPENAI_API_KEY is not configured" },
+        { status: 500 }
+      );
+    }
+
     const { entityId, appNames, message } = await req.json();
 
     if (!entityId || !appNames || !message) {
       return NextResponse.json(
         { error: "entityId, appNames, and message are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     console.log("[Composio Tools] Getting tools for:", { entityId, appNames });
 
-    const composio = initializeComposio();
+    const composio = createComposioClient();
 
     // Get tools for the specified apps using the Composio SDK
     let tools: any[] = [];
@@ -99,7 +94,7 @@ export async function POST(req: NextRequest) {
       console.log(
         "[Composio Tools] Executing",
         completion.choices[0].message.tool_calls.length,
-        "tool calls",
+        "tool calls"
       );
 
       for (const toolCall of completion.choices[0].message.tool_calls) {
@@ -107,7 +102,7 @@ export async function POST(req: NextRequest) {
           try {
             const result = await composio.tools.execute(
               toolCall.function.name,
-              JSON.parse(toolCall.function.arguments),
+              JSON.parse(toolCall.function.arguments)
             );
 
             toolResults.push({
@@ -173,7 +168,7 @@ export async function POST(req: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -188,7 +183,7 @@ export async function GET(req: NextRequest) {
     if (!entityId) {
       return NextResponse.json(
         { error: "entityId is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -197,7 +192,7 @@ export async function GET(req: NextRequest) {
       appNames,
     });
 
-    const composio = initializeComposio();
+    const composio = createComposioClient();
 
     // Get tools for the specified apps
     let tools: any[] = [];
@@ -244,7 +239,7 @@ export async function GET(req: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
