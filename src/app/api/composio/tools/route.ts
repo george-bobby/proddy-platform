@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: "OPENAI_API_KEY is not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (!entityId || !appNames || !message) {
       return NextResponse.json(
         { error: "entityId, appNames, and message are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       console.log(
         "[Composio Tools] Executing",
         completion.choices[0].message.tool_calls.length,
-        "tool calls"
+        "tool calls",
       );
 
       for (const toolCall of completion.choices[0].message.tool_calls) {
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
           try {
             const result = await composio.tools.execute(
               toolCall.function.name,
-              JSON.parse(toolCall.function.arguments)
+              JSON.parse(toolCall.function.arguments),
             );
 
             toolResults.push({
@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -183,7 +183,7 @@ export async function GET(req: NextRequest) {
     if (!entityId) {
       return NextResponse.json(
         { error: "entityId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -239,7 +239,7 @@ export async function GET(req: NextRequest) {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -2,7 +2,7 @@
 if (typeof window !== "undefined") {
   throw new Error(
     "composio.ts contains server-only code and cannot be imported in the browser. " +
-      "This file uses server credentials that must not be exposed to the client."
+      "This file uses server credentials that must not be exposed to the client.",
   );
 }
 
@@ -14,7 +14,7 @@ import OpenAI from "openai";
 if (!process.env.OPENAI_API_KEY) {
   throw new Error(
     "OPENAI_API_KEY environment variable is required but not set. " +
-      "Please configure your OpenAI API key in the environment variables."
+      "Please configure your OpenAI API key in the environment variables.",
   );
 }
 
@@ -33,7 +33,7 @@ export const openaiClient = new OpenAI({
 if (!process.env.COMPOSIO_API_KEY) {
   throw new Error(
     "COMPOSIO_API_KEY environment variable is required but not set. " +
-      "Please configure your Composio API key in the environment variables."
+      "Please configure your Composio API key in the environment variables.",
   );
 }
 
@@ -68,12 +68,12 @@ export function initializeComposio() {
 
         if (!authConfigId) {
           throw new Error(
-            `Auth config ID not found for ${appName}. Please check your environment variables. Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`
+            `Auth config ID not found for ${appName}. Please check your environment variables. Available apps: ${Object.keys(APP_CONFIGS).join(", ")}`,
           );
         }
 
         console.log(
-          `[Composio API] Creating connection for ${appName} with auth config ID: ${authConfigId}`
+          `[Composio API] Creating connection for ${appName} with auth config ID: ${authConfigId}`,
         );
 
         // Try to initiate connection using auth config ID
@@ -119,7 +119,7 @@ export function initializeComposio() {
       try {
         const connection =
           (await (composioInstance as any).connectedAccounts?.get?.(
-            connectionId
+            connectionId,
           )) ||
           (await (composioInstance as any).connections?.get?.(connectionId));
 
@@ -148,7 +148,7 @@ export function initializeComposio() {
     async deleteConnection(connectionId: string) {
       try {
         (await (composioInstance as any).connectedAccounts?.delete?.(
-          connectionId
+          connectionId,
         )) ||
           (await (composioInstance as any).connections?.delete?.(connectionId));
       } catch (error) {
@@ -186,7 +186,7 @@ export async function getOpenAITools(entityId: string, appNames: string[]) {
 export async function executeComposioAction(
   entityId: string,
   actionName: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
 ) {
   try {
     const result = await composio.tools.execute(actionName, params);
@@ -200,7 +200,7 @@ export async function executeComposioAction(
 // Helper function to handle tool calls from OpenAI response
 export async function handleOpenAIToolCalls(
   response: unknown,
-  entityId: string
+  entityId: string,
 ) {
   try {
     // Use the provider's handle_tool_calls method
@@ -208,7 +208,7 @@ export async function handleOpenAIToolCalls(
       composio.provider as unknown as {
         handleToolCalls: (
           response: unknown,
-          entityId: string
+          entityId: string,
         ) => Promise<unknown>;
       }
     ).handleToolCalls(response, entityId);
@@ -222,7 +222,7 @@ export async function handleOpenAIToolCalls(
 // Helper function to get Composio tools for OpenAI function calling format
 export async function getComposioToolsForOpenAI(
   entityId: string,
-  appNames: string[]
+  appNames: string[],
 ) {
   if (!appNames.length) {
     return [];
@@ -244,7 +244,7 @@ export async function getComposioToolsForOpenAI(
 export async function createOpenAICompletion(
   entityId: string,
   appNames: string[],
-  message: string
+  message: string,
 ) {
   try {
     // Get tools for the entity
@@ -267,7 +267,7 @@ export async function createOpenAICompletion(
   } catch (error) {
     console.error(
       "Error creating OpenAI completion with Composio tools:",
-      error
+      error,
     );
     throw error;
   }

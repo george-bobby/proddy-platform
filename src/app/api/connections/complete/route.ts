@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!isAuthenticatedNextjs()) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     if (!token) {
       return NextResponse.json(
         { error: "Invalid authentication token" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (!workspaceId || !app) {
       return NextResponse.json(
         { error: "workspaceId and app are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -56,14 +56,14 @@ export async function POST(req: NextRequest) {
     if (!members || members.length === 0) {
       return NextResponse.json(
         { error: "Access denied: Not a member of this workspace" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     const memberId = members[0]._id;
 
     console.log(
-      `[Connection Complete] Completing ${app} connection for workspace ${workspaceId}`
+      `[Connection Complete] Completing ${app} connection for workspace ${workspaceId}`,
     );
 
     // Use consistent workspace entity ID pattern
@@ -89,12 +89,12 @@ export async function POST(req: NextRequest) {
           error: "Connection not found",
           details: `No active connection found for ${app}. Please try connecting again.`,
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     console.log(
-      `[Connection Complete] Found connection: ${connectedAccount.id} for ${app}`
+      `[Connection Complete] Found connection: ${connectedAccount.id} for ${app}`,
     );
 
     // Store connected account in database (consistent with agentauth)
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
           {
             workspaceId: workspaceId as Id<"workspaces">,
             toolkit: app as any,
-          }
+          },
         );
         authConfigId = existingAuthConfig?._id;
       } catch (error) {
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
         error: "Failed to complete connection",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
