@@ -22,7 +22,16 @@ const openai = new OpenAI({
 const queryCache = new Map<string, { response: string; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Extract relevant keywords from user query for smart tool selection
+/**
+ * Extracts relevant keywords from a user query to aid smart tool selection.
+ *
+ * Scans the input string for known technology names (e.g., "github", "slack"),
+ * action verbs (e.g., "create", "send") and object terms (e.g., "repo", "email")
+ * and returns a de-duplicated list of the matched keywords in lower-case.
+ *
+ * @param query - The user's natural-language query or command to analyze.
+ * @returns An array of unique keywords found in `query`. Order is not guaranteed.
+ */
 function extractKeywords(query: string): string[] {
   const keywords = new Set<string>();
   const words = query.toLowerCase().split(/\s+/);
@@ -65,6 +74,43 @@ function extractKeywords(query: string): string[] {
   return Array.from(keywords);
 }
 
+/**
+ * POST handler for the Proddy AI workspace assistant API route.
+ *
+ * Accepts a JSON body with `message`, `workspaceId`, optional `workspaceContext`, and optional `conversationHistory`,
+ * then returns a structured JSON response containing a generated assistant reply and related metadata.
+ *
+ * Behavior highlights:
+ * - Validates that `message` and `workspaceId` are present (responds 400 if missing).
+ * - Uses a short in-memory cache for simple (non-create/update/delete/send) queries to return recent answers quickly.
+ * - Performs a semantic search of the workspace to enrich context for the assistant.
+ * - Detects connected external integrations and, when appropriate, loads and filters Composio tools to allow the model
+ *   to invoke external services (GitHub, Gmail, Slack, Notion, etc.). If no relevant integrations are connected and the
+ *   user explicitly asks about them, returns guidance on enabling integrations.
+ * - Calls OpenAI (gpt-4o-mini) to generate an initial response; if the model requests tool calls, executes them via Composio,
+ *   supplies tool results back to the model in a follow-up completion, and uses the follow-up content as the final reply.
+ * - Assembles `sources` (from semantic search), `actions` (navigation links derived from search results), and `toolResults`
+ *   (results or errors from executed tools). Caches the final response for simple queries.
+ *
+ * Response:
+ * - On success returns 200 with JSON containing:
+ *   - `success`: true
+ *   - `response`: assistant-generated text
+ *   - `sources`: array of workspace search snippets { id, type, text }
+ *   - `actions`: array of navigation actions derived from search results
+ *   - `toolResults`: array of executed tool outcomes (or errors)
+ *   - `assistantType`: "chatbot"
+ *   - `composioToolsUsed`: boolean indicating whether composio tools were loaded
+ * - On client error returns 400 with an error message (missing parameters).
+ * - On internal failure returns 500 with `{ success: false, error: string }`.
+ *
+ * Side effects and external interactions:
+ * - May call Convex for semantic search, Composio to list/load/execute tools, and OpenAI for completions.
+ * - Executes external tool actions (via Composio) when the model requests them; those tool executions may change external state
+ *   depending on the tool.
+ *
+ * @param req - NextRequest for the incoming POST (expects a JSON body as described above).
+ */
 export async function POST(req: NextRequest) {
   try {
     const { message, workspaceContext, workspaceId, conversationHistory } =

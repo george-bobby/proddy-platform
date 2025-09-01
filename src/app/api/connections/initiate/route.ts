@@ -11,6 +11,25 @@ import type { Id } from "@/../convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+/**
+ * HTTP POST handler that initiates a Composio app connection for a workspace.
+ *
+ * Expects a JSON body with:
+ * - `workspaceId` (string) — target workspace ID (required)
+ * - `app` (string) — one of AVAILABLE_APPS (required)
+ * - `memberId` (string) — ID of the member initiating the connection (required)
+ * - `redirectUrl` (string) — optional override for the OAuth callback/redirect URL
+ *
+ * The handler:
+ * - validates input and `app` against AVAILABLE_APPS,
+ * - constructs a workspace-scoped `entityId` (`workspace_<workspaceId>`),
+ * - calls `initiateAppConnection` to start the Composio-managed authorization flow,
+ * - attempts to persist a corresponding auth config via a Convex mutation (storage failures are logged but do not fail the request),
+ * - returns a JSON response with connection details or an error status.
+ *
+ * @returns A NextResponse JSON payload. On success: `{ success: true, app, redirectUrl, connectionId, entityId, message }`.
+ * On client errors returns 400 with `{ error }`. On unexpected server errors returns 500 with `{ error, details }`.
+ */
 export async function POST(req: NextRequest) {
   try {
     const { workspaceId, app, redirectUrl, memberId } = await req.json();

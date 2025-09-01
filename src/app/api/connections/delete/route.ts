@@ -7,6 +7,17 @@ import type { Id } from "@/../convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+/**
+ * HTTP DELETE handler that removes a connection for a workspace.
+ *
+ * Attempts to delete the connection from Composio and, if provided with a valid Convex-style
+ * connectedAccountId, disables the corresponding connected account record in the Convex backend.
+ * The handler tolerates failures from external systems (Composio or Convex) and continues cleanup
+ * where possible. Returns a 400 response when required query parameters are missing and a 500
+ * response for unexpected errors.
+ *
+ * @returns A JSON NextResponse indicating success with `connectionId` and `workspaceId`, or an error payload with an appropriate HTTP status.
+ */
 export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -93,6 +104,24 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
+/**
+ * Deletes a connection for a workspace using data from the request body.
+ *
+ * Expects a JSON body with `workspaceId` and `connectionId`. Optionally accepts
+ * `connectedAccountId`. Attempts to remove the connection via the Composio API;
+ * if `connectedAccountId` looks like a Convex ID (length > 10 and not prefixed
+ * with `"ca_"`), it also sets that connected account's status to `"DISABLED"`
+ * and `isDisabled: true` via a Convex mutation. The handler always attempts
+ * database cleanup even if the Composio deletion fails.
+ *
+ * Responses:
+ * - 200: JSON { success: true, message, connectionId, workspaceId } on success.
+ * - 400: JSON error when `workspaceId` or `connectionId` is missing.
+ * - 500: JSON error with details on unexpected failures.
+ *
+ * Note: This function handles its own errors and returns HTTP responses; it does
+ * not throw exceptions to the caller.
+ */
 export async function POST(req: NextRequest) {
   try {
     const { workspaceId, connectionId, connectedAccountId } = await req.json();

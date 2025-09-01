@@ -205,7 +205,14 @@ export const APP_CONFIGS = {
   },
 } as const;
 
-// Initialize Composio client with OpenAI provider
+/**
+ * Create and return a Composio client configured with the OpenAI provider.
+ *
+ * The client is initialized using the `COMPOSIO_API_KEY` environment variable.
+ *
+ * @returns A ready-to-use `Composio` instance.
+ * @throws If `COMPOSIO_API_KEY` is not set in the environment.
+ */
 export function createComposioClient(): Composio {
   if (!process.env.COMPOSIO_API_KEY) {
     throw new Error("COMPOSIO_API_KEY environment variable is required");
@@ -243,7 +250,18 @@ const API_TOOL_FALLBACKS: Record<string, string[]> = {
   GITHUB_GET_A_REPOSITORY: ["GITHUB_REPOS_GET"],
 };
 
-// Fetch ALL available tools for connected apps and cache them
+/**
+ * Fetches, normalizes, deduplicates, and OpenAI-validates all tools for the given apps and entity, with optional in-memory caching.
+ *
+ * For each requested app this function retrieves up to the configured maximum tools from Composio, maps tools to a standardized ComposioTool shape (adding metadata used by downstream filters), performs basic name validation, removes duplicates, and runs OpenAI compatibility checks. Results are cached in-process for a short duration when `useCache` is true.
+ *
+ * Note: the `composio` client parameter is intentionally undocumented as a passed service. On internal errors the function returns an empty array.
+ *
+ * @param entityId - The Composio entity id (e.g., user or workspace-scoped id) to fetch tools for.
+ * @param apps - List of apps to fetch tools from (values from AVAILABLE_APPS).
+ * @param useCache - When true (default) the function will return cached results if available and not expired.
+ * @returns A promise that resolves to an array of validated, deduplicated ComposioTool objects (may be empty on error).
+ */
 export async function getAllToolsForApps(
   composio: Composio,
   entityId: string,
@@ -363,7 +381,22 @@ export async function getAllToolsForApps(
   }
 }
 
-// Filter tools based on query context and needs
+/**
+ * Filter and rank a list of tools for a user's natural-language query.
+ *
+ * This function:
+ * - Optionally narrows tools to a single app if the query strongly implies GitHub, Gmail, or Slack.
+ * - Extracts keywords from the query (and accepts additional keywords) to match tool names and descriptions.
+ * - Scores tools by dashboard preference, configured priority levels, keyword matches, and action-type hints
+ *   (create/list/get/update/delete/send), then returns the top-scoring tools.
+ *
+ * @param allTools - Array of tool objects (expected to include fields like `name`, `description`, `app`, `_isDashboardTool`, and `_priority`).
+ * @param query - The user's natural-language query used to infer intent and keywords.
+ * @param options.maxTools - Maximum number of tools to return (default: 100).
+ * @param options.preferDashboard - Whether to boost dashboard-listed tools (default: true).
+ * @param options.keywords - Additional keywords to consider along with those extracted from the query.
+ * @returns A slice of the input tools augmented with `_score` and sorted by descending relevance.
+ */
 export function filterToolsForQuery(
   allTools: any[],
   query: string,
@@ -477,7 +510,15 @@ export function filterToolsForQuery(
   return selectedTools;
 }
 
-// Extract keywords from query
+/**
+ * Extracts a deduplicated list of relevant keywords found in a user query.
+ *
+ * Scans the input string (case-insensitive) for known technology, action, and object keywords
+ * (e.g., "github", "create", "issue") and returns the set of matches in lowercase.
+ *
+ * @param query - The user query to analyze.
+ * @returns An array of unique, lowercase keywords found in `query`. If none are found, returns an empty array.
+ */
 function extractKeywordsFromQuery(query: string): string[] {
   const keywords = new Set<string>();
   const words = query.toLowerCase().split(/\s+/);
@@ -521,7 +562,21 @@ function extractKeywordsFromQuery(query: string): string[] {
 }
 
 // Legacy wrapper for backward compatibility
-// Process tools for a specific app with intelligent filtering
+/**
+ * Selects and returns up to `maxTools` tools for a single app using a tiered filtering strategy.
+ *
+ * The function normalizes and validates incoming tools (enforcing name length and allowed characters),
+ * then selects tools in this order until the `maxTools` limit is reached:
+ * 1. Dashboard-specific tools (with configurable API fallbacks for missing dashboard items).
+ * 2. Priority-based selection using `TOOL_PRIORITY_MAP` and `priorityLevel`.
+ * 3. Keyword matching against tool name and description.
+ * 4. Fallback fill using an alphabetical proxy for commonly used tools.
+ *
+ * @param toolsArray - Raw list of Composio tools for the app; entries will be normalized and validated.
+ * @param app - The target app identifier (one of AVAILABLE_APPS) used to set tool metadata (toolkit/app).
+ * @param options - Processing options controlling selection: `maxTools`, `priorityLevel`, `keywords`, and `dashboardTools`.
+ * @returns An array of up to `maxTools` normalized and validated ComposioTool objects selected for the app.
+ */
 function processAppTools(
   toolsArray: ComposioTool[],
   app: AvailableApp,
@@ -659,7 +714,15 @@ function processAppTools(
   return filteredTools.slice(0, maxTools); // Ensure we don't exceed the limit
 }
 
-// Remove duplicate tools based on function name
+/**
+ * Remove duplicate tools, preserving the first occurrence of each tool by name.
+ *
+ * Treats a tool's primary identifier as `tool.name` falling back to `tool.function?.name`.
+ * Tools with no identifiable name are dropped. Comparison is case-sensitive.
+ *
+ * @param tools - Array of ComposioTool objects to deduplicate
+ * @returns A new array with duplicates (by name) removed, preserving original order
+ */
 function removeDuplicateTools(tools: ComposioTool[]): ComposioTool[] {
   const seen = new Set<string>();
   return tools.filter((tool) => {
@@ -672,12 +735,24 @@ function removeDuplicateTools(tools: ComposioTool[]): ComposioTool[] {
   });
 }
 
-// Helper to ensure consistent entity ID format for workspace connections
+/**
+ * Convert a workspace ID into the standardized entity ID used for workspace-scoped Composio connections.
+ *
+ * @param workspaceId - The raw workspace identifier (without the `workspace_` prefix)
+ * @returns The entity ID string prefixed with `workspace_` (e.g., `workspace_<workspaceId>`)
+ */
 export function getWorkspaceEntityId(workspaceId: string): string {
   return `workspace_${workspaceId}`;
 }
 
-// Helper to check if user has connected accounts for specific apps
+/**
+ * Returns connection status for each available app for a given entity.
+ *
+ * Queries Composio for connected accounts for `entityId` and maps AVAILABLE_APPS to objects indicating whether a matching connection exists and is ACTIVE. A connection matches an app if any of `toolkit.slug`, `appName`, or `integrationId` (case-insensitive) equals the app key. On error, returns all apps with `connected: false`.
+ *
+ * @param entityId - The Composio entity identifier (e.g., user or workspace-scoped ID) to check connections for.
+ * @returns An array of records for each AvailableApp: `{ app, connected, connectionId? }`.
+ */
 export async function getConnectedApps(
   composio: Composio,
   entityId: string,
@@ -712,7 +787,15 @@ export async function getConnectedApps(
   }
 }
 
-// Validate tools for OpenAI compatibility
+/**
+ * Filters a list of Composio tools to those compatible with OpenAI function-calling requirements.
+ *
+ * Performs lightweight validations on each tool's function name (required, <=64 chars, only alphanumeric/underscore/dash),
+ * description length (<=1000 chars), and JSON-serializability of `function.parameters`. Tools failing any check are excluded.
+ *
+ * @param tools - Array of ComposioTool objects to validate; each tool should include a `function.name` for compatibility.
+ * @returns A new array containing only tools that passed all OpenAI-compatible validations.
+ */
 function validateToolsForOpenAI(tools: ComposioTool[]): ComposioTool[] {
   const validTools: ComposioTool[] = [];
 
@@ -782,7 +865,20 @@ function validateToolsForOpenAI(tools: ComposioTool[]): ComposioTool[] {
   return validTools;
 }
 
-// Helper to check if ANY user has connected accounts for specific apps (for workspace-wide access)
+/**
+ * Check whether any user in the given workspace has active connections for each supported app.
+ *
+ * This queries Composio for workspace-scoped connected accounts (preferring results scoped to
+ * `workspace_<workspaceId>`) and falls back to global connections only when no workspace connections
+ * are found. For each app in AVAILABLE_APPS it selects an ACTIVE connection (preferring workspace-scoped
+ * ones and then the most recently created) and returns per-app connection status.
+ *
+ * The returned objects have the workspace-scoped `entityId` when a connection is reported. On error,
+ * the function returns a list marking every app as not connected.
+ *
+ * @param workspaceId - Workspace identifier used to construct the workspace-scoped entity id (`workspace_<workspaceId>`).
+ * @returns An array of ConnectedApp entries describing whether each app is connected, optionally including `connectionId` and the workspace-scoped `entityId` when a connection exists.
+ */
 export async function getAnyConnectedApps(
   composio: Composio,
   workspaceId: string, // Make workspaceId required for workspace scoping
@@ -885,7 +981,18 @@ export async function getAnyConnectedApps(
   }
 }
 
-// Helper to initiate connection for an app
+/**
+ * Initiates an OAuth/connection flow for the given app and entity via Composio.
+ *
+ * Attempts to look up the app's authConfigId from APP_CONFIGS and calls Composio's
+ * connectedAccounts.initiate to create a new connection. If a callbackUrl is not
+ * provided, it defaults to `${NEXT_PUBLIC_APP_URL}/integrations/callback`.
+ *
+ * @param entityId - The Composio entity id used to scope the connection (for example a user or workspace entity).
+ * @param app - One of the AVAILABLE_APPS values indicating which app to connect (e.g., GMAIL, GITHUB, SLACK, NOTION).
+ * @param callbackUrl - Optional redirect/callback URL to receive the auth response; overrides the default app URL if provided.
+ * @returns An object indicating success. On success includes `redirectUrl` and `connectionId`. On failure includes `error` with a message.
+ */
 export async function initiateAppConnection(
   composio: Composio,
   entityId: string,

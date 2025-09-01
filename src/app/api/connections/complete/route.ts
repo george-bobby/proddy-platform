@@ -7,6 +7,26 @@ import type { Id } from "@/../convex/_generated/dataModel";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+/**
+ * Finalizes a Composio connection for a workspace and returns a JSON response.
+ *
+ * Verifies the existence of a recent connection for the provided app and workspace entity,
+ * attempts to persist an auth config and connected account (best-effort; failures are logged
+ * and do not cause the endpoint to fail), and returns the connected account details and a
+ * redirect URL on success.
+ *
+ * @param req - NextRequest whose JSON body must include:
+ *   - workspaceId: string (required)
+ *   - app: string (required) — app name, integrationId, or toolkit slug to match
+ *   - memberId: string (required) — ID of the acting member
+ *   - redirectUrl?: string (optional) — URL to return to after completion
+ *
+ * Responses:
+ *   - 200: { success: true, connectedAccount, app, connectionId, entityId, message, redirectUrl }
+ *   - 400: when workspaceId, app, or memberId are missing
+ *   - 404: when no matching connection is found for the workspace/app
+ *   - 500: on unexpected server errors
+ */
 export async function POST(req: NextRequest) {
   try {
     const { workspaceId, app, memberId, redirectUrl } = await req.json();

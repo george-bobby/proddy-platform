@@ -20,7 +20,26 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Get Composio tools for OpenAI
+/**
+ * HTTP POST handler that discovers Composio tools for an entity, invokes OpenAI with those tools, optionally executes tool calls via Composio, and returns the composed response.
+ *
+ * Accepts a JSON body with `entityId` (string), `appNames` (string[]), and `message` (string). Workflow:
+ * - Retrieves tools for the specified entity and apps via Composio.
+ * - Converts tools into OpenAI function/tool format and sends a chat completion to OpenAI.
+ * - If the model issues tool calls, executes them through Composio and collects results.
+ * - If tool results are produced, sends a follow-up completion including those results and returns the final assistant response.
+ *
+ * @returns A JSON NextResponse with shape:
+ * {
+ *   success: true,
+ *   response: string,                 // final assistant text
+ *   toolCalls: Array,                 // tool call objects returned by the model (if any)
+ *   toolResults: Array,               // results or errors from executing tools
+ *   availableTools: number            // count of discovered tools
+ * }
+ *
+ * Responds with status 400 when `entityId`, `appNames`, or `message` are missing, and 500 on internal errors.
+ */
 export async function POST(req: NextRequest) {
   try {
     const { entityId, appNames, message } = await req.json();
@@ -178,7 +197,29 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Get available tools for an entity
+/**
+ * HTTP GET handler that returns Composio tools available to an entity.
+ *
+ * Accepts query parameters:
+ * - `entityId` (required): the target entity identifier.
+ * - `appNames` (optional): comma-separated list of app names to limit the results.
+ *
+ * Behavior:
+ * - Validates `entityId`; responds with 400 if missing.
+ * - If `appNames` provided, fetches tools per app and aggregates results; otherwise fetches all tools for the entity.
+ * - Normalizes each tool to an object with `name`, `description`, `parameters`, and `appName`.
+ *
+ * Successful response (status 200) JSON shape:
+ * {
+ *   success: true,
+ *   tools: Array<{ name: string; description?: string; parameters: any; appName?: string }>,
+ *   count: number
+ * }
+ *
+ * Error responses:
+ * - 400 when `entityId` is missing.
+ * - 500 on internal errors with `{ success: false, error: string }`.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

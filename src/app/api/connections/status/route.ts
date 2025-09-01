@@ -6,6 +6,18 @@ import {
   type AvailableApp,
 } from "@/lib/composio-config";
 
+/**
+ * GET handler returning workspace connection status and total tool count.
+ *
+ * Responds with JSON:
+ * - 200: { success: true, connected: AvailableApp[], totalTools: number, workspaceId: string, timestamp: string }
+ * - 400: { error: "workspaceId required" }
+ * - 500: { success: false, error: string, connected: [], totalTools: 0 }
+ *
+ * Uses workspace-scoped data to fetch connected apps and, when available, counts tools (best-effort; tool fetch failures do not fail the request).
+ *
+ * @returns A NextResponse containing the JSON payload described above.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

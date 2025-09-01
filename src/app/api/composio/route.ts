@@ -8,6 +8,20 @@ import {
   type AvailableApp,
 } from "@/lib/composio-config";
 
+/**
+ * HTTP GET handler for Composio-related queries.
+ *
+ * Supports the query action=status to return available app metadata and the current
+ * connection status for a workspace. Expects a `workspaceId` query parameter.
+ *
+ * Responses:
+ * - 200: { success: true, availableApps, appConfigs, connectedApps } when action=status.
+ * - 400: { error: "workspaceId is required" } if `workspaceId` is missing.
+ * - 400: { error: "Invalid action. Use action=status" } for unsupported actions.
+ * - 500: { error: "Failed to fetch Composio status", details } on unexpected failures.
+ *
+ * @returns A NextResponse with JSON payload and appropriate HTTP status.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -52,6 +66,23 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/**
+ * POST route handler for initiating Composio app connections.
+ *
+ * Validates the JSON body for `workspaceId` and `action`. When `action` is `"connect"`,
+ * validates `app` against AVAILABLE_APPS, constructs a userId (`workspace_<workspaceId>`),
+ * and calls `initiateAppConnection` to begin an OAuth/connection flow. On success returns a JSON
+ * payload containing `success`, `app`, `redirectUrl`, `connectionId`, and a short message.
+ *
+ * Possible responses:
+ * - 200: successful initiation with `success: true` and connection details.
+ * - 400: missing/invalid `workspaceId`, `action`, or `app` (includes a list of valid apps when `app` is invalid).
+ * - 500: server error with an error message in `details`.
+ *
+ * Does not throw; all errors are returned as JSON responses with appropriate HTTP status codes.
+ *
+ * @returns A NextResponse containing the JSON result and appropriate HTTP status code.
+ */
 export async function POST(req: NextRequest) {
   try {
     const { action, workspaceId, app, redirectUrl } = await req.json();

@@ -12,7 +12,27 @@ const validateAuthConfigFormat = (composioAuthConfigId: string): boolean => {
   return Boolean(composioAuthConfigId && composioAuthConfigId.length > 0);
 };
 
-// Unified POST endpoint for authorization and completion
+/**
+ * Handles authorization and connection completion for third-party toolkits.
+ *
+ * Processes POST requests with a JSON body containing `action`, `userId`, `toolkit`, `workspaceId`, and optional `memberId`.
+ *
+ * Behavior:
+ * - action = "authorize": initiates a workspace-scoped connection (entityId = `workspace_<workspaceId>`) using the Composio API client and returns an OAuth `redirectUrl` and connection id. If `memberId` is provided, attempts to persist a Composio-managed auth config record.
+ * - action = "complete": retrieves workspace-scoped connections, selects the most relevant connection for the requested `toolkit`, and returns the connected account. If `memberId` is provided, attempts to get-or-create an auth config and persist a connected account record in the database.
+ *
+ * Validation and responses:
+ * - Requires `userId`, `toolkit`, and `workspaceId` in the request body; responds 400 if missing.
+ * - Returns 400 for authorization errors or missing redirect URL.
+ * - Returns 404 if no connected account is found during completion.
+ * - Returns 500 for unexpected failures during completion or other server errors.
+ *
+ * Side effects:
+ * - Initiates and deletes connections via the Composio API client.
+ * - May create or update auth config and connected account records in the database when `memberId` is supplied.
+ *
+ * @param req - Incoming NextRequest containing the JSON body described above.
+ */
 export async function POST(req: NextRequest) {
   try {
     console.log("[AgentAuth] POST request received");
@@ -201,7 +221,30 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Get auth configs, connected accounts, tools, or check status (unified GET endpoint)
+/**
+ * Unified GET handler for fetching integration-related data, checking connection status, and retrieving toolkit tools.
+ *
+ * Supported query actions (via URL search params):
+ * - action=fetch-data & workspaceId
+ *   - Returns { success: true, authConfigs, connectedAccounts }.
+ *   - authConfigs are fetched from the database; connectedAccounts are derived from the Composio client and normalized to the module's expected shape.
+ *   - On internal error returns success: true with empty arrays.
+ *
+ * - action=check-status & composioAccountId
+ *   - Returns { connected: true, status, account } when the Composio client finds the connection.
+ *   - If the account is not found or an error occurs, returns { connected: false, status: "NOT_FOUND", error }.
+ *
+ * - action=fetch-tools & userId & toolkit
+ *   - Uses the API client to fetch available tools for the given user and toolkit.
+ *   - Returns { success: true, tools, toolkit, userId } on success.
+ *   - On failure returns a 500 response with an error message.
+ *
+ * Behavior and errors:
+ * - For missing or invalid actions/parameters returns a 400 JSON error.
+ * - Unexpected server errors return a 500 JSON error.
+ *
+ * Note: This function delegates Composio interactions to an initialized Composio API client and normalizes external data to the app's shape.
+ */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -345,7 +388,19 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Disconnect account (unified DELETE endpoint)
+/**
+ * Disconnects a connected Composio account and optionally disables its local database record.
+ *
+ * Expects a JSON body with `workspaceId` and `composioAccountId`; `connectedAccountId` is optional.
+ * - If `workspaceId` or `composioAccountId` is missing, responds with 400.
+ * - Attempts to delete the connection from Composio. This step may fail without causing the overall
+ *   operation to error.
+ * - If a valid `connectedAccountId` that appears to be a local DB ID is provided, marks that record
+ *   as disabled in the database. Database update failures are non-fatal and do not change the final response.
+ *
+ * @returns A NextResponse JSON object with `{ success: true, message: "Account disconnected successfully" }` on success,
+ * or an error payload with HTTP status 400 (validation) or 500 (unexpected failure).
+ */
 export async function DELETE(req: NextRequest) {
   try {
     const { workspaceId, connectedAccountId, composioAccountId } =

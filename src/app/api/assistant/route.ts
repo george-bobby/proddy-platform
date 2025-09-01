@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Redirect to the chatbot endpoint
+/**
+ * Forwards incoming POST requests to the internal chatbot endpoint and returns its JSON response.
+ *
+ * The incoming request body is read as JSON and proxied to `${req.nextUrl.origin}/api/assistant/chatbot`
+ * using a POST with `Content-Type: application/json`. The handler returns the chatbot endpoint's parsed JSON
+ * and preserves its HTTP status. If an unexpected error occurs, responds with status 500 and a JSON payload:
+ * `{ error: "Failed to process request", details: string }`.
+ *
+ * @returns A NextResponse containing the chatbot endpoint's JSON result with the same status code,
+ * or an error payload with HTTP status 500 if forwarding fails.
+ */
 export async function POST(req: NextRequest) {
   try {
     // Get the request body
