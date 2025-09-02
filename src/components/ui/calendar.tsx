@@ -19,8 +19,8 @@ import { cn } from '@/lib/utils';
 
 export interface CalendarProps {
   mode?: 'single' | 'range' | 'multiple';
-  selected?: Date | Date[] | undefined;
-  onSelect?: (date: Date | undefined) => void;
+  selected?: Date | Date[];
+  onSelect?: (date: Date) => void;
   className?: string;
   month?: Date;
   defaultMonth?: Date;

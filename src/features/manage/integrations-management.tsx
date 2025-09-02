@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Ticket, FileText, CheckSquare } from "lucide-react";
 import { FaGithub, FaSlack } from "react-icons/fa";
-import { Mail, Ticket, FileText, CheckSquare } from "lucide-react";
 import { ServiceIntegrationCard } from "./service-integration-card";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

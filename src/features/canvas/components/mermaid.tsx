@@ -204,7 +204,7 @@ export const Mermaid = ({
             style={{ fontSize: '12px', color: '#666' }}
           >
             <div className="text-center">
-              <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+              <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2" />
               <div>Rendering diagram...</div>
             </div>
           </div>
