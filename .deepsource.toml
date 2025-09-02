@@ -1,11 +1,5 @@
 version = 1
 
-[[analyzers]]
-name = "javascript"
-
-  [analyzers.meta]
-  plugins = ["react"]
-
 exclude_patterns = [
   "tests/**",         # ignore test files
   "build/**",         # ignore build outputs
@@ -13,6 +7,12 @@ exclude_patterns = [
   "node_modules/**",  # ignore node dependencies
   "public/**"         # ignore public folder
 ]
+
+[[analyzers]]
+name = "javascript"
+
+  [analyzers.meta]
+  plugins = ["react"]
 
 [[transformers]]
 name = "prettier"
