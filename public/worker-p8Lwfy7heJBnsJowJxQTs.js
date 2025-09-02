@@ -44,12 +44,6 @@
     );
   }),
     self.addEventListener("fetch", function (t) {
-      "GET" === t.request.method &&
-        ("navigate" !== t.request.mode ||
-          t.respondWith(
-            fetch(t.request).catch(function () {
-              return caches.match(n);
-            }),
-          ));
+      
     }));
 })();
