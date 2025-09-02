@@ -5,7 +5,7 @@ import { useMutation } from "../../../../liveblocks.config";
 import { MermaidLayer } from "../types/canvas";
 import { colorToCSS } from "../../../lib/utils";
 import { MermaidEditDialog } from "./mermaid-edit-dialog";
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 type MermaidProps = {
   id: string;
@@ -41,7 +41,7 @@ export const Mermaid = ({
         }
       }
     },
-    [id]
+    [id],
   );
 
   // Handle client-side mounting
@@ -55,10 +55,57 @@ export const Mermaid = ({
       // Sanitize the SVG content to prevent XSS attacks
       const sanitizedSvg = DOMPurify.sanitize(renderedSvg, {
         USE_PROFILES: { svg: true, svgFilters: true },
-        ALLOWED_TAGS: ['svg', 'g', 'path', 'text', 'tspan', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'defs', 'marker', 'foreignObject', 'div', 'p', 'span'],
-        ALLOWED_ATTR: ['viewBox', 'width', 'height', 'x', 'y', 'x1', 'x2', 'y1', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opacity', 'transform', 'class', 'id', 'style', 'font-family', 'font-size', 'text-anchor', 'dominant-baseline'],
-        ADD_TAGS: ['foreignObject'],
-        ADD_ATTR: ['xmlns', 'xmlns:xlink', 'role']
+        ALLOWED_TAGS: [
+          "svg",
+          "g",
+          "path",
+          "text",
+          "tspan",
+          "rect",
+          "circle",
+          "ellipse",
+          "line",
+          "polyline",
+          "polygon",
+          "defs",
+          "marker",
+          "foreignObject",
+          "div",
+          "p",
+          "span",
+        ],
+        ALLOWED_ATTR: [
+          "viewBox",
+          "width",
+          "height",
+          "x",
+          "y",
+          "x1",
+          "x2",
+          "y1",
+          "y2",
+          "cx",
+          "cy",
+          "r",
+          "rx",
+          "ry",
+          "d",
+          "fill",
+          "stroke",
+          "stroke-width",
+          "stroke-dasharray",
+          "opacity",
+          "transform",
+          "class",
+          "id",
+          "style",
+          "font-family",
+          "font-size",
+          "text-anchor",
+          "dominant-baseline",
+        ],
+        ADD_TAGS: ["foreignObject"],
+        ADD_ATTR: ["xmlns", "xmlns:xlink", "role"],
       });
 
       // Safely set the innerHTML with sanitized content
@@ -71,61 +118,67 @@ export const Mermaid = ({
 
     const renderMermaid = async () => {
       if (!mermaidCode) {
-        console.log('No mermaid code provided');
+        console.log("No mermaid code provided");
         return;
       }
 
       // Check if we're in browser environment
-      if (typeof window === 'undefined') {
-        console.log('Not in browser environment');
+      if (typeof window === "undefined") {
+        console.log("Not in browser environment");
         return;
       }
 
-      console.log('Starting mermaid rendering for:', id, 'with code:', mermaidCode);
+      console.log(
+        "Starting mermaid rendering for:",
+        id,
+        "with code:",
+        mermaidCode,
+      );
 
       try {
         setIsLoading(true);
         setError(null);
 
         // Dynamic import of mermaid to avoid SSR issues
-        const mermaid = (await import('mermaid')).default;
-        console.log('Mermaid imported successfully');
+        const mermaid = (await import("mermaid")).default;
+        console.log("Mermaid imported successfully");
 
         // Initialize mermaid with configuration
         mermaid.initialize({
           startOnLoad: false,
-          theme: 'default',
-          securityLevel: 'loose',
-          fontFamily: 'Arial, sans-serif',
+          theme: "default",
+          securityLevel: "loose",
+          fontFamily: "Arial, sans-serif",
           fontSize: 12,
           flowchart: {
             useMaxWidth: false,
             htmlLabels: true,
-            curve: 'basis',
+            curve: "basis",
           },
         });
-        console.log('Mermaid initialized');
+        console.log("Mermaid initialized");
 
         // Generate unique ID for this diagram
         const diagramId = `mermaid-${id}-${Date.now()}`;
-        console.log('Rendering with ID:', diagramId);
+        console.log("Rendering with ID:", diagramId);
 
         // Render the mermaid diagram
         const { svg } = await mermaid.render(diagramId, mermaidCode);
-        console.log('Mermaid rendered successfully, SVG length:', svg.length);
+        console.log("Mermaid rendered successfully, SVG length:", svg.length);
 
         // Clean up the SVG to make it responsive
         const cleanedSvg = svg
           .replace(/width="[^"]*"/, 'width="100%"')
           .replace(/height="[^"]*"/, 'height="100%"');
 
-        console.log('SVG cleaned, setting rendered SVG');
+        console.log("SVG cleaned, setting rendered SVG");
         setRenderedSvg(cleanedSvg);
         setIsLoading(false);
-        console.log('Rendering complete');
+        console.log("Rendering complete");
       } catch (err) {
-        console.error('Mermaid rendering error:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error("Mermaid rendering error:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
         setError(`Failed to render diagram: ${errorMessage}`);
         setIsLoading(false);
       }
@@ -164,7 +217,7 @@ export const Mermaid = ({
         >
           <div
             className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
-            style={{ fontSize: '12px', color: '#666' }}
+            style={{ fontSize: "12px", color: "#666" }}
           >
             <div className="text-center">
               <div>Loading...</div>
@@ -201,7 +254,7 @@ export const Mermaid = ({
         >
           <div
             className="h-full w-full flex items-center justify-center bg-gray-100 border border-gray-300 rounded"
-            style={{ fontSize: '12px', color: '#666' }}
+            style={{ fontSize: "12px", color: "#666" }}
           >
             <div className="text-center">
               <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
@@ -239,7 +292,7 @@ export const Mermaid = ({
         >
           <div
             className="h-full w-full flex items-center justify-center bg-red-50 border border-red-300 rounded text-red-600"
-            style={{ fontSize: '12px' }}
+            style={{ fontSize: "12px" }}
           >
             <div className="text-center p-2">
               <div className="font-medium mb-1">Diagram Error</div>
@@ -278,10 +331,10 @@ export const Mermaid = ({
           ref={containerRef}
           className="h-full w-full overflow-hidden rounded border border-gray-200 bg-white"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '4px',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "4px",
           }}
         >
           {renderedSvg && (
@@ -289,8 +342,8 @@ export const Mermaid = ({
               ref={svgContainerRef}
               className="w-full h-full flex items-center justify-center"
               style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
+                maxWidth: "100%",
+                maxHeight: "100%",
               }}
             />
           )}
