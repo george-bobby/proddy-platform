@@ -147,10 +147,7 @@ export function initializeComposio() {
     // Delete connection
     async deleteConnection(connectionId: string) {
       try {
-        (await (composioInstance as any).connectedAccounts?.delete?.(
-          connectionId,
-        )) ||
-          (await (composioInstance as any).connections?.delete?.(connectionId));
+        
       } catch (error) {
         console.error("Error deleting connection:", error);
         throw error;
