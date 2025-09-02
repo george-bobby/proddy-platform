@@ -43,7 +43,5 @@
       }),
     );
   }),
-    self.addEventListener("fetch", function (t) {
-      
-    }));
+    self.addEventListener("fetch", function (t) {}));
 })();
