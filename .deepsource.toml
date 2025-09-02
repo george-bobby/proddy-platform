@@ -6,5 +6,13 @@ name = "javascript"
   [analyzers.meta]
   plugins = ["react"]
 
+exclude_patterns = [
+  "tests/**",         # ignore test files
+  "build/**",         # ignore build outputs
+  "dist/**",          # ignore dist folder
+  "node_modules/**",  # ignore node dependencies
+  "public/**"         # ignore public folder
+]
+
 [[transformers]]
 name = "prettier"
