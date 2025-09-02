@@ -5,6 +5,7 @@ import { useMutation } from "../../../../liveblocks.config";
 import { MermaidLayer } from "../types/canvas";
 import { colorToCSS } from "../../../lib/utils";
 import { MermaidEditDialog } from "./mermaid-edit-dialog";
+import DOMPurify from 'dompurify';
 
 type MermaidProps = {
   id: string;
@@ -21,6 +22,7 @@ export const Mermaid = ({
 }: MermaidProps) => {
   const { x, y, width, height, fill, mermaidCode } = layer;
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [renderedSvg, setRenderedSvg] = useState<string>("");
@@ -46,6 +48,23 @@ export const Mermaid = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Safely render sanitized SVG
+  useEffect(() => {
+    if (renderedSvg && svgContainerRef.current) {
+      // Sanitize the SVG content to prevent XSS attacks
+      const sanitizedSvg = DOMPurify.sanitize(renderedSvg, {
+        USE_PROFILES: { svg: true, svgFilters: true },
+        ALLOWED_TAGS: ['svg', 'g', 'path', 'text', 'tspan', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'defs', 'marker', 'foreignObject', 'div', 'p', 'span'],
+        ALLOWED_ATTR: ['viewBox', 'width', 'height', 'x', 'y', 'x1', 'x2', 'y1', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'opacity', 'transform', 'class', 'id', 'style', 'font-family', 'font-size', 'text-anchor', 'dominant-baseline'],
+        ADD_TAGS: ['foreignObject'],
+        ADD_ATTR: ['xmlns', 'xmlns:xlink', 'role']
+      });
+
+      // Safely set the innerHTML with sanitized content
+      svgContainerRef.current.innerHTML = sanitizedSvg;
+    }
+  }, [renderedSvg]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -267,8 +286,8 @@ export const Mermaid = ({
         >
           {renderedSvg && (
             <div
+              ref={svgContainerRef}
               className="w-full h-full flex items-center justify-center"
-              dangerouslySetInnerHTML={{ __html: renderedSvg }}
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
